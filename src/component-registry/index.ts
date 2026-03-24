@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, createElement, useContext } from "react";
 
 /** A constructor type used as the registry map key. */
 // biome-ignore lint/suspicious/noExplicitAny: Constructor must accept any args for generic model matching
@@ -23,14 +23,24 @@ export class ReactComponentRegistry {
   register<T>(
     modelType: Constructor<T>,
     component: ReactComponentType<T>,
-  ): void {
+  ): () => void {
     this.factories.set(modelType, component);
+    return () => {
+      if (this.factories.get(modelType) === component) {
+        this.factories.delete(modelType);
+      }
+    };
   }
 
   resolve<T extends object>(model: T): ReactComponentType<T> | undefined {
     return this.factories.get(model.constructor as Constructor) as
       | ReactComponentType<T>
       | undefined;
+  }
+
+  render<T extends object>(model: T): React.ReactElement | null {
+    const Component = this.resolve<T>(model);
+    return Component ? createElement(Component, { model }) : null;
   }
 }
 
@@ -40,4 +50,13 @@ export const ComponentRegistryContext = createContext<ReactComponentRegistry>(
 
 export function useComponentRegistry(): ReactComponentRegistry {
   return useContext(ComponentRegistryContext);
+}
+
+export function ModelViewComponent<T extends object>({
+  model,
+}: {
+  model: T;
+}): React.ReactElement | null {
+  const registry = useComponentRegistry();
+  return registry.render(model);
 }
