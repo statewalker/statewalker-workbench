@@ -1,0 +1,13 @@
+import { newExtensionPoint } from "@repo/shared/extensions";
+import type { DialogModel } from "./dialog-model.js";
+import type { MenuModel } from "./menu-model.js";
+import type { PanelModel } from "./panel-model.js";
+
+export const [publishPanel, listenPanel] =
+  newExtensionPoint<PanelModel>("model:panel");
+
+export const [publishMenu, listenMenu] =
+  newExtensionPoint<MenuModel>("model:menu");
+
+export const [publishDialog, listenDialog] =
+  newExtensionPoint<DialogModel>("model:dialog");

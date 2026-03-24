@@ -1,0 +1,61 @@
+import { describe, expect, it, vi } from "vitest";
+import { ViewModel } from "../view-model.js";
+import { SheetModel } from "./sheet-model.js";
+
+describe("SheetModel", () => {
+  it("has sensible defaults", () => {
+    const s = new SheetModel({});
+    expect(s.side).toBe("right");
+    expect(s.open).toBe(false);
+    expect(s.header).toBeUndefined();
+    expect(s.content).toBeUndefined();
+    expect(s.actions).toEqual([]);
+  });
+
+  it("accepts all options", () => {
+    const content = new ViewModel({ key: "c" });
+    const s = new SheetModel({
+      header: "Details",
+      icon: "info",
+      content,
+      side: "left",
+      open: true,
+      key: "s1",
+    });
+    expect(s.key).toBe("s1");
+    expect(s.header).toBe("Details");
+    expect(s.side).toBe("left");
+    expect(s.open).toBe(true);
+    expect(s.content).toBe(content);
+  });
+
+  it("setOpen notifies", () => {
+    const s = new SheetModel({});
+    const listener = vi.fn();
+    s.onUpdate(listener);
+
+    s.setOpen(true);
+    expect(s.open).toBe(true);
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it("toggle flips open state", () => {
+    const s = new SheetModel({});
+    s.toggle();
+    expect(s.open).toBe(true);
+    s.toggle();
+    expect(s.open).toBe(false);
+  });
+
+  it("setContent notifies", () => {
+    const s = new SheetModel({});
+    const listener = vi.fn();
+    s.onUpdate(listener);
+
+    const content = new ViewModel({ key: "new" });
+    s.setContent(content);
+
+    expect(s.content).toBe(content);
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+});
