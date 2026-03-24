@@ -1,0 +1,24 @@
+{
+  "name": "@repo/shared-dom",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./htl": "./src/htl.ts"
+  },
+  "files": [
+    "dist/**",
+    "src/**"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+    "htl": "^0.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
