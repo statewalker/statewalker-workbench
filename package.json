@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     "./hooks": "./src/hooks/index.ts",
-    "./component-registry": "./src/component-registry/index.ts"
+    "./component-registry": "./src/component-registry/index.ts",
+    "./components": "./src/components/index.ts"
   },
   "files": [
     "dist/**",
