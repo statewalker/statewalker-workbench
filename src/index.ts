@@ -1,4 +1,5 @@
 export * from "./action-model.js";
+export * from "./active-panel-model.js";
 export * from "./card-model.js";
 export * from "./command-model.js";
 export * from "./container/index.js";
