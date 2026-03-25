@@ -1,4 +1,5 @@
 import { newExtensionPoint } from "@repo/shared/extensions";
+import type { CommandModel } from "./command-model.js";
 import type { DialogModel } from "./dialog-model.js";
 import type { MenuModel } from "./menu-model.js";
 import type { PanelModel } from "./panel-model.js";
@@ -11,3 +12,6 @@ export const [publishMenu, listenMenu] =
 
 export const [publishDialog, listenDialog] =
   newExtensionPoint<DialogModel>("model:dialog");
+
+export const [publishCommand, listenCommand] =
+  newExtensionPoint<CommandModel>("model:command");

@@ -1,5 +1,6 @@
 export * from "./action-model.js";
 export * from "./card-model.js";
+export * from "./command-model.js";
 export * from "./container/index.js";
 export * from "./data-display/index.js";
 export * from "./dialog-model.js";
