@@ -1,4 +1,5 @@
 import { newExtensionPoint } from "@repo/shared/extensions";
+import type { ActionModel } from "./action-model.js";
 import type { CommandModel } from "./command-model.js";
 import type { DialogModel } from "./dialog-model.js";
 import type { MenuModel } from "./menu-model.js";
@@ -19,3 +20,7 @@ export const [publishCommand, listenCommand] =
 
 export const [publishContextMenu, listenContextMenu] =
   newExtensionPoint<ContextMenuModel>("model:context-menu");
+
+export const [publishToolbarAction, listenToolbarAction] =
+  newExtensionPoint<ActionModel>("model:toolbar-action");
+
