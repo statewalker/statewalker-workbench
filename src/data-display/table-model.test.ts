@@ -37,7 +37,7 @@ describe("TableModel", () => {
     t.setRows([{ id: "2", name: "B", age: 25 }]);
 
     expect(t.rows).toHaveLength(1);
-    expect(t.rows[0]!.name).toBe("B");
+    expect(t.rows[0]?.name).toBe("B");
     expect(t.selectedKeys.size).toBe(0);
     expect(listener).toHaveBeenCalledTimes(1);
   });

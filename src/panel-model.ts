@@ -1,3 +1,8 @@
+import { newAdapter } from "@repo/shared/adapters";
+import {
+  createModelPoint,
+  UIModelRegistry,
+} from "./models/ui-model-registry.js";
 import { ViewModel } from "./view-model.js";
 
 export class PanelModel extends ViewModel {
@@ -20,3 +25,11 @@ export class PanelModel extends ViewModel {
     this.area = options.area ?? "center";
   }
 }
+
+const [getPanelRegistry] = newAdapter<UIModelRegistry<PanelModel>>(
+  "aspect:panel-registry",
+  () => new UIModelRegistry<PanelModel>(),
+);
+
+export const [publishPanel, listenPanel] =
+  createModelPoint<PanelModel>(getPanelRegistry);

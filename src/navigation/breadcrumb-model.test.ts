@@ -7,7 +7,7 @@ describe("BreadcrumbModel", () => {
       items: [{ label: "Home" }, { label: "Products" }],
     });
     expect(bc.items).toHaveLength(2);
-    expect(bc.items[0]!.label).toBe("Home");
+    expect(bc.items[0]?.label).toBe("Home");
   });
 
   it("setItems replaces and notifies", () => {
@@ -29,7 +29,7 @@ describe("BreadcrumbModel", () => {
     bc.push({ label: "Details" });
 
     expect(bc.items).toHaveLength(2);
-    expect(bc.items[1]!.label).toBe("Details");
+    expect(bc.items[1]?.label).toBe("Details");
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
@@ -43,7 +43,7 @@ describe("BreadcrumbModel", () => {
     bc.popTo(0);
 
     expect(bc.items).toHaveLength(1);
-    expect(bc.items[0]!.label).toBe("A");
+    expect(bc.items[0]?.label).toBe("A");
     expect(listener).toHaveBeenCalledTimes(1);
   });
 });

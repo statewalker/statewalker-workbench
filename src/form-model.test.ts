@@ -1,6 +1,6 @@
 import { Action } from "@repo/shared/models";
 import { describe, expect, it, vi } from "vitest";
-import { FormModel, type FieldConfig } from "./form-model.js";
+import { type FieldConfig, FormModel } from "./form-model.js";
 
 function makeForm(fields: FieldConfig[] = []) {
   return new FormModel({
@@ -133,6 +133,6 @@ describe("FormModel", () => {
     const form = makeForm([
       { key: "locked", label: "Locked", type: "text", disabled: true },
     ]);
-    expect(form.fields[0]!.disabled).toBe(true);
+    expect(form.fields[0]?.disabled).toBe(true);
   });
 });

@@ -1,6 +1,11 @@
 import { ViewModel } from "../view-model.js";
 
-export type AlertVariant = "default" | "destructive" | "info" | "warning" | "success";
+export type AlertVariant =
+  | "default"
+  | "destructive"
+  | "info"
+  | "warning"
+  | "success";
 
 export class AlertModel extends ViewModel {
   variant: AlertVariant;

@@ -3,7 +3,12 @@ import { ViewModel } from "../view-model.js";
 import { AccordionModel } from "./accordion-model.js";
 
 function item(key: string, disabled = false) {
-  return { key, title: key, content: new ViewModel({ key: `c-${key}` }), disabled };
+  return {
+    key,
+    title: key,
+    content: new ViewModel({ key: `c-${key}` }),
+    disabled,
+  };
 }
 
 describe("AccordionModel", () => {

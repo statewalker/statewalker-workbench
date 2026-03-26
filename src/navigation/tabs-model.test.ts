@@ -3,7 +3,12 @@ import { ViewModel } from "../view-model.js";
 import { TabsModel } from "./tabs-model.js";
 
 function tab(key: string, disabled = false) {
-  return { key, label: key, content: new ViewModel({ key: `c-${key}` }), disabled };
+  return {
+    key,
+    label: key,
+    content: new ViewModel({ key: `c-${key}` }),
+    disabled,
+  };
 }
 
 describe("TabsModel", () => {
