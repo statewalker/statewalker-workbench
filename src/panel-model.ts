@@ -10,6 +10,7 @@ export class PanelModel extends ViewModel {
   icon: string | undefined;
   content: ViewModel;
   area: string;
+  closable: boolean;
 
   constructor(options: {
     label: string;
@@ -17,12 +18,14 @@ export class PanelModel extends ViewModel {
     content: ViewModel;
     key?: string;
     area?: string;
+    closable?: boolean;
   }) {
     super({ key: options.key });
     this.label = options.label;
     this.icon = options.icon;
     this.content = options.content;
     this.area = options.area ?? "center";
+    this.closable = options.closable ?? false;
   }
 }
 
