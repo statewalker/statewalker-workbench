@@ -12,6 +12,7 @@ export * from "./drop-down-model.js";
 export * from "./feedback/index.js";
 export * from "./form-model.js";
 export * from "./json-view-model.js";
+export * from "./keyboard-model.js";
 export * from "./layout/index.js";
 export * from "./menu/index.js";
 export * from "./menu-model.js";
