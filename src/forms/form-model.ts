@@ -1,4 +1,5 @@
-import { type Action, onChange } from "@repo/shared/models";
+import { onChange } from "@repo/shared/models";
+import type { ActionModel } from "../actions/action-model.js";
 import { ViewModel } from "../core/view-model.js";
 
 export type FieldType =
@@ -45,13 +46,13 @@ export class FormModel extends ViewModel {
   fields: FieldConfig[];
   values: Record<string, string | number | boolean>;
   messages: Record<string, FieldMessage>;
-  actions: Action<void>[];
+  actions: ActionModel[];
 
   #valuesVersion = 0;
 
   constructor(options: {
     fields: FieldConfig[];
-    actions: Action<void>[];
+    actions: ActionModel[];
     key?: string;
   }) {
     super({ key: options.key });

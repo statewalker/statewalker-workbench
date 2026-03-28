@@ -5,7 +5,7 @@ import {
 } from "../core/ui-model-registry.js";
 import { ViewModel } from "../core/view-model.js";
 
-export class PanelModel extends ViewModel {
+export class DockPanelModel extends ViewModel {
   label: string;
   icon: string | undefined;
   content: ViewModel;
@@ -29,10 +29,10 @@ export class PanelModel extends ViewModel {
   }
 }
 
-const [getPanelRegistry] = newAdapter<UIModelRegistry<PanelModel>>(
+const [getPanelRegistry] = newAdapter<UIModelRegistry<DockPanelModel>>(
   "aspect:panel-registry",
-  () => new UIModelRegistry<PanelModel>(),
+  () => new UIModelRegistry<DockPanelModel>(),
 );
 
 export const [publishPanel, listenPanel] =
-  createModelPoint<PanelModel>(getPanelRegistry);
+  createModelPoint<DockPanelModel>(getPanelRegistry);

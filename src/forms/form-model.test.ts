@@ -1,11 +1,11 @@
-import { Action } from "@repo/shared/models";
 import { describe, expect, it, vi } from "vitest";
+import { ActionModel } from "../actions/action-model.js";
 import { type FieldConfig, FormModel } from "./form-model.js";
 
 function makeForm(fields: FieldConfig[] = []) {
   return new FormModel({
     fields,
-    actions: [new Action("submit", { label: "Submit" })],
+    actions: [new ActionModel({ key: "submit", label: "Submit" })],
   });
 }
 

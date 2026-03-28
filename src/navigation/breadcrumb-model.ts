@@ -1,10 +1,10 @@
-import type { Action } from "@repo/shared/models";
+import type { ActionModel } from "../actions/action-model.js";
 import { ViewModel } from "../core/view-model.js";
 
 export interface BreadcrumbItem {
   label: string;
   icon?: string;
-  action?: Action<void>;
+  action?: ActionModel;
 }
 
 export class BreadcrumbModel extends ViewModel {

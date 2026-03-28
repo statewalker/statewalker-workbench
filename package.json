@@ -5,10 +5,12 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./std": "./src-std/index.ts",
     "./layout": "./src/shell/index.ts"
   },
   "files": [
-    "src/**"
+    "src/**",
+    "src-std/**"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
