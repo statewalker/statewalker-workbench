@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ViewModel } from "../view-model.js";
+import { ViewModel } from "../core/view-model.js";
 import { AlertModel } from "./alert-model.js";
 
 describe("AlertModel", () => {

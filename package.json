@@ -5,7 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./layout": "./src/layout/index.ts"
+    "./layout": "./src/shell/index.ts"
   },
   "files": [
     "src/**"

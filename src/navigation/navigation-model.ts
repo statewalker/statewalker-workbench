@@ -1,5 +1,5 @@
 import { onChange } from "@repo/shared/models";
-import { ViewModel } from "../view-model.js";
+import { ViewModel } from "../core/view-model.js";
 
 /**
  * Generic navigation model — manages a single route identifier.

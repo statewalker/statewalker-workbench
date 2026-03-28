@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ActionModel } from "../action-model.js";
+import { ActionModel } from "../actions/action-model.js";
 import { EmptyModel } from "./empty-model.js";
 
 describe("EmptyModel", () => {

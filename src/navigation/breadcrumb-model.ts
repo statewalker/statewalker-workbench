@@ -1,5 +1,5 @@
 import type { Action } from "@repo/shared/models";
-import { ViewModel } from "../view-model.js";
+import { ViewModel } from "../core/view-model.js";
 
 export interface BreadcrumbItem {
   label: string;

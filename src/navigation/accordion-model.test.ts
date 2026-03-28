@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ViewModel } from "../view-model.js";
+import { ViewModel } from "../core/view-model.js";
 import { AccordionModel } from "./accordion-model.js";
 
 function item(key: string, disabled = false) {

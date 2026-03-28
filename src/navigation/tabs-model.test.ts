@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ViewModel } from "../view-model.js";
+import { ViewModel } from "../core/view-model.js";
 import { TabsModel } from "./tabs-model.js";
 
 function tab(key: string, disabled = false) {

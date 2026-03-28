@@ -1,4 +1,4 @@
-import { ViewModel } from "../view-model.js";
+import { ViewModel } from "../core/view-model.js";
 
 export class ProgressModel extends ViewModel {
   value: number;
