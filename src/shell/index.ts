@@ -1,6 +1,4 @@
 export * from "./active-panel-model.js";
-export * from "./command-model.js";
-export * from "./command-registry-model.js";
 export * from "./context-menu-registry-model.js";
 export * from "./dialog-stack-model.js";
 export * from "./keyboard-model.js";
