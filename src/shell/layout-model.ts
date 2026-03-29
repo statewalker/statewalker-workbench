@@ -164,18 +164,70 @@ export class LayoutModel extends ViewModel {
 
   // ─── Tab drag lifecycle ───
 
+  /**
+   * Check whether a tab can be split-dropped onto a target panel.
+   * Returns false when the tab's source panel is the target and it is the only tab.
+   */
+  canSplitDrop(
+    contentKey: string,
+    sourcePanelName: string,
+    targetPanelName: string,
+  ): boolean {
+    if (sourcePanelName !== targetPanelName) return true;
+    const panel = this._panels.get(sourcePanelName);
+    if (!panel) return false;
+    return panel.contents.length > 1 && !!panel.findContent(contentKey);
+  }
+
   startTabDrag(contentKey: string, sourcePanelName: string): void {
     this.tabDrag = { contentKey, sourcePanelName };
     this.notify();
   }
 
-  confirmTabDrop(targetPanelName: string, position: DropPosition): void {
+  /**
+   * Controller method: validates the drop using the model and either
+   * creates a pendingDrop (showing the confirmation UI) or cancels.
+   */
+  requestDrop(
+    targetPanelName: string,
+    suggestedPosition: DropPosition,
+    dropCoords: { x: number; y: number },
+  ): void {
     if (!this.tabDrag) return;
     const { contentKey, sourcePanelName } = this.tabDrag;
+
+    if (!this.canSplitDrop(contentKey, sourcePanelName, targetPanelName)) {
+      this.cancelTabDrop();
+      return;
+    }
+
+    this.pendingDrop = {
+      contentKey,
+      sourcePanelName,
+      targetPanelName,
+      suggestedPosition,
+      dropCoords,
+    };
+    this.tabDrag = null;
+    this.notify();
+  }
+
+  confirmTabDrop(targetPanelName: string, position: DropPosition): void {
+    if (!this.pendingDrop) return;
+    const { contentKey, sourcePanelName } = this.pendingDrop;
 
     const sourcePanel = this._panels.get(sourcePanelName);
     const content = sourcePanel?.findContent(contentKey);
     if (!sourcePanel || !content) {
+      this.cancelTabDrop();
+      return;
+    }
+
+    // Self-drop with split on a single-tab panel is a no-op
+    if (
+      position !== "center" &&
+      !this.canSplitDrop(contentKey, sourcePanelName, targetPanelName)
+    ) {
       this.cancelTabDrop();
       return;
     }
