@@ -18,7 +18,7 @@ export interface ActionConfig {
   children?: ActionConfig[];
 }
 
-export class ActionModel extends BaseClass {
+export class ActionModel<T = unknown> extends BaseClass {
   readonly actionKey: string;
 
   #label: string | undefined = undefined;
@@ -68,7 +68,7 @@ export class ActionModel extends BaseClass {
 
   children: ActionModel[];
 
-  #payload: unknown = undefined;
+  #payload: T | undefined = undefined;
   #submitCounter = 0;
 
   constructor(config: ActionConfig) {
@@ -87,11 +87,11 @@ export class ActionModel extends BaseClass {
     }
   }
 
-  get payload(): unknown {
+  get payload(): T | undefined {
     return this.#payload;
   }
 
-  submit = (payload?: unknown): void => {
+  submit = (payload?: T): void => {
     if (this.disabled) return;
     if (payload !== undefined) {
       this.#payload = payload;
