@@ -1,1 +1,1 @@
-export * from "./json-model.js";
+export * from "./json-view.js";

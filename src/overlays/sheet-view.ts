@@ -1,46 +1,67 @@
-import type { ActionView } from "../actions/action-view.js";
-import { ViewModel } from "../core/view-model.js";
+import { ViewModel } from "../core/index.js";
 
 export type SheetSide = "left" | "right" | "top" | "bottom";
 
 export class SheetView extends ViewModel {
-  header: string | undefined;
-  icon: string | undefined;
-  content: ViewModel | undefined;
-  side: SheetSide;
-  actions: ActionView[];
-  open: boolean;
+  #content: ViewModel | undefined;
+  set content(value: ViewModel | undefined) {
+    this.#content = value;
+    this.notify();
+  }
+  get content(): ViewModel | undefined {
+    return this.#content;
+  }
 
-  constructor(options: {
-    header?: string;
-    icon?: string;
+  #side: SheetSide;
+  set side(value: SheetSide) {
+    this.#side = value;
+    this.notify();
+  }
+  get side(): SheetSide {
+    return this.#side;
+  }
+
+  #isOpen: boolean;
+  set isOpen(value: boolean) {
+    this.#isOpen = value;
+    this.notify();
+  }
+  get isOpen(): boolean {
+    return this.#isOpen;
+  }
+
+  #isDismissable: boolean;
+  set isDismissable(value: boolean) {
+    this.#isDismissable = value;
+    this.notify();
+  }
+  get isDismissable(): boolean {
+    return this.#isDismissable;
+  }
+
+  constructor(options?: {
+    key?: string;
     content?: ViewModel;
     side?: SheetSide;
-    actions?: ActionView[];
-    open?: boolean;
-    key?: string;
+    isOpen?: boolean;
+    isDismissable?: boolean;
   }) {
-    super({ key: options.key });
-    this.header = options.header;
-    this.icon = options.icon;
-    this.content = options.content;
-    this.side = options.side ?? "right";
-    this.actions = options.actions ?? [];
-    this.open = options.open ?? false;
+    super({ key: options?.key });
+    this.#content = options?.content;
+    this.#side = options?.side ?? "right";
+    this.#isOpen = options?.isOpen ?? false;
+    this.#isDismissable = options?.isDismissable ?? true;
   }
 
-  setOpen(open: boolean) {
-    this.open = open;
-    this.notify();
+  setOpen(open: boolean): void {
+    this.isOpen = open;
   }
 
-  toggle() {
-    this.open = !this.open;
-    this.notify();
+  toggle(): void {
+    this.isOpen = !this.isOpen;
   }
 
-  setContent(content: ViewModel | undefined) {
+  setContent(content: ViewModel | undefined): void {
     this.content = content;
-    this.notify();
   }
 }

@@ -1,6 +1,6 @@
 import { ViewModel } from "../core/view-model.js";
 
-export class JsonViewModel extends ViewModel {
+export class JsonView extends ViewModel {
   data: unknown;
   label: string | undefined;
 

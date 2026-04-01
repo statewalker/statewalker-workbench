@@ -1,130 +1,87 @@
-import { onChange } from "@repo/shared/models";
-import type { ActionView } from "../actions/action-view.js";
-import { ViewModel } from "../core/view-model.js";
+import { ContainerView } from "../core/index.js";
 
-export type FieldType =
-  | "text"
-  | "number"
-  | "textarea"
-  | "checkbox"
-  | "switch"
-  | "select"
-  | "combobox"
-  | "radio"
-  | "slider"
-  | "date"
-  | "toggle"
-  | "toggle-group";
+export class FormView extends ContainerView {
+  #isRequired = false;
+  set isRequired(value: boolean) {
+    this.#isRequired = value;
+    this.notify();
+  }
+  get isRequired(): boolean {
+    return this.#isRequired;
+  }
 
-export type MessageSeverity = "error" | "warning" | "info";
+  #isDisabled = false;
+  set isDisabled(value: boolean) {
+    this.#isDisabled = value;
+    this.notify();
+  }
+  get isDisabled(): boolean {
+    return this.#isDisabled;
+  }
 
-export interface FieldMessage {
-  text: string;
-  severity: MessageSeverity;
-}
+  #isReadOnly = false;
+  set isReadOnly(value: boolean) {
+    this.#isReadOnly = value;
+    this.notify();
+  }
+  get isReadOnly(): boolean {
+    return this.#isReadOnly;
+  }
 
-export interface SelectOption {
-  label: string;
-  value: string;
-}
+  #validationBehavior: "native" | "aria" = "native";
+  set validationBehavior(value: "native" | "aria") {
+    this.#validationBehavior = value;
+    this.notify();
+  }
+  get validationBehavior(): "native" | "aria" {
+    return this.#validationBehavior;
+  }
 
-export interface FieldConfig {
-  key: string;
-  label: string;
-  type?: FieldType;
-  placeholder?: string;
-  required?: boolean;
-  group?: string;
-  options?: SelectOption[];
-  min?: number;
-  max?: number;
-  step?: number;
-  disabled?: boolean;
-}
+  #labelPosition: "top" | "side" = "top";
+  set labelPosition(value: "top" | "side") {
+    this.#labelPosition = value;
+    this.notify();
+  }
+  get labelPosition(): "top" | "side" {
+    return this.#labelPosition;
+  }
 
-export class FormView extends ViewModel {
-  fields: FieldConfig[];
-  values: Record<string, string | number | boolean>;
-  messages: Record<string, FieldMessage>;
-  actions: ActionView[];
+  #labelAlign: "start" | "end" = "start";
+  set labelAlign(value: "start" | "end") {
+    this.#labelAlign = value;
+    this.notify();
+  }
+  get labelAlign(): "start" | "end" {
+    return this.#labelAlign;
+  }
 
-  #valuesVersion = 0;
+  #necessityIndicator: "icon" | "label" = "icon";
+  set necessityIndicator(value: "icon" | "label") {
+    this.#necessityIndicator = value;
+    this.notify();
+  }
+  get necessityIndicator(): "icon" | "label" {
+    return this.#necessityIndicator;
+  }
 
-  constructor(options: {
-    fields: FieldConfig[];
-    actions: ActionView[];
+  constructor(options?: {
     key?: string;
+    children?: import("../core/index.js").ViewModel[];
+    isRequired?: boolean;
+    isDisabled?: boolean;
+    isReadOnly?: boolean;
+    validationBehavior?: "native" | "aria";
+    labelPosition?: "top" | "side";
+    labelAlign?: "start" | "end";
+    necessityIndicator?: "icon" | "label";
   }) {
-    super({ key: options.key });
-    this.fields = options.fields;
-    this.values = {};
-    this.messages = {};
-    this.actions = options.actions;
-  }
-
-  setValue(fieldKey: string, value: string | number | boolean) {
-    this.values = { ...this.values, [fieldKey]: value };
-    this.#valuesVersion++;
-    this.notify();
-  }
-
-  getValue(fieldKey: string): string | number | boolean | undefined {
-    return this.values[fieldKey];
-  }
-
-  getValues(): Record<string, string | number | boolean> {
-    return { ...this.values };
-  }
-
-  setMessage(fieldKey: string, message: FieldMessage | undefined) {
-    if (message) {
-      this.messages = { ...this.messages, [fieldKey]: message };
-    } else {
-      const { [fieldKey]: _, ...rest } = this.messages;
-      this.messages = rest;
-    }
-    this.notify();
-  }
-
-  setMessages(messages: Record<string, FieldMessage>) {
-    this.messages = messages;
-    this.notify();
-  }
-
-  getMessage(fieldKey: string): FieldMessage | undefined {
-    return this.messages[fieldKey];
-  }
-
-  hasErrors(): boolean {
-    return Object.values(this.messages).some((m) => m.severity === "error");
-  }
-
-  reset() {
-    this.values = {};
-    this.messages = {};
-    this.#valuesVersion++;
-    this.notify();
-  }
-
-  getFieldsByGroup(): Map<string | undefined, FieldConfig[]> {
-    const groups = new Map<string | undefined, FieldConfig[]>();
-    for (const field of this.fields) {
-      const group = field.group;
-      const list = groups.get(group);
-      if (list) {
-        list.push(field);
-      } else {
-        groups.set(group, [field]);
-      }
-    }
-    return groups;
-  }
-
-  onFieldsUpdate(cb: () => void): () => void {
-    return onChange(
-      (cb) => this.onUpdate(cb),
-      cb,
-      () => this.#valuesVersion,
-    );
+    super({ key: options?.key, children: options?.children });
+    this.#isRequired = options?.isRequired ?? false;
+    this.#isDisabled = options?.isDisabled ?? false;
+    this.#isReadOnly = options?.isReadOnly ?? false;
+    this.#validationBehavior = options?.validationBehavior ?? "native";
+    this.#labelPosition = options?.labelPosition ?? "top";
+    this.#labelAlign = options?.labelAlign ?? "start";
+    this.#necessityIndicator = options?.necessityIndicator ?? "icon";
   }
 }

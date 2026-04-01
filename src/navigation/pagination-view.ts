@@ -1,67 +1,84 @@
-import { ViewModel } from "../core/view-model.js";
+import { ViewModel } from "../core/index.js";
 
 export class PaginationView extends ViewModel {
-  page: number;
-  pageSize: number;
-  total: number;
+  #page: number;
+  #pageSize: number;
+  #total: number;
 
-  constructor(options: {
+  constructor(options?: {
+    key?: string;
     page?: number;
     pageSize?: number;
     total?: number;
-    key?: string;
   }) {
-    super({ key: options.key });
-    this.page = options.page ?? 1;
-    this.pageSize = options.pageSize ?? 10;
-    this.total = options.total ?? 0;
+    super({ key: options?.key });
+    this.#page = options?.page ?? 1;
+    this.#pageSize = options?.pageSize ?? 10;
+    this.#total = options?.total ?? 0;
+  }
+
+  get page(): number {
+    return this.#page;
+  }
+  set page(value: number) {
+    this.#page = value;
+    this.notify();
+  }
+
+  get pageSize(): number {
+    return this.#pageSize;
+  }
+  set pageSize(value: number) {
+    this.#pageSize = value;
+    this.notify();
+  }
+
+  get total(): number {
+    return this.#total;
+  }
+  set total(value: number) {
+    this.#total = value;
+    this.notify();
   }
 
   get totalPages(): number {
-    return this.pageSize > 0 ? Math.ceil(this.total / this.pageSize) : 0;
+    return this.#pageSize > 0 ? Math.ceil(this.#total / this.#pageSize) : 0;
   }
 
   get hasNext(): boolean {
-    return this.page < this.totalPages;
+    return this.#page < this.totalPages;
   }
 
   get hasPrevious(): boolean {
-    return this.page > 1;
+    return this.#page > 1;
   }
 
-  setPage(page: number) {
-    const clamped = Math.min(Math.max(1, page), this.totalPages || 1);
-    if (clamped !== this.page) {
-      this.page = clamped;
+  setPage(page: number): void {
+    this.#page = Math.max(1, Math.min(page, this.totalPages));
+    this.notify();
+  }
+
+  next(): void {
+    if (this.hasNext) {
+      this.#page++;
       this.notify();
     }
   }
 
-  next() {
-    if (this.hasNext) {
-      this.setPage(this.page + 1);
-    }
-  }
-
-  previous() {
+  previous(): void {
     if (this.hasPrevious) {
-      this.setPage(this.page - 1);
+      this.#page--;
+      this.notify();
     }
   }
 
-  setTotal(total: number) {
-    this.total = total;
-    if (this.page > this.totalPages && this.totalPages > 0) {
-      this.page = this.totalPages;
-    }
+  setTotal(total: number): void {
+    this.#total = total;
     this.notify();
   }
 
-  setPageSize(pageSize: number) {
-    this.pageSize = pageSize;
-    if (this.page > this.totalPages && this.totalPages > 0) {
-      this.page = this.totalPages;
-    }
+  setPageSize(pageSize: number): void {
+    this.#pageSize = pageSize;
     this.notify();
   }
 }

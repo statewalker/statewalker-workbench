@@ -1,35 +1,65 @@
-import type { ActionView } from "../actions/action-view.js";
-import { ViewModel } from "../core/view-model.js";
+import type { ActionView } from "../core/index.js";
+import { ViewModel } from "../core/index.js";
 
 export interface BreadcrumbItem {
+  key: string;
   label: string;
-  icon?: string;
   action?: ActionView;
 }
 
 export class BreadcrumbView extends ViewModel {
-  items: BreadcrumbItem[];
+  #items: BreadcrumbItem[];
+  #size: "S" | "M" | "L";
+  #isMultiline: boolean;
 
-  constructor(options: {
-    items: BreadcrumbItem[];
+  constructor(options?: {
     key?: string;
+    items?: BreadcrumbItem[];
+    size?: "S" | "M" | "L";
+    isMultiline?: boolean;
   }) {
-    super({ key: options.key });
-    this.items = options.items;
+    super({ key: options?.key });
+    this.#items = options?.items ?? [];
+    this.#size = options?.size ?? "M";
+    this.#isMultiline = options?.isMultiline ?? false;
   }
 
-  setItems(items: BreadcrumbItem[]) {
-    this.items = items;
+  get items(): BreadcrumbItem[] {
+    return this.#items;
+  }
+  set items(value: BreadcrumbItem[]) {
+    this.#items = value;
     this.notify();
   }
 
-  push(item: BreadcrumbItem) {
-    this.items = [...this.items, item];
+  get size(): "S" | "M" | "L" {
+    return this.#size;
+  }
+  set size(value: "S" | "M" | "L") {
+    this.#size = value;
     this.notify();
   }
 
-  popTo(index: number) {
-    this.items = this.items.slice(0, index + 1);
+  get isMultiline(): boolean {
+    return this.#isMultiline;
+  }
+  set isMultiline(value: boolean) {
+    this.#isMultiline = value;
+    this.notify();
+  }
+
+  setItems(items: BreadcrumbItem[]): void {
+    this.#items = items;
+    this.notify();
+  }
+
+  push(item: BreadcrumbItem): void {
+    this.#items = [...this.#items, item];
+    this.notify();
+  }
+
+  popTo(index: number): void {
+    this.#items = this.#items.slice(0, index + 1);
     this.notify();
   }
 }

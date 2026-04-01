@@ -1,26 +1,75 @@
-import type { ActionView } from "../actions/action-view.js";
-import { ViewModel } from "../core/view-model.js";
+import { ContentPanelView } from "../core/content-panel-view.js";
+import type { ViewModel } from "../core/index.js";
 
-// DialogAction is now just ActionView (which has tooltip + children).
-export { ActionView as DialogAction } from "../actions/action-view.js";
+export type DialogType =
+  | "modal"
+  | "popover"
+  | "tray"
+  | "fullscreen"
+  | "fullscreenTakeover";
 
-export class DialogView extends ViewModel {
-  header: string;
-  icon: string | undefined;
-  content: ViewModel;
-  actions: ActionView[];
+export type DialogSize = "S" | "M" | "L";
+
+export class DialogView extends ContentPanelView {
+  #type: DialogType;
+  #isDismissable: boolean;
+  #isOpen: boolean;
+  #size: DialogSize;
 
   constructor(options: {
-    header: string;
-    icon?: string;
-    content: ViewModel;
-    actions: ActionView[];
     key?: string;
+    children?: ViewModel[];
+    header?: string | ViewModel;
+    footer?: string | ViewModel;
+    type?: DialogType;
+    isDismissable?: boolean;
+    isOpen?: boolean;
+    size?: DialogSize;
   }) {
-    super({ key: options.key });
-    this.header = options.header;
-    this.icon = options.icon;
-    this.content = options.content;
-    this.actions = options.actions;
+    super(options);
+    this.#type = options.type ?? "modal";
+    this.#isDismissable = options.isDismissable ?? true;
+    this.#isOpen = options.isOpen ?? false;
+    this.#size = options.size ?? "M";
+  }
+
+  get type(): DialogType {
+    return this.#type;
+  }
+  set type(value: DialogType) {
+    this.#type = value;
+    this.notify();
+  }
+
+  get isDismissable(): boolean {
+    return this.#isDismissable;
+  }
+  set isDismissable(value: boolean) {
+    this.#isDismissable = value;
+    this.notify();
+  }
+
+  get isOpen(): boolean {
+    return this.#isOpen;
+  }
+  set isOpen(value: boolean) {
+    this.#isOpen = value;
+    this.notify();
+  }
+
+  get size(): DialogSize {
+    return this.#size;
+  }
+  set size(value: DialogSize) {
+    this.#size = value;
+    this.notify();
+  }
+
+  setOpen(open: boolean): void {
+    this.isOpen = open;
+  }
+
+  toggle(): void {
+    this.isOpen = !this.isOpen;
   }
 }
