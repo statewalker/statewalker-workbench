@@ -1,4 +1,22 @@
-import { ContainerView } from "../core/index.js";
+import { ContainerView, type ViewModel } from "../core/index.js";
+
+export type MessageSeverity = "error" | "warning" | "info";
+
+export interface FieldMessage {
+  text: string;
+  severity: MessageSeverity;
+}
+
+/** Interface for child field views that participate in form value collection. */
+interface FieldLike {
+  key: string;
+  value?: unknown;
+  errorMessage?: string;
+}
+
+function _isFieldLike(child: ViewModel): child is ViewModel & FieldLike {
+  return "value" in child;
+}
 
 export class FormView extends ContainerView {
   #isRequired = false;
