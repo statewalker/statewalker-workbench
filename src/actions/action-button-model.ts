@@ -1,7 +1,7 @@
 import { type ActionModel, ViewModel } from "../core/index.js";
+import type { StaticColor } from "./button-model.js";
 
 export type ActionButtonSize = "XS" | "S" | "M" | "L" | "XL";
-export type StaticColor = "white" | "black" | undefined;
 
 export class ActionButtonModel extends ViewModel {
   readonly action: ActionModel;

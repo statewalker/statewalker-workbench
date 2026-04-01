@@ -2,7 +2,7 @@ export * from "./active-panel-model.js";
 export * from "./context-menu-registry-model.js";
 export * from "./dialog-stack-model.js";
 export * from "./keyboard-model.js";
-export * from "./menu-model.js";
+// menu-model.js aliases removed — use menus/MenuModel instead
 export * from "./panel-model.js";
 export * from "./toolbar-model.js";
 export * from "./top-menu-model.js";

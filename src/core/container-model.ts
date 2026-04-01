@@ -1,4 +1,4 @@
-import { ViewModel } from "../../src/core/view-model.js";
+import { ViewModel } from "./view-model.js";
 
 export class ContainerModel<T = ViewModel> extends ViewModel {
   children: T[];

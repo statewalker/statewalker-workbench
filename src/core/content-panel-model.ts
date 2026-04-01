@@ -1,5 +1,5 @@
-import type { ViewModel } from "../core/index.js";
-import { ContainerModel } from "../core/index.js";
+import { ContainerModel } from "./container-model.js";
+import type { ViewModel } from "./view-model.js";
 
 export class ContentPanelModel extends ContainerModel {
   #header: string | ViewModel | undefined;

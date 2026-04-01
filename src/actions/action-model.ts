@@ -2,4 +2,4 @@ export {
   type ActionConfig,
   ActionModel,
   type ActionVariant,
-} from "../../src-std/core/action-model.js";
+} from "../core/action-model.js";

@@ -1,6 +1,6 @@
 import { ViewModel } from "../core/index.js";
 
-export class KeyboardModel extends ViewModel {
+export class KbdModel extends ViewModel {
   readonly keys: string;
 
   constructor(options: {

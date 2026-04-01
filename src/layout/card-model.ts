@@ -1,5 +1,5 @@
+import { ContentPanelModel } from "../core/content-panel-model.js";
 import type { ActionModel, ViewModel } from "../core/index.js";
-import { ContentPanelModel } from "./content-panel-model.js";
 
 export class CardModel extends ContentPanelModel {
   #actions: ActionModel[];
