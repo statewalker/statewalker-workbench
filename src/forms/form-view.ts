@@ -14,7 +14,7 @@ interface FieldLike {
   errorMessage?: string;
 }
 
-function _isFieldLike(child: ViewModel): child is ViewModel & FieldLike {
+function isFieldLike(child: ViewModel): child is ViewModel & FieldLike {
   return "value" in child;
 }
 
@@ -101,5 +101,56 @@ export class FormView extends ContainerView {
     this.#labelPosition = options?.labelPosition ?? "top";
     this.#labelAlign = options?.labelAlign ?? "start";
     this.#necessityIndicator = options?.necessityIndicator ?? "icon";
+  }
+
+  /** Find a child field by its key. */
+  findField(fieldKey: string): (ViewModel & FieldLike) | undefined {
+    return this.children.find(
+      (c): c is ViewModel & FieldLike => isFieldLike(c) && c.key === fieldKey,
+    );
+  }
+
+  /** Get the value of a single child field. */
+  getValue(fieldKey: string): unknown {
+    return this.findField(fieldKey)?.value;
+  }
+
+  /** Get all child field values as a record keyed by field key. */
+  getValues(): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    for (const child of this.children) {
+      if (isFieldLike(child)) {
+        result[child.key] = child.value;
+      }
+    }
+    return result;
+  }
+
+  /** Set an error message on a child field. */
+  setMessage(fieldKey: string, message: FieldMessage | undefined): void {
+    const field = this.findField(fieldKey);
+    if (field && "errorMessage" in field) {
+      (field as ViewModel & { errorMessage: string | undefined }).errorMessage =
+        message?.text;
+    }
+  }
+
+  /** Check if any child field has an error message. */
+  hasErrors(): boolean {
+    return this.children.some(
+      (c) => isFieldLike(c) && c.errorMessage != null && c.errorMessage !== "",
+    );
+  }
+
+  /** Clear all child field error messages. */
+  reset(): void {
+    for (const child of this.children) {
+      if (isFieldLike(child) && "errorMessage" in child) {
+        (
+          child as ViewModel & { errorMessage: string | undefined }
+        ).errorMessage = undefined;
+      }
+    }
+    this.notify();
   }
 }
