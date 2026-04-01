@@ -5,7 +5,7 @@ import type { ColorFieldView } from "@repo/shared-views";
 
 export function ColorFieldRenderer({ model }: { model: ColorFieldView }) {
   useUpdates(model.onUpdate);
-  let colorValue;
+  let colorValue: ReturnType<typeof parseColor> | undefined;
   try {
     colorValue = parseColor(model.value);
   } catch {

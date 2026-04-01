@@ -4,5 +4,9 @@ import type { BadgeView } from "@repo/shared-views";
 
 export function BadgeRenderer({ model }: { model: BadgeView }) {
   useUpdates(model.onUpdate);
-  return <Badge variant={model.variant as any}>{model.label}</Badge>;
+  return (
+    <Badge variant={model.variant === "informative" ? "info" : model.variant}>
+      {model.label}
+    </Badge>
+  );
 }

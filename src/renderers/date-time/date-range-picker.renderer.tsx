@@ -9,7 +9,9 @@ export function DateRangePickerRenderer({
   model: DateRangePickerView;
 }) {
   useUpdates(model.onUpdate);
-  let value;
+  let value:
+    | { start: ReturnType<typeof parseDate>; end: ReturnType<typeof parseDate> }
+    | undefined;
   try {
     if (model.startValue && model.endValue) {
       value = {

@@ -4,11 +4,5 @@ import type { LabeledValueView } from "@repo/shared-views";
 
 export function LabeledValueRenderer({ model }: { model: LabeledValueView }) {
   useUpdates(model.onUpdate);
-  return (
-    <LabeledValue
-      label={model.label}
-      value={String(model.value)}
-      formatOptions={model.formatOptions as any}
-    />
-  );
+  return <LabeledValue label={model.label} value={String(model.value)} />;
 }

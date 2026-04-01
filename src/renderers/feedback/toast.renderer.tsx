@@ -13,15 +13,19 @@ export function ToastRenderer({ model }: { model: ToastView }) {
     >
       <Text>{model.message}</Text>
       {model.action && (
-        <span
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           onClick={() => model.action?.submit()}
-          onKeyDown={() => {}}
-          style={{ cursor: "pointer", textDecoration: "underline" }}
+          style={{
+            cursor: "pointer",
+            textDecoration: "underline",
+            background: "none",
+            border: "none",
+            padding: 0,
+          }}
         >
           {model.action.label}
-        </span>
+        </button>
       )}
     </Flex>
   );

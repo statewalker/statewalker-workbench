@@ -5,7 +5,7 @@ import type { ColorPickerView } from "@repo/shared-views";
 
 export function ColorPickerRenderer({ model }: { model: ColorPickerView }) {
   useUpdates(model.onUpdate);
-  let colorValue;
+  let colorValue: ReturnType<typeof parseColor> | undefined;
   try {
     colorValue = parseColor(model.value).toFormat("hsb");
   } catch {

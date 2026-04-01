@@ -5,7 +5,7 @@ import type { DatePickerView } from "@repo/shared-views";
 
 export function DatePickerRenderer({ model }: { model: DatePickerView }) {
   useUpdates(model.onUpdate);
-  let value;
+  let value: ReturnType<typeof parseDate> | undefined;
   try {
     value = model.value ? parseDate(model.value) : undefined;
   } catch {

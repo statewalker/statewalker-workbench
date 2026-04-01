@@ -10,7 +10,7 @@ export function MeterRenderer({ model }: { model: MeterView }) {
       value={model.value}
       minValue={model.minValue}
       maxValue={model.maxValue}
-      size={model.size as any}
+      size={model.size === "M" ? "S" : model.size}
       variant={model.variant}
     />
   );

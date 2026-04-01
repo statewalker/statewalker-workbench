@@ -9,7 +9,7 @@ export function ColorSwatchPickerRenderer({
   model: ColorSwatchPickerView;
 }) {
   useUpdates(model.onUpdate);
-  let selectedValue;
+  let selectedValue: ReturnType<typeof parseColor> | undefined;
   try {
     selectedValue = model.selectedColor
       ? parseColor(model.selectedColor)
@@ -21,13 +21,13 @@ export function ColorSwatchPickerRenderer({
     <ColorSwatchPicker
       value={selectedValue}
       size={model.size}
-      rounding={model.rounding as any}
+      rounding={model.rounding === "regular" ? "default" : model.rounding}
       onChange={(color) => {
         model.selectedColor = color.toString("hex");
       }}
     >
       {model.colors.map((c) => {
-        let parsed;
+        let parsed: ReturnType<typeof parseColor> | undefined;
         try {
           parsed = parseColor(c);
         } catch {

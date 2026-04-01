@@ -5,7 +5,7 @@ import type { ColorWheelView } from "@repo/shared-views";
 
 export function ColorWheelRenderer({ model }: { model: ColorWheelView }) {
   useUpdates(model.onUpdate);
-  let colorValue;
+  let colorValue: ReturnType<typeof parseColor> | undefined;
   try {
     colorValue = parseColor(model.value).toFormat("hsb");
   } catch {

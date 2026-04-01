@@ -5,7 +5,7 @@ import type { CalendarView } from "@repo/shared-views";
 
 export function CalendarRenderer({ model }: { model: CalendarView }) {
   useUpdates(model.onUpdate);
-  let value;
+  let value: ReturnType<typeof parseDate> | undefined;
   try {
     value = model.value ? parseDate(model.value) : undefined;
   } catch {

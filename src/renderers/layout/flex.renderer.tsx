@@ -10,8 +10,29 @@ export function FlexRenderer({ model }: { model: FlexView }) {
       direction={model.direction}
       gap={model.gap}
       wrap={model.wrap}
-      alignItems={model.alignItems as any}
-      justifyContent={model.justifyContent as any}
+      alignItems={
+        model.alignItems as
+          | "start"
+          | "center"
+          | "end"
+          | "stretch"
+          | "baseline"
+          | "self-start"
+          | "self-end"
+          | undefined
+      }
+      justifyContent={
+        model.justifyContent as
+          | "start"
+          | "center"
+          | "end"
+          | "space-between"
+          | "space-around"
+          | "space-evenly"
+          | "left"
+          | "right"
+          | undefined
+      }
     >
       {model.children.map((child) => (
         <RenderModel key={child.key} model={child} />

@@ -5,7 +5,7 @@ import type { TimeFieldView } from "@repo/shared-views";
 
 export function TimeFieldRenderer({ model }: { model: TimeFieldView }) {
   useUpdates(model.onUpdate);
-  let value;
+  let value: ReturnType<typeof parseTime> | undefined;
   try {
     value = model.value ? parseTime(model.value) : undefined;
   } catch {

@@ -5,7 +5,7 @@ import type { ColorSliderView } from "@repo/shared-views";
 
 export function ColorSliderRenderer({ model }: { model: ColorSliderView }) {
   useUpdates(model.onUpdate);
-  let colorValue;
+  let colorValue: ReturnType<typeof parseColor> | undefined;
   try {
     colorValue = parseColor(model.value).toFormat("hsb");
   } catch {

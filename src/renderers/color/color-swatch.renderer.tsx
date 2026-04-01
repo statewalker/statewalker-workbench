@@ -5,7 +5,7 @@ import type { ColorSwatchView } from "@repo/shared-views";
 
 export function ColorSwatchRenderer({ model }: { model: ColorSwatchView }) {
   useUpdates(model.onUpdate);
-  let colorValue;
+  let colorValue: ReturnType<typeof parseColor> | undefined;
   try {
     colorValue = parseColor(model.color);
   } catch {
