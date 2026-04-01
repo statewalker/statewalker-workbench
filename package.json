@@ -6,7 +6,9 @@
   "exports": {
     "./hooks": "./src/hooks/index.ts",
     "./component-registry": "./src/component-registry/index.ts",
-    "./components": "./src/components/index.ts"
+    "./dock": "./src/dock/index.ts",
+    "./dock-hooks": "./src/dock-hooks/index.ts",
+    "./shell-hooks": "./src/shell-hooks/index.ts"
   },
   "files": [
     "dist/**",
@@ -21,7 +23,9 @@
     "lint": "biome check --write .",
     "lint:check": "biome check .",
     "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@repo/shared": "workspace:*"
@@ -32,6 +36,7 @@
   "devDependencies": {
     "tsdown": "catalog:",
     "typescript": "catalog:",
+    "vitest": "catalog:",
     "@types/react": "catalog:",
     "react": "catalog:"
   }

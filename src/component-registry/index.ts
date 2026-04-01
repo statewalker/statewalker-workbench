@@ -1,3 +1,4 @@
+import { newAdapter } from "@repo/shared/adapters";
 import { createContext, createElement, useContext } from "react";
 
 /** A constructor type used as the registry map key. */
@@ -33,9 +34,13 @@ export class ReactComponentRegistry {
   }
 
   resolve<T extends object>(model: T): ReactComponentType<T> | undefined {
-    return this.factories.get(model.constructor as Constructor) as
-      | ReactComponentType<T>
-      | undefined;
+    let ctor = model.constructor as Constructor;
+    while (ctor && ctor !== Object) {
+      const component = this.factories.get(ctor);
+      if (component) return component as ReactComponentType<T>;
+      ctor = Object.getPrototypeOf(ctor);
+    }
+    return undefined;
   }
 
   render<T extends object>(model: T): React.ReactElement | null {
@@ -52,7 +57,21 @@ export function useComponentRegistry(): ReactComponentRegistry {
   return useContext(ComponentRegistryContext);
 }
 
-export function ModelViewComponent<T extends object>({
+export const [getReactComponentRegistry] = newAdapter<ReactComponentRegistry>(
+  "reactComponentRegistry",
+  () => new ReactComponentRegistry(),
+);
+
+export function registerComponent<V>(
+  appContext: Record<string, unknown>,
+  viewType: Constructor<V>,
+  component: ReactComponentType<V>,
+): () => void {
+  const registry = getReactComponentRegistry(appContext);
+  return registry.register(viewType, component);
+}
+
+export function RenderSlot<T extends object>({
   model,
 }: {
   model: T;
