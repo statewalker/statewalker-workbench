@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { ViewModel } from "../core/view-model.js";
-import { TabsModel } from "./tabs-model.js";
+import { TabsView } from "./tabs-view.js";
 
 function tab(key: string, disabled = false) {
   return {
@@ -11,24 +11,24 @@ function tab(key: string, disabled = false) {
   };
 }
 
-describe("TabsModel", () => {
+describe("TabsView", () => {
   it("defaults activeKey to first tab", () => {
-    const tabs = new TabsModel({ tabs: [tab("a"), tab("b")] });
+    const tabs = new TabsView({ tabs: [tab("a"), tab("b")] });
     expect(tabs.activeKey).toBe("a");
   });
 
   it("accepts explicit activeKey", () => {
-    const tabs = new TabsModel({ tabs: [tab("a"), tab("b")], activeKey: "b" });
+    const tabs = new TabsView({ tabs: [tab("a"), tab("b")], activeKey: "b" });
     expect(tabs.activeKey).toBe("b");
   });
 
   it("handles empty tabs", () => {
-    const tabs = new TabsModel({ tabs: [] });
+    const tabs = new TabsView({ tabs: [] });
     expect(tabs.activeKey).toBe("");
   });
 
   it("setActiveKey switches tab and notifies", () => {
-    const tabs = new TabsModel({ tabs: [tab("a"), tab("b")] });
+    const tabs = new TabsView({ tabs: [tab("a"), tab("b")] });
     const listener = vi.fn();
     tabs.onUpdate(listener);
 
@@ -39,7 +39,7 @@ describe("TabsModel", () => {
   });
 
   it("setActiveKey ignores disabled tabs", () => {
-    const tabs = new TabsModel({ tabs: [tab("a"), tab("b", true)] });
+    const tabs = new TabsView({ tabs: [tab("a"), tab("b", true)] });
     const listener = vi.fn();
     tabs.onUpdate(listener);
 
@@ -50,7 +50,7 @@ describe("TabsModel", () => {
   });
 
   it("setActiveKey ignores unknown keys", () => {
-    const tabs = new TabsModel({ tabs: [tab("a")] });
+    const tabs = new TabsView({ tabs: [tab("a")] });
     const listener = vi.fn();
     tabs.onUpdate(listener);
 
@@ -62,12 +62,12 @@ describe("TabsModel", () => {
 
   it("getActiveTab returns the current tab descriptor", () => {
     const t = tab("x");
-    const tabs = new TabsModel({ tabs: [t] });
+    const tabs = new TabsView({ tabs: [t] });
     expect(tabs.getActiveTab()).toBe(t);
   });
 
   it("addTab appends and notifies", () => {
-    const tabs = new TabsModel({ tabs: [tab("a")] });
+    const tabs = new TabsView({ tabs: [tab("a")] });
     const listener = vi.fn();
     tabs.onUpdate(listener);
 
@@ -78,7 +78,7 @@ describe("TabsModel", () => {
   });
 
   it("removeTab removes and resets activeKey when needed", () => {
-    const tabs = new TabsModel({ tabs: [tab("a"), tab("b")] });
+    const tabs = new TabsView({ tabs: [tab("a"), tab("b")] });
     tabs.setActiveKey("a");
 
     tabs.removeTab("a");
@@ -88,7 +88,7 @@ describe("TabsModel", () => {
   });
 
   it("removeTab keeps activeKey when removing non-active tab", () => {
-    const tabs = new TabsModel({ tabs: [tab("a"), tab("b")], activeKey: "a" });
+    const tabs = new TabsView({ tabs: [tab("a"), tab("b")], activeKey: "a" });
 
     tabs.removeTab("b");
 

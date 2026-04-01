@@ -1,4 +1,4 @@
-import type { ActionModel } from "../actions/action-model.js";
+import type { ActionView } from "../actions/action-view.js";
 import { ViewModel } from "../core/view-model.js";
 
 export class CardModel extends ViewModel {
@@ -6,14 +6,14 @@ export class CardModel extends ViewModel {
   icon: string | undefined;
   content: string | ViewModel;
   footer: string | ViewModel | undefined;
-  actions: ActionModel[];
+  actions: ActionView[];
 
   constructor(options: {
     header: string | ViewModel;
     icon?: string;
     content: string | ViewModel;
     footer?: string | ViewModel;
-    actions?: ActionModel[];
+    actions?: ActionView[];
     key?: string;
   }) {
     super({ key: options.key });

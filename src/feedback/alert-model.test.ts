@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { ViewModel } from "../core/view-model.js";
-import { AlertModel } from "./alert-model.js";
+import { AlertView } from "./alert-view.js";
 
-describe("AlertModel", () => {
+describe("AlertView", () => {
   it("has sensible defaults", () => {
-    const alert = new AlertModel({ title: "Heads up" });
+    const alert = new AlertView({ title: "Heads up" });
     expect(alert.variant).toBe("default");
     expect(alert.title).toBe("Heads up");
     expect(alert.description).toBeUndefined();
@@ -13,7 +13,7 @@ describe("AlertModel", () => {
 
   it("accepts all options", () => {
     const desc = new ViewModel({ key: "desc" });
-    const alert = new AlertModel({
+    const alert = new AlertView({
       variant: "destructive",
       title: "Error",
       description: desc,
@@ -27,7 +27,7 @@ describe("AlertModel", () => {
   });
 
   it("setTitle notifies", () => {
-    const alert = new AlertModel({ title: "Old" });
+    const alert = new AlertView({ title: "Old" });
     const listener = vi.fn();
     alert.onUpdate(listener);
 
@@ -38,7 +38,7 @@ describe("AlertModel", () => {
   });
 
   it("setDescription notifies", () => {
-    const alert = new AlertModel({ title: "T" });
+    const alert = new AlertView({ title: "T" });
     const listener = vi.fn();
     alert.onUpdate(listener);
 
@@ -49,7 +49,7 @@ describe("AlertModel", () => {
   });
 
   it("setVariant notifies", () => {
-    const alert = new AlertModel({ title: "T" });
+    const alert = new AlertView({ title: "T" });
     const listener = vi.fn();
     alert.onUpdate(listener);
 

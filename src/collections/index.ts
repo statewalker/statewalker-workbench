@@ -1,26 +1,26 @@
 export {
   type ListBoxItem,
-  ListBoxModel,
   type ListBoxSelectionMode,
-} from "./list-box-model.js";
+  ListBoxView,
+} from "./list-box-view.js";
 export {
   type ListItem,
+  ListView,
   type ListViewDensity,
-  ListViewModel,
   type ListViewOverflowMode,
   type ListViewSelectionMode,
-} from "./list-view-model.js";
+} from "./list-view-view.js";
 export {
   type ColumnDescriptor,
   type SortDescriptor,
   type TableDensity,
-  TableModel,
   type TableOverflowMode,
   type TableSelectionMode,
-} from "./table-model.js";
-export { TagGroupModel, type TagItem } from "./tag-group-model.js";
+  TableView,
+} from "./table-view.js";
+export { TagGroupView, type TagItem } from "./tag-group-view.js";
 export {
   type TreeNode,
-  TreeViewModel,
+  TreeView,
   type TreeViewSelectionMode,
-} from "./tree-view-model.js";
+} from "./tree-view-view.js";

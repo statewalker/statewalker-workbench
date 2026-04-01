@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { ActionModel } from "../actions/action-model.js";
-import { EmptyModel } from "./empty-model.js";
+import { ActionView } from "../actions/action-view.js";
+import { EmptyView } from "./empty-view.js";
 
-describe("EmptyModel", () => {
+describe("EmptyView", () => {
   it("has sensible defaults", () => {
-    const empty = new EmptyModel({ title: "No data" });
+    const empty = new EmptyView({ title: "No data" });
     expect(empty.title).toBe("No data");
     expect(empty.icon).toBeUndefined();
     expect(empty.description).toBeUndefined();
@@ -12,8 +12,8 @@ describe("EmptyModel", () => {
   });
 
   it("accepts all options", () => {
-    const action = new ActionModel({ key: "add", label: "Add Item" });
-    const empty = new EmptyModel({
+    const action = new ActionView({ key: "add", label: "Add Item" });
+    const empty = new EmptyView({
       icon: "inbox",
       title: "Nothing here",
       description: "Try adding something",

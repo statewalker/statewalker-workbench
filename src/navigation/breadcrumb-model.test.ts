@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { BreadcrumbModel } from "./breadcrumb-model.js";
+import { BreadcrumbView } from "./breadcrumb-view.js";
 
-describe("BreadcrumbModel", () => {
+describe("BreadcrumbView", () => {
   it("stores items", () => {
-    const bc = new BreadcrumbModel({
+    const bc = new BreadcrumbView({
       items: [{ label: "Home" }, { label: "Products" }],
     });
     expect(bc.items).toHaveLength(2);
@@ -11,7 +11,7 @@ describe("BreadcrumbModel", () => {
   });
 
   it("setItems replaces and notifies", () => {
-    const bc = new BreadcrumbModel({ items: [{ label: "Home" }] });
+    const bc = new BreadcrumbView({ items: [{ label: "Home" }] });
     const listener = vi.fn();
     bc.onUpdate(listener);
 
@@ -22,7 +22,7 @@ describe("BreadcrumbModel", () => {
   });
 
   it("push appends and notifies", () => {
-    const bc = new BreadcrumbModel({ items: [{ label: "Home" }] });
+    const bc = new BreadcrumbView({ items: [{ label: "Home" }] });
     const listener = vi.fn();
     bc.onUpdate(listener);
 
@@ -34,7 +34,7 @@ describe("BreadcrumbModel", () => {
   });
 
   it("popTo truncates to index and notifies", () => {
-    const bc = new BreadcrumbModel({
+    const bc = new BreadcrumbView({
       items: [{ label: "A" }, { label: "B" }, { label: "C" }],
     });
     const listener = vi.fn();

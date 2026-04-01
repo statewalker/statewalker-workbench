@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import { ActionModel } from "../actions/action-model.js";
-import { type FieldConfig, FormModel } from "./form-model.js";
+import { ActionView } from "../actions/action-view.js";
+import { type FieldConfig, FormView } from "./form-view.js";
 
 function makeForm(fields: FieldConfig[] = []) {
-  return new FormModel({
+  return new FormView({
     fields,
-    actions: [new ActionModel({ key: "submit", label: "Submit" })],
+    actions: [new ActionView({ key: "submit", label: "Submit" })],
   });
 }
 
-describe("FormModel", () => {
+describe("FormView", () => {
   it("stores fields and actions", () => {
     const form = makeForm([{ key: "name", label: "Name" }]);
     expect(form.fields).toHaveLength(1);

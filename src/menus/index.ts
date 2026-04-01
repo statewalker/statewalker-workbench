@@ -1,5 +1,5 @@
-export { ActionBarModel } from "./action-bar-model.js";
-export { ActionMenuModel } from "./action-menu-model.js";
-export { MenuBarModel } from "./menu-bar-model.js";
-export { MenuItemModel, MenuModel } from "./menu-model.js";
-export { MenuTriggerModel } from "./menu-trigger-model.js";
+export { ActionBarView } from "./action-bar-view.js";
+export { ActionMenuView } from "./action-menu-view.js";
+export { MenuBarView } from "./menu-bar-view.js";
+export { MenuTriggerView } from "./menu-trigger-view.js";
+export { MenuItemView, MenuView } from "./menu-view.js";

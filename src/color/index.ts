@@ -1,17 +1,17 @@
-export { ColorAreaModel } from "./color-area-model.js";
-export { ColorFieldModel } from "./color-field-model.js";
-export { ColorPickerModel } from "./color-picker-model.js";
+export { ColorAreaView } from "./color-area-view.js";
+export { ColorFieldView } from "./color-field-view.js";
+export { ColorPickerView } from "./color-picker-view.js";
 export {
   type ColorSliderChannel,
-  ColorSliderModel,
-} from "./color-slider-model.js";
+  ColorSliderView,
+} from "./color-slider-view.js";
 export {
-  ColorSwatchModel,
-  type ColorSwatchSize,
-} from "./color-swatch-model.js";
-export {
-  ColorSwatchPickerModel,
   type ColorSwatchPickerRounding,
   type ColorSwatchPickerSize,
-} from "./color-swatch-picker-model.js";
-export { ColorWheelModel } from "./color-wheel-model.js";
+  ColorSwatchPickerView,
+} from "./color-swatch-picker-view.js";
+export {
+  type ColorSwatchSize,
+  ColorSwatchView,
+} from "./color-swatch-view.js";
+export { ColorWheelView } from "./color-wheel-view.js";

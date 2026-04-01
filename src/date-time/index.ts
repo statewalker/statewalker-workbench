@@ -1,16 +1,16 @@
-export { CalendarModel } from "./calendar-model.js";
-export { DateFieldModel, type DateGranularity } from "./date-field-model.js";
+export { CalendarView } from "./calendar-view.js";
+export { DateFieldView, type DateGranularity } from "./date-field-view.js";
 export {
   type DatePickerGranularity,
-  DatePickerModel,
-} from "./date-picker-model.js";
+  DatePickerView,
+} from "./date-picker-view.js";
 export {
   type DateRangePickerGranularity,
-  DateRangePickerModel,
-} from "./date-range-picker-model.js";
-export { RangeCalendarModel } from "./range-calendar-model.js";
+  DateRangePickerView,
+} from "./date-range-picker-view.js";
+export { RangeCalendarView } from "./range-calendar-view.js";
 export {
   type HourCycle,
-  TimeFieldModel,
+  TimeFieldView,
   type TimeGranularity,
-} from "./time-field-model.js";
+} from "./time-field-view.js";

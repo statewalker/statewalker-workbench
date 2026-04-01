@@ -1,8 +1,8 @@
-export * from "./active-panel-model.js";
-export * from "./context-menu-registry-model.js";
-export * from "./dialog-stack-model.js";
-export * from "./keyboard-model.js";
+export * from "./active-panel-view.js";
+export * from "./context-menu-registry-view.js";
+export * from "./dialog-stack-view.js";
+export * from "./keyboard-view.js";
 // menu-model.js aliases removed — use menus/MenuModel instead
-export * from "./panel-model.js";
-export * from "./toolbar-model.js";
-export * from "./top-menu-model.js";
+export * from "./panel-view.js";
+export * from "./toolbar-view.js";
+export * from "./top-menu-view.js";

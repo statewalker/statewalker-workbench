@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { ViewModel } from "../core/view-model.js";
-import { AccordionModel } from "./accordion-model.js";
+import { AccordionView } from "./accordion-view.js";
 
 function item(key: string, disabled = false) {
   return {
@@ -11,15 +11,15 @@ function item(key: string, disabled = false) {
   };
 }
 
-describe("AccordionModel", () => {
+describe("AccordionView", () => {
   it("has sensible defaults", () => {
-    const acc = new AccordionModel({ items: [item("a")] });
+    const acc = new AccordionView({ items: [item("a")] });
     expect(acc.expandedKeys.size).toBe(0);
     expect(acc.multiple).toBe(false);
   });
 
   it("accepts initial expandedKeys", () => {
-    const acc = new AccordionModel({
+    const acc = new AccordionView({
       items: [item("a"), item("b")],
       expandedKeys: ["a"],
     });
@@ -28,7 +28,7 @@ describe("AccordionModel", () => {
   });
 
   it("toggle expands and collapses", () => {
-    const acc = new AccordionModel({ items: [item("a"), item("b")] });
+    const acc = new AccordionView({ items: [item("a"), item("b")] });
     const listener = vi.fn();
     acc.onUpdate(listener);
 
@@ -41,7 +41,7 @@ describe("AccordionModel", () => {
   });
 
   it("single mode collapses others when expanding", () => {
-    const acc = new AccordionModel({
+    const acc = new AccordionView({
       items: [item("a"), item("b")],
       expandedKeys: ["a"],
     });
@@ -53,7 +53,7 @@ describe("AccordionModel", () => {
   });
 
   it("multiple mode keeps others expanded", () => {
-    const acc = new AccordionModel({
+    const acc = new AccordionView({
       items: [item("a"), item("b")],
       expandedKeys: ["a"],
       multiple: true,
@@ -66,7 +66,7 @@ describe("AccordionModel", () => {
   });
 
   it("toggle ignores disabled items", () => {
-    const acc = new AccordionModel({ items: [item("a", true)] });
+    const acc = new AccordionView({ items: [item("a", true)] });
     const listener = vi.fn();
     acc.onUpdate(listener);
 
@@ -77,7 +77,7 @@ describe("AccordionModel", () => {
   });
 
   it("expandAll expands all non-disabled items", () => {
-    const acc = new AccordionModel({
+    const acc = new AccordionView({
       items: [item("a"), item("b", true), item("c")],
     });
 
@@ -89,7 +89,7 @@ describe("AccordionModel", () => {
   });
 
   it("collapseAll clears all", () => {
-    const acc = new AccordionModel({
+    const acc = new AccordionView({
       items: [item("a"), item("b")],
       expandedKeys: ["a", "b"],
     });

@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { ViewModel } from "../core/view-model.js";
-import { SheetModel } from "./sheet-model.js";
+import { SheetView } from "./sheet-view.js";
 
-describe("SheetModel", () => {
+describe("SheetView", () => {
   it("has sensible defaults", () => {
-    const s = new SheetModel({});
+    const s = new SheetView({});
     expect(s.side).toBe("right");
     expect(s.open).toBe(false);
     expect(s.header).toBeUndefined();
@@ -14,7 +14,7 @@ describe("SheetModel", () => {
 
   it("accepts all options", () => {
     const content = new ViewModel({ key: "c" });
-    const s = new SheetModel({
+    const s = new SheetView({
       header: "Details",
       icon: "info",
       content,
@@ -30,7 +30,7 @@ describe("SheetModel", () => {
   });
 
   it("setOpen notifies", () => {
-    const s = new SheetModel({});
+    const s = new SheetView({});
     const listener = vi.fn();
     s.onUpdate(listener);
 
@@ -40,7 +40,7 @@ describe("SheetModel", () => {
   });
 
   it("toggle flips open state", () => {
-    const s = new SheetModel({});
+    const s = new SheetView({});
     s.toggle();
     expect(s.open).toBe(true);
     s.toggle();
@@ -48,7 +48,7 @@ describe("SheetModel", () => {
   });
 
   it("setContent notifies", () => {
-    const s = new SheetModel({});
+    const s = new SheetView({});
     const listener = vi.fn();
     s.onUpdate(listener);
 

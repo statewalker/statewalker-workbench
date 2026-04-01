@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { ActionModel } from "../actions/action-model.js";
+import { ActionView } from "../actions/action-view.js";
 import { ViewModel } from "../core/view-model.js";
-import { ContextMenuModel } from "./context-menu-model.js";
+import { ContextMenuView } from "./context-menu-view.js";
 
-describe("ContextMenuModel", () => {
+describe("ContextMenuView", () => {
   it("stores items and target", () => {
     const target = new ViewModel({ key: "t" });
-    const action = new ActionModel({ key: "copy", label: "Copy" });
-    const cm = new ContextMenuModel({ items: [action], target });
+    const action = new ActionView({ key: "copy", label: "Copy" });
+    const cm = new ContextMenuView({ items: [action], target });
 
     expect(cm.items).toEqual([action]);
     expect(cm.target).toBe(target);
@@ -15,11 +15,11 @@ describe("ContextMenuModel", () => {
 
   it("setItems replaces and notifies", () => {
     const target = new ViewModel({ key: "t" });
-    const cm = new ContextMenuModel({ items: [], target });
+    const cm = new ContextMenuView({ items: [], target });
     const listener = vi.fn();
     cm.onUpdate(listener);
 
-    const newItems = [new ActionModel({ key: "paste", label: "Paste" })];
+    const newItems = [new ActionView({ key: "paste", label: "Paste" })];
     cm.setItems(newItems);
 
     expect(cm.items).toBe(newItems);
