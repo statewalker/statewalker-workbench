@@ -14,6 +14,8 @@ export function AlertDialogRenderer({ model }: { model: AlertDialogView }) {
       onPrimaryAction={() => model.primaryAction.submit()}
       onSecondaryAction={() => model.secondaryAction?.submit()}
       onCancel={() => model.cancelAction?.submit()}
-    />
+    >
+      {typeof model.header === "string" ? model.header : ""}
+    </AlertDialog>
   );
 }

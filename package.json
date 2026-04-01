@@ -9,19 +9,23 @@
     "./provider": "./src/spectrum-provider.tsx",
     "./layouts": "./src/layouts/index.ts"
   },
-  "files": ["src/**"],
+  "files": [
+    "src/**"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write --unsafe .",
     "lint:check": "biome check ."
   },
   "dependencies": {
-    "@adobe/react-spectrum": "^3.38.1",
-    "@spectrum-icons/workflow": "^4.2.16",
+    "@adobe/react-spectrum": "^3.46.2",
+    "@internationalized/date": "^3.8.2",
+    "@react-stately/color": "^3.9.0",
+    "@spectrum-icons/workflow": "^4.2.28",
     "@repo/shared": "workspace:*",
     "@repo/shared-react": "workspace:*",
     "@repo/shared-views": "workspace:*",
-    "react-resizable-panels": "^2.1.7"
+    "react-resizable-panels": "^4.8.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

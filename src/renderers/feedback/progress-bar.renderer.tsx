@@ -10,7 +10,7 @@ export function ProgressBarRenderer({ model }: { model: ProgressBarView }) {
       value={model.value ?? undefined}
       minValue={model.minValue}
       maxValue={model.maxValue}
-      size={model.size}
+      size={model.size as any}
       labelPosition={model.labelPosition}
       showValueLabel={model.showValueLabel}
       variant={model.variant}

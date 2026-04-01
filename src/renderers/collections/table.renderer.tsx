@@ -33,7 +33,11 @@ export function TableRenderer({ model }: { model: TableView }) {
     >
       <TableHeader>
         {model.columns.map((col) => (
-          <Column key={col.key} allowsSorting={col.sortable} width={col.width}>
+          <Column
+            key={col.key}
+            allowsSorting={col.sortable}
+            width={col.width as any}
+          >
             {col.label}
           </Column>
         ))}

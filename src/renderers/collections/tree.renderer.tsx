@@ -15,7 +15,7 @@ function TreeNodeItem({
   const isSelected = model.isSelected(node.key);
   const hasChildren = node.children && node.children.length > 0;
   return (
-    <View>
+    <div>
       <Flex
         direction="row"
         gap="size-50"
@@ -46,7 +46,7 @@ function TreeNodeItem({
         </Text>
       </Flex>
       {hasChildren && isExpanded && (
-        <View>
+        <div>
           {node.children?.map((child) => (
             <TreeNodeItem
               key={child.key}
@@ -55,19 +55,19 @@ function TreeNodeItem({
               depth={depth + 1}
             />
           ))}
-        </View>
+        </div>
       )}
-    </View>
+    </div>
   );
 }
 
 export function TreeRenderer({ model }: { model: TreeViewType }) {
   useUpdates(model.onUpdate);
   return (
-    <View role="tree">
+    <div role="tree">
       {model.roots.map((root) => (
         <TreeNodeItem key={root.key} node={root} model={model} depth={0} />
       ))}
-    </View>
+    </div>
   );
 }

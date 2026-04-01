@@ -6,7 +6,7 @@ import { RenderModel } from "../_shared/render-slot.js";
 export function WellRenderer({ model }: { model: WellView }) {
   useUpdates(model.onUpdate);
   return (
-    <Well role={model.role}>
+    <Well role={model.role as any}>
       {model.children.map((child) => (
         <RenderModel key={child.key} model={child} />
       ))}

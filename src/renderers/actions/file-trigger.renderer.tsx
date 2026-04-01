@@ -9,7 +9,7 @@ export function FileTriggerRenderer({ model }: { model: FileTriggerView }) {
       acceptedFileTypes={model.acceptedFileTypes}
       allowsMultiple={model.allowsMultiple}
     >
-      <Button>{model.action.label}</Button>
+      <Button variant="primary">{model.action.label}</Button>
     </FileTrigger>
   );
 }

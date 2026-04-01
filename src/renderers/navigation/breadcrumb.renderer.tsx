@@ -11,7 +11,7 @@ export function BreadcrumbRenderer({ model }: { model: BreadcrumbView }) {
       onAction={(key) => {
         const idx = model.items.findIndex((item) => item.key === String(key));
         if (idx >= 0) {
-          const item = model.items[idx];
+          const item = model.items[idx]!;
           if (item.action) {
             item.action.submit();
           } else {

@@ -21,7 +21,7 @@ export function ColorSwatchPickerRenderer({
     <ColorSwatchPicker
       value={selectedValue}
       size={model.size}
-      rounding={model.rounding}
+      rounding={model.rounding as any}
       onChange={(color) => {
         model.selectedColor = color.toString("hex");
       }}

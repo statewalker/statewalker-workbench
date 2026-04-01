@@ -7,8 +7,8 @@ export function LabeledValueRenderer({ model }: { model: LabeledValueView }) {
   return (
     <LabeledValue
       label={model.label}
-      value={model.value}
-      formatOptions={model.formatOptions}
+      value={String(model.value)}
+      formatOptions={model.formatOptions as any}
     />
   );
 }
