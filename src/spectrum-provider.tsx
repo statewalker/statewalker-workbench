@@ -11,7 +11,12 @@ export function SpectrumProvider({
   locale?: string;
 }) {
   return (
-    <Provider theme={defaultTheme} colorScheme={colorScheme} locale={locale}>
+    <Provider
+      theme={defaultTheme}
+      colorScheme={colorScheme}
+      locale={locale}
+      height="100%"
+    >
       {children}
     </Provider>
   );
