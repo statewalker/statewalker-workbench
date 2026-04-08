@@ -8,7 +8,8 @@
     "./component-registry": "./src/component-registry/index.ts",
     "./dock": "./src/dock/index.ts",
     "./dock-hooks": "./src/dock-hooks/index.ts",
-    "./shell-hooks": "./src/shell-hooks/index.ts"
+    "./shell-hooks": "./src/shell-hooks/index.ts",
+    "./icons": "./src/icons/index.ts"
   },
   "files": [
     "dist/**",
@@ -19,6 +20,7 @@
     "build:watch": "tsdown --watch",
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
+    "build:browser": "vite build --config vite.config.lib.ts && node ../../scripts/generate-browser-package-json.mjs .",
     "clean": "rm -rf dist",
     "lint": "biome check --write .",
     "lint:check": "biome check .",
@@ -36,6 +38,7 @@
   "devDependencies": {
     "tsdown": "catalog:",
     "typescript": "catalog:",
+    "vite": "catalog:",
     "vitest": "catalog:",
     "@types/react": "catalog:",
     "react": "catalog:"

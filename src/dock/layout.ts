@@ -41,7 +41,10 @@ export function panelsToTree(panels: PanelDescriptor[]): DockNode {
   const centerModels = areas.get("center") ?? [];
   const centerPanel = areaToPanel("center", centerModels);
 
-  if (areas.size <= 1) return centerPanel;
+  // If only center panels exist (or no panels at all), return center directly
+  if (areas.size <= 1 && (areas.has("center") || areas.size === 0)) {
+    return centerPanel;
+  }
 
   let mainNode: DockNode = centerPanel;
 
