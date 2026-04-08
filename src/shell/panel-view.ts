@@ -11,6 +11,7 @@ export class DockPanelView extends ViewModel {
   content: ViewModel;
   area: string;
   closable: boolean;
+  onClose?: () => void;
 
   constructor(options: {
     label: string;
@@ -19,6 +20,7 @@ export class DockPanelView extends ViewModel {
     key?: string;
     area?: string;
     closable?: boolean;
+    onClose?: () => void;
   }) {
     super({ key: options.key });
     this.label = options.label;
@@ -26,6 +28,7 @@ export class DockPanelView extends ViewModel {
     this.content = options.content;
     this.area = options.area ?? "center";
     this.closable = options.closable ?? false;
+    this.onClose = options.onClose;
   }
 }
 
