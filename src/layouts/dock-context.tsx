@@ -215,10 +215,19 @@ export function DockProvider({ children, initialLayout }: DockProviderProps) {
   }, []);
 
   const closeTab = useCallback((panelId: string, tabId: string) => {
+    let closedTab: { panelModel: unknown } | null = null;
     setRoot((currentRoot) => {
-      const { node } = findAndRemoveTab(currentRoot, panelId, tabId);
+      const { node, tab } = findAndRemoveTab(currentRoot, panelId, tabId);
+      closedTab = tab;
       return node || currentRoot;
     });
+    // Notify after setRoot completes — avoids state updates inside the updater
+    if (closedTab) {
+      const model = closedTab.panelModel as
+        | { onClose?: () => void }
+        | undefined;
+      model?.onClose?.();
+    }
   }, []);
 
   const setActiveTab = useCallback((panelId: string, tabId: string) => {

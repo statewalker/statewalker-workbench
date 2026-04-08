@@ -1,16 +1,7 @@
 import { useComponentRegistry } from "@repo/shared-react/component-registry";
+import { Icon } from "@repo/shared-react/icons";
 import type { DockPanelView } from "@repo/shared-views";
-import {
-  File,
-  FolderOpen,
-  GripVertical,
-  Key,
-  List,
-  type LucideProps,
-  MessageSquare,
-  Settings,
-  X,
-} from "lucide-react";
+import { GripVertical, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "../lib/utils.js";
 import { useActivePanelView } from "./app-shell.js";
@@ -21,20 +12,9 @@ import {
 import { DropConfirmationGrid } from "./drop-confirmation-grid.js";
 import { usePanelDnd } from "./use-panel-dnd.js";
 
-const TAB_ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
-  list: List,
-  "message-square": MessageSquare,
-  file: File,
-  "folder-open": FolderOpen,
-  key: Key,
-  settings: Settings,
-};
-
 function TabIcon({ name }: { name?: string }) {
   if (!name) return null;
-  const Icon = TAB_ICON_MAP[name];
-  if (!Icon) return null;
-  return <Icon className="size-3.5" />;
+  return <Icon name={name} className="size-3.5" />;
 }
 
 export function DockPanelComponent({ panel }: { panel: DockPanelType }) {

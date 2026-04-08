@@ -3,6 +3,7 @@ import {
   ComponentRegistryContext,
   ReactComponentRegistry,
 } from "@repo/shared-react/component-registry";
+import { Icon, IconRegistryProvider } from "@repo/shared-react/icons";
 import type { ActionView, DialogView } from "@repo/shared-views";
 import {
   type ActivePanelView,
@@ -39,6 +40,7 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "../components/ui/menubar.js";
+import { createIconRegistry } from "../icons/init-icons.js";
 import { DockProvider, panelsToTreeFromViews } from "./dock-context.js";
 import { DockLayout } from "./dock-layout.js";
 import { useModelItems } from "./use-model-items.js";
@@ -64,11 +66,10 @@ interface AppShellProps {
   wrapper?: ComponentType<{ children: ReactNode }>;
 }
 
+const iconRegistry = createIconRegistry();
+
 export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
-  const registry = useMemo(
-    () => getComponentRegistry(context),
-    [context],
-  );
+  const registry = useMemo(() => getComponentRegistry(context), [context]);
 
   const dialogsModel = getDialogStackView(context);
   const toolbarModel = getToolbarView(context);
@@ -124,20 +125,22 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
     dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
 
   const content = (
-    <ComponentRegistryContext.Provider value={registry}>
-      <div className="flex flex-col h-full w-full bg-background text-foreground">
-        <AppMenuBar menus={menus} />
-        <div className="flex-1 overflow-hidden">
-          <ActivePanelCtx.Provider value={activePanelModel}>
-            <DockProvider initialLayout={tree}>
-              <DockLayout />
-            </DockProvider>
-          </ActivePanelCtx.Provider>
+    <IconRegistryProvider value={iconRegistry}>
+      <ComponentRegistryContext.Provider value={registry}>
+        <div className="flex flex-col h-full w-full bg-background text-foreground">
+          <AppMenuBar menus={menus} />
+          <div className="flex-1 overflow-hidden">
+            <ActivePanelCtx.Provider value={activePanelModel}>
+              <DockProvider initialLayout={tree}>
+                <DockLayout />
+              </DockProvider>
+            </ActivePanelCtx.Provider>
+          </div>
+          <Toolbar actions={toolbarActions} />
+          <DialogOverlay dialog={topDialog} registry={registry} />
         </div>
-        <Toolbar actions={toolbarActions} />
-        <DialogOverlay dialog={topDialog} registry={registry} />
-      </div>
-    </ComponentRegistryContext.Provider>
+      </ComponentRegistryContext.Provider>
+    </IconRegistryProvider>
   );
 
   if (Wrapper) {
@@ -180,7 +183,10 @@ function AppMenuBar({ menus }: { menus: ActionView[] }) {
     <Menubar className="border-0 border-b border-border rounded-none shadow-none bg-card">
       {menus.map((menu) => (
         <MenubarMenu key={menu.actionKey}>
-          <MenubarTrigger>{menu.label ?? menu.actionKey}</MenubarTrigger>
+          <MenubarTrigger>
+            {menu.icon && <Icon name={menu.icon} className="size-4 mr-1.5" />}
+            {menu.label ?? menu.actionKey}
+          </MenubarTrigger>
           {menu.children.length > 0 && (
             <MenubarContent>
               {menu.children.map((item) => (

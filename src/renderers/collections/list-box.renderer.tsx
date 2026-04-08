@@ -1,4 +1,5 @@
 import { useUpdates } from "@repo/shared-react/hooks";
+import { Icon } from "@repo/shared-react/icons";
 import type { ListBoxView } from "@repo/shared-views";
 
 export function ListBoxRenderer({ model }: { model: ListBoxView }) {
@@ -38,7 +39,7 @@ export function ListBoxRenderer({ model }: { model: ListBoxView }) {
               ${isDisabled ? "opacity-50 pointer-events-none" : ""}
               ${model.selectionMode !== "none" ? "cursor-pointer" : ""}`}
           >
-            {item.icon && <span>{item.icon}</span>}
+            {item.icon && <Icon name={item.icon} className="size-4 shrink-0" />}
             <div className="flex flex-col min-w-0">
               <span>{item.label}</span>
               {item.description && (

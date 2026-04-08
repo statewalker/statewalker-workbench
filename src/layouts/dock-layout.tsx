@@ -22,15 +22,14 @@ function DockSplitRenderer({ split }: { split: DockSplit }) {
 
   return (
     <ResizablePanelGroup
-      direction={split.direction}
-      onLayout={handleResize}
+      orientation={split.direction}
+      onLayoutChanged={handleResize}
       className="h-full w-full"
     >
       {split.children.map((child, index) => (
         <React.Fragment key={child.id}>
           <ResizablePanel
             id={child.id}
-            order={index}
             defaultSize={split.sizes[index]}
             minSize={10}
             className="relative"
