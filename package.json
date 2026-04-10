@@ -7,6 +7,7 @@
     "./components": "./src/components/index.ts",
     "./renderers": "./src/renderers/index.ts",
     "./init": "./src/init-common-views.ts",
+    "./init-ai-models": "./src/init-ai-model-views.ts",
     "./layouts": "./src/layouts/index.ts",
     "./theme.css": "./src/layouts/theme.css",
     "./lib/utils": "./src/lib/utils.ts",
@@ -21,6 +22,7 @@
     "build:watch": "tsdown --watch",
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
+    "build:browser": "vite build --config vite.config.lib.ts && node ../../scripts/generate-browser-package-json.mjs . && cp src/layouts/theme.css dist-browser/theme.css",
     "clean": "rm -rf dist",
     "lint": "biome check --write .",
     "lint:check": "biome check .",
@@ -35,7 +37,7 @@
     "clsx": "^2.1.0",
     "lucide-react": "^0.475.0",
     "radix-ui": "^1.4.2",
-    "react-resizable-panels": "^2.1.7",
+    "react-resizable-panels": "catalog:",
     "tailwind-merge": "^2.2.0"
   },
   "peerDependencies": {
@@ -45,6 +47,7 @@
   "devDependencies": {
     "tsdown": "catalog:",
     "typescript": "catalog:",
+    "vite": "catalog:",
     "@types/react": "catalog:",
     "react": "catalog:",
     "tailwindcss": "catalog:"
