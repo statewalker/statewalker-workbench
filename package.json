@@ -5,12 +5,14 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./ai-models": "./src/ai-models/index.ts",
     "./layout": "./src/shell/index.ts"
   },
   "files": [
     "src/**"
   ],
   "scripts": {
+    "build:browser": "vite build --config vite.config.lib.ts && node ../../scripts/generate-browser-package-json.mjs .",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write --unsafe .",
     "lint:check": "biome check ."
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "typescript": "catalog:",
+    "vite": "catalog:",
     "vitest": "catalog:"
   }
 }
