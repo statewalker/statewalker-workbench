@@ -37,7 +37,7 @@ function DockSplitRenderer({ split }: { split: DockSplit }) {
             <DockNodeRenderer node={child} />
           </ResizablePanel>
           {index < split.children.length - 1 && (
-            <ResizableHandle className="bg-transparent hover:bg-border active:bg-primary/50 transition-colors data-[panel-group-direction=vertical]:h-2 data-[panel-group-direction=horizontal]:w-2" />
+            <ResizableHandle className="bg-transparent hover:bg-border active:bg-primary/50 transition-colors aria-[orientation=horizontal]:h-2 aria-[orientation=vertical]:w-2" />
           )}
         </React.Fragment>
       ))}
