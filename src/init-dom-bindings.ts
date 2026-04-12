@@ -1,6 +1,7 @@
 import { newRegistry } from "@repo/shared/registry";
 import { bindKeyboard } from "./bind-keyboard.js";
 import { bindPointer } from "./bind-pointer.js";
+import { bindTheme } from "./bind-theme.js";
 
 /**
  * Initialize all DOM bindings for the shared interaction models.
@@ -12,5 +13,6 @@ export function initDomBindings(ctx: Record<string, unknown>): () => void {
   const [register, cleanup] = newRegistry();
   register(bindKeyboard(ctx));
   register(bindPointer(ctx));
+  register(bindTheme(ctx));
   return cleanup;
 }
