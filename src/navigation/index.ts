@@ -4,3 +4,4 @@ export * from "./link-view.js";
 export * from "./navigation-view.js";
 export * from "./pagination-view.js";
 export * from "./tabs-view.js";
+export * from "./url-state-view.js";
