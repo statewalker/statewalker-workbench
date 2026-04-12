@@ -11,7 +11,6 @@ import {
   type DockPanelView,
   getActivePanelView,
   getDialogStackView,
-  getKeyboardView,
   getToolbarView,
   getTopMenuView,
   listenPanel,
@@ -85,42 +84,6 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
   const tree = useMemo(() => panelsToTreeFromViews(panels), [panels]);
 
   const activePanelModel = getActivePanelView(context);
-
-  // Keyboard listener — dispatches registered key bindings from KeyboardView
-  const keyboardModel = getKeyboardView(context);
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent): void {
-      // Skip form elements
-      const tag = (document.activeElement as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      // Skip when dialog is open
-      if (document.querySelector("[role=dialog]")) return;
-
-      // Build key string: "Ctrl+Shift+F3", "ArrowDown", etc.
-      const parts: string[] = [];
-      if (e.ctrlKey || e.metaKey) parts.push("Ctrl");
-      if (e.shiftKey) parts.push("Shift");
-      if (e.altKey) parts.push("Alt");
-      parts.push(e.key);
-      const combo = parts.length > 1 ? parts.join("+") : e.key;
-
-      // Try combo first, then plain key
-      const bindings =
-        keyboardModel.getBindings(combo).length > 0
-          ? keyboardModel.getBindings(combo)
-          : keyboardModel.getBindings(e.key);
-
-      for (const binding of bindings) {
-        if (binding.preventDefault !== false) {
-          e.preventDefault();
-        }
-        binding.execute();
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [keyboardModel]);
 
   const topDialog =
     dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
