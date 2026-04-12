@@ -124,6 +124,51 @@ export function addTabToPanel(
   };
 }
 
+/**
+ * Remove a tab by its ID, searching all panels in the tree.
+ * Unlike findAndRemoveTab, this doesn't require knowing the panel ID.
+ */
+export function removeTabById(
+  node: DockNode,
+  tabId: string,
+): { node: DockNode | null; tab: DockTab | null } {
+  if (isPanel(node)) {
+    const tabIndex = node.tabs.findIndex((t) => t.id === tabId);
+    if (tabIndex === -1) return { node, tab: null };
+    return findAndRemoveTab(node, node.id, tabId);
+  }
+
+  let removedTab: DockTab | null = null;
+  const newChildren: (DockPanel | DockSplit)[] = [];
+  const newSizes: number[] = [];
+
+  for (let i = 0; i < node.children.length; i++) {
+    const child = node.children[i]!;
+    const result = removeTabById(child, tabId);
+
+    if (result.tab && !removedTab) {
+      removedTab = result.tab;
+    }
+
+    if (result.node) {
+      newChildren.push(result.node as DockPanel | DockSplit);
+      newSizes.push(node.sizes[i]!);
+    }
+  }
+
+  if (newChildren.length === 0) return { node: null, tab: removedTab };
+  if (newChildren.length === 1)
+    return { node: newChildren[0]!, tab: removedTab };
+
+  const totalSize = newSizes.reduce((a, b) => a + b, 0);
+  const normalizedSizes = newSizes.map((s) => (s / totalSize) * 100);
+
+  return {
+    node: { ...node, children: newChildren, sizes: normalizedSizes },
+    tab: removedTab,
+  };
+}
+
 export function findPanel(node: DockNode, panelId: string): DockPanel | null {
   if (isPanel(node)) {
     return node.id === panelId ? node : null;
