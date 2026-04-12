@@ -1,10 +1,11 @@
 import { useComponentRegistry } from "@repo/shared-react/component-registry";
+import type { DockTab } from "@repo/shared-react/dock";
 import { Icon } from "@repo/shared-react/icons";
 import type { DockPanelView } from "@repo/shared-views";
 import { GripVertical, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { cn } from "../lib/utils.js";
-import { useActivePanelView } from "./app-shell.js";
+import { usePanelManagerView } from "./app-shell.js";
 import {
   type DockPanel as DockPanelType,
   useDockLayout,
@@ -14,7 +15,82 @@ import { usePanelDnd } from "./use-panel-dnd.js";
 
 function TabIcon({ name }: { name?: string }) {
   if (!name) return null;
-  return <Icon name={name} className="size-3.5 group-hover:opacity-0 transition-opacity" />;
+  return (
+    <Icon
+      name={name}
+      className="size-3.5 group-hover:opacity-0 transition-opacity"
+    />
+  );
+}
+
+/** Extract area name from panel container ID (e.g., "area-center" → "center"). */
+function panelIdToArea(panelId: string): string {
+  return panelId.startsWith("area-") ? panelId.slice(5) : panelId;
+}
+
+/**
+ * Build the tab list from PanelManagerView for a given area.
+ * Falls back to the tree node's tabs if no model is available.
+ */
+function useAreaTabs(
+  panelId: string,
+  treeTabs: DockTab[],
+): {
+  tabs: DockTab[];
+  activeTabId: string | null;
+  focusedTabKey: string | null;
+} {
+  const pm = usePanelManagerView();
+  const area = panelIdToArea(panelId);
+
+  const [state, setState] = useState(() => buildState(pm, area, treeTabs));
+
+  useEffect(() => {
+    if (!pm) return;
+    setState(buildState(pm, area, treeTabs));
+    return pm.onUpdate(() => setState(buildState(pm, area, treeTabs)));
+  }, [pm, area, treeTabs]);
+
+  return state;
+}
+
+function buildState(
+  pm: ReturnType<typeof usePanelManagerView>,
+  area: string,
+  treeTabs: DockTab[],
+): {
+  tabs: DockTab[];
+  activeTabId: string | null;
+  focusedTabKey: string | null;
+} {
+  if (!pm) {
+    return {
+      tabs: treeTabs,
+      activeTabId: treeTabs[0]?.id ?? null,
+      focusedTabKey: null,
+    };
+  }
+
+  const order = pm.getTabOrder(area);
+  const tabs: DockTab[] = order
+    .map((key) => {
+      const panel = pm.getPanel(key);
+      if (!panel) return null;
+      return {
+        id: panel.key,
+        title: panel.label,
+        icon: panel.icon,
+        panelModel: panel,
+        closable: panel.closable,
+      };
+    })
+    .filter((t): t is DockTab => t !== null);
+
+  return {
+    tabs,
+    activeTabId: pm.getActiveTab(area),
+    focusedTabKey: pm.focusedTabKey,
+  };
 }
 
 export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
@@ -26,42 +102,22 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
     requestDrop,
     confirmDrop,
     cancelDrop,
-    closeTab,
     setActiveTab,
   } = useDockLayout();
 
   const registry = useComponentRegistry();
-  const activePanelModel = useActivePanelView();
+  const panelManager = usePanelManagerView();
 
-  // Subscribe to the model to get re-renders when active panel changes
-  const [activePanelKey, setActivePanelKey] = useState<string | null>(
-    activePanelModel?.activePanelKey ?? null,
+  // Read tabs from the model (single source of truth), not the tree
+  const { tabs, activeTabId, focusedTabKey } = useAreaTabs(
+    panel.id,
+    panel.tabs,
   );
-  useEffect(() => {
-    if (!activePanelModel) return;
-    setActivePanelKey(activePanelModel.activePanelKey);
-    return activePanelModel.onUpdate(() => {
-      setActivePanelKey(activePanelModel.activePanelKey);
-    });
-  }, [activePanelModel]);
-
-  // Sync active panel key with tab focus
-  const lastActivatedRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!activePanelKey || activePanelKey === lastActivatedRef.current) return;
-    const tab = panel.tabs.find((t) => t.id === activePanelKey);
-    if (tab && panel.activeTabId !== tab.id) {
-      lastActivatedRef.current = activePanelKey;
-      setActiveTab(panel.id, tab.id);
-    } else if (tab) {
-      lastActivatedRef.current = activePanelKey;
-    }
-  }, [activePanelKey, panel.tabs, panel.activeTabId, panel.id, setActiveTab]);
 
   const isDragging = dragState !== null;
   const hasPendingDrop = pendingDrop?.targetPanelId === panel.id;
-  const isFocused = panel.tabs.some((t) => t.id === activePanelKey);
-  const activeTab = panel.tabs.find((t) => t.id === panel.activeTabId);
+  const isFocused = tabs.some((t) => t.id === focusedTabKey);
+  const activeTab = tabs.find((t) => t.id === activeTabId);
 
   // ─── DnD hook ───
 
@@ -83,11 +139,10 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
   const ActiveContent = panelView ? registry.resolve(panelView.content) : null;
 
   const handlePanelClick = useCallback(() => {
-    const activeId = panel.activeTabId;
-    if (activeId && activePanelModel) {
-      activePanelModel.setActivePanel(activeId);
+    if (activeTabId && panelManager) {
+      panelManager.focus(activeTabId);
     }
-  }, [panel.activeTabId, activePanelModel]);
+  }, [activeTabId, panelManager]);
 
   return (
     <div
@@ -108,8 +163,8 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
         onDragEnter={dnd.handlers.tabBarDragEnter}
         onDrop={dnd.handlers.tabBarDrop}
       >
-        {panel.tabs.map((tab) => {
-          const isActiveTab = tab.id === panel.activeTabId;
+        {tabs.map((tab) => {
+          const isActiveTab = tab.id === activeTabId;
           return (
             <div
               key={tab.id}
@@ -121,13 +176,13 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
               onDragEnd={dnd.handlers.tabDragEnd}
               onClick={() => {
                 setActiveTab(panel.id, tab.id);
-                activePanelModel?.setActivePanel(tab.id);
+                panelManager?.focus(tab.id);
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   setActiveTab(panel.id, tab.id);
-                  activePanelModel?.setActivePanel(tab.id);
+                  panelManager?.focus(tab.id);
                 }
               }}
               className={cn(
@@ -147,7 +202,11 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    closeTab(panel.id, tab.id);
+                    // Remove from model (source of truth) — the onClose
+                    // callback on the DockPanelView handles cleanup
+                    const pv = panelManager?.getPanel(tab.id);
+                    if (pv?.onClose) pv.onClose();
+                    panelManager?.removePanel(tab.id);
                   }}
                   className="ml-1 p-0.5 rounded-sm hover:bg-foreground/10 opacity-0 group-hover:opacity-100 transition-opacity"
                 >

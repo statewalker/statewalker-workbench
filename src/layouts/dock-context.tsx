@@ -6,6 +6,7 @@ import {
   type DropPosition,
   findAndRemoveTab,
   findPanel,
+  removeTabById as removeTabByIdFromTree,
   updatePanelActiveTab,
   updateSplitSizes,
 } from "@repo/shared-react/dock";
@@ -62,6 +63,10 @@ interface DockContextType {
   closeTab: (panelId: string, tabId: string) => void;
   setActiveTab: (panelId: string, tabId: string) => void;
   updateSizes: (splitId: string, sizes: number[]) => void;
+  /** Add a tab to an existing panel container (by panel id). */
+  addTab: (panelId: string, tab: DockTab) => void;
+  /** Remove a tab by its ID, searching all panels. */
+  removeTabById: (tabId: string) => void;
 }
 
 const DockCtx = createContext<DockContextType | null>(null);
@@ -110,6 +115,9 @@ export function DockProvider({ children, initialLayout }: DockProviderProps) {
   } | null>(null);
   const [pendingDrop, setPendingDropState] = useState<PendingDrop | null>(null);
 
+  // Reset tree when the layout structure changes (new areas appear).
+  // Tab changes within areas are handled by DockPanelComponent reading
+  // directly from PanelManagerView — they don't touch the tree.
   useEffect(() => {
     setRoot(initialLayout);
   }, [initialLayout]);
@@ -238,6 +246,27 @@ export function DockProvider({ children, initialLayout }: DockProviderProps) {
     setRoot((currentRoot) => updateSplitSizes(currentRoot, splitId, sizes));
   }, []);
 
+  const handleAddTab = useCallback((panelId: string, tab: DockTab) => {
+    setRoot((currentRoot) =>
+      addTabToPanel(currentRoot, panelId, tab, "center"),
+    );
+  }, []);
+
+  const handleRemoveTabById = useCallback((tabId: string) => {
+    let closedTab: { panelModel: unknown } | null = null;
+    setRoot((currentRoot) => {
+      const { node, tab } = removeTabByIdFromTree(currentRoot, tabId);
+      closedTab = tab;
+      return node || currentRoot;
+    });
+    if (closedTab) {
+      const model = closedTab.panelModel as
+        | { onClose?: () => void }
+        | undefined;
+      model?.onClose?.();
+    }
+  }, []);
+
   return (
     <DockCtx.Provider
       value={{
@@ -254,6 +283,8 @@ export function DockProvider({ children, initialLayout }: DockProviderProps) {
         closeTab,
         setActiveTab,
         updateSizes: handleUpdateSizes,
+        addTab: handleAddTab,
+        removeTabById: handleRemoveTabById,
       }}
     >
       {children}

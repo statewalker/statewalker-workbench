@@ -10,14 +10,13 @@ import {
 import { Icon, IconRegistryProvider } from "@repo/shared-react/icons";
 import type { ActionView, DialogView, ViewModel } from "@repo/shared-views";
 import {
-  type ActivePanelView,
-  type DockPanelView,
-  getActivePanelView,
   getDialogStackView,
+  getPanelManagerView,
   getThemeView,
   getToolbarView,
   getTopMenuView,
   listenPanel,
+  type PanelManagerView,
 } from "@repo/shared-views";
 import { Moon, Sun } from "lucide-react";
 import {
@@ -50,12 +49,17 @@ import { DockLayout } from "./dock-layout.js";
 import { useModelItems } from "./use-model-items.js";
 
 /**
- * Provides the ActivePanelView to dock panel components.
- * The model is the single source of truth for which panel is focused.
+ * Provides the PanelManagerView to dock panel components.
+ * The model is the single source of truth for which tab is active/focused.
  */
-const ActivePanelCtx = createContext<ActivePanelView | null>(null);
-export function useActivePanelView(): ActivePanelView | null {
-  return useContext(ActivePanelCtx);
+const PanelManagerCtx = createContext<PanelManagerView | null>(null);
+export function usePanelManagerView(): PanelManagerView | null {
+  return useContext(PanelManagerCtx);
+}
+
+/** @deprecated Use usePanelManagerView instead. */
+export function useActivePanelView(): PanelManagerView | null {
+  return useContext(PanelManagerCtx);
 }
 
 const [getComponentRegistry] = newAdapter<ReactComponentRegistry>(
@@ -78,16 +82,58 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
   const dialogsModel = getDialogStackView(context);
   const toolbarModel = getToolbarView(context);
   const menuModel = getTopMenuView(context);
+  const panelManager = useMemo(() => getPanelManagerView(context), [context]);
 
-  const [panels, setPanels] = useState<DockPanelView[]>([]);
-  useEffect(() => listenPanel(context, setPanels), [context]);
+  // Bridge: listenPanel → PanelManagerView, and track area set for tree rebuilds.
+  // IMPORTANT: the onUpdate listener must be registered BEFORE listenPanel fires,
+  // because listenPanel's callback fires synchronously with existing panels.
+  const [areas, setAreas] = useState<string[]>([]);
+  useEffect(() => {
+    const knownKeys = new Set<string>();
+
+    // 1. Listen for model changes to track area set
+    const unsubModel = panelManager.onUpdate(() => {
+      const next = panelManager.getAreas().sort();
+      setAreas((prev) =>
+        prev.length === next.length && prev.every((a, i) => a === next[i])
+          ? prev
+          : next,
+      );
+    });
+
+    // 2. Bridge published panels into the model (fires synchronously for existing panels)
+    const unsubPanels = listenPanel(context, (panels) => {
+      const currentKeys = new Set(panels.map((p) => p.key));
+      for (const p of panels) {
+        if (!knownKeys.has(p.key)) {
+          knownKeys.add(p.key);
+          panelManager.addPanel(p);
+        }
+      }
+      for (const key of knownKeys) {
+        if (!currentKeys.has(key)) {
+          knownKeys.delete(key);
+          panelManager.removePanel(key);
+        }
+      }
+    });
+
+    return () => {
+      unsubModel();
+      unsubPanels();
+    };
+  }, [context, panelManager]);
+
   const dialogs = useModelItems(dialogsModel);
   const toolbarActions = useModelItems(toolbarModel);
   const menus = useModelItems(menuModel);
 
-  const tree = useMemo(() => panelsToTreeFromViews(panels), [panels]);
-
-  const activePanelModel = getActivePanelView(context);
+  // Rebuild tree only when the set of areas changes — preserves split sizes.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — rebuild on area changes only
+  const tree = useMemo(
+    () => panelsToTreeFromViews(panelManager.getAllPanels()),
+    [areas],
+  );
 
   const topDialog =
     dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
@@ -99,11 +145,11 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
           <div className="flex flex-col h-full w-full bg-background text-foreground">
             <AppMenuBar menus={menus} />
             <div className="flex-1 overflow-hidden">
-              <ActivePanelCtx.Provider value={activePanelModel}>
+              <PanelManagerCtx.Provider value={panelManager}>
                 <DockProvider initialLayout={tree}>
                   <DockLayout />
                 </DockProvider>
-              </ActivePanelCtx.Provider>
+              </PanelManagerCtx.Provider>
             </div>
             <Toolbar actions={toolbarActions} />
             <DialogOverlay dialog={topDialog} context={context} />
