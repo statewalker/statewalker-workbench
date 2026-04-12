@@ -18,6 +18,16 @@ function isFieldLike(child: ViewModel): child is ViewModel & FieldLike {
   return "value" in child;
 }
 
+function isContainerLike(
+  child: ViewModel,
+): child is ViewModel & { children: ViewModel[] } {
+  if (typeof child !== "object" || !child) return false;
+  if (!("children" in child)) return false;
+  return Array.isArray(
+    (child as unknown as { children: ViewModel[] }).children,
+  );
+}
+
 export class FormView extends ContainerView {
   #isRequired = false;
   set isRequired(value: boolean) {
@@ -105,9 +115,8 @@ export class FormView extends ContainerView {
 
   /** Find a child field by its key. */
   findField(fieldKey: string): (ViewModel & FieldLike) | undefined {
-    return this.children.find(
-      (c): c is ViewModel & FieldLike => isFieldLike(c) && c.key === fieldKey,
-    );
+    const fields = this.getFields();
+    return fields[fieldKey];
   }
 
   /** Get the value of a single child field. */
@@ -117,13 +126,10 @@ export class FormView extends ContainerView {
 
   /** Get all child field values as a record keyed by field key. */
   getValues(): Record<string, unknown> {
-    const result: Record<string, unknown> = {};
-    for (const child of this.children) {
-      if (isFieldLike(child)) {
-        result[child.key] = child.value;
-      }
-    }
-    return result;
+    const fields = this.getFields();
+    return Object.fromEntries(
+      Object.entries(fields).map(([key, field]) => [key, field.value]),
+    );
   }
 
   /** Set an error message on a child field. */
@@ -135,19 +141,39 @@ export class FormView extends ContainerView {
     }
   }
 
+  private getFields(): Record<string, ViewModel & FieldLike> {
+    return visit(this);
+
+    function visit(
+      parent: { children: ViewModel[] },
+      result: Record<string, ViewModel & FieldLike> = {},
+    ): Record<string, ViewModel & FieldLike> {
+      for (const child of parent.children) {
+        if (isFieldLike(child)) {
+          result[child.key] = child;
+        } else if (isContainerLike(child)) {
+          visit(child, result);
+        }
+      }
+      return result;
+    }
+  }
+
   /** Check if any child field has an error message. */
   hasErrors(): boolean {
-    return this.children.some(
-      (c) => isFieldLike(c) && c.errorMessage != null && c.errorMessage !== "",
+    const fields = this.getFields();
+    return Object.values(fields).some(
+      (field) => field.errorMessage != null && field.errorMessage !== "",
     );
   }
 
   /** Clear all child field error messages. */
   reset(): void {
-    for (const child of this.children) {
-      if (isFieldLike(child) && "errorMessage" in child) {
+    const fields = this.getFields();
+    for (const field of Object.values(fields)) {
+      if ("errorMessage" in field) {
         (
-          child as ViewModel & { errorMessage: string | undefined }
+          field as ViewModel & { errorMessage: string | undefined }
         ).errorMessage = undefined;
       }
     }
