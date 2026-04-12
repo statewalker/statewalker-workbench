@@ -13,6 +13,7 @@
     "src/**"
   ],
   "scripts": {
+    "build:browser": "vite build --config vite.config.lib.ts && node ../../scripts/generate-browser-package-json.mjs .",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write --unsafe .",
     "lint:check": "biome check ."
@@ -25,7 +26,7 @@
     "@repo/shared": "workspace:*",
     "@repo/shared-react": "workspace:*",
     "@repo/shared-views": "workspace:*",
-    "react-resizable-panels": "^4.8.0"
+    "react-resizable-panels": "catalog:"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "typescript": "catalog:",
+    "vite": "catalog:",
     "@types/react": "catalog:",
     "react": "catalog:"
   }

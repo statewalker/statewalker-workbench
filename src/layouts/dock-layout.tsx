@@ -36,7 +36,8 @@ function SplitRenderer({ split }: { split: DockSplit }) {
               style={{
                 width: split.direction === "horizontal" ? 4 : undefined,
                 height: split.direction === "vertical" ? 4 : undefined,
-                background: "transparent",
+                background:
+                  "var(--spectrum-alias-border-color-mid, rgba(128,128,128,0.3))",
                 cursor:
                   split.direction === "horizontal"
                     ? "col-resize"
