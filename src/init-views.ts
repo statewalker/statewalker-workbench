@@ -1,6 +1,6 @@
 import "./index.css";
 
-import type { ReactComponentRegistry } from "@repo/shared-react/component-registry";
+import { getComponentRegistry } from "./layouts/app-shell.js";
 import {
   AccordionView,
   ActionBarView,
@@ -171,7 +171,8 @@ import { PopoverRenderer } from "./renderers/overlays/popover.renderer.js";
 import { SheetRenderer } from "./renderers/overlays/sheet.renderer.js";
 import { TooltipRenderer } from "./renderers/overlays/tooltip.renderer.js";
 
-export function initViews(registry: ReactComponentRegistry): () => void {
+export function initViews(ctx: Record<string, unknown>): () => void {
+  const registry = getComponentRegistry(ctx);
   const cleanups = [
     // Actions
     registry.register(ActionGroupView, ActionGroupRenderer),
