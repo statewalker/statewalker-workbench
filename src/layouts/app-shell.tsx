@@ -23,7 +23,7 @@ import {
   type UIModelRegistry,
   getActivePanelView,
   getDialogStackView,
-  getKeyboardView,
+  getThemeView,
   getToolbarView,
   getTopMenuView,
   listenPanel,
@@ -53,17 +53,17 @@ const [getComponentRegistry] = newAdapter<ReactComponentRegistry>(
 );
 export { getComponentRegistry };
 
-// ─── Theme context ──────────────────────────────────────
-
-type ColorScheme = "light" | "dark";
-const ColorSchemeCtx = createContext<{
-  colorScheme: ColorScheme;
-  toggle: () => void;
-}>({ colorScheme: "dark", toggle: () => {} });
+// ─── Theme hook (reads from ThemeView model) ───────────
 
 export function useColorScheme() {
+  // Fallback for components rendered outside AppShell
   return useContext(ColorSchemeCtx);
 }
+
+const ColorSchemeCtx = createContext<{
+  colorScheme: "light" | "dark";
+  toggle: () => void;
+}>({ colorScheme: "dark", toggle: () => {} });
 
 // ─── Model items hook ───────────────────────────────────
 
@@ -99,48 +99,16 @@ export function SpectrumAppShell({ context, wrapper: Wrapper }: AppShellProps) {
   const tree = useMemo(() => panelsToTreeFromViews(panels), [panels]);
   const activePanelModel = getActivePanelView(context);
 
-  // Theme state
-  const [colorScheme, setColorScheme] = useState<ColorScheme>(() => {
-    try {
-      return (localStorage.getItem("theme") as ColorScheme) ?? "dark";
-    } catch {
-      return "dark";
-    }
-  });
-  const toggleTheme = () => {
-    setColorScheme((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
-      try { localStorage.setItem("theme", next); } catch {}
-      document.documentElement.classList.toggle("dark", next === "dark");
-      return next;
-    });
-  };
-
-  // Keyboard dispatch
-  const keyboardModel = getKeyboardView(context);
+  // Theme state — driven by ThemeView model
+  const themeModel = useMemo(() => getThemeView(context), [context]);
+  const [colorScheme, setColorScheme] = useState<"light" | "dark">(
+    () => themeModel.resolved,
+  );
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent): void {
-      const tag = (document.activeElement as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      if (document.querySelector("[role=dialog]")) return;
-      const parts: string[] = [];
-      if (e.ctrlKey || e.metaKey) parts.push("Ctrl");
-      if (e.shiftKey) parts.push("Shift");
-      if (e.altKey) parts.push("Alt");
-      parts.push(e.key);
-      const combo = parts.length > 1 ? parts.join("+") : e.key;
-      const bindings =
-        keyboardModel.getBindings(combo).length > 0
-          ? keyboardModel.getBindings(combo)
-          : keyboardModel.getBindings(e.key);
-      for (const binding of bindings) {
-        if (binding.preventDefault !== false) e.preventDefault();
-        binding.execute();
-      }
-    }
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [keyboardModel]);
+    setColorScheme(themeModel.resolved);
+    return themeModel.onUpdate(() => setColorScheme(themeModel.resolved));
+  }, [themeModel]);
+  const toggleTheme = () => themeModel.toggle();
 
   const topDialog = dialogs.length > 0 ? (dialogs[dialogs.length - 1] as DialogView) : undefined;
 
