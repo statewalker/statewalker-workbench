@@ -1,0 +1,23 @@
+{
+  "name": "@repo/backbone-web",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write .",
+    "lint:check": "biome check ."
+  },
+  "dependencies": {
+    "@repo/backbone-common": "workspace:*",
+    "@repo/shared": "workspace:*",
+    "sucrase": "^3.35.0"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
