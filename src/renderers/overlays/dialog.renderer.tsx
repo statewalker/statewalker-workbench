@@ -15,7 +15,7 @@ export function DialogRenderer({ model }: { model: DialogViewType }) {
 
   return (
     <Dialog open={true}>
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} size={model.size}>
         <DialogHeader>
           <DialogTitle>
             {typeof model.header === "string" ? model.header : "Dialog"}

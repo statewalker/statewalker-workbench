@@ -7,7 +7,7 @@ export function GridRenderer({ model }: { model: GridViewType }) {
 
   return (
     <div
-      className="grid"
+      className="grid *:min-w-0"
       style={{
         gridTemplateColumns:
           typeof model.columns === "string"
