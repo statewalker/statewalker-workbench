@@ -4,6 +4,7 @@ export * from "./dialog-stack-view.js";
 export * from "./dnd-interaction-view.js";
 export * from "./keyboard-interaction-view.js";
 export * from "./keyboard-view.js";
+export * from "./panel-manager-view.js";
 export * from "./panel-view.js";
 export * from "./pointer-interaction-view.js";
 export * from "./theme-view.js";
