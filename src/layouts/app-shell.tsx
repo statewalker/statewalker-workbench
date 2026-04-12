@@ -1,5 +1,8 @@
 import { newAdapter } from "@repo/shared/adapters";
-import { AppContextProvider } from "@repo/shared-react/app-context";
+import {
+  AppContextProvider,
+  useAppContext,
+} from "@repo/shared-react/app-context";
 import {
   ComponentRegistryContext,
   ReactComponentRegistry,
@@ -11,6 +14,7 @@ import {
   type DockPanelView,
   getActivePanelView,
   getDialogStackView,
+  getThemeView,
   getToolbarView,
   getTopMenuView,
   listenPanel,
@@ -116,23 +120,22 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
 }
 
 function ThemeToggle() {
-  const [dark, setDark] = useState(() =>
-    document.documentElement.classList.contains("dark"),
-  );
+  const ctx = useAppContext();
+  const theme = useMemo(() => (ctx ? getThemeView(ctx) : null), [ctx]);
+  const [dark, setDark] = useState(() => theme?.isDark ?? true);
+
+  useEffect(() => {
+    if (!theme) return;
+    setDark(theme.isDark);
+    return theme.onUpdate(() => setDark(theme.isDark));
+  }, [theme]);
+
   return (
     <Button
       variant="ghost"
       size="icon"
       className="ml-auto size-8"
-      onClick={() => {
-        const isDark = document.documentElement.classList.toggle("dark");
-        setDark(isDark);
-        try {
-          localStorage.setItem("theme", isDark ? "dark" : "light");
-        } catch {
-          // localStorage unavailable
-        }
-      }}
+      onClick={() => theme?.toggle()}
       title={dark ? "Switch to light theme" : "Switch to dark theme"}
     >
       {dark ? (
