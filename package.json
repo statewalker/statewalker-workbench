@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./bindings": "./src/init-dom-bindings.ts",
     "./htl": "./src/htl.ts"
   },
   "files": [
@@ -16,6 +17,7 @@
   },
   "dependencies": {
     "@repo/shared": "workspace:*",
+    "@repo/shared-views": "workspace:*",
     "htl": "^0.3.1"
   },
   "devDependencies": {
