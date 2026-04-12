@@ -14,7 +14,7 @@ import { usePanelDnd } from "./use-panel-dnd.js";
 
 function TabIcon({ name }: { name?: string }) {
   if (!name) return null;
-  return <Icon name={name} className="size-3.5" />;
+  return <Icon name={name} className="size-3.5 group-hover:opacity-0 transition-opacity" />;
 }
 
 export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
@@ -137,8 +137,10 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
-              <GripVertical className="w-3 h-3 opacity-0 group-hover:opacity-40 cursor-grab active:cursor-grabbing transition-opacity" />
-              <TabIcon name={tab.icon} />
+              <span className="relative flex items-center justify-center w-3.5 h-3.5 shrink-0">
+                <TabIcon name={tab.icon} />
+                <GripVertical className="absolute inset-0 w-3.5 h-3.5 opacity-0 group-hover:opacity-40 cursor-grab active:cursor-grabbing transition-opacity" />
+              </span>
               <span className="truncate max-w-35">{tab.title}</span>
               {tab.closable !== false && (
                 <button
