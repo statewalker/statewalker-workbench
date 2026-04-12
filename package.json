@@ -9,7 +9,8 @@
     "./dock": "./src/dock/index.ts",
     "./dock-hooks": "./src/dock-hooks/index.ts",
     "./shell-hooks": "./src/shell-hooks/index.ts",
-    "./icons": "./src/icons/index.ts"
+    "./icons": "./src/icons/index.ts",
+    "./app-context": "./src/app-context.tsx"
   },
   "files": [
     "dist/**",
