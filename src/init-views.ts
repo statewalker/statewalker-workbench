@@ -1,4 +1,4 @@
-import type { ReactComponentRegistry } from "@repo/shared-react/component-registry";
+import { getComponentRegistry } from "./layouts/app-shell.js";
 import {
   AccordionView,
   ActionBarView,
@@ -162,8 +162,9 @@ import { SheetRenderer } from "./renderers/overlays/sheet.renderer.js";
 import { TooltipRenderer } from "./renderers/overlays/tooltip.renderer.js";
 
 export function initSpectrumViews(
-  registry: ReactComponentRegistry,
+  ctx: Record<string, unknown>,
 ): () => void {
+  const registry = getComponentRegistry(ctx);
   const cleanups = [
     registry.register(ActionButtonView, ActionButtonRenderer),
     registry.register(ActionGroupView, ActionGroupRenderer),
