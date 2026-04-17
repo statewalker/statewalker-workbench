@@ -1,9 +1,8 @@
 import { useComponentRegistry } from "@repo/shared-react/component-registry";
-import type { DockTab } from "@repo/shared-react/dock";
 import { Icon } from "@repo/shared-react/icons";
 import type { DockPanelView } from "@repo/shared-views";
 import { GripVertical, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import { cn } from "../lib/utils.js";
 import { usePanelManagerView } from "./app-shell.js";
 import {
@@ -23,76 +22,11 @@ function TabIcon({ name }: { name?: string }) {
   );
 }
 
-/** Extract area name from panel container ID (e.g., "area-center" → "center"). */
-function panelIdToArea(panelId: string): string {
-  return panelId.startsWith("area-") ? panelId.slice(5) : panelId;
-}
-
 /**
- * Build the tab list from PanelManagerView for a given area.
- * Falls back to the tree node's tabs if no model is available.
+ * DockPanelComponent — renders the tab bar and active content for a
+ * single tree panel. The panel's tabs come directly from the tree
+ * (authored by PanelManagerView); no tree lookups happen here.
  */
-function useAreaTabs(
-  panelId: string,
-  treeTabs: DockTab[],
-): {
-  tabs: DockTab[];
-  activeTabId: string | null;
-  focusedTabKey: string | null;
-} {
-  const pm = usePanelManagerView();
-  const area = panelIdToArea(panelId);
-
-  const [state, setState] = useState(() => buildState(pm, area, treeTabs));
-
-  useEffect(() => {
-    if (!pm) return;
-    setState(buildState(pm, area, treeTabs));
-    return pm.onUpdate(() => setState(buildState(pm, area, treeTabs)));
-  }, [pm, area, treeTabs]);
-
-  return state;
-}
-
-function buildState(
-  pm: ReturnType<typeof usePanelManagerView>,
-  area: string,
-  treeTabs: DockTab[],
-): {
-  tabs: DockTab[];
-  activeTabId: string | null;
-  focusedTabKey: string | null;
-} {
-  if (!pm) {
-    return {
-      tabs: treeTabs,
-      activeTabId: treeTabs[0]?.id ?? null,
-      focusedTabKey: null,
-    };
-  }
-
-  const order = pm.getTabOrder(area);
-  const tabs: DockTab[] = order
-    .map((key) => {
-      const panel = pm.getPanel(key);
-      if (!panel) return null;
-      return {
-        id: panel.key,
-        title: panel.label,
-        icon: panel.icon,
-        panelModel: panel,
-        closable: panel.closable,
-      };
-    })
-    .filter((t): t is DockTab => t !== null);
-
-  return {
-    tabs,
-    activeTabId: pm.getActiveTab(area),
-    focusedTabKey: pm.focusedTabKey,
-  };
-}
-
 export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
   const {
     dragState,
@@ -108,11 +42,20 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
   const registry = useComponentRegistry();
   const panelManager = usePanelManagerView();
 
-  // Read tabs from the model (single source of truth), not the tree
-  const { tabs, activeTabId, focusedTabKey } = useAreaTabs(
-    panel.id,
-    panel.tabs,
+  // Focus is tracked on the model; subscribe to it so the ring reflects it.
+  const focusedTabKey = useSyncExternalStore(
+    useCallback(
+      (cb) => panelManager?.onUpdate(cb) ?? (() => {}),
+      [panelManager],
+    ),
+    useCallback(() => panelManager?.focusedTabKey ?? null, [panelManager]),
+    () => null,
   );
+
+  // Tabs & active tab come directly from the tree panel — PM is the
+  // single source of truth, and DockProvider has already subscribed.
+  const tabs = panel.tabs;
+  const activeTabId = panel.activeTabId;
 
   const isDragging = dragState !== null;
   const hasPendingDrop = pendingDrop?.targetPanelId === panel.id;

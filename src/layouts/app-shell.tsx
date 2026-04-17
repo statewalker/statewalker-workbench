@@ -15,7 +15,6 @@ import {
   getThemeView,
   getToolbarView,
   getTopMenuView,
-  listenPanel,
   type PanelManagerView,
 } from "@repo/shared-views";
 import { Moon, Sun } from "lucide-react";
@@ -44,7 +43,7 @@ import {
   MenubarTrigger,
 } from "../components/ui/menubar.js";
 import { createIconRegistry } from "../icons/init-icons.js";
-import { DockProvider, panelsToTreeFromViews } from "./dock-context.js";
+import { DockProvider } from "./dock-context.js";
 import { DockLayout } from "./dock-layout.js";
 import { useModelItems } from "./use-model-items.js";
 
@@ -84,56 +83,9 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
   const menuModel = getTopMenuView(context);
   const panelManager = useMemo(() => getPanelManagerView(context), [context]);
 
-  // Bridge: listenPanel → PanelManagerView, and track area set for tree rebuilds.
-  // IMPORTANT: the onUpdate listener must be registered BEFORE listenPanel fires,
-  // because listenPanel's callback fires synchronously with existing panels.
-  const [areas, setAreas] = useState<string[]>([]);
-  useEffect(() => {
-    const knownKeys = new Set<string>();
-
-    // 1. Listen for model changes to track area set
-    const unsubModel = panelManager.onUpdate(() => {
-      const next = panelManager.getAreas().sort();
-      setAreas((prev) =>
-        prev.length === next.length && prev.every((a, i) => a === next[i])
-          ? prev
-          : next,
-      );
-    });
-
-    // 2. Bridge published panels into the model (fires synchronously for existing panels)
-    const unsubPanels = listenPanel(context, (panels) => {
-      const currentKeys = new Set(panels.map((p) => p.key));
-      for (const p of panels) {
-        if (!knownKeys.has(p.key)) {
-          knownKeys.add(p.key);
-          panelManager.addPanel(p);
-        }
-      }
-      for (const key of knownKeys) {
-        if (!currentKeys.has(key)) {
-          knownKeys.delete(key);
-          panelManager.removePanel(key);
-        }
-      }
-    });
-
-    return () => {
-      unsubModel();
-      unsubPanels();
-    };
-  }, [context, panelManager]);
-
   const dialogs = useModelItems(dialogsModel);
   const toolbarActions = useModelItems(toolbarModel);
   const menus = useModelItems(menuModel);
-
-  // Rebuild tree only when the set of areas changes — preserves split sizes.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — rebuild on area changes only
-  const tree = useMemo(
-    () => panelsToTreeFromViews(panelManager.getAllPanels()),
-    [areas],
-  );
 
   const topDialog =
     dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
@@ -146,7 +98,7 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
             <AppMenuBar menus={menus} />
             <div className="flex-1 overflow-hidden">
               <PanelManagerCtx.Provider value={panelManager}>
-                <DockProvider initialLayout={tree}>
+                <DockProvider panelManager={panelManager}>
                   <DockLayout />
                 </DockProvider>
               </PanelManagerCtx.Provider>
