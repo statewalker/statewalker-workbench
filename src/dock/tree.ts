@@ -81,6 +81,8 @@ export function addTabToPanel(
   targetPanelId: string,
   tab: DockTab,
   position: DropPosition,
+  /** Pre-generated ID for the new panel created by split drops. */
+  newPanelId?: string,
 ): DockNode {
   if (isPanel(node)) {
     if (node.id === targetPanelId) {
@@ -93,7 +95,7 @@ export function addTabToPanel(
       }
 
       const newPanel: DockPanel = {
-        id: generateId(),
+        id: newPanelId ?? generateId(),
         tabs: [tab],
         activeTabId: tab.id,
       };
