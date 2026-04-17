@@ -5,6 +5,7 @@ export * from "./content/index.js";
 export * from "./core/index.js";
 export * from "./data/index.js";
 export * from "./date-time/index.js";
+export * from "./dock/index.js";
 export * from "./feedback/index.js";
 export * from "./forms/index.js";
 export * from "./layout/index.js";
