@@ -29,7 +29,6 @@ import {
   DateFieldView,
   DatePickerView,
   DateRangePickerView,
-  DialogView,
   DividerView,
   EmptyView,
   FileTriggerView,
@@ -166,7 +165,6 @@ import { TabsRenderer } from "./renderers/navigation/tabs.renderer.js";
 // Overlays
 import { AlertDialogRenderer } from "./renderers/overlays/alert-dialog.renderer.js";
 import { ContextMenuRenderer } from "./renderers/overlays/context-menu.renderer.js";
-import { DialogRenderer } from "./renderers/overlays/dialog.renderer.js";
 import { PopoverRenderer } from "./renderers/overlays/popover.renderer.js";
 import { SheetRenderer } from "./renderers/overlays/sheet.renderer.js";
 import { TooltipRenderer } from "./renderers/overlays/tooltip.renderer.js";
@@ -259,7 +257,6 @@ export function initViews(ctx: Record<string, unknown>): () => void {
     // Overlays
     registry.register(AlertDialogView, AlertDialogRenderer),
     registry.register(ContextMenuView, ContextMenuRenderer),
-    registry.register(DialogView, DialogRenderer),
     registry.register(PopoverView, PopoverRenderer),
     registry.register(SheetView, SheetRenderer),
     registry.register(TooltipView, TooltipRenderer),

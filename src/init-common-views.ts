@@ -6,7 +6,6 @@ import {
   BreadcrumbView,
   CardView,
   ContextMenuView,
-  DialogView,
   EmptyView,
   FlexView,
   GridView,
@@ -29,7 +28,6 @@ import { BreadcrumbRenderer } from "./renderers/navigation/breadcrumb.renderer.j
 import { PaginationRenderer } from "./renderers/navigation/pagination.renderer.js";
 import { TabsRenderer } from "./renderers/navigation/tabs.renderer.js";
 import { ContextMenuRenderer } from "./renderers/overlays/context-menu.renderer.js";
-import { DialogRenderer } from "./renderers/overlays/dialog.renderer.js";
 import { SheetRenderer } from "./renderers/overlays/sheet.renderer.js";
 
 export function initCommonViews(registry: ReactComponentRegistry): () => void {
@@ -51,7 +49,6 @@ export function initCommonViews(registry: ReactComponentRegistry): () => void {
     // Overlay
     registry.register(SheetView, SheetRenderer),
     registry.register(ContextMenuView, ContextMenuRenderer),
-    registry.register(DialogView, DialogRenderer),
 
     // Data Display
     registry.register(TableView, TableRenderer),
