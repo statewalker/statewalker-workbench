@@ -1,63 +1,48 @@
 import { useUpdates } from "@repo/shared-react/hooks";
-import type {
-  ModelPickerView,
-  PickerModelItem,
-} from "@repo/shared-views/ai-models";
+import type { ModelPickerView } from "@repo/shared-views/ai-models";
 
-function Section({
-  label,
-  items,
-  model,
-}: {
-  label: string;
-  items: PickerModelItem[];
-  model: ModelPickerView;
-}) {
-  return (
-    <>
-      <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-        {label}
-      </div>
-      {items.map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          disabled={!item.isInteractive}
-          title={item.statusReason}
-          className={`w-full flex items-center gap-3 px-2 py-1.5 text-sm rounded-sm transition-colors
-            ${item.isInteractive ? "hover:bg-accent cursor-pointer" : "opacity-50 cursor-not-allowed"}
-            ${item.key === model.currentKey ? "bg-accent font-medium" : ""}`}
-          onClick={() => {
-            if (item.isInteractive) {
-              model.selectAction.submit(item.key);
-              model.isOpen = false;
-            }
-          }}
-        >
-          <span
-            className={`w-2 h-2 rounded-full shrink-0 ${
-              item.isActive ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
-            }`}
-          />
-          <span className="flex-1 truncate">{item.label}</span>
-          <span className="text-xs text-muted-foreground shrink-0">
-            {item.provider}
-          </span>
-        </button>
-      ))}
-    </>
-  );
-}
-
+/**
+ * Chat-header model picker. Visibility is driven by `model.mode`:
+ *   "none"   → "Configure model…" button (opens settings)
+ *   "single" → static label with a green dot (no popover)
+ *   "multi"  → dropdown trigger + popover listing active reasoning models
+ */
 export function ModelPickerRenderer({ model }: { model: ModelPickerView }) {
   useUpdates(model.onUpdate);
 
-  const active = model.items.filter((i) => i.isActive);
-  const available = model.items.filter((i) => !i.isActive);
+  if (model.mode === "none") {
+    return (
+      <button
+        type="button"
+        className="inline-flex items-center gap-2 rounded-md border border-input
+          bg-transparent px-3 py-1.5 text-sm transition-colors
+          hover:bg-accent cursor-pointer"
+        onClick={() => model.manageAction.submit()}
+      >
+        <span className="w-2 h-2 rounded-full shrink-0 bg-gray-300 dark:bg-gray-600" />
+        <span>Configure model…</span>
+      </button>
+    );
+  }
 
+  if (model.mode === "single") {
+    return (
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 text-sm">
+        <span
+          className={`w-2 h-2 rounded-full shrink-0 ${
+            model.isActivating ? "bg-yellow-400 animate-pulse" : "bg-green-500"
+          }`}
+        />
+        <span className="max-w-[220px] truncate">
+          {model.isActivating ? model.activationMessage : model.currentLabel}
+        </span>
+      </div>
+    );
+  }
+
+  // mode === "multi"
   return (
     <div className="relative inline-block">
-      {/* Trigger */}
       <button
         type="button"
         className="inline-flex items-center gap-2 rounded-md border border-input
@@ -67,11 +52,7 @@ export function ModelPickerRenderer({ model }: { model: ModelPickerView }) {
       >
         <span
           className={`w-2 h-2 rounded-full shrink-0 ${
-            model.isActivating
-              ? "bg-yellow-400 animate-pulse"
-              : model.currentKey
-                ? "bg-green-500"
-                : "bg-gray-300 dark:bg-gray-600"
+            model.isActivating ? "bg-yellow-400 animate-pulse" : "bg-green-500"
           }`}
         />
         <span className="max-w-[180px] truncate">
@@ -80,6 +61,7 @@ export function ModelPickerRenderer({ model }: { model: ModelPickerView }) {
             : model.currentLabel || "Pick a model"}
         </span>
         <svg className="h-3 w-3 text-muted-foreground" viewBox="0 0 12 12">
+          <title>Toggle model picker</title>
           <path
             d="M3 5l3 3 3-3"
             fill="none"
@@ -89,18 +71,30 @@ export function ModelPickerRenderer({ model }: { model: ModelPickerView }) {
         </svg>
       </button>
 
-      {/* Dropdown */}
       {model.isOpen && (
         <div
           className="absolute bottom-full left-0 z-50 mb-1 min-w-[280px]
           rounded-md border border-border bg-popover p-1 shadow-md"
         >
-          {active.length > 0 && (
-            <Section label="Active Models" items={active} model={model} />
-          )}
-          {available.length > 0 && (
-            <Section label="Available" items={available} model={model} />
-          )}
+          {model.items.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              className={`w-full flex items-center gap-3 px-2 py-1.5 text-sm rounded-sm
+                hover:bg-accent cursor-pointer transition-colors
+                ${item.key === model.currentKey ? "bg-accent font-medium" : ""}`}
+              onClick={() => {
+                model.selectAction.submit(item.key);
+                model.isOpen = false;
+              }}
+            >
+              <span className="w-2 h-2 rounded-full shrink-0 bg-green-500" />
+              <span className="flex-1 truncate">{item.label}</span>
+              <span className="text-xs text-muted-foreground shrink-0">
+                {item.provider}
+              </span>
+            </button>
+          ))}
 
           <div className="-mx-1 my-1 h-px bg-border" />
           <button
@@ -112,7 +106,7 @@ export function ModelPickerRenderer({ model }: { model: ModelPickerView }) {
               model.isOpen = false;
             }}
           >
-            Manage Models...
+            Manage Models…
           </button>
         </div>
       )}
