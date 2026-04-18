@@ -9,7 +9,24 @@ export interface PickerModelItem {
   statusReason?: string;
 }
 
+/**
+ * Quantity-driven mode for the chat-header picker:
+ *   "none"   — no reasoning model active; renders as a "Configure model…" button
+ *   "single" — exactly one active; renders as a static label (no popover)
+ *   "multi"  — ≥ 2 active; renders as a dropdown listing all active reasoning models
+ */
+export type ModelPickerMode = "none" | "single" | "multi";
+
 export class ModelPickerView extends ViewModel {
+  #mode: ModelPickerMode = "none";
+  get mode(): ModelPickerMode {
+    return this.#mode;
+  }
+  set mode(value: ModelPickerMode) {
+    this.#mode = value;
+    this.notify();
+  }
+
   #isOpen = false;
   get isOpen(): boolean {
     return this.#isOpen;
