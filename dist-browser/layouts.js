@@ -1,6 +1,6 @@
 import { jsx as t, jsxs as C } from "react/jsx-runtime";
 import { View as K, Flex as j, MenuTrigger as G, ActionButton as V, Text as N, Menu as J, Item as Z, DialogContainer as ee, Dialog as te, Heading as ne, Content as oe } from "@adobe/react-spectrum";
-import { newAdapter as re } from "@repo/shared/adapters";
+import { newAdapter as re } from "@repo/shared-adapters";
 import { useComponentRegistry as ie, ReactComponentRegistry as le, ComponentRegistryContext as ae } from "@repo/shared-react/component-registry";
 import { getDialogStackView as ce, getToolbarView as se, getTopMenuView as de, listenPanel as ue, getActivePanelView as ge, getKeyboardView as pe } from "@repo/shared-views";
 import he, { createContext as F, useState as I, useEffect as R, useCallback as D, useContext as H, useRef as fe, useMemo as W } from "react";

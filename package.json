@@ -23,10 +23,10 @@
     "@internationalized/date": "^3.8.2",
     "@react-stately/color": "^3.9.0",
     "@spectrum-icons/workflow": "^4.2.28",
-    "@repo/shared": "workspace:*",
     "@repo/shared-react": "workspace:*",
     "@repo/shared-views": "workspace:*",
-    "react-resizable-panels": "catalog:"
+    "react-resizable-panels": "catalog:",
+    "@repo/shared-adapters": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
