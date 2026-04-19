@@ -7,12 +7,7 @@ export function ResizablePanelGroup({
   className,
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.Group>) {
-  return (
-    <ResizablePrimitive.Group
-      className={cn("flex h-full w-full", className)}
-      {...props}
-    />
-  );
+  return <ResizablePrimitive.Group className={cn("flex h-full w-full", className)} {...props} />;
 }
 
 export function ResizablePanel({

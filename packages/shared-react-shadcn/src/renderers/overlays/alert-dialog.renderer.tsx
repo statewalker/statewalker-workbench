@@ -14,11 +14,7 @@ export function AlertDialogRenderer({ model }: { model: AlertDialogView }) {
       <div className="relative z-50 w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg">
         {model.header && (
           <h2 className="text-lg font-semibold mb-2">
-            {typeof model.header === "string" ? (
-              model.header
-            ) : (
-              <RenderSlot value={model.header} />
-            )}
+            {typeof model.header === "string" ? model.header : <RenderSlot value={model.header} />}
           </h2>
         )}
         <div className="text-sm text-muted-foreground mb-4">
@@ -28,9 +24,7 @@ export function AlertDialogRenderer({ model }: { model: AlertDialogView }) {
         </div>
         <div className="flex justify-end gap-2">
           {model.cancelAction && <ActionButton action={model.cancelAction} />}
-          {model.secondaryAction && (
-            <ActionButton action={model.secondaryAction} />
-          )}
+          {model.secondaryAction && <ActionButton action={model.secondaryAction} />}
           <ActionButton action={model.primaryAction} />
         </div>
       </div>

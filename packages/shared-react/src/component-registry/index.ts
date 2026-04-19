@@ -21,10 +21,7 @@ export class ReactComponentRegistry {
   // biome-ignore lint/suspicious/noExplicitAny: factory map must be heterogeneous
   private factories = new Map<Constructor, ReactComponentType<any>>();
 
-  register<T>(
-    modelType: Constructor<T>,
-    component: ReactComponentType<T>,
-  ): () => void {
+  register<T>(modelType: Constructor<T>, component: ReactComponentType<T>): () => void {
     this.factories.set(modelType, component);
     return () => {
       if (this.factories.get(modelType) === component) {
@@ -71,11 +68,7 @@ export function registerComponent<V>(
   return registry.register(viewType, component);
 }
 
-export function RenderSlot<T extends object>({
-  model,
-}: {
-  model: T;
-}): React.ReactElement | null {
+export function RenderSlot<T extends object>({ model }: { model: T }): React.ReactElement | null {
   const registry = useComponentRegistry();
   return registry.render(model);
 }

@@ -10,10 +10,7 @@ interface IconProps {
  * Icon names follow lucide kebab-case convention (e.g. "file-text", "check-circle").
  * Returns null if the icon is not registered.
  */
-export function Icon({
-  name,
-  className,
-}: IconProps): React.ReactElement | null {
+export function Icon({ name, className }: IconProps): React.ReactElement | null {
   const registry = useIconRegistry();
   if (!registry) return null;
   const Component = registry.resolve(name);

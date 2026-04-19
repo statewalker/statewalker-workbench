@@ -1,10 +1,4 @@
-import type {
-  DockNode,
-  DockPanel,
-  DockSplit,
-  DockTab,
-  DropPosition,
-} from "./types.js";
+import type { DockNode, DockPanel, DockSplit, DockTab, DropPosition } from "./types.js";
 import { isPanel } from "./types.js";
 
 export function generateId(): string {
@@ -104,9 +98,7 @@ export function addTabToPanel(
         position === "left" || position === "right" ? "horizontal" : "vertical";
 
       const children: DockPanel[] =
-        position === "left" || position === "top"
-          ? [newPanel, node]
-          : [node, newPanel];
+        position === "left" || position === "top" ? [newPanel, node] : [node, newPanel];
 
       return {
         id: generateId(),
@@ -120,9 +112,10 @@ export function addTabToPanel(
 
   return {
     ...node,
-    children: node.children.map((child) =>
-      addTabToPanel(child, targetPanelId, tab, position),
-    ) as (DockPanel | DockSplit)[],
+    children: node.children.map((child) => addTabToPanel(child, targetPanelId, tab, position)) as (
+      | DockPanel
+      | DockSplit
+    )[],
   };
 }
 
@@ -159,8 +152,7 @@ export function removeTabById(
   }
 
   if (newChildren.length === 0) return { node: null, tab: removedTab };
-  if (newChildren.length === 1)
-    return { node: newChildren[0]!, tab: removedTab };
+  if (newChildren.length === 1) return { node: newChildren[0]!, tab: removedTab };
 
   const totalSize = newSizes.reduce((a, b) => a + b, 0);
   const normalizedSizes = newSizes.map((s) => (s / totalSize) * 100);
@@ -182,11 +174,7 @@ export function findPanel(node: DockNode, panelId: string): DockPanel | null {
   return null;
 }
 
-export function updatePanelActiveTab(
-  node: DockNode,
-  panelId: string,
-  tabId: string,
-): DockNode {
+export function updatePanelActiveTab(node: DockNode, panelId: string, tabId: string): DockNode {
   if (isPanel(node)) {
     if (node.id === panelId) {
       return { ...node, activeTabId: tabId };
@@ -196,17 +184,14 @@ export function updatePanelActiveTab(
 
   return {
     ...node,
-    children: node.children.map((child) =>
-      updatePanelActiveTab(child, panelId, tabId),
-    ) as (DockPanel | DockSplit)[],
+    children: node.children.map((child) => updatePanelActiveTab(child, panelId, tabId)) as (
+      | DockPanel
+      | DockSplit
+    )[],
   };
 }
 
-export function updateSplitSizes(
-  node: DockNode,
-  splitId: string,
-  sizes: number[],
-): DockNode {
+export function updateSplitSizes(node: DockNode, splitId: string, sizes: number[]): DockNode {
   if (isPanel(node)) {
     return node;
   }
@@ -217,8 +202,9 @@ export function updateSplitSizes(
 
   return {
     ...node,
-    children: node.children.map((child) =>
-      updateSplitSizes(child, splitId, sizes),
-    ) as (DockPanel | DockSplit)[],
+    children: node.children.map((child) => updateSplitSizes(child, splitId, sizes)) as (
+      | DockPanel
+      | DockSplit
+    )[],
   };
 }

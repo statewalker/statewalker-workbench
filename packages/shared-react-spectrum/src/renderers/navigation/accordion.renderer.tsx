@@ -1,9 +1,4 @@
-import {
-  Disclosure,
-  DisclosurePanel,
-  DisclosureTitle,
-  Flex,
-} from "@adobe/react-spectrum";
+import { Disclosure, DisclosurePanel, DisclosureTitle, Flex } from "@adobe/react-spectrum";
 import { useUpdates } from "@statewalker/shared-react/hooks";
 import type { AccordionView } from "@statewalker/shared-views";
 import { RenderModel } from "../_shared/render-slot.js";

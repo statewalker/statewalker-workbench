@@ -1,6 +1,5 @@
 import "./index.css";
 
-import { getComponentRegistry } from "./layouts/app-shell.js";
 import {
   AccordionView,
   ActionBarView,
@@ -79,6 +78,7 @@ import {
   TreeView,
   WellView,
 } from "@statewalker/shared-views";
+import { getComponentRegistry } from "./layouts/app-shell.js";
 
 // Actions
 import { ActionGroupRenderer } from "./renderers/actions/action-group.renderer.js";

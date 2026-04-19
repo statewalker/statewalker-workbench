@@ -6,9 +6,7 @@ export function JsonRenderer({ model }: { model: JsonView }) {
   useUpdates(model.onUpdate);
   return (
     <View>
-      {model.label && (
-        <div style={{ fontWeight: "bold", marginBottom: 4 }}>{model.label}</div>
-      )}
+      {model.label && <div style={{ fontWeight: "bold", marginBottom: 4 }}>{model.label}</div>}
       <pre
         style={{
           margin: 0,

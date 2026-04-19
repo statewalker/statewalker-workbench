@@ -6,9 +6,7 @@ export function LabeledValueRenderer({ model }: { model: LabeledValueView }) {
 
   const formatted =
     typeof model.value === "number" && model.formatOptions
-      ? new Intl.NumberFormat(undefined, model.formatOptions).format(
-          model.value,
-        )
+      ? new Intl.NumberFormat(undefined, model.formatOptions).format(model.value)
       : String(model.value);
 
   return (

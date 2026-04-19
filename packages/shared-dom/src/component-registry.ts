@@ -14,10 +14,7 @@ export type ComponentFactory<T = unknown, C = unknown> = (params: {
 export class ComponentRegistry<C = unknown> {
   private factories = new Map<Constructor, ComponentFactory<unknown, C>>();
 
-  register<T>(
-    modelType: Constructor<T>,
-    factory: ComponentFactory<T, C>,
-  ): void {
+  register<T>(modelType: Constructor<T>, factory: ComponentFactory<T, C>): void {
     this.factories.set(modelType, factory as ComponentFactory<unknown, C>);
   }
 

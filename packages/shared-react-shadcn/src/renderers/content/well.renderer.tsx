@@ -6,10 +6,7 @@ export function WellRenderer({ model }: { model: WellView }) {
   useUpdates(model.onUpdate);
 
   return (
-    <div
-      role={model.role}
-      className="rounded-lg border border-border bg-muted/50 p-4"
-    >
+    <div role={model.role} className="rounded-lg border border-border bg-muted/50 p-4">
       {model.children.map((child) => (
         <RenderModel key={child.key} model={child} />
       ))}

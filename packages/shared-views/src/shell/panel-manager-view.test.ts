@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { isPanel, isSplit } from "../dock/index.js";
-import type { DockNode, DockPanel, DockSplit } from "../dock/index.js";
 import { ViewModel } from "../core/view-model.js";
-import { DockPanelView } from "./panel-view.js";
+import type { DockNode, DockPanel, DockSplit } from "../dock/index.js";
+import { isPanel, isSplit } from "../dock/index.js";
 import { PanelManagerView } from "./panel-manager-view.js";
+import { DockPanelView } from "./panel-view.js";
 
 // Minimal ViewModel content stub (DockPanelView requires a ViewModel)
 class StubContent extends ViewModel {}
@@ -152,11 +152,12 @@ describe("PanelManagerView", () => {
       expect(tabIds(right!)).toEqual(["r1", "c1"]);
 
       // Panel registry still has all three panels
-      expect(pm.getAllPanels().map((p) => p.key).sort()).toEqual([
-        "c1",
-        "c2",
-        "r1",
-      ]);
+      expect(
+        pm
+          .getAllPanels()
+          .map((p) => p.key)
+          .sort(),
+      ).toEqual(["c1", "c2", "r1"]);
     });
 
     it("makes the moved tab active in the target panel", () => {
@@ -355,11 +356,12 @@ describe("PanelManagerView", () => {
       expect(isSplit(pm.getTree())).toBe(true);
 
       // All three panels still exist in the registry
-      expect(pm.getAllPanels().map((p) => p.key).sort()).toEqual([
-        "a",
-        "b",
-        "c",
-      ]);
+      expect(
+        pm
+          .getAllPanels()
+          .map((p) => p.key)
+          .sort(),
+      ).toEqual(["a", "b", "c"]);
     });
   });
 });

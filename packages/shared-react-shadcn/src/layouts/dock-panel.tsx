@@ -5,21 +5,13 @@ import { GripVertical, X } from "lucide-react";
 import { useCallback, useSyncExternalStore } from "react";
 import { cn } from "../lib/utils.js";
 import { usePanelManagerView } from "./app-shell.js";
-import {
-  type DockPanel as DockPanelType,
-  useDockLayout,
-} from "./dock-context.js";
+import { type DockPanel as DockPanelType, useDockLayout } from "./dock-context.js";
 import { DropConfirmationGrid } from "./drop-confirmation-grid.js";
 import { usePanelDnd } from "./use-panel-dnd.js";
 
 function TabIcon({ name }: { name?: string }) {
   if (!name) return null;
-  return (
-    <Icon
-      name={name}
-      className="size-3.5 group-hover:opacity-0 transition-opacity"
-    />
-  );
+  return <Icon name={name} className="size-3.5 group-hover:opacity-0 transition-opacity" />;
 }
 
 /**
@@ -44,10 +36,7 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
 
   // Focus is tracked on the model; subscribe to it so the ring reflects it.
   const focusedTabKey = useSyncExternalStore(
-    useCallback(
-      (cb) => panelManager?.onUpdate(cb) ?? (() => {}),
-      [panelManager],
-    ),
+    useCallback((cb) => panelManager?.onUpdate(cb) ?? (() => {}), [panelManager]),
     useCallback(() => panelManager?.focusedTabKey ?? null, [panelManager]),
     () => null,
   );
@@ -71,8 +60,7 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
     pendingDropPosition: pendingDrop?.suggestedPosition,
     onDragStart: (tabId) => startDrag(tabId, panel.id),
     onDragEnd: endDrag,
-    onRequestDrop: (position, coords) =>
-      requestDrop(panel.id, position, coords),
+    onRequestDrop: (position, coords) => requestDrop(panel.id, position, coords),
     onConfirmDrop: confirmDrop,
     onCancelDrop: cancelDrop,
   });
@@ -130,9 +118,7 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
               }}
               className={cn(
                 "group relative flex items-center gap-1.5 px-3 py-1.5 text-sm cursor-pointer select-none transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                isActiveTab
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
+                isActiveTab ? "text-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
               <span className="relative flex items-center justify-center w-3.5 h-3.5 shrink-0">
@@ -175,9 +161,7 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
         ref={dnd.contentRef}
         className={cn(
           "relative flex-1 overflow-auto",
-          isDragging &&
-            dnd.isHovering &&
-            "ring-2 ring-inset ring-primary/30 bg-primary/5",
+          isDragging && dnd.isHovering && "ring-2 ring-inset ring-primary/30 bg-primary/5",
         )}
         onDragOver={dnd.handlers.contentDragOver}
         onDragEnter={dnd.handlers.contentDragEnter}
@@ -197,8 +181,7 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
               dnd.selectedPosition === "left" && "left-0 top-0 w-1/2 h-full",
               dnd.selectedPosition === "right" && "right-0 top-0 w-1/2 h-full",
               dnd.selectedPosition === "top" && "left-0 top-0 w-full h-1/2",
-              dnd.selectedPosition === "bottom" &&
-                "left-0 bottom-0 w-full h-1/2",
+              dnd.selectedPosition === "bottom" && "left-0 bottom-0 w-full h-1/2",
             )}
           />
         )}
@@ -210,10 +193,7 @@ export function DockPanelComponent({ panel }: { panel: DockPanelType }) {
 
       {/* Drop confirmation grid */}
       {hasPendingDrop && pendingDrop && (
-        <div
-          data-drop-confirmation
-          className="absolute inset-0 pointer-events-none"
-        >
+        <div data-drop-confirmation className="absolute inset-0 pointer-events-none">
           <div className="pointer-events-auto">
             <DropConfirmationGrid
               selectedPosition={dnd.selectedPosition}

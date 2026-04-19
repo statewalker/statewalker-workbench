@@ -40,10 +40,7 @@ export function buildHash(state: UrlState): string {
  *
  * Returns a cleanup function.
  */
-export function bindUrlState(
-  _ctx: Record<string, unknown>,
-  model: UrlStateView,
-): () => void {
+export function bindUrlState(_ctx: Record<string, unknown>, model: UrlStateView): () => void {
   const [register, cleanup] = newRegistry();
 
   // Model → URL: when model notifies (sync was called), write hash

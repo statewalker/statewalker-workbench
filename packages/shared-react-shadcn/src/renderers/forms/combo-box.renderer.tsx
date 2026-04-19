@@ -59,9 +59,7 @@ export function ComboBoxRenderer({ model }: { model: ComboBoxView }) {
           ))}
         </ul>
       )}
-      {model.errorMessage && (
-        <p className="text-xs text-destructive">{model.errorMessage}</p>
-      )}
+      {model.errorMessage && <p className="text-xs text-destructive">{model.errorMessage}</p>}
     </div>
   );
 }

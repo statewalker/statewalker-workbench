@@ -5,9 +5,7 @@ import type { RangeCalendarView } from "@statewalker/shared-views";
 
 export function RangeCalendarRenderer({ model }: { model: RangeCalendarView }) {
   useUpdates(model.onUpdate);
-  let value:
-    | { start: ReturnType<typeof parseDate>; end: ReturnType<typeof parseDate> }
-    | undefined;
+  let value: { start: ReturnType<typeof parseDate>; end: ReturnType<typeof parseDate> } | undefined;
   try {
     if (model.startValue && model.endValue) {
       value = {

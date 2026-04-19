@@ -115,10 +115,7 @@ export class TableView<T = Record<string, unknown>> extends ContainerView<T> {
     if (this.#sortDescriptor && this.#sortDescriptor.column === columnKey) {
       this.#sortDescriptor = {
         column: columnKey,
-        direction:
-          this.#sortDescriptor.direction === "ascending"
-            ? "descending"
-            : "ascending",
+        direction: this.#sortDescriptor.direction === "ascending" ? "descending" : "ascending",
       };
     } else {
       this.#sortDescriptor = { column: columnKey, direction: "ascending" };

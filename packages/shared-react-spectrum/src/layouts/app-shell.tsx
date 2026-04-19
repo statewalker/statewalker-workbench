@@ -20,13 +20,13 @@ import type { ActionView, DialogView } from "@statewalker/shared-views";
 import {
   type ActivePanelView,
   type DockPanelView,
-  type UIModelRegistry,
   getActivePanelView,
   getDialogStackView,
   getThemeView,
   getToolbarView,
   getTopMenuView,
   listenPanel,
+  type UIModelRegistry,
 } from "@statewalker/shared-views";
 import {
   type ComponentType,
@@ -101,9 +101,7 @@ export function SpectrumAppShell({ context, wrapper: Wrapper }: AppShellProps) {
 
   // Theme state — driven by ThemeView model
   const themeModel = useMemo(() => getThemeView(context), [context]);
-  const [colorScheme, setColorScheme] = useState<"light" | "dark">(
-    () => themeModel.resolved,
-  );
+  const [colorScheme, setColorScheme] = useState<"light" | "dark">(() => themeModel.resolved);
   useEffect(() => {
     setColorScheme(themeModel.resolved);
     return themeModel.onUpdate(() => setColorScheme(themeModel.resolved));
@@ -123,9 +121,7 @@ export function SpectrumAppShell({ context, wrapper: Wrapper }: AppShellProps) {
             </DockProvider>
           </ActivePanelCtx.Provider>
         </View>
-        {toolbarActions.length > 0 && (
-          <SpectrumToolbar actions={toolbarActions} />
-        )}
+        {toolbarActions.length > 0 && <SpectrumToolbar actions={toolbarActions} />}
         <SpectrumDialogOverlay dialog={topDialog} registry={registry} />
       </Flex>
     </ComponentRegistryContext.Provider>
@@ -149,8 +145,7 @@ function SpectrumMenuBar({ menus }: { menus: ActionView[] }) {
       UNSAFE_style={{
         paddingInline: 8,
         minHeight: 36,
-        borderBottom:
-          "1px solid var(--spectrum-alias-border-color-mid, rgba(255,255,255,0.1))",
+        borderBottom: "1px solid var(--spectrum-alias-border-color-mid, rgba(255,255,255,0.1))",
       }}
     >
       {menus.map((menu) => (
@@ -165,9 +160,7 @@ function SpectrumMenuBar({ menus }: { menus: ActionView[] }) {
             }}
           >
             {menu.children.map((item) => (
-              <Item key={item.actionKey}>
-                {item.label ?? item.actionKey}
-              </Item>
+              <Item key={item.actionKey}>{item.label ?? item.actionKey}</Item>
             ))}
           </Menu>
         </MenuTrigger>
@@ -191,8 +184,7 @@ function SpectrumToolbar({ actions }: { actions: ActionView[] }) {
       UNSAFE_style={{
         paddingInline: 8,
         paddingBlock: 4,
-        borderTop:
-          "1px solid var(--spectrum-alias-border-color-mid, rgba(255,255,255,0.1))",
+        borderTop: "1px solid var(--spectrum-alias-border-color-mid, rgba(255,255,255,0.1))",
       }}
     >
       {actions.map((action) => (
@@ -225,9 +217,7 @@ function SpectrumDialogOverlay({
   return (
     <DialogContainer onDismiss={() => {}}>
       <Dialog>
-        <Heading>
-          {typeof dialog.header === "string" ? dialog.header : "Dialog"}
-        </Heading>
+        <Heading>{typeof dialog.header === "string" ? dialog.header : "Dialog"}</Heading>
         <Content>
           <DialogComponent model={dialog} />
         </Content>

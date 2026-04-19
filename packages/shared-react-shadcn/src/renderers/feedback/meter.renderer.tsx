@@ -11,8 +11,7 @@ const variantColors: Record<string, string> = {
 export function MeterRenderer({ model }: { model: MeterView }) {
   useUpdates(model.onUpdate);
 
-  const heightClass =
-    model.size === "S" ? "h-1" : model.size === "L" ? "h-3" : "h-2";
+  const heightClass = model.size === "S" ? "h-1" : model.size === "L" ? "h-3" : "h-2";
   const barColor = variantColors[model.variant] ?? "bg-primary";
 
   return (
@@ -20,14 +19,10 @@ export function MeterRenderer({ model }: { model: MeterView }) {
       {model.label && (
         <div className="flex justify-between mb-1 text-sm">
           <span className="text-muted-foreground">{model.label}</span>
-          <span className="text-muted-foreground">
-            {Math.round(model.percentage)}%
-          </span>
+          <span className="text-muted-foreground">{Math.round(model.percentage)}%</span>
         </div>
       )}
-      <div
-        className={`w-full rounded-full bg-secondary ${heightClass} overflow-hidden`}
-      >
+      <div className={`w-full rounded-full bg-secondary ${heightClass} overflow-hidden`}>
         <div
           className={`${heightClass} rounded-full ${barColor} transition-[width] duration-200`}
           style={{

@@ -1,17 +1,7 @@
 import React from "react";
-import {
-  type DockNode,
-  type DockSplit,
-  isPanel,
-  isSplit,
-  useDockLayout,
-} from "./dock-context.js";
+import { type DockNode, type DockSplit, isPanel, isSplit, useDockLayout } from "./dock-context.js";
 import { DockPanelComponent } from "./dock-panel.js";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "./resizable.js";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./resizable.js";
 
 function DockSplitRenderer({ split }: { split: DockSplit }) {
   const { updateSizes } = useDockLayout();

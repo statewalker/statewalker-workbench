@@ -1,12 +1,10 @@
 import { newRegistry } from "@statewalker/shared-registry";
-import { type ThemeMode, getThemeView } from "@statewalker/shared-views";
+import { getThemeView, type ThemeMode } from "@statewalker/shared-views";
 
 const STORAGE_KEY = "theme";
 
 function getSystemTheme(): "light" | "dark" {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 function resolveTheme(mode: ThemeMode): "light" | "dark" {

@@ -14,9 +14,7 @@ export function AccordionRenderer({ model }: { model: AccordionViewType }) {
             <button
               type="button"
               className={`flex w-full items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50 ${
-                item.disabled
-                  ? "opacity-50 cursor-not-allowed"
-                  : "cursor-pointer"
+                item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
               }`}
               onClick={() => model.toggle(item.key)}
               disabled={item.disabled}
@@ -24,9 +22,7 @@ export function AccordionRenderer({ model }: { model: AccordionViewType }) {
             >
               <span>{item.title}</span>
               <svg
-                className={`h-4 w-4 shrink-0 transition-transform ${
-                  expanded ? "rotate-180" : ""
-                }`}
+                className={`h-4 w-4 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`}
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"

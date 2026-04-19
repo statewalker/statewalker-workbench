@@ -57,9 +57,7 @@ describe("loadShellConfig", () => {
     };
 
     const config = await loadShellConfig({ roots: [], modules: {} });
-    expect(config.modules["@ext/custom"]).toBe(
-      "https://cdn.example.com/custom",
-    );
+    expect(config.modules["@ext/custom"]).toBe("https://cdn.example.com/custom");
   });
 
   it("merges fetched config over defaults", async () => {

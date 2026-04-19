@@ -5,11 +5,7 @@ import type { SkeletonView } from "@statewalker/shared-views";
 export function SkeletonRenderer({ model }: { model: SkeletonView }) {
   useUpdates(model.onUpdate);
   const borderRadius =
-    model.variant === "circular"
-      ? "50%"
-      : model.variant === "text"
-        ? "4px"
-        : "8px";
+    model.variant === "circular" ? "50%" : model.variant === "text" ? "4px" : "8px";
   return (
     <View
       UNSAFE_style={{

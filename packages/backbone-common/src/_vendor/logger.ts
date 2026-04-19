@@ -49,11 +49,7 @@ function newConsoleLogger(
       const prefix = `[${level.toUpperCase()}]`.padStart(7, " ");
       return (...args: unknown[]) => {
         if (Levels[logLevel] > Levels[level]) return;
-        console[method](
-          `[${String(rowCounter++).padStart(7, "0")}]${prefix}`,
-          ...args,
-          meta,
-        );
+        console[method](`[${String(rowCounter++).padStart(7, "0")}]${prefix}`, ...args, meta);
       };
     };
     const logger: Logger = {
@@ -94,9 +90,6 @@ export function getLogger(context: Record<string, unknown>): Logger {
   return fallback;
 }
 
-export function setLogger(
-  context: Record<string, unknown>,
-  logger: Logger,
-): void {
+export function setLogger(context: Record<string, unknown>, logger: Logger): void {
   context[LOGGER_KEY] = logger;
 }

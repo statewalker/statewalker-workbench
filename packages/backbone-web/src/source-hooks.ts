@@ -41,10 +41,7 @@ export async function sourceHook(
   return defaultSourceHook(url, fetchOpts, parent);
 }
 
-async function handleCss(
-  url: string,
-  fetchOpts: RequestInit,
-): Promise<SourceResult> {
+async function handleCss(url: string, fetchOpts: RequestInit): Promise<SourceResult> {
   const res = await fetch(url, fetchOpts);
   const css = await res.text();
   const escaped = JSON.stringify(css);
@@ -77,10 +74,7 @@ async function handleTypeScript(
   return { type: "js", source: code };
 }
 
-async function handleJson(
-  url: string,
-  fetchOpts: RequestInit,
-): Promise<SourceResult> {
+async function handleJson(url: string, fetchOpts: RequestInit): Promise<SourceResult> {
   const res = await fetch(url, fetchOpts);
   const json = await res.text();
   return { type: "js", source: `export default ${json};` };

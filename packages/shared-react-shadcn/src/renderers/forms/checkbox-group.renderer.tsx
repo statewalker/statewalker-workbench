@@ -18,9 +18,7 @@ export function CheckboxGroupRenderer({ model }: { model: CheckboxGroupView }) {
           <RenderModel key={child.key} model={child} />
         ))}
       </div>
-      {model.errorMessage && (
-        <p className="text-xs text-destructive">{model.errorMessage}</p>
-      )}
+      {model.errorMessage && <p className="text-xs text-destructive">{model.errorMessage}</p>}
     </fieldset>
   );
 }

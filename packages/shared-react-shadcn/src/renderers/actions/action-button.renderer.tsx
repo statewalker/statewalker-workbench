@@ -10,13 +10,7 @@ const variantMap: Record<ActionViewVariant, ButtonProps["variant"]> = {
   info: "ghost",
 };
 
-export function ActionButton({
-  action,
-  tooltip,
-}: {
-  action: ActionView;
-  tooltip?: string;
-}) {
+export function ActionButton({ action, tooltip }: { action: ActionView; tooltip?: string }) {
   useUpdates(action.onUpdate);
 
   return (

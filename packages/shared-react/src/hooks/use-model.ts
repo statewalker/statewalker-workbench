@@ -20,9 +20,7 @@ import { useEffect, useState } from "react";
  * useUpdates(model.onUpdate, model.action.onUpdate);
  * ```
  */
-export function useUpdates(
-  ...callbacks: ((notify: () => void) => () => void)[]
-): void {
+export function useUpdates(...callbacks: ((notify: () => void) => () => void)[]): void {
   const [, redraw] = useState({});
   useEffect(() => {
     const notify = () => redraw({});

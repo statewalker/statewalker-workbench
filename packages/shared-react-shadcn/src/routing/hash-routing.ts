@@ -46,10 +46,6 @@ function writeHash(value: string): void {
   if (value) {
     window.history.replaceState(null, "", `#${encodeURIComponent(value)}`);
   } else {
-    window.history.replaceState(
-      null,
-      "",
-      window.location.pathname + window.location.search,
-    );
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
   }
 }

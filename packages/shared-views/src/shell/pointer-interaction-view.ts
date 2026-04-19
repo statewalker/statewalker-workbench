@@ -26,8 +26,7 @@ export class PointerInteractionView extends BaseClass {
   }
 }
 
-export const [getPointerInteractionView] =
-  newAdapter<PointerInteractionView>(
-    "model:pointer-interaction",
-    () => new PointerInteractionView(),
-  );
+export const [getPointerInteractionView] = newAdapter<PointerInteractionView>(
+  "model:pointer-interaction",
+  () => new PointerInteractionView(),
+);

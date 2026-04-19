@@ -5,10 +5,7 @@ import type { FileTriggerView } from "@statewalker/shared-views";
 export function FileTriggerRenderer({ model }: { model: FileTriggerView }) {
   useUpdates(model.onUpdate);
   return (
-    <FileTrigger
-      acceptedFileTypes={model.acceptedFileTypes}
-      allowsMultiple={model.allowsMultiple}
-    >
+    <FileTrigger acceptedFileTypes={model.acceptedFileTypes} allowsMultiple={model.allowsMultiple}>
       <Button variant="primary">{model.action.label}</Button>
     </FileTrigger>
   );

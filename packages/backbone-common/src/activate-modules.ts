@@ -55,8 +55,5 @@ export async function activateModules<T>(
 }
 
 function defaultOnError(entry: unknown, error: unknown): void {
-  console.error(
-    `[backbone] Module activation failed for ${String(entry)}:`,
-    error,
-  );
+  console.error(`[backbone] Module activation failed for ${String(entry)}:`, error);
 }

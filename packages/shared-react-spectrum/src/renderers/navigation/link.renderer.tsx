@@ -5,11 +5,7 @@ import type { LinkView } from "@statewalker/shared-views";
 export function LinkRenderer({ model }: { model: LinkView }) {
   useUpdates(model.onUpdate);
   return (
-    <Link
-      variant={model.variant}
-      isQuiet={model.isQuiet}
-      onPress={() => model.action.submit()}
-    >
+    <Link variant={model.variant} isQuiet={model.isQuiet} onPress={() => model.action.submit()}>
       {model.action.label}
     </Link>
   );

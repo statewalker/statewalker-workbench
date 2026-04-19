@@ -10,9 +10,7 @@ export function GridRenderer({ model }: { model: GridViewType }) {
       className="grid *:min-w-0"
       style={{
         gridTemplateColumns:
-          typeof model.columns === "string"
-            ? model.columns
-            : model.columns?.join(" "),
+          typeof model.columns === "string" ? model.columns : model.columns?.join(" "),
         gap: model.gap,
       }}
     >

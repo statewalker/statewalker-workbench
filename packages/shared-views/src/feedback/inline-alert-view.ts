@@ -1,10 +1,6 @@
 import { ViewModel } from "../core/index.js";
 
-export type InlineAlertVariant =
-  | "informative"
-  | "positive"
-  | "notice"
-  | "negative";
+export type InlineAlertVariant = "informative" | "positive" | "notice" | "negative";
 
 export class InlineAlertView extends ViewModel {
   #variant: InlineAlertVariant = "informative";

@@ -15,8 +15,7 @@ export class KeyboardInteractionView extends BaseClass {
   }
 }
 
-export const [getKeyboardInteractionView] =
-  newAdapter<KeyboardInteractionView>(
-    "model:keyboard-interaction",
-    () => new KeyboardInteractionView(),
-  );
+export const [getKeyboardInteractionView] = newAdapter<KeyboardInteractionView>(
+  "model:keyboard-interaction",
+  () => new KeyboardInteractionView(),
+);

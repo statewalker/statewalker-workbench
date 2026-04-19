@@ -3,17 +3,11 @@ import { parseColor } from "@react-stately/color";
 import { useUpdates } from "@statewalker/shared-react/hooks";
 import type { ColorSwatchPickerView } from "@statewalker/shared-views";
 
-export function ColorSwatchPickerRenderer({
-  model,
-}: {
-  model: ColorSwatchPickerView;
-}) {
+export function ColorSwatchPickerRenderer({ model }: { model: ColorSwatchPickerView }) {
   useUpdates(model.onUpdate);
   let selectedValue: ReturnType<typeof parseColor> | undefined;
   try {
-    selectedValue = model.selectedColor
-      ? parseColor(model.selectedColor)
-      : undefined;
+    selectedValue = model.selectedColor ? parseColor(model.selectedColor) : undefined;
   } catch {
     selectedValue = undefined;
   }

@@ -13,22 +13,17 @@ export type ShellConfig = AppManifest;
  *    Legacy id `shell-config` is also accepted.
  * 4. Provided defaults
  */
-export async function loadAppManifest(
-  defaults?: Partial<AppManifest>,
-): Promise<AppManifest> {
+export async function loadAppManifest(defaults?: Partial<AppManifest>): Promise<AppManifest> {
   let manifest: AppManifest = {
     roots: defaults?.roots ?? [],
     ...(defaults?.modules ? { modules: { ...defaults.modules } } : {}),
   };
 
   const embeddedEl =
-    document.getElementById("app-manifest") ??
-    document.getElementById("shell-config");
+    document.getElementById("app-manifest") ?? document.getElementById("shell-config");
   if (embeddedEl?.textContent) {
     try {
-      const embedded = JSON.parse(
-        embeddedEl.textContent,
-      ) as Partial<AppManifest>;
+      const embedded = JSON.parse(embeddedEl.textContent) as Partial<AppManifest>;
       manifest = mergeManifest(manifest, embedded);
     } catch {
       console.warn("[backbone-web] Failed to parse embedded app-manifest");
@@ -71,14 +66,9 @@ export async function loadAppManifest(
  */
 export const loadShellConfig = loadAppManifest;
 
-function mergeManifest(
-  base: AppManifest,
-  override: Partial<AppManifest>,
-): AppManifest {
+function mergeManifest(base: AppManifest, override: Partial<AppManifest>): AppManifest {
   const modules =
-    base.modules || override.modules
-      ? { ...base.modules, ...override.modules }
-      : undefined;
+    base.modules || override.modules ? { ...base.modules, ...override.modules } : undefined;
   return {
     roots: override.roots ?? base.roots,
     ...(modules ? { modules } : {}),

@@ -1,6 +1,37 @@
 /* empty css               */
-import { FlexView as i, GridView as a, CardView as o, EmptyView as d, TabsView as s, AccordionView as t, BreadcrumbView as w, PaginationView as V, SheetView as R, ContextMenuView as c, DialogView as m, TableView as l, TreeView as p, JsonView as u } from "@statewalker/shared-views";
-import { F as b, G as T, C, E as f, d as g, A as x, B as A, P as B, S as D, b as E, D as F, T as G, e as J, J as P } from "./sheet.renderer-GaVVNgCX.js";
+import {
+  GridView as a,
+  ContextMenuView as c,
+  EmptyView as d,
+  FlexView as i,
+  TableView as l,
+  DialogView as m,
+  CardView as o,
+  TreeView as p,
+  SheetView as R,
+  TabsView as s,
+  AccordionView as t,
+  JsonView as u,
+  PaginationView as V,
+  BreadcrumbView as w,
+} from "@statewalker/shared-views";
+import {
+  B as A,
+  P as B,
+  F as b,
+  C,
+  S as D,
+  b as E,
+  D as F,
+  E as f,
+  T as G,
+  d as g,
+  e as J,
+  J as P,
+  G as T,
+  A as x,
+} from "./sheet.renderer-GaVVNgCX.js";
+
 function j(e) {
   const r = [
     // Layout
@@ -21,13 +52,10 @@ function j(e) {
     // Data Display
     e.register(l, G),
     e.register(p, J),
-    e.register(u, P)
+    e.register(u, P),
   ];
   return () => {
-    for (const n of r)
-      n();
+    for (const n of r) n();
   };
 }
-export {
-  j as initCommonViews
-};
+export { j as initCommonViews };

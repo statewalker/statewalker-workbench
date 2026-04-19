@@ -1,11 +1,4 @@
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  Layers,
-  X,
-} from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Layers, X } from "lucide-react";
 import { cn } from "../lib/utils.js";
 import type { DropPosition } from "./dock-context.js";
 
@@ -122,9 +115,7 @@ export function DropConfirmationGrid({
         </div>
 
         <div className="mt-2 text-center text-xs font-medium text-muted-foreground">
-          {selectedPosition === "center"
-            ? "Add as Tab"
-            : `Split ${selectedPosition}`}
+          {selectedPosition === "center" ? "Add as Tab" : `Split ${selectedPosition}`}
         </div>
       </div>
     </div>

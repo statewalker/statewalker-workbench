@@ -6,10 +6,7 @@ export function ListBoxRenderer({ model }: { model: ListBoxView }) {
   useUpdates(model.onUpdate);
 
   return (
-    <div
-      className="overflow-auto rounded-md border border-border p-1"
-      role="listbox"
-    >
+    <div className="overflow-auto rounded-md border border-border p-1" role="listbox">
       {model.items.map((item) => {
         const isSelected = model.selectedKeys.has(item.key);
         const isDisabled = model.disabledKeys.has(item.key);
@@ -43,9 +40,7 @@ export function ListBoxRenderer({ model }: { model: ListBoxView }) {
             <div className="flex flex-col min-w-0">
               <span>{item.label}</span>
               {item.description && (
-                <span className="text-xs text-muted-foreground">
-                  {item.description}
-                </span>
+                <span className="text-xs text-muted-foreground">{item.description}</span>
               )}
             </div>
           </div>

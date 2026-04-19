@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  ModuleResolver,
-  type ModuleResolverOptions,
-} from "../src/resolve-modules.js";
+import { ModuleResolver, type ModuleResolverOptions } from "../src/resolve-modules.js";
 
 /**
  * Build a mock resolver from a virtual package registry.
@@ -45,9 +42,7 @@ function createMockResolver(
       return `${prefix}${name}/package.json`;
     },
 
-    async loadPackageJson(
-      packageJsonUrl: string,
-    ): Promise<Record<string, unknown>> {
+    async loadPackageJson(packageJsonUrl: string): Promise<Record<string, unknown>> {
       const name = extractPackageName(packageJsonUrl);
       const pkg = packages[name];
       if (!pkg) throw new Error(`Package not found: ${name}`);
@@ -78,9 +73,7 @@ describe("ModuleResolver", () => {
     expect(result[0].name).toBe("shared");
     expect(result[0].url).toBe("file:///packages/shared/src/index.ts");
     expect(result[0].version).toBe("1.0.0");
-    expect(result[0].packageJsonUrl).toBe(
-      "file:///packages/shared/package.json",
-    );
+    expect(result[0].packageJsonUrl).toBe("file:///packages/shared/package.json");
   });
 
   it("orders dependencies before dependents", async () => {
@@ -117,10 +110,7 @@ describe("ModuleResolver", () => {
       shared: {},
       logger: { dependencies: { shared: "workspace:*" } },
     });
-    const result = await resolver.resolveModules("file:///app/", [
-      "shared",
-      "logger",
-    ]);
+    const result = await resolver.resolveModules("file:///app/", ["shared", "logger"]);
     const names = result.map((m) => m.name);
 
     expect(names.filter((n) => n === "shared")).toHaveLength(1);
@@ -207,10 +197,7 @@ describe("ModuleResolver", () => {
     // First call: logger resolved from the app's base URL
     expect(resolveCalls[0]).toEqual(["file:///app/package.json", "logger"]);
     // Second call: shared resolved from logger's package.json URL
-    expect(resolveCalls[1]).toEqual([
-      "file:///packages/logger/package.json",
-      "shared",
-    ]);
+    expect(resolveCalls[1]).toEqual(["file:///packages/logger/package.json", "shared"]);
   });
 
   it("preserves input order for independent modules", async () => {
@@ -219,11 +206,7 @@ describe("ModuleResolver", () => {
       http: {},
       sandbox: {},
     });
-    const result = await resolver.resolveModules("file:///app/", [
-      "logger",
-      "http",
-      "sandbox",
-    ]);
+    const result = await resolver.resolveModules("file:///app/", ["logger", "http", "sandbox"]);
     const names = result.map((m) => m.name);
     expect(names).toEqual(["logger", "http", "sandbox"]);
   });
@@ -236,11 +219,7 @@ describe("ModuleResolver", () => {
       sandbox: {},
     });
     // User lists sandbox before http, but http depends on logger depends on shared
-    const result = await resolver.resolveModules("file:///app/", [
-      "logger",
-      "http",
-      "sandbox",
-    ]);
+    const result = await resolver.resolveModules("file:///app/", ["logger", "http", "sandbox"]);
     const names = result.map((m) => m.name);
 
     // shared must come before logger (dependency), logger before http (dependency)

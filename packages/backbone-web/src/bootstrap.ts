@@ -25,12 +25,9 @@ export async function bootstrap(
   manifest: AppManifest,
   ctx: Record<string, unknown> = {},
 ): Promise<() => Promise<void>> {
-  const hasModules =
-    manifest.modules && Object.keys(manifest.modules).length > 0;
+  const hasModules = manifest.modules && Object.keys(manifest.modules).length > 0;
 
-  return hasModules
-    ? bootstrapDynamic(manifest, ctx)
-    : bootstrapBundler(manifest, ctx);
+  return hasModules ? bootstrapDynamic(manifest, ctx) : bootstrapBundler(manifest, ctx);
 }
 
 async function bootstrapBundler(
@@ -82,9 +79,7 @@ async function bootstrapDynamic(
   }
 
   importShim.addImportMap(importMap);
-  console.log(
-    `[backbone-web] Import map: ${Object.keys(importMap.imports).length} entries`,
-  );
+  console.log(`[backbone-web] Import map: ${Object.keys(importMap.imports).length} entries`);
 
   return activateModules(
     ordered,
@@ -100,9 +95,7 @@ async function bootstrapDynamic(
  * Typically set via <script type="esms-options"> in HTML, but this helper
  * can be used to set options programmatically.
  */
-export function configureEsModuleShims(options?: {
-  hotReload?: boolean;
-}): void {
+export function configureEsModuleShims(options?: { hotReload?: boolean }): void {
   (window as unknown as Record<string, unknown>).esmsInitOptions = {
     shimMode: true,
     mapOverrides: true,

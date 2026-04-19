@@ -27,8 +27,7 @@ function InputGroupAddon({
   align = "inline-start",
   ...props
 }: React.ComponentProps<"div"> & { align?: "inline-start" | "inline-end" }) {
-  const alignClasses =
-    align === "inline-start" ? "order-first pl-3" : "order-last pr-3";
+  const alignClasses = align === "inline-start" ? "order-first pl-3" : "order-last pr-3";
   return (
     <div
       role="group"
@@ -48,10 +47,7 @@ function InputGroupAddon({
   );
 }
 
-function InputGroupInput({
-  className,
-  ...props
-}: React.ComponentProps<"input">) {
+function InputGroupInput({ className, ...props }: React.ComponentProps<"input">) {
   return (
     <Input
       data-slot="input-group-control"

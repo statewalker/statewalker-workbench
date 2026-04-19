@@ -33,10 +33,7 @@ export class ModuleResolver {
     this._loadPackageJson = options.loadPackageJson;
   }
 
-  async resolveModules(
-    baseUrl: string,
-    moduleIds: string[],
-  ): Promise<ResolvedModule[]> {
+  async resolveModules(baseUrl: string, moduleIds: string[]): Promise<ResolvedModule[]> {
     if (moduleIds.length === 0) return [];
 
     const graph = await this._buildGraph(baseUrl, moduleIds);
@@ -78,10 +75,7 @@ export class ModuleResolver {
     }));
   }
 
-  private async _buildGraph(
-    baseUrl: string,
-    roots: string[],
-  ): Promise<Map<string, ModuleNode>> {
+  private async _buildGraph(baseUrl: string, roots: string[]): Promise<Map<string, ModuleNode>> {
     const visited = new Map<string, ModuleNode>();
     // Queue entries: [moduleId, baseUrlToResolveFrom]
     const pending: Array<[string, string]> = roots.map((r) => [r, baseUrl]);
@@ -110,9 +104,7 @@ export class ModuleResolver {
       }
 
       const deps: string[] = [];
-      const dependencies = pkg.dependencies as
-        | Record<string, string>
-        | undefined;
+      const dependencies = pkg.dependencies as Record<string, string> | undefined;
       if (dependencies) {
         for (const [depName, version] of Object.entries(dependencies)) {
           if (version.startsWith("workspace:")) {

@@ -44,9 +44,7 @@ interface DockContextType {
   pendingDrop: PendingDrop | null;
   startDrag: (tabId: string, sourcePanelId: string) => void;
   endDrag: () => void;
-  setDropTarget: (
-    target: { panelId: string; position: DropPosition } | null,
-  ) => void;
+  setDropTarget: (target: { panelId: string; position: DropPosition } | null) => void;
   requestDrop: (
     targetPanelId: string,
     suggestedPosition: DropPosition,
@@ -126,13 +124,7 @@ export function DockProvider({ children, panelManager }: DockProviderProps) {
         if (!drag) return null;
         // Ask the model if this drop is valid.  All tree inspection
         // happens in PanelManagerView, not here.
-        if (
-          !panelManager.canMoveTab(
-            drag.sourcePanelId,
-            targetPanelId,
-            suggestedPosition,
-          )
-        ) {
+        if (!panelManager.canMoveTab(drag.sourcePanelId, targetPanelId, suggestedPosition)) {
           return null;
         }
         setPendingDrop({
@@ -149,12 +141,7 @@ export function DockProvider({ children, panelManager }: DockProviderProps) {
   );
 
   const moveTab = useCallback(
-    (
-      tabId: string,
-      sourcePanelId: string,
-      targetPanelId: string,
-      position: DropPosition,
-    ) => {
+    (tabId: string, sourcePanelId: string, targetPanelId: string, position: DropPosition) => {
       panelManager.moveTab(tabId, sourcePanelId, targetPanelId, position);
     },
     [panelManager],
@@ -164,12 +151,7 @@ export function DockProvider({ children, panelManager }: DockProviderProps) {
     (position: DropPosition) => {
       setPendingDrop((pd) => {
         if (pd) {
-          panelManager.moveTab(
-            pd.tabId,
-            pd.sourcePanelId,
-            pd.targetPanelId,
-            position,
-          );
+          panelManager.moveTab(pd.tabId, pd.sourcePanelId, pd.targetPanelId, position);
         }
         return null;
       });

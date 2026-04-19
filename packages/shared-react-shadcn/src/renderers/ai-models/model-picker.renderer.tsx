@@ -56,18 +56,11 @@ export function ModelPickerRenderer({ model }: { model: ModelPickerView }) {
           }`}
         />
         <span className="max-w-[180px] truncate">
-          {model.isActivating
-            ? model.activationMessage
-            : model.currentLabel || "Pick a model"}
+          {model.isActivating ? model.activationMessage : model.currentLabel || "Pick a model"}
         </span>
         <svg className="h-3 w-3 text-muted-foreground" viewBox="0 0 12 12">
           <title>Toggle model picker</title>
-          <path
-            d="M3 5l3 3 3-3"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
+          <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" />
         </svg>
       </button>
 
@@ -90,9 +83,7 @@ export function ModelPickerRenderer({ model }: { model: ModelPickerView }) {
             >
               <span className="w-2 h-2 rounded-full shrink-0 bg-green-500" />
               <span className="flex-1 truncate">{item.label}</span>
-              <span className="text-xs text-muted-foreground shrink-0">
-                {item.provider}
-              </span>
+              <span className="text-xs text-muted-foreground shrink-0">{item.provider}</span>
             </button>
           ))}
 

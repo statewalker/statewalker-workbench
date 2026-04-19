@@ -6,12 +6,7 @@ import { RenderModel, RenderSlot } from "../_shared/render-slot.js";
 export function CardRenderer({ model }: { model: CardView }) {
   useUpdates(model.onUpdate);
   return (
-    <View
-      borderWidth="thin"
-      borderColor="dark"
-      borderRadius="medium"
-      padding="size-200"
-    >
+    <View borderWidth="thin" borderColor="dark" borderRadius="medium" padding="size-200">
       {model.preview && (
         <View marginBottom="size-200">
           <RenderModel model={model.preview} />

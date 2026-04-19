@@ -11,13 +11,7 @@ export function MenuRenderer({ model }: { model: MenuView }) {
     >
       {model.children.map((item) => {
         if (item.isSeparator) {
-          return (
-            <div
-              key={item.key}
-              className="-mx-1 my-1 h-px bg-border"
-              role="separator"
-            />
-          );
+          return <div key={item.key} className="-mx-1 my-1 h-px bg-border" role="separator" />;
         }
         const isSelected = model.selectedKeys.has(item.key);
         const isDisabled = model.disabledKeys.has(item.key);
@@ -33,13 +27,9 @@ export function MenuRenderer({ model }: { model: MenuView }) {
               disabled:pointer-events-none disabled:opacity-50
               ${isSelected ? "bg-accent" : ""}`}
           >
-            <span className="flex-1">
-              {item.action.label ?? item.action.actionKey}
-            </span>
+            <span className="flex-1">{item.action.label ?? item.action.actionKey}</span>
             {item.shortcut && (
-              <span className="ml-auto text-xs text-muted-foreground">
-                {item.shortcut}
-              </span>
+              <span className="ml-auto text-xs text-muted-foreground">{item.shortcut}</span>
             )}
           </button>
         );

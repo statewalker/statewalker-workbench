@@ -52,7 +52,4 @@ export class ThemeView extends BaseClass {
   }
 }
 
-export const [getThemeView] = newAdapter<ThemeView>(
-  "model:theme",
-  () => new ThemeView(),
-);
+export const [getThemeView] = newAdapter<ThemeView>("model:theme", () => new ThemeView());

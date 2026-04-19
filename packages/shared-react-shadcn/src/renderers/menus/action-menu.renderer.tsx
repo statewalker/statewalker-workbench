@@ -22,13 +22,7 @@ export function ActionMenuRenderer({ model }: { model: ActionMenuView }) {
         <div className="absolute left-0 top-full z-50 mt-1 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
           {model.items.map((item) => {
             if (item.isSeparator) {
-              return (
-                <div
-                  key={item.key}
-                  className="-mx-1 my-1 h-px bg-border"
-                  role="separator"
-                />
-              );
+              return <div key={item.key} className="-mx-1 my-1 h-px bg-border" role="separator" />;
             }
             return (
               <button
@@ -44,13 +38,9 @@ export function ActionMenuRenderer({ model }: { model: ActionMenuView }) {
                   hover:bg-accent hover:text-accent-foreground
                   disabled:pointer-events-none disabled:opacity-50"
               >
-                <span className="flex-1">
-                  {item.action.label ?? item.action.actionKey}
-                </span>
+                <span className="flex-1">{item.action.label ?? item.action.actionKey}</span>
                 {item.shortcut && (
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {item.shortcut}
-                  </span>
+                  <span className="ml-auto text-xs text-muted-foreground">{item.shortcut}</span>
                 )}
               </button>
             );

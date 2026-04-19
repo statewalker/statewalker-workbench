@@ -5,10 +5,7 @@ describe("activateModules", () => {
   it("activates each root in order and calls default(ctx)", async () => {
     const ctx = { seen: [] as string[] };
     const roots = ["a", "b", "c"];
-    const modules: Record<
-      string,
-      { default: (ctx: Record<string, unknown>) => void }
-    > = {
+    const modules: Record<string, { default: (ctx: Record<string, unknown>) => void }> = {
       a: {
         default: (c) => {
           (c.seen as string[]).push("a");
@@ -36,11 +33,7 @@ describe("activateModules", () => {
       b: { default: () => () => order.push("teardown-b") },
       c: { default: () => () => order.push("teardown-c") },
     };
-    const cleanup = await activateModules(
-      ["a", "b", "c"],
-      async (n) => modules[n],
-      {},
-    );
+    const cleanup = await activateModules(["a", "b", "c"], async (n) => modules[n], {});
     await cleanup();
     expect(order).toEqual(["teardown-c", "teardown-b", "teardown-a"]);
   });
@@ -80,12 +73,7 @@ describe("activateModules", () => {
         },
       },
     };
-    await activateModules(
-      ["a", "b", "c"],
-      async (n) => modules[n],
-      {},
-      onError,
-    );
+    await activateModules(["a", "b", "c"], async (n) => modules[n], {}, onError);
     expect(seen).toEqual(["a", "c"]);
     expect(onError).toHaveBeenCalledOnce();
     expect(onError.mock.calls[0]?.[0]).toBe("b");
@@ -116,11 +104,7 @@ describe("activateModules", () => {
       a: { default: 42 },
       b: { other: () => {} },
     };
-    const cleanup = await activateModules(
-      ["a", "b"],
-      async (n) => modules[n],
-      {},
-    );
+    const cleanup = await activateModules(["a", "b"], async (n) => modules[n], {});
     await cleanup();
   });
 });

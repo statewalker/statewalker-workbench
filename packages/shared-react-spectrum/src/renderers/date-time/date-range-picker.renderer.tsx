@@ -3,15 +3,9 @@ import { parseDate } from "@internationalized/date";
 import { useUpdates } from "@statewalker/shared-react/hooks";
 import type { DateRangePickerView } from "@statewalker/shared-views";
 
-export function DateRangePickerRenderer({
-  model,
-}: {
-  model: DateRangePickerView;
-}) {
+export function DateRangePickerRenderer({ model }: { model: DateRangePickerView }) {
   useUpdates(model.onUpdate);
-  let value:
-    | { start: ReturnType<typeof parseDate>; end: ReturnType<typeof parseDate> }
-    | undefined;
+  let value: { start: ReturnType<typeof parseDate>; end: ReturnType<typeof parseDate> } | undefined;
   try {
     if (model.startValue && model.endValue) {
       value = {

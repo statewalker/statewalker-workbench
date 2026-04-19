@@ -34,10 +34,7 @@ function findPackageJsonUp(dir: string): string {
  * Fallback for packages whose root export is not defined (ERR_PACKAGE_PATH_NOT_EXPORTED).
  * Walks node_modules to locate the package directory and returns its package.json path.
  */
-function resolvePackageJsonFallback(
-  packageName: string,
-  fromDir: string,
-): string {
+function resolvePackageJsonFallback(packageName: string, fromDir: string): string {
   let dir = resolve(fromDir);
   const root = resolve("/");
   while (dir !== root) {
@@ -60,8 +57,7 @@ function createNodeResolver(): ModuleResolver {
       } catch (error: unknown) {
         if (
           error instanceof Error &&
-          (error as NodeJS.ErrnoException).code ===
-            "ERR_PACKAGE_PATH_NOT_EXPORTED"
+          (error as NodeJS.ErrnoException).code === "ERR_PACKAGE_PATH_NOT_EXPORTED"
         ) {
           const baseDir = dirname(toFilePath(baseUrl));
           const pkgJsonPath = resolvePackageJsonFallback(moduleId, baseDir);
@@ -77,9 +73,7 @@ function createNodeResolver(): ModuleResolver {
       return pathToFileURL(packageJsonPath).href;
     },
 
-    async loadPackageJson(
-      packageJsonUrl: string,
-    ): Promise<Record<string, unknown>> {
+    async loadPackageJson(packageJsonUrl: string): Promise<Record<string, unknown>> {
       const raw = readFileSync(toFilePath(packageJsonUrl), "utf-8");
       return JSON.parse(raw) as Record<string, unknown>;
     },
@@ -119,10 +113,7 @@ export async function bootstrap(
     ctx,
   );
 
-  logger.info(
-    `[backbone] Started with ${ordered.length} module(s)`,
-    formatModulesMap(modulesMap),
-  );
+  logger.info(`[backbone] Started with ${ordered.length} module(s)`, formatModulesMap(modulesMap));
 
   return async () => {
     await moduleCleanup();

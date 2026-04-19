@@ -53,12 +53,8 @@ export function topoSort<T extends GraphNode>(
 
   if (result.length !== graph.size) {
     // Find cycle for error message
-    const remaining = [...graph.keys()].filter(
-      (n) => !result.some((r) => r.name === n),
-    );
-    throw new Error(
-      `Circular dependency detected among: ${remaining.join(" -> ")}`,
-    );
+    const remaining = [...graph.keys()].filter((n) => !result.some((r) => r.name === n));
+    throw new Error(`Circular dependency detected among: ${remaining.join(" -> ")}`);
   }
 
   return result;

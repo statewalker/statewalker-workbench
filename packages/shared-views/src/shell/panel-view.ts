@@ -1,8 +1,5 @@
 import { newAdapter } from "@statewalker/shared-adapters";
-import {
-  createModelPoint,
-  UIModelRegistry,
-} from "../core/ui-model-registry.js";
+import { createModelPoint, UIModelRegistry } from "../core/ui-model-registry.js";
 import { ViewModel } from "../core/view-model.js";
 
 export class DockPanelView extends ViewModel {
@@ -37,5 +34,4 @@ const [getPanelRegistry] = newAdapter<UIModelRegistry<DockPanelView>>(
   () => new UIModelRegistry<DockPanelView>(),
 );
 
-export const [publishPanel, listenPanel] =
-  createModelPoint<DockPanelView>(getPanelRegistry);
+export const [publishPanel, listenPanel] = createModelPoint<DockPanelView>(getPanelRegistry);

@@ -5,13 +5,8 @@ import type { MenuTriggerView } from "@statewalker/shared-views";
 export function MenuTriggerRenderer({ model }: { model: MenuTriggerView }) {
   useUpdates(model.onUpdate);
   return (
-    <MenuTrigger
-      isOpen={model.isOpen}
-      onOpenChange={(open) => model.setOpen(open)}
-    >
-      <ActionButton onPress={() => model.toggle()}>
-        {model.trigger.label}
-      </ActionButton>
+    <MenuTrigger isOpen={model.isOpen} onOpenChange={(open) => model.setOpen(open)}>
+      <ActionButton onPress={() => model.toggle()}>{model.trigger.label}</ActionButton>
       <Menu
         selectionMode={model.menu.selectionMode}
         selectedKeys={model.menu.selectedKeys}

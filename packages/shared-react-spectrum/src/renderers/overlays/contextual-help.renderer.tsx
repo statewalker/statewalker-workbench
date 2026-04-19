@@ -3,11 +3,7 @@ import { useUpdates } from "@statewalker/shared-react/hooks";
 import type { ContextualHelpView } from "@statewalker/shared-views";
 import { RenderSlot } from "../_shared/render-slot.js";
 
-export function ContextualHelpRenderer({
-  model,
-}: {
-  model: ContextualHelpView;
-}) {
+export function ContextualHelpRenderer({ model }: { model: ContextualHelpView }) {
   useUpdates(model.onUpdate);
   return (
     <ContextualHelp variant={model.variant}>

@@ -6,13 +6,9 @@ import { RenderModel } from "../_shared/render-slot.js";
 export function ScrollAreaRenderer({ model }: { model: ScrollAreaView }) {
   useUpdates(model.onUpdate);
   const overflowX =
-    model.orientation === "horizontal" || model.orientation === "both"
-      ? "auto"
-      : "hidden";
+    model.orientation === "horizontal" || model.orientation === "both" ? "auto" : "hidden";
   const overflowY =
-    model.orientation === "vertical" || model.orientation === "both"
-      ? "auto"
-      : "hidden";
+    model.orientation === "vertical" || model.orientation === "both" ? "auto" : "hidden";
   return (
     <View
       UNSAFE_style={{

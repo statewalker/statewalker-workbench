@@ -1,11 +1,4 @@
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import type { DockNode, DropPosition } from "../dock/index.js";
 import {
   addTabToPanel,
@@ -34,9 +27,7 @@ export interface DockContextType {
   pendingDrop: PendingDrop | null;
   startDrag: (tabId: string, sourcePanelId: string) => void;
   endDrag: () => void;
-  setDropTarget: (
-    target: { panelId: string; position: DropPosition } | null,
-  ) => void;
+  setDropTarget: (target: { panelId: string; position: DropPosition } | null) => void;
   /** Controller method: validates the drop and shows confirmation or cancels. */
   requestDrop: (
     targetPanelId: string,
@@ -133,12 +124,7 @@ export function DockProvider({ children, initialLayout }: DockProviderProps) {
   );
 
   const moveTab = useCallback(
-    (
-      tabId: string,
-      sourcePanelId: string,
-      targetPanelId: string,
-      position: DropPosition,
-    ) => {
+    (tabId: string, sourcePanelId: string, targetPanelId: string, position: DropPosition) => {
       setRoot((currentRoot) => {
         if (sourcePanelId === targetPanelId && position === "center") {
           return currentRoot;
@@ -152,11 +138,7 @@ export function DockProvider({ children, initialLayout }: DockProviderProps) {
           }
         }
 
-        const { node: nodeAfterRemoval, tab } = findAndRemoveTab(
-          currentRoot,
-          sourcePanelId,
-          tabId,
-        );
+        const { node: nodeAfterRemoval, tab } = findAndRemoveTab(currentRoot, sourcePanelId, tabId);
 
         if (!tab || !nodeAfterRemoval) {
           return currentRoot;
@@ -171,12 +153,7 @@ export function DockProvider({ children, initialLayout }: DockProviderProps) {
   const confirmDrop = useCallback(
     (position: DropPosition) => {
       if (pendingDrop) {
-        moveTab(
-          pendingDrop.tabId,
-          pendingDrop.sourcePanelId,
-          pendingDrop.targetPanelId,
-          position,
-        );
+        moveTab(pendingDrop.tabId, pendingDrop.sourcePanelId, pendingDrop.targetPanelId, position);
         setPendingDropState(null);
       }
     },

@@ -8,9 +8,7 @@
 import { newRegistry } from "@statewalker/shared-registry";
 import { getPanelManagerView, listenPanel } from "@statewalker/shared-views";
 
-export function createPanelBridgeController(
-  ctx: Record<string, unknown>,
-): () => void {
+export function createPanelBridgeController(ctx: Record<string, unknown>): () => void {
   const [register, cleanup] = newRegistry();
   const panelManager = getPanelManagerView(ctx);
   const knownKeys = new Set<string>();

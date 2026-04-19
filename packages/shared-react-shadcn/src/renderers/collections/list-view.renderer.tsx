@@ -43,15 +43,11 @@ export function ListViewRenderer({ model }: { model: ListView }) {
           >
             {item.icon && <span>{item.icon}</span>}
             <div className="flex flex-col min-w-0">
-              <span
-                className={model.overflowMode === "truncate" ? "truncate" : ""}
-              >
+              <span className={model.overflowMode === "truncate" ? "truncate" : ""}>
                 {item.label}
               </span>
               {item.description && (
-                <span className="text-xs text-muted-foreground">
-                  {item.description}
-                </span>
+                <span className="text-xs text-muted-foreground">{item.description}</span>
               )}
             </div>
           </li>

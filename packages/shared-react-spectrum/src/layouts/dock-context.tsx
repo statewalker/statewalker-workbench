@@ -4,6 +4,7 @@
  * Identical to shadcn dock-context but without any UI dependencies.
  */
 import {
+  panelsToTree as _panelsToTree,
   addTabToPanel,
   type DockNode,
   type DockPanel,
@@ -11,19 +12,11 @@ import {
   type DropPosition,
   findAndRemoveTab,
   findPanel,
-  panelsToTree as _panelsToTree,
   updatePanelActiveTab,
   updateSplitSizes,
 } from "@statewalker/shared-react/dock";
 import type { DockPanelView } from "@statewalker/shared-views";
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
 export type { DockNode, DockPanel, DockTab, DropPosition };
 export type { DockSplit } from "@statewalker/shared-react/dock";
@@ -101,8 +94,7 @@ export function DockProvider({
   useEffect(() => setRoot(initialLayout), [initialLayout]);
 
   const startDrag = useCallback(
-    (tabId: string, sourcePanelId: string) =>
-      setDragState({ tabId, sourcePanelId }),
+    (tabId: string, sourcePanelId: string) => setDragState({ tabId, sourcePanelId }),
     [],
   );
   const endDrag = useCallback(() => setDragState(null), []);
@@ -132,15 +124,9 @@ export function DockProvider({
   );
 
   const moveTab = useCallback(
-    (
-      tabId: string,
-      sourcePanelId: string,
-      targetPanelId: string,
-      position: DropPosition,
-    ) => {
+    (tabId: string, sourcePanelId: string, targetPanelId: string, position: DropPosition) => {
       setRoot((cur) => {
-        if (sourcePanelId === targetPanelId && position === "center")
-          return cur;
+        if (sourcePanelId === targetPanelId && position === "center") return cur;
         if (sourcePanelId === targetPanelId && position !== "center") {
           const panel = findPanel(cur, sourcePanelId);
           if (panel && panel.tabs.length <= 1) return cur;
@@ -156,12 +142,7 @@ export function DockProvider({
   const confirmDrop = useCallback(
     (position: DropPosition) => {
       if (pendingDrop) {
-        moveTab(
-          pendingDrop.tabId,
-          pendingDrop.sourcePanelId,
-          pendingDrop.targetPanelId,
-          position,
-        );
+        moveTab(pendingDrop.tabId, pendingDrop.sourcePanelId, pendingDrop.targetPanelId, position);
         setPendingDrop(null);
       }
     },

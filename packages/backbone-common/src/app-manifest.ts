@@ -19,7 +19,4 @@ export interface AppManifest {
  */
 export type FragmentInit = (
   ctx: Record<string, unknown>,
-) =>
-  | (() => void | Promise<void>)
-  | undefined
-  | Promise<(() => void | Promise<void>) | undefined>;
+) => (() => void | Promise<void>) | undefined | Promise<(() => void | Promise<void>) | undefined>;

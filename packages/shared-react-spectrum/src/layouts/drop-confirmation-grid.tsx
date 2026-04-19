@@ -54,9 +54,7 @@ export function DropConfirmationGrid({
           border: `1px solid ${isDark ? "#555" : "#ccc"}`,
           borderRadius: 12,
           padding: 12,
-          boxShadow: isDark
-            ? "0 8px 32px rgba(0,0,0,0.5)"
-            : "0 8px 32px rgba(0,0,0,0.15)",
+          boxShadow: isDark ? "0 8px 32px rgba(0,0,0,0.5)" : "0 8px 32px rgba(0,0,0,0.15)",
           position: "relative",
         }}
       >
@@ -116,12 +114,8 @@ export function DropConfirmationGrid({
                   border: isSelected
                     ? "2px solid var(--spectrum-global-color-blue-500, #1473e6)"
                     : "2px solid transparent",
-                  background: isSelected
-                    ? "#1473e6"
-                    : isDark ? "#333" : "#e8e8e8",
-                  color: isSelected
-                    ? "white"
-                    : isDark ? "#ccc" : "#444",
+                  background: isSelected ? "#1473e6" : isDark ? "#333" : "#e8e8e8",
+                  color: isSelected ? "white" : isDark ? "#ccc" : "#444",
                   cursor: "pointer",
                   fontSize: 16,
                   transition: "all 0.15s",
@@ -151,9 +145,7 @@ export function DropConfirmationGrid({
             color: isDark ? "#999" : "#666",
           }}
         >
-          {selectedPosition === "center"
-            ? "Add as Tab"
-            : `Split ${selectedPosition}`}
+          {selectedPosition === "center" ? "Add as Tab" : `Split ${selectedPosition}`}
         </div>
       </div>
     </div>

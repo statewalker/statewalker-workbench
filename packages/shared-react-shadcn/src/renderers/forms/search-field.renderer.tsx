@@ -6,9 +6,7 @@ export function SearchFieldRenderer({ model }: { model: SearchFieldView }) {
 
   return (
     <div className="flex flex-col gap-1.5">
-      {model.label && (
-        <label className="text-sm font-medium">{model.label}</label>
-      )}
+      {model.label && <label className="text-sm font-medium">{model.label}</label>}
       <div className="relative">
         <input
           type="search"

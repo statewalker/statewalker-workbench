@@ -6,9 +6,7 @@ export function TagGroupRenderer({ model }: { model: TagGroupView }) {
 
   return (
     <div className="flex flex-col gap-1.5">
-      {model.label && (
-        <span className="text-sm font-medium">{model.label}</span>
-      )}
+      {model.label && <span className="text-sm font-medium">{model.label}</span>}
       <div className="flex flex-wrap gap-1">
         {model.items.map((item) => (
           <span
@@ -27,9 +25,7 @@ export function TagGroupRenderer({ model }: { model: TagGroupView }) {
           </span>
         ))}
       </div>
-      {model.errorMessage && (
-        <p className="text-xs text-destructive">{model.errorMessage}</p>
-      )}
+      {model.errorMessage && <p className="text-xs text-destructive">{model.errorMessage}</p>}
     </div>
   );
 }

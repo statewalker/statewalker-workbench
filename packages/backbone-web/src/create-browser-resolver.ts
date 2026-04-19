@@ -6,9 +6,7 @@ import { ModuleResolver } from "@statewalker/backbone-common";
  * @param registry Maps module names to their base URLs (where package.json can be fetched).
  *   For leaf nodes (react, zod), the URL IS the final module URL — no package.json fetch.
  */
-export function createBrowserResolver(
-  registry: Map<string, string>,
-): ModuleResolver {
+export function createBrowserResolver(registry: Map<string, string>): ModuleResolver {
   return new ModuleResolver({
     async resolve(_baseUrl: string, moduleId: string): Promise<string> {
       const baseUrl = registry.get(moduleId);
@@ -25,14 +23,10 @@ export function createBrowserResolver(
       return `${base}package.json`;
     },
 
-    async loadPackageJson(
-      packageJsonUrl: string,
-    ): Promise<Record<string, unknown>> {
+    async loadPackageJson(packageJsonUrl: string): Promise<Record<string, unknown>> {
       const res = await fetch(packageJsonUrl);
       if (!res.ok) {
-        throw new Error(
-          `Failed to fetch ${packageJsonUrl}: ${res.status} ${res.statusText}`,
-        );
+        throw new Error(`Failed to fetch ${packageJsonUrl}: ${res.status} ${res.statusText}`);
       }
       return (await res.json()) as Record<string, unknown>;
     },

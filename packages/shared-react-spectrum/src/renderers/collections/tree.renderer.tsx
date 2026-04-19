@@ -48,12 +48,7 @@ function TreeNodeItem({
       {hasChildren && isExpanded && (
         <div>
           {node.children?.map((child) => (
-            <TreeNodeItem
-              key={child.key}
-              node={child}
-              model={model}
-              depth={depth + 1}
-            />
+            <TreeNodeItem key={child.key} node={child} model={model} depth={depth + 1} />
           ))}
         </div>
       )}

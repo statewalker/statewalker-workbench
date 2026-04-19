@@ -2,8 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ReactComponentRegistry } from "./index.js";
 
 // Minimal stubs — we only test lookup logic, not React rendering.
-const stubComponent = (tag: string) =>
-  Object.assign(() => null, { displayName: tag });
+const stubComponent = (tag: string) => Object.assign(() => null, { displayName: tag });
 
 class Base {}
 class Child extends Base {}

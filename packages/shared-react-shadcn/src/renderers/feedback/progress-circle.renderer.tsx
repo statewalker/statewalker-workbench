@@ -3,11 +3,7 @@ import type { ProgressCircleView } from "@statewalker/shared-views";
 
 const sizeMap = { S: 24, M: 32, L: 48 };
 
-export function ProgressCircleRenderer({
-  model,
-}: {
-  model: ProgressCircleView;
-}) {
+export function ProgressCircleRenderer({ model }: { model: ProgressCircleView }) {
   useUpdates(model.onUpdate);
 
   const size = sizeMap[model.size] ?? 32;
@@ -17,9 +13,7 @@ export function ProgressCircleRenderer({
 
   const range = model.maxValue - model.minValue;
   const pct =
-    model.isIndeterminate || range === 0
-      ? 0.25
-      : ((model.value ?? 0) - model.minValue) / range;
+    model.isIndeterminate || range === 0 ? 0.25 : ((model.value ?? 0) - model.minValue) / range;
   const offset = circumference * (1 - pct);
 
   return (

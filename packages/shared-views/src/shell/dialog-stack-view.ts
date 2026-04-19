@@ -1,8 +1,5 @@
 import { newAdapter } from "@statewalker/shared-adapters";
-import {
-  createModelPoint,
-  UIModelRegistry,
-} from "../core/ui-model-registry.js";
+import { createModelPoint, UIModelRegistry } from "../core/ui-model-registry.js";
 import type { DialogView } from "../overlays/dialog-view.js";
 
 export class DialogStackView extends UIModelRegistry<DialogView> {
@@ -17,5 +14,4 @@ export const [getDialogStackView] = newAdapter<DialogStackView>(
   () => new DialogStackView(),
 );
 
-export const [publishDialog, listenDialog] =
-  createModelPoint<DialogView>(getDialogStackView);
+export const [publishDialog, listenDialog] = createModelPoint<DialogView>(getDialogStackView);

@@ -1,7 +1,7 @@
 import { View } from "@adobe/react-spectrum";
 import { useComponentRegistry } from "@statewalker/shared-react/component-registry";
-import { calculateDropPosition } from "@statewalker/shared-react/dock";
 import type { DropPosition } from "@statewalker/shared-react/dock";
+import { calculateDropPosition } from "@statewalker/shared-react/dock";
 import type { DockPanelView } from "@statewalker/shared-views";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useColorScheme } from "./app-shell.js";
@@ -32,8 +32,7 @@ export function SpectrumDockPanel({ panel }: { panel: DockPanel }) {
   const isDark = colorScheme === "dark";
 
   // Track selected position for the drop confirmation
-  const [selectedPosition, setSelectedPosition] =
-    useState<DropPosition>("center");
+  const [selectedPosition, setSelectedPosition] = useState<DropPosition>("center");
   const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
@@ -49,10 +48,7 @@ export function SpectrumDockPanel({ panel }: { panel: DockPanel }) {
       const target = e.target as HTMLElement;
       if (!target.closest("[role=dialog]")) cancelDrop();
     };
-    const timeout = setTimeout(
-      () => document.addEventListener("click", handle),
-      100,
-    );
+    const timeout = setTimeout(() => document.addEventListener("click", handle), 100);
     return () => {
       clearTimeout(timeout);
       document.removeEventListener("click", handle);
@@ -76,8 +72,7 @@ export function SpectrumDockPanel({ panel }: { panel: DockPanel }) {
     (e: React.DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (panelRef.current)
-        setContainerRect(panelRef.current.getBoundingClientRect());
+      if (panelRef.current) setContainerRect(panelRef.current.getBoundingClientRect());
       setSelectedPosition("center");
       requestDrop(panel.id, "center", { x: e.clientX, y: e.clientY });
     },
@@ -131,8 +126,7 @@ export function SpectrumDockPanel({ panel }: { panel: DockPanel }) {
             minHeight: 36,
             overflowX: "auto",
             paddingInline: 4,
-            borderBottom:
-              "1px solid var(--spectrum-alias-border-color-mid, rgba(255,255,255,0.1))",
+            borderBottom: "1px solid var(--spectrum-alias-border-color-mid, rgba(255,255,255,0.1))",
           }}
           onDragOver={(e) => {
             e.preventDefault();
@@ -228,9 +222,7 @@ export function SpectrumDockPanel({ panel }: { panel: DockPanel }) {
         </div>
 
         {/* Content + overlays wrapper — relative + overflow hidden to clip overlays */}
-        <div
-          style={{ flex: 1, position: "relative", overflow: "hidden" }}
-        >
+        <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
           {/* Scrollable content */}
           <div
             style={{ position: "absolute", inset: 0, overflow: "auto" }}
@@ -257,9 +249,7 @@ export function SpectrumDockPanel({ panel }: { panel: DockPanel }) {
 
           {/* Drop confirmation grid */}
           {hasPendingDrop && pendingDrop && (
-            <div
-              style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-            >
+            <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
               <div style={{ pointerEvents: "auto" }}>
                 <DropConfirmationGrid
                   selectedPosition={selectedPosition}

@@ -15,11 +15,7 @@ function mockResponse(body: string, contentType = "text/plain") {
   });
 }
 
-const noopDefaultHook = async (
-  url: string,
-  _opts: RequestInit,
-  _parent: string,
-) => ({
+const noopDefaultHook = async (url: string, _opts: RequestInit, _parent: string) => ({
   type: "js" as const,
   source: `/* default: ${url} */`,
 });
@@ -28,12 +24,7 @@ describe("sourceHook", () => {
   it("wraps CSS as a JS module", async () => {
     mockFetch.mockResolvedValueOnce(mockResponse("body { color: red; }"));
 
-    const result = await sourceHook(
-      "https://host/theme.css",
-      {},
-      "",
-      noopDefaultHook,
-    );
+    const result = await sourceHook("https://host/theme.css", {}, "", noopDefaultHook);
 
     expect(result.type).toBe("js");
     expect(result.source).toContain("export default");
@@ -44,12 +35,7 @@ describe("sourceHook", () => {
   it("wraps JSON as export default", async () => {
     mockFetch.mockResolvedValueOnce(mockResponse('{"key":"value"}'));
 
-    const result = await sourceHook(
-      "https://host/config.json",
-      {},
-      "",
-      noopDefaultHook,
-    );
+    const result = await sourceHook("https://host/config.json", {}, "", noopDefaultHook);
 
     expect(result.type).toBe("js");
     expect(result.source).toBe('export default {"key":"value"};');
@@ -59,12 +45,7 @@ describe("sourceHook", () => {
     const tsCode = "const x: number = 42;\nexport default x;";
     mockFetch.mockResolvedValueOnce(mockResponse(tsCode));
 
-    const result = await sourceHook(
-      "https://host/module.ts",
-      {},
-      "",
-      noopDefaultHook,
-    );
+    const result = await sourceHook("https://host/module.ts", {}, "", noopDefaultHook);
 
     expect(result.type).toBe("js");
     expect(result.source).toContain("const x = 42");
@@ -75,12 +56,7 @@ describe("sourceHook", () => {
     const tsxCode = "const App = () => <div>hello</div>;\nexport default App;";
     mockFetch.mockResolvedValueOnce(mockResponse(tsxCode));
 
-    const result = await sourceHook(
-      "https://host/app.tsx",
-      {},
-      "",
-      noopDefaultHook,
-    );
+    const result = await sourceHook("https://host/app.tsx", {}, "", noopDefaultHook);
 
     expect(result.type).toBe("js");
     expect(result.source).not.toContain("<div>");
@@ -88,12 +64,7 @@ describe("sourceHook", () => {
   });
 
   it("passes through unknown extensions to default hook", async () => {
-    const result = await sourceHook(
-      "https://host/module.js",
-      {},
-      "",
-      noopDefaultHook,
-    );
+    const result = await sourceHook("https://host/module.js", {}, "", noopDefaultHook);
 
     expect(result.type).toBe("js");
     expect(result.source).toContain("default:");
@@ -102,12 +73,7 @@ describe("sourceHook", () => {
   it("strips ?v=N query from URL for extension detection", async () => {
     mockFetch.mockResolvedValueOnce(mockResponse('{"hot":true}'));
 
-    const result = await sourceHook(
-      "https://host/config.json?v=123",
-      {},
-      "",
-      noopDefaultHook,
-    );
+    const result = await sourceHook("https://host/config.json?v=123", {}, "", noopDefaultHook);
 
     expect(result.type).toBe("js");
     expect(result.source).toContain("export default");

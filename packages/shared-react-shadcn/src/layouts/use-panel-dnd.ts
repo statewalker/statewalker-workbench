@@ -12,10 +12,7 @@ export interface PanelDndOptions {
   /** End drag without dropping (dragEnd on the source tab). */
   onDragEnd?: () => void;
   /** Request a drop at a computed position — controller validates and shows/cancels the confirmation grid. */
-  onRequestDrop: (
-    position: DropPosition,
-    coords: { x: number; y: number },
-  ) => void;
+  onRequestDrop: (position: DropPosition, coords: { x: number; y: number }) => void;
   /** Confirm the drop at a chosen position. */
   onConfirmDrop: (position: DropPosition) => void;
   /** Cancel the pending drop. */
@@ -65,8 +62,7 @@ export function usePanelDnd(options: PanelDndOptions): PanelDndState {
   const contentRef = useRef<HTMLDivElement>(null);
   const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
   const [isHovering, setIsHovering] = useState(false);
-  const [selectedPosition, setSelectedPosition] =
-    useState<DropPosition>("center");
+  const [selectedPosition, setSelectedPosition] = useState<DropPosition>("center");
 
   const isTabDrag = useCallback(
     (e: React.DragEvent): boolean => {
@@ -138,11 +134,7 @@ export function usePanelDnd(options: PanelDndOptions): PanelDndState {
       e.preventDefault();
       e.stopPropagation();
 
-      const suggested = calculateDropPosition(
-        e.clientX,
-        e.clientY,
-        containerRect,
-      );
+      const suggested = calculateDropPosition(e.clientX, e.clientY, containerRect);
       setSelectedPosition(suggested);
       onRequestDrop(suggested, { x: e.clientX, y: e.clientY });
 

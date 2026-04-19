@@ -1,22 +1,8 @@
 import { useUpdates } from "@statewalker/shared-react/hooks";
 import type { TreeNode, TreeView } from "@statewalker/shared-views";
-import {
-  ChevronDown,
-  ChevronRight,
-  File,
-  Folder,
-  FolderOpen,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, File, Folder, FolderOpen } from "lucide-react";
 
-function TreeNodeItem({
-  node,
-  model,
-  depth,
-}: {
-  node: TreeNode;
-  model: TreeView;
-  depth: number;
-}) {
+function TreeNodeItem({ node, model, depth }: { node: TreeNode; model: TreeView; depth: number }) {
   const hasChildren = node.children && node.children.length > 0;
   const expanded = model.isExpanded(node.key);
   const selected = model.selectedKeys.values().next().value === node.key;
@@ -57,12 +43,7 @@ function TreeNodeItem({
       {hasChildren && expanded && (
         <div>
           {node.children?.map((child) => (
-            <TreeNodeItem
-              key={child.key}
-              node={child}
-              model={model}
-              depth={depth + 1}
-            />
+            <TreeNodeItem key={child.key} node={child} model={model} depth={depth + 1} />
           ))}
         </div>
       )}

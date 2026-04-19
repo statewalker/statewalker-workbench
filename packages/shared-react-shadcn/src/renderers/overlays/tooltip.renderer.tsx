@@ -10,11 +10,7 @@ export function TooltipRenderer({ model }: { model: TooltipView }) {
       className="z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground shadow-md"
       role="tooltip"
     >
-      {typeof model.content === "string" ? (
-        model.content
-      ) : (
-        <RenderModel model={model.content} />
-      )}
+      {typeof model.content === "string" ? model.content : <RenderModel model={model.content} />}
     </div>
   );
 }

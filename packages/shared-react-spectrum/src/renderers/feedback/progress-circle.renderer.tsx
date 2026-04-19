@@ -2,11 +2,7 @@ import { ProgressCircle } from "@adobe/react-spectrum";
 import { useUpdates } from "@statewalker/shared-react/hooks";
 import type { ProgressCircleView } from "@statewalker/shared-views";
 
-export function ProgressCircleRenderer({
-  model,
-}: {
-  model: ProgressCircleView;
-}) {
+export function ProgressCircleRenderer({ model }: { model: ProgressCircleView }) {
   useUpdates(model.onUpdate);
   return (
     <ProgressCircle

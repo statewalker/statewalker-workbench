@@ -17,9 +17,7 @@ export function SpinnerRenderer({ model }: { model: SpinnerView }) {
       <div
         className={`animate-spin rounded-full border-current border-t-transparent ${sizeClass}`}
       />
-      {model.label && (
-        <span className="text-sm text-muted-foreground">{model.label}</span>
-      )}
+      {model.label && <span className="text-sm text-muted-foreground">{model.label}</span>}
     </output>
   );
 }

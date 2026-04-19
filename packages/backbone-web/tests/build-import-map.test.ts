@@ -38,18 +38,12 @@ describe("buildImportMap", () => {
   });
 
   it("generates entry from root export '.'", () => {
-    const registry = new Map([
-      ["@repo/shared-views", "https://host/modules/@repo/shared-views"],
-    ]);
+    const registry = new Map([["@repo/shared-views", "https://host/modules/@repo/shared-views"]]);
     const modules = [
-      makeModule(
-        "@repo/shared-views",
-        "https://host/modules/@repo/shared-views",
-        {
-          ".": "./index.js",
-          "./layout": "./layout.js",
-        },
-      ),
+      makeModule("@repo/shared-views", "https://host/modules/@repo/shared-views", {
+        ".": "./index.js",
+        "./layout": "./layout.js",
+      }),
     ];
     const result = buildImportMap(modules, registry);
 
@@ -62,17 +56,11 @@ describe("buildImportMap", () => {
   });
 
   it("falls back to index.js when no exports field", () => {
-    const registry = new Map([
-      ["@ext/sandbox", "https://host/modules/@ext/sandbox"],
-    ]);
-    const modules = [
-      makeModule("@ext/sandbox", "https://host/modules/@ext/sandbox"),
-    ];
+    const registry = new Map([["@ext/sandbox", "https://host/modules/@ext/sandbox"]]);
+    const modules = [makeModule("@ext/sandbox", "https://host/modules/@ext/sandbox")];
     const result = buildImportMap(modules, registry);
 
-    expect(result.imports["@ext/sandbox"]).toBe(
-      "https://host/modules/@ext/sandbox/index.js",
-    );
+    expect(result.imports["@ext/sandbox"]).toBe("https://host/modules/@ext/sandbox/index.js");
   });
 
   it("uses direct URL for leaf nodes with file extension", () => {

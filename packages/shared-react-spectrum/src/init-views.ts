@@ -1,4 +1,3 @@
-import { getComponentRegistry } from "./layouts/app-shell.js";
 import {
   AccordionView,
   ActionBarView,
@@ -80,6 +79,7 @@ import {
   TreeView,
   WellView,
 } from "@statewalker/shared-views";
+import { getComponentRegistry } from "./layouts/app-shell.js";
 
 import { ActionButtonRenderer } from "./renderers/actions/action-button.renderer.js";
 import { ActionGroupRenderer } from "./renderers/actions/action-group.renderer.js";
@@ -161,9 +161,7 @@ import { PopoverRenderer } from "./renderers/overlays/popover.renderer.js";
 import { SheetRenderer } from "./renderers/overlays/sheet.renderer.js";
 import { TooltipRenderer } from "./renderers/overlays/tooltip.renderer.js";
 
-export function initSpectrumViews(
-  ctx: Record<string, unknown>,
-): () => void {
+export function initSpectrumViews(ctx: Record<string, unknown>): () => void {
   const registry = getComponentRegistry(ctx);
   const cleanups = [
     registry.register(ActionButtonView, ActionButtonRenderer),

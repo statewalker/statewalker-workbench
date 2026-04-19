@@ -5,12 +5,7 @@ import type { ToastView } from "@statewalker/shared-views";
 export function ToastRenderer({ model }: { model: ToastView }) {
   useUpdates(model.onUpdate);
   return (
-    <Flex
-      direction="row"
-      gap="size-100"
-      alignItems="center"
-      UNSAFE_style={{ padding: "8px 16px" }}
-    >
+    <Flex direction="row" gap="size-100" alignItems="center" UNSAFE_style={{ padding: "8px 16px" }}>
       <Text>{model.message}</Text>
       {model.action && (
         <button

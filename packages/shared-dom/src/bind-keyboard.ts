@@ -1,7 +1,4 @@
-import {
-  getKeyboardInteractionView,
-  getKeyboardView,
-} from "@statewalker/shared-views";
+import { getKeyboardInteractionView, getKeyboardView } from "@statewalker/shared-views";
 
 /**
  * Binds the DOM keydown listener to both interaction models:

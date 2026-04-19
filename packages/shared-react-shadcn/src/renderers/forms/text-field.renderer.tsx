@@ -31,9 +31,7 @@ export function TextFieldRenderer({ model }: { model: TextFieldView }) {
       {model.description && !model.errorMessage && (
         <p className="text-xs text-muted-foreground">{model.description}</p>
       )}
-      {model.errorMessage && (
-        <p className="text-xs text-destructive">{model.errorMessage}</p>
-      )}
+      {model.errorMessage && <p className="text-xs text-destructive">{model.errorMessage}</p>}
     </div>
   );
 }

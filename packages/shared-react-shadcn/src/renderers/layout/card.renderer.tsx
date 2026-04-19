@@ -1,12 +1,6 @@
 import { useUpdates } from "@statewalker/shared-react/hooks";
 import type { CardView as CardViewType } from "@statewalker/shared-views";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../../components/index.js";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../components/index.js";
 import { RenderModel } from "../_shared/render-slot.js";
 import { ActionButton } from "../actions/action-button.renderer.js";
 
@@ -20,11 +14,7 @@ export function CardRenderer({ model }: { model: CardViewType }) {
       {model.header && (
         <CardHeader>
           <CardTitle>
-            {typeof model.header === "string" ? (
-              model.header
-            ) : (
-              <RenderModel model={model.header} />
-            )}
+            {typeof model.header === "string" ? model.header : <RenderModel model={model.header} />}
           </CardTitle>
         </CardHeader>
       )}

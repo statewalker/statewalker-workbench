@@ -11,25 +11,13 @@ export function PaginationRenderer({ model }: { model: PaginationViewType }) {
         Page {model.page} of {model.totalPages}
       </span>
       <div className="flex gap-1">
-        <Button
-          variant="outline"
-          onClick={() => model.setPage(1)}
-          disabled={!model.hasPrevious}
-        >
+        <Button variant="outline" onClick={() => model.setPage(1)} disabled={!model.hasPrevious}>
           First
         </Button>
-        <Button
-          variant="outline"
-          onClick={() => model.previous()}
-          disabled={!model.hasPrevious}
-        >
+        <Button variant="outline" onClick={() => model.previous()} disabled={!model.hasPrevious}>
           Previous
         </Button>
-        <Button
-          variant="outline"
-          onClick={() => model.next()}
-          disabled={!model.hasNext}
-        >
+        <Button variant="outline" onClick={() => model.next()} disabled={!model.hasNext}>
           Next
         </Button>
         <Button

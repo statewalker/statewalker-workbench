@@ -72,9 +72,7 @@ export class AccordionView extends ContainerView {
   }
 
   expandAll(): void {
-    this.#expandedKeys = new Set(
-      this.#items.filter((i) => !i.disabled).map((i) => i.key),
-    );
+    this.#expandedKeys = new Set(this.#items.filter((i) => !i.disabled).map((i) => i.key));
     this.notify();
   }
 

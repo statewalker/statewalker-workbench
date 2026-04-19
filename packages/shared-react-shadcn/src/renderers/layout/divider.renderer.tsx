@@ -19,10 +19,5 @@ export function DividerRenderer({ model }: { model: DividerView }) {
     );
   }
 
-  return (
-    <hr
-      className="w-full border-none bg-border"
-      style={{ height: sizeMap[model.size] }}
-    />
-  );
+  return <hr className="w-full border-none bg-border" style={{ height: sizeMap[model.size] }} />;
 }

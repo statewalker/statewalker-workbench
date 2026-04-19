@@ -19,10 +19,7 @@ export function TableRenderer({ model }: { model: TableView }) {
             {selectable && (
               <th style={{ padding: "6px 8px", textAlign: "left", width: 32 }}>
                 <Checkbox
-                  isSelected={
-                    rows.length > 0 &&
-                    model.selectedKeys.size === rows.length
-                  }
+                  isSelected={rows.length > 0 && model.selectedKeys.size === rows.length}
                   onChange={(checked) => {
                     if (checked) model.selectAll();
                     else model.selectedKeys = new Set();
@@ -46,9 +43,7 @@ export function TableRenderer({ model }: { model: TableView }) {
                 <Text UNSAFE_style={{ fontWeight: 600 }}>
                   {col.label}
                   {model.sortDescriptor?.column === col.key &&
-                    (model.sortDescriptor.direction === "ascending"
-                      ? " ▲"
-                      : " ▼")}
+                    (model.sortDescriptor.direction === "ascending" ? " ▲" : " ▼")}
                 </Text>
               </th>
             ))}
@@ -62,9 +57,7 @@ export function TableRenderer({ model }: { model: TableView }) {
               <tr
                 key={key}
                 style={{
-                  background: selected
-                    ? "var(--spectrum-alias-highlight-selected)"
-                    : undefined,
+                  background: selected ? "var(--spectrum-alias-highlight-selected)" : undefined,
                 }}
               >
                 {selectable && (
@@ -85,15 +78,8 @@ export function TableRenderer({ model }: { model: TableView }) {
                   <td key={col.key} style={{ padding: "4px 12px" }}>
                     <Text>
                       {col.render
-                        ? String(
-                            col.render(
-                              (row as Record<string, unknown>)[col.key],
-                              row,
-                            ) ?? "",
-                          )
-                        : String(
-                            (row as Record<string, unknown>)[col.key] ?? "",
-                          )}
+                        ? String(col.render((row as Record<string, unknown>)[col.key], row) ?? "")
+                        : String((row as Record<string, unknown>)[col.key] ?? "")}
                     </Text>
                   </td>
                 ))}

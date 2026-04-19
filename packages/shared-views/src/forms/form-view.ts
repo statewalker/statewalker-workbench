@@ -18,14 +18,10 @@ function isFieldLike(child: ViewModel): child is ViewModel & FieldLike {
   return "value" in child;
 }
 
-function isContainerLike(
-  child: ViewModel,
-): child is ViewModel & { children: ViewModel[] } {
+function isContainerLike(child: ViewModel): child is ViewModel & { children: ViewModel[] } {
   if (typeof child !== "object" || !child) return false;
   if (!("children" in child)) return false;
-  return Array.isArray(
-    (child as unknown as { children: ViewModel[] }).children,
-  );
+  return Array.isArray((child as unknown as { children: ViewModel[] }).children);
 }
 
 export class FormView extends ContainerView {
@@ -127,17 +123,14 @@ export class FormView extends ContainerView {
   /** Get all child field values as a record keyed by field key. */
   getValues(): Record<string, unknown> {
     const fields = this.getFields();
-    return Object.fromEntries(
-      Object.entries(fields).map(([key, field]) => [key, field.value]),
-    );
+    return Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value]));
   }
 
   /** Set an error message on a child field. */
   setMessage(fieldKey: string, message: FieldMessage | undefined): void {
     const field = this.findField(fieldKey);
     if (field && "errorMessage" in field) {
-      (field as ViewModel & { errorMessage: string | undefined }).errorMessage =
-        message?.text;
+      (field as ViewModel & { errorMessage: string | undefined }).errorMessage = message?.text;
     }
   }
 
@@ -172,9 +165,7 @@ export class FormView extends ContainerView {
     const fields = this.getFields();
     for (const field of Object.values(fields)) {
       if ("errorMessage" in field) {
-        (
-          field as ViewModel & { errorMessage: string | undefined }
-        ).errorMessage = undefined;
+        (field as ViewModel & { errorMessage: string | undefined }).errorMessage = undefined;
       }
     }
     this.notify();

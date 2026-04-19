@@ -25,9 +25,6 @@ export const [getActivePanelView] = newAdapter<ActivePanelView>(
  * Delegates to PanelManagerView.focus() which also sets the tab
  * as active in its area.
  */
-export function activatePanel(
-  context: Record<string, unknown>,
-  panelKey: string,
-): void {
+export function activatePanel(context: Record<string, unknown>, panelKey: string): void {
   getPanelManagerView(context).focus(panelKey);
 }

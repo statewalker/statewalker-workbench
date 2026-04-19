@@ -16,18 +16,13 @@ const variantClasses: Record<string, string> = {
 export function InlineAlertRenderer({ model }: { model: InlineAlertView }) {
   useUpdates(model.onUpdate);
 
-  const variantClass =
-    variantClasses[model.variant] ?? variantClasses.informative;
+  const variantClass = variantClasses[model.variant] ?? variantClasses.informative;
 
   return (
     <div className={`rounded-lg border p-4 ${variantClass}`} role="alert">
       {model.header && <h4 className="mb-1 font-semibold">{model.header}</h4>}
       <div className="text-sm">
-        {typeof model.content === "string" ? (
-          model.content
-        ) : (
-          <RenderModel model={model.content} />
-        )}
+        {typeof model.content === "string" ? model.content : <RenderModel model={model.content} />}
       </div>
     </div>
   );

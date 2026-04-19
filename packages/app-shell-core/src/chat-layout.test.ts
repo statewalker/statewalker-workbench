@@ -128,7 +128,7 @@ describe("chat layout — Sessions (left) + Chat (center) via publishPanel", () 
       expect(tabIds(centerArea!).sort()).toEqual(["chat", "sessions"]);
 
       // Sessions is the active tab in the central pane
-      expect(centerArea!.activeTabId).toBe("sessions");
+      expect(centerArea?.activeTabId).toBe("sessions");
 
       // Sessions is the globally focused tab
       expect(pm.focusedTabKey).toBe("sessions");

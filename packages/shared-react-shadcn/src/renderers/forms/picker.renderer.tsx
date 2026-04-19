@@ -32,9 +32,7 @@ export function PickerRenderer({ model }: { model: PickerView }) {
           </option>
         ))}
       </select>
-      {model.errorMessage && (
-        <p className="text-xs text-destructive">{model.errorMessage}</p>
-      )}
+      {model.errorMessage && <p className="text-xs text-destructive">{model.errorMessage}</p>}
     </div>
   );
 }

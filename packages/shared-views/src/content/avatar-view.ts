@@ -1,15 +1,6 @@
 import { ViewModel } from "../core/index.js";
 
-export type AvatarSize =
-  | "50"
-  | "75"
-  | "100"
-  | "200"
-  | "300"
-  | "400"
-  | "500"
-  | "600"
-  | "700";
+export type AvatarSize = "50" | "75" | "100" | "200" | "300" | "400" | "500" | "600" | "700";
 
 export class AvatarView extends ViewModel {
   readonly src: string;

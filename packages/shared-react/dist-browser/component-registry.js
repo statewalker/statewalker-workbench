@@ -1,17 +1,23 @@
 var i = Object.defineProperty;
-var c = (r, t, e) => t in r ? i(r, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : r[t] = e;
-var o = (r, t, e) => c(r, typeof t != "symbol" ? t + "" : t, e);
+var c = (r, t, e) =>
+  t in r ? i(r, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : (r[t] = e);
+var o = (r, t, e) => c(r, typeof t !== "symbol" ? `${t}` : t, e);
+
 import { newAdapter as g } from "@statewalker/shared-adapters";
-import { createContext as u, createElement as a, useContext as f } from "react";
+import { createElement as a, useContext as f, createContext as u } from "react";
+
 class s {
   constructor() {
     // biome-ignore lint/suspicious/noExplicitAny: factory map must be heterogeneous
     o(this, "factories", /* @__PURE__ */ new Map());
   }
   register(t, e) {
-    return this.factories.set(t, e), () => {
-      this.factories.get(t) === e && this.factories.delete(t);
-    };
+    return (
+      this.factories.set(t, e),
+      () => {
+        this.factories.get(t) === e && this.factories.delete(t);
+      }
+    );
   }
   resolve(t) {
     let e = t.constructor;
@@ -26,22 +32,15 @@ class s {
     return e ? a(e, { model: t }) : null;
   }
 }
-const p = u(
-  new s()
-);
+const p = u(new s());
 function C() {
   return f(p);
 }
-const [m] = g(
-  "reactComponentRegistry",
-  () => new s()
-);
+const [m] = g("reactComponentRegistry", () => new s());
 function h(r, t, e) {
   return m(r).register(t, e);
 }
-function w({
-  model: r
-}) {
+function w({ model: r }) {
   return C().render(r);
 }
 export {
@@ -50,5 +49,5 @@ export {
   w as RenderSlot,
   m as getReactComponentRegistry,
   h as registerComponent,
-  C as useComponentRegistry
+  C as useComponentRegistry,
 };

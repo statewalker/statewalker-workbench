@@ -9,11 +9,7 @@ export function ContentPanelRenderer({ model }: { model: ContentPanelView }) {
     <div className="flex flex-col">
       {model.header && (
         <div className="border-b border-border px-4 py-3 font-semibold">
-          {typeof model.header === "string" ? (
-            model.header
-          ) : (
-            <RenderSlot value={model.header} />
-          )}
+          {typeof model.header === "string" ? model.header : <RenderSlot value={model.header} />}
         </div>
       )}
       <div className="p-4">
@@ -23,11 +19,7 @@ export function ContentPanelRenderer({ model }: { model: ContentPanelView }) {
       </div>
       {model.footer && (
         <div className="border-t border-border px-4 py-3">
-          {typeof model.footer === "string" ? (
-            model.footer
-          ) : (
-            <RenderSlot value={model.footer} />
-          )}
+          {typeof model.footer === "string" ? model.footer : <RenderSlot value={model.footer} />}
         </div>
       )}
     </div>

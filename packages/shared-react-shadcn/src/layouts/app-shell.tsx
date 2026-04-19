@@ -1,8 +1,5 @@
 import { newAdapter } from "@statewalker/shared-adapters";
-import {
-  AppContextProvider,
-  useAppContext,
-} from "@statewalker/shared-react/app-context";
+import { AppContextProvider, useAppContext } from "@statewalker/shared-react/app-context";
 import {
   ComponentRegistryContext,
   ReactComponentRegistry,
@@ -87,8 +84,7 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
   const toolbarActions = useModelItems(toolbarModel);
   const menus = useModelItems(menuModel);
 
-  const topDialog =
-    dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
+  const topDialog = dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
 
   const content = (
     <AppContextProvider value={context}>
@@ -253,12 +249,8 @@ function DialogOverlay({
         showCloseButton={dialog.isDismissable}
         className={`${sizeClass} ${dialog.fullScreen ? "w-screen! h-screen! max-w-none! max-h-none! rounded-none!" : "max-h-[85vh]"} flex flex-col`}
         style={sizeStyle}
-        onEscapeKeyDown={
-          dialog.closeOnEscape ? undefined : (e) => e.preventDefault()
-        }
-        onPointerDownOutside={
-          dialog.closeOnClickOutside ? undefined : (e) => e.preventDefault()
-        }
+        onEscapeKeyDown={dialog.closeOnEscape ? undefined : (e) => e.preventDefault()}
+        onPointerDownOutside={dialog.closeOnClickOutside ? undefined : (e) => e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -273,9 +265,7 @@ function DialogOverlay({
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end pt-4 border-t">
             {dialog.footer &&
               (typeof dialog.footer === "string" ? (
-                <span className="mr-auto text-sm text-muted-foreground">
-                  {dialog.footer}
-                </span>
+                <span className="mr-auto text-sm text-muted-foreground">{dialog.footer}</span>
               ) : (
                 <div className="mr-auto">
                   <RenderChild model={dialog.footer} />

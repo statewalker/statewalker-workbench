@@ -30,17 +30,13 @@ export function RadioGroupRenderer({ model }: { model: RadioGroupView }) {
             <div className="flex flex-col">
               <span className="text-sm">{option.label}</span>
               {option.description && (
-                <span className="text-xs text-muted-foreground">
-                  {option.description}
-                </span>
+                <span className="text-xs text-muted-foreground">{option.description}</span>
               )}
             </div>
           </label>
         ))}
       </div>
-      {model.errorMessage && (
-        <p className="text-xs text-destructive">{model.errorMessage}</p>
-      )}
+      {model.errorMessage && <p className="text-xs text-destructive">{model.errorMessage}</p>}
     </fieldset>
   );
 }

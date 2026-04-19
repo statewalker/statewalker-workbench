@@ -28,17 +28,12 @@ export class UIModelRegistry<T> extends BaseClass {
 
 type Context = Record<string, unknown>;
 
-export function createModelPoint<T>(
-  getModel: (ctx: Context) => UIModelRegistry<T>,
-) {
+export function createModelPoint<T>(getModel: (ctx: Context) => UIModelRegistry<T>) {
   function publish(context: Context, item: T): () => void {
     return getModel(context).add(item);
   }
 
-  function listen(
-    context: Context,
-    callback: (items: T[]) => void,
-  ): () => void {
+  function listen(context: Context, callback: (items: T[]) => void): () => void {
     const model = getModel(context);
     const items = model.getAll();
     if (items.length > 0) {

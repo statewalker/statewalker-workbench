@@ -17,9 +17,7 @@ export function TableRenderer({ model }: { model: TableViewType }) {
                 <input
                   type="checkbox"
                   className="cursor-pointer"
-                  checked={
-                    rows.length > 0 && model.selectedKeys.size === rows.length
-                  }
+                  checked={rows.length > 0 && model.selectedKeys.size === rows.length}
                   onChange={() => {
                     if (model.selectedKeys.size === rows.length) {
                       model.clearSelection();
@@ -34,9 +32,7 @@ export function TableRenderer({ model }: { model: TableViewType }) {
               <th
                 key={col.key}
                 className={`h-10 px-2 text-left align-middle font-medium text-muted-foreground ${
-                  col.sortable
-                    ? "cursor-pointer hover:text-foreground select-none"
-                    : ""
+                  col.sortable ? "cursor-pointer hover:text-foreground select-none" : ""
                 }`}
                 style={col.width ? { width: col.width } : undefined}
                 onClick={() => model.sort(col.key)}
@@ -45,9 +41,7 @@ export function TableRenderer({ model }: { model: TableViewType }) {
                   {col.label}
                   {model.sortDescriptor?.column === col.key && (
                     <span className="text-xs">
-                      {model.sortDescriptor?.direction === "ascending"
-                        ? "▲"
-                        : "▼"}
+                      {model.sortDescriptor?.direction === "ascending" ? "▲" : "▼"}
                     </span>
                   )}
                 </span>
@@ -89,9 +83,7 @@ export function TableRenderer({ model }: { model: TableViewType }) {
         </tbody>
       </table>
       {rows.length === 0 && (
-        <div className="py-6 text-center text-sm text-muted-foreground">
-          No data
-        </div>
+        <div className="py-6 text-center text-sm text-muted-foreground">No data</div>
       )}
     </div>
   );

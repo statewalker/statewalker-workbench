@@ -28,8 +28,7 @@ export function buildImportMap(
     if (exports && typeof exports === "object") {
       for (const [subpath, target] of Object.entries(exports)) {
         if (typeof target !== "string") continue;
-        const specifier =
-          subpath === "." ? mod.name : `${mod.name}/${subpath.slice(2)}`;
+        const specifier = subpath === "." ? mod.name : `${mod.name}/${subpath.slice(2)}`;
         const resolvedUrl = new URL(target, ensureTrailingSlash(baseUrl)).href;
         imports[specifier] = resolvedUrl;
       }
@@ -39,10 +38,7 @@ export function buildImportMap(
       if (looksLikeModuleUrl(baseUrl)) {
         imports[mod.name] = baseUrl;
       } else {
-        imports[mod.name] = new URL(
-          "index.js",
-          ensureTrailingSlash(baseUrl),
-        ).href;
+        imports[mod.name] = new URL("index.js", ensureTrailingSlash(baseUrl)).href;
       }
     }
   }

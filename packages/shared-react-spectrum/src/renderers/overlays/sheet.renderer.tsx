@@ -7,9 +7,7 @@ export function SheetRenderer({ model }: { model: SheetView }) {
   useUpdates(model.onUpdate);
   return (
     <Dialog isDismissable={model.isDismissable}>
-      <Content>
-        {model.content && <RenderModel model={model.content} />}
-      </Content>
+      <Content>{model.content && <RenderModel model={model.content} />}</Content>
     </Dialog>
   );
 }

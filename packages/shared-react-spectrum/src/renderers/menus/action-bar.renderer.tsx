@@ -7,9 +7,7 @@ export function ActionBarRenderer({ model }: { model: ActionBarView }) {
   return (
     <ActionBar
       isEmphasized={model.isEmphasized}
-      selectedItemCount={
-        model.selectedItemCount === 0 ? "all" : model.selectedItemCount
-      }
+      selectedItemCount={model.selectedItemCount === 0 ? "all" : model.selectedItemCount}
       onAction={(key) => {
         const action = model.children.find((a) => a.actionKey === String(key));
         action?.submit();

@@ -1,13 +1,7 @@
 import { View } from "@adobe/react-spectrum";
 import React from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
-import {
-  type DockNode,
-  type DockSplit,
-  isPanel,
-  isSplit,
-  useDockLayout,
-} from "./dock-context.js";
+import { type DockNode, type DockSplit, isPanel, isSplit, useDockLayout } from "./dock-context.js";
 import { SpectrumDockPanel } from "./dock-panel.js";
 
 function SplitRenderer({ split }: { split: DockSplit }) {
@@ -36,12 +30,8 @@ function SplitRenderer({ split }: { split: DockSplit }) {
               style={{
                 width: split.direction === "horizontal" ? 4 : undefined,
                 height: split.direction === "vertical" ? 4 : undefined,
-                background:
-                  "var(--spectrum-alias-border-color-mid, rgba(128,128,128,0.3))",
-                cursor:
-                  split.direction === "horizontal"
-                    ? "col-resize"
-                    : "row-resize",
+                background: "var(--spectrum-alias-border-color-mid, rgba(128,128,128,0.3))",
+                cursor: split.direction === "horizontal" ? "col-resize" : "row-resize",
               }}
             />
           )}
@@ -60,12 +50,7 @@ function NodeRenderer({ node }: { node: DockNode }) {
 export function SpectrumDockLayout() {
   const { root } = useDockLayout();
   return (
-    <View
-      height="100%"
-      width="100%"
-      overflow="hidden"
-      padding="size-50"
-    >
+    <View height="100%" width="100%" overflow="hidden" padding="size-50">
       <NodeRenderer node={root} />
     </View>
   );

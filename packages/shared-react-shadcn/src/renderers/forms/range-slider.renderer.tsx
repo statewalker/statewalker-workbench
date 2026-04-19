@@ -22,9 +22,7 @@ export function RangeSliderRenderer({ model }: { model: RangeSliderView }) {
           max={model.maxValue}
           step={model.step}
           disabled={model.isDisabled}
-          onChange={(e) =>
-            model.setRange(Number(e.target.value), model.endValue)
-          }
+          onChange={(e) => model.setRange(Number(e.target.value), model.endValue)}
           className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-secondary
             disabled:cursor-not-allowed disabled:opacity-50"
         />
@@ -35,9 +33,7 @@ export function RangeSliderRenderer({ model }: { model: RangeSliderView }) {
           max={model.maxValue}
           step={model.step}
           disabled={model.isDisabled}
-          onChange={(e) =>
-            model.setRange(model.startValue, Number(e.target.value))
-          }
+          onChange={(e) => model.setRange(model.startValue, Number(e.target.value))}
           className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-secondary
             disabled:cursor-not-allowed disabled:opacity-50"
         />
