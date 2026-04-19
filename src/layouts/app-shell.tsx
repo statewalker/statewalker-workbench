@@ -11,7 +11,7 @@ import {
   Text,
   View,
 } from "@adobe/react-spectrum";
-import { newAdapter } from "@repo/shared-adapters";
+import { newAdapter } from "@statewalker/shared-adapters";
 import {
   ComponentRegistryContext,
   ReactComponentRegistry,
