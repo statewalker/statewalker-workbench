@@ -1,5 +1,5 @@
-import { newAdapter } from "@repo/shared-adapters";
-import { BaseClass } from "@repo/shared-baseclass";
+import { newAdapter } from "@statewalker/shared-adapters";
+import { BaseClass } from "@statewalker/shared-baseclass";
 
 export interface KeyBinding {
   /** Key or combo, e.g. "F3", "ArrowUp", "Ctrl+H" */

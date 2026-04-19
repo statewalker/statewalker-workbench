@@ -1,4 +1,4 @@
-import { BaseClass, onChange } from "@repo/shared-baseclass";
+import { BaseClass, onChange } from "@statewalker/shared-baseclass";
 
 export type ActionViewVariant =
   | "primary"

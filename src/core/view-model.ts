@@ -1,4 +1,4 @@
-import { BaseClass } from "@repo/shared-baseclass";
+import { BaseClass } from "@statewalker/shared-baseclass";
 
 const counters = new Map<string, number>();
 

@@ -1,4 +1,4 @@
-import { onChange } from "@repo/shared-baseclass";
+import { onChange } from "@statewalker/shared-baseclass";
 import { ViewModel } from "../core/view-model.js";
 
 /**
