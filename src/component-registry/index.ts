@@ -1,4 +1,4 @@
-import { newAdapter } from "@repo/shared/adapters";
+import { newAdapter } from "@repo/shared-adapters";
 import { createContext, createElement, useContext } from "react";
 
 /** A constructor type used as the registry map key. */
