@@ -21,7 +21,7 @@
   "dependencies": {
     "@repo/backbone-common": "workspace:*",
     "import-meta-resolve": "^4.1.0",
-    "@repo/shared-logger": "workspace:*"
+    "@statewalker/shared-logger": "workspace:*"
   },
   "devDependencies": {
     "tsx": "catalog:",

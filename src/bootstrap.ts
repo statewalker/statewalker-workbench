@@ -7,7 +7,7 @@ import {
   formatModulesMap,
   ModuleResolver,
 } from "@repo/backbone-common";
-import { getLogger } from "@repo/shared-logger";
+import { getLogger } from "@statewalker/shared-logger";
 import { resolve as resolveImport } from "import-meta-resolve";
 
 function toFilePath(url: string): string {
