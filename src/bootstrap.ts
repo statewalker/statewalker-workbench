@@ -1,8 +1,10 @@
-import type { ResolvedModule } from "@repo/backbone-common";
-import { newRegistry } from "@repo/shared/registry";
+import {
+  type AppManifest,
+  activateModules,
+  type ResolvedModule,
+} from "@repo/backbone-common";
 import { buildImportMap } from "./build-import-map.js";
 import { createBrowserResolver } from "./create-browser-resolver.js";
-import type { ShellConfig } from "./shell-config.js";
 import { sourceHook } from "./source-hooks.js";
 
 // es-module-shims global API (declared, not imported — loaded via <script>)
@@ -13,80 +15,84 @@ declare const importShim: {
 };
 
 /**
- * Browser-side module bootstrap. Mirrors backbone-server's bootstrap():
- * 1. Build module registry from config
- * 2. Resolve dependency graph via HTTP-fetched package.json
- * 3. Topologically sort
- * 4. Build import map from package.json exports
- * 5. Inject import map via importShim.addImportMap()
- * 6. Load each module in order, call default(ctx) if function
+ * Browser-side bootstrap. Dispatches on manifest shape:
+ * - `modules` absent or empty → bundler mode: roots are loaded via native
+ *   dynamic `import()`, resolved by the bundler's existing module graph.
+ * - `modules` populated → dynamic mode: uses `es-module-shims` + an
+ *   HTTP-built import map to resolve roots from fetchable base URLs.
  */
 export async function bootstrap(
-  config: ShellConfig,
-): Promise<() => void> {
-  const [register, cleanup] = newRegistry();
+  manifest: AppManifest,
+  ctx: Record<string, unknown> = {},
+): Promise<() => Promise<void>> {
+  const hasModules =
+    manifest.modules && Object.keys(manifest.modules).length > 0;
 
-  try {
-    const context: Record<string, unknown> = {};
+  return hasModules
+    ? bootstrapDynamic(manifest, ctx)
+    : bootstrapBundler(manifest, ctx);
+}
 
-    // 1. Build module registry: name → base URL
-    const registry = new Map(Object.entries(config.modules));
+async function bootstrapBundler(
+  manifest: AppManifest,
+  ctx: Record<string, unknown>,
+): Promise<() => Promise<void>> {
+  return activateModules(
+    manifest.roots,
+    (spec) => import(/* @vite-ignore */ resolveBundlerSpecifier(spec)),
+    ctx,
+  );
+}
 
-    // 2. Resolve dependency graph
-    const resolver = createBrowserResolver(registry);
-    const ordered = await resolver.resolveModules("", config.roots);
+/**
+ * Turn a bare specifier into a URL the browser can fetch at runtime.
+ *
+ * Absolute URLs and absolute paths pass through unchanged. Bare package
+ * specifiers are rewritten to Vite's `/@id/<spec>` endpoint — Vite dev-server
+ * resolves and transforms the module on demand. For production builds that
+ * run outside Vite, declare an `<script type="importmap">` in the host HTML
+ * (or switch to dynamic mode with `manifest.modules`) so the browser can
+ * resolve bare specifiers natively.
+ */
+function resolveBundlerSpecifier(spec: string): string {
+  if (/^(https?:)?\/\//.test(spec) || spec.startsWith("/")) return spec;
+  return `${location.origin}/@id/${spec}`;
+}
 
-    // Attach packageJson to resolved modules for import map builder
-    // The resolver already fetched them — store in a side map
-    const resolvedWithPkg = ordered as Array<
-      ResolvedModule & { packageJson?: Record<string, unknown> }
-    >;
+async function bootstrapDynamic(
+  manifest: AppManifest,
+  ctx: Record<string, unknown>,
+): Promise<() => Promise<void>> {
+  const modules = manifest.modules ?? {};
+  const registry = new Map(Object.entries(modules));
 
-    // 3. Build and inject import map
-    const importMap = buildImportMap(resolvedWithPkg, registry);
+  const resolver = createBrowserResolver(registry);
+  const ordered = await resolver.resolveModules("", manifest.roots);
 
-    // Also add leaf-node entries from registry that weren't resolved
-    // (non-workspace deps like react, zod)
-    for (const [name, url] of registry) {
-      if (!importMap.imports[name] && !ordered.some((m) => m.name === name)) {
-        importMap.imports[name] = url;
-      }
+  const resolvedWithPkg = ordered as Array<
+    ResolvedModule & { packageJson?: Record<string, unknown> }
+  >;
+
+  const importMap = buildImportMap(resolvedWithPkg, registry);
+
+  for (const [name, url] of registry) {
+    if (!importMap.imports[name] && !ordered.some((m) => m.name === name)) {
+      importMap.imports[name] = url;
     }
-
-    importShim.addImportMap(importMap);
-
-    console.log(
-      `[backbone-web] Import map: ${Object.keys(importMap.imports).length} entries`,
-    );
-
-    // 4. Load modules in topo order
-    for (const mod of ordered) {
-      let imported: Record<string, unknown>;
-      try {
-        imported = await importShim(mod.name);
-      } catch (err) {
-        console.error(`[backbone-web] Failed to load ${mod.name}:`, err);
-        continue;
-      }
-      const init = imported.default;
-      if (typeof init !== "function") continue;
-
-      console.log(`[backbone-web] Activating: ${mod.name}`);
-      const teardown: unknown = await init(context);
-      if (typeof teardown === "function") {
-        register(teardown as () => void);
-      }
-    }
-
-    console.log(
-      `[backbone-web] Started with ${ordered.length} module(s)`,
-    );
-
-    return cleanup;
-  } catch (error) {
-    cleanup();
-    throw error;
   }
+
+  importShim.addImportMap(importMap);
+  console.log(
+    `[backbone-web] Import map: ${Object.keys(importMap.imports).length} entries`,
+  );
+
+  return activateModules(
+    ordered,
+    async (mod) => {
+      return (await importShim(mod.name)) as Record<string, unknown>;
+    },
+    ctx,
+  );
 }
 
 /**

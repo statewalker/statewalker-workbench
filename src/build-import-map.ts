@@ -39,8 +39,10 @@ export function buildImportMap(
       if (looksLikeModuleUrl(baseUrl)) {
         imports[mod.name] = baseUrl;
       } else {
-        imports[mod.name] = new URL("index.js", ensureTrailingSlash(baseUrl))
-          .href;
+        imports[mod.name] = new URL(
+          "index.js",
+          ensureTrailingSlash(baseUrl),
+        ).href;
       }
     }
   }

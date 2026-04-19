@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loadShellConfig } from "../src/shell-config.js";
 
 // Mock DOM
@@ -57,7 +57,9 @@ describe("loadShellConfig", () => {
     };
 
     const config = await loadShellConfig({ roots: [], modules: {} });
-    expect(config.modules["@ext/custom"]).toBe("https://cdn.example.com/custom");
+    expect(config.modules["@ext/custom"]).toBe(
+      "https://cdn.example.com/custom",
+    );
   });
 
   it("merges fetched config over defaults", async () => {

@@ -4,7 +4,10 @@ import { sourceHook } from "../src/source-hooks.js";
 // Mock fetch for tests
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
-vi.stubGlobal("document", { createElement: () => ({ textContent: "" }), head: { appendChild: () => {} } });
+vi.stubGlobal("document", {
+  createElement: () => ({ textContent: "" }),
+  head: { appendChild: () => {} },
+});
 
 function mockResponse(body: string, contentType = "text/plain") {
   return new Response(body, {
@@ -12,7 +15,11 @@ function mockResponse(body: string, contentType = "text/plain") {
   });
 }
 
-const noopDefaultHook = async (url: string, _opts: RequestInit, _parent: string) => ({
+const noopDefaultHook = async (
+  url: string,
+  _opts: RequestInit,
+  _parent: string,
+) => ({
   type: "js" as const,
   source: `/* default: ${url} */`,
 });
@@ -49,7 +56,7 @@ describe("sourceHook", () => {
   });
 
   it("compiles TypeScript via sucrase", async () => {
-    const tsCode = 'const x: number = 42;\nexport default x;';
+    const tsCode = "const x: number = 42;\nexport default x;";
     mockFetch.mockResolvedValueOnce(mockResponse(tsCode));
 
     const result = await sourceHook(
@@ -65,7 +72,7 @@ describe("sourceHook", () => {
   });
 
   it("compiles TSX with JSX transform", async () => {
-    const tsxCode = 'const App = () => <div>hello</div>;\nexport default App;';
+    const tsxCode = "const App = () => <div>hello</div>;\nexport default App;";
     mockFetch.mockResolvedValueOnce(mockResponse(tsxCode));
 
     const result = await sourceHook(

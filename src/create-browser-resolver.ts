@@ -21,9 +21,7 @@ export function createBrowserResolver(
     async findPackageJson(moduleUrl: string): Promise<string> {
       // If the URL already ends with a file extension, it's a leaf node (e.g., esm.sh URL)
       // Strip to directory and append package.json
-      const base = moduleUrl.endsWith("/")
-        ? moduleUrl
-        : `${moduleUrl}/`;
+      const base = moduleUrl.endsWith("/") ? moduleUrl : `${moduleUrl}/`;
       return `${base}package.json`;
     },
 

@@ -1,6 +1,6 @@
+import type { ResolvedModule } from "@repo/backbone-common";
 import { describe, expect, it } from "vitest";
 import { buildImportMap } from "../src/build-import-map.js";
-import type { ResolvedModule } from "@repo/backbone-common";
 
 function makeModule(
   name: string,
@@ -18,7 +18,9 @@ function makeModule(
 
 describe("buildImportMap", () => {
   it("generates entries from sub-path exports", () => {
-    const registry = new Map([["@repo/shared", "https://host/modules/@repo/shared"]]);
+    const registry = new Map([
+      ["@repo/shared", "https://host/modules/@repo/shared"],
+    ]);
     const modules = [
       makeModule("@repo/shared", "https://host/modules/@repo/shared", {
         "./adapters": "./adapters.js",
@@ -36,12 +38,18 @@ describe("buildImportMap", () => {
   });
 
   it("generates entry from root export '.'", () => {
-    const registry = new Map([["@repo/shared-views", "https://host/modules/@repo/shared-views"]]);
+    const registry = new Map([
+      ["@repo/shared-views", "https://host/modules/@repo/shared-views"],
+    ]);
     const modules = [
-      makeModule("@repo/shared-views", "https://host/modules/@repo/shared-views", {
-        ".": "./index.js",
-        "./layout": "./layout.js",
-      }),
+      makeModule(
+        "@repo/shared-views",
+        "https://host/modules/@repo/shared-views",
+        {
+          ".": "./index.js",
+          "./layout": "./layout.js",
+        },
+      ),
     ];
     const result = buildImportMap(modules, registry);
 
@@ -54,8 +62,12 @@ describe("buildImportMap", () => {
   });
 
   it("falls back to index.js when no exports field", () => {
-    const registry = new Map([["@ext/sandbox", "https://host/modules/@ext/sandbox"]]);
-    const modules = [makeModule("@ext/sandbox", "https://host/modules/@ext/sandbox")];
+    const registry = new Map([
+      ["@ext/sandbox", "https://host/modules/@ext/sandbox"],
+    ]);
+    const modules = [
+      makeModule("@ext/sandbox", "https://host/modules/@ext/sandbox"),
+    ];
     const result = buildImportMap(modules, registry);
 
     expect(result.imports["@ext/sandbox"]).toBe(
@@ -71,6 +83,6 @@ describe("buildImportMap", () => {
     // esm.sh URLs have no package.json, so no exports — should use URL directly
     // The URL has no file extension in path, so falls back to index.js approach
     // Actually esm.sh/react@19.2.0 doesn't end with an extension, so it adds /index.js
-    expect(result.imports["react"]).toBeDefined();
+    expect(result.imports.react).toBeDefined();
   });
 });
