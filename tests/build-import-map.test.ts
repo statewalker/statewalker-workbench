@@ -19,21 +19,21 @@ function makeModule(
 describe("buildImportMap", () => {
   it("generates entries from sub-path exports", () => {
     const registry = new Map([
-      ["@repo/shared", "https://host/modules/@repo/shared"],
+      ["@repo/shared-adapters", "https://host/modules/@repo/shared-adapters"],
     ]);
     const modules = [
-      makeModule("@repo/shared", "https://host/modules/@repo/shared", {
+      makeModule("@repo/shared-adapters", "https://host/modules/@repo/shared-adapters", {
         "./adapters": "./adapters.js",
         "./registry": "./registry.js",
       }),
     ];
     const result = buildImportMap(modules, registry);
 
-    expect(result.imports["@repo/shared/adapters"]).toBe(
-      "https://host/modules/@repo/shared/adapters.js",
+    expect(result.imports["@repo/shared-adapters/adapters"]).toBe(
+      "https://host/modules/@repo/shared-adapters/adapters.js",
     );
-    expect(result.imports["@repo/shared/registry"]).toBe(
-      "https://host/modules/@repo/shared/registry.js",
+    expect(result.imports["@repo/shared-adapters/registry"]).toBe(
+      "https://host/modules/@repo/shared-adapters/registry.js",
     );
   });
 

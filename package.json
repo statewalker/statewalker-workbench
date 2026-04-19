@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@repo/backbone-common": "workspace:*",
-    "@repo/shared": "workspace:*",
     "sucrase": "^3.35.0"
   },
   "devDependencies": {

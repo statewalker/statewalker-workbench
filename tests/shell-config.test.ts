@@ -30,13 +30,13 @@ describe("loadShellConfig", () => {
     mockGetElementById.mockReturnValue({
       textContent: JSON.stringify({
         roots: ["@ext/explorer"],
-        modules: { "@repo/shared": "/m/shared" },
+        modules: { "@repo/shared-adapters": "/m/shared" },
       }),
     });
 
     const config = await loadShellConfig();
     expect(config.roots).toEqual(["@ext/explorer"]);
-    expect(config.modules["@repo/shared"]).toBe("/m/shared");
+    expect(config.modules["@repo/shared-adapters"]).toBe("/m/shared");
   });
 
   it("URL ?root= params override roots", async () => {
@@ -70,7 +70,7 @@ describe("loadShellConfig", () => {
       ok: true,
       json: async () => ({
         roots: ["@ext/fetched"],
-        modules: { "@repo/shared": "/fetched/shared" },
+        modules: { "@repo/shared-adapters": "/fetched/shared" },
       }),
     });
 
@@ -80,7 +80,7 @@ describe("loadShellConfig", () => {
     });
 
     expect(config.roots).toEqual(["@ext/fetched"]);
-    expect(config.modules["@repo/shared"]).toBe("/fetched/shared");
+    expect(config.modules["@repo/shared-adapters"]).toBe("/fetched/shared");
     expect(config.modules.react).toBe("https://esm.sh/react");
   });
 });
