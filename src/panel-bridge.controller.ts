@@ -5,7 +5,7 @@
  * PanelManagerView in sync. This is the controller-layer wiring that
  * was previously embedded in the React AppShell component.
  */
-import { newRegistry } from "@repo/shared-registry";
+import { newRegistry } from "@statewalker/shared-registry";
 import { getPanelManagerView, listenPanel } from "@repo/shared-views";
 
 export function createPanelBridgeController(

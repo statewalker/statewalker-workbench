@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@repo/shared-views": "workspace:*",
-    "@repo/shared-registry": "workspace:*"
+    "@statewalker/shared-registry": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

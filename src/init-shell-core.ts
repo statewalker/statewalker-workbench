@@ -5,7 +5,7 @@
  * Controllers bridge extension-point registrations (publishPanel, etc.)
  * to the shared model layer (PanelManagerView, etc.).
  */
-import { newRegistry } from "@repo/shared-registry";
+import { newRegistry } from "@statewalker/shared-registry";
 import { createPanelBridgeController } from "./panel-bridge.controller.js";
 
 export function initShellCore(ctx: Record<string, unknown>): () => void {
