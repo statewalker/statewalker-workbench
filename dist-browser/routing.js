@@ -1,4 +1,4 @@
-import { newRegistry as r } from "@repo/shared-registry";
+import { newRegistry as r } from "@statewalker/shared-registry";
 function c(e) {
   const [t, s] = r(), o = n();
   o && e.setRouteId(o), t(
