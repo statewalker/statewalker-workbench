@@ -1,4 +1,4 @@
-import { newRegistry } from "@repo/shared/registry";
+import { newRegistry } from "@repo/shared-registry";
 import type { NavigationView } from "@repo/shared-views";
 
 /**
