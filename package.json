@@ -17,9 +17,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/shared": "workspace:*",
     "@repo/shared-views": "workspace:*",
-    "htl": "^0.3.1"
+    "htl": "^0.3.1",
+    "@repo/shared-registry": "workspace:*",
+    "@repo/shared-adapters": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

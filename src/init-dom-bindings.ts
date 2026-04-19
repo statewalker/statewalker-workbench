@@ -1,4 +1,4 @@
-import { newRegistry } from "@repo/shared/registry";
+import { newRegistry } from "@repo/shared-registry";
 import { bindKeyboard } from "./bind-keyboard.js";
 import { bindPointer } from "./bind-pointer.js";
 import { bindTheme } from "./bind-theme.js";
