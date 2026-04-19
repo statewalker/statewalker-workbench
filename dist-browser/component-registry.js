@@ -1,7 +1,7 @@
 var i = Object.defineProperty;
 var c = (r, t, e) => t in r ? i(r, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : r[t] = e;
 var o = (r, t, e) => c(r, typeof t != "symbol" ? t + "" : t, e);
-import { newAdapter as g } from "@repo/shared-adapters";
+import { newAdapter as g } from "@statewalker/shared-adapters";
 import { createContext as u, createElement as a, useContext as f } from "react";
 class s {
   constructor() {
