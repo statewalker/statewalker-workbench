@@ -1,15 +1,14 @@
 import { accessSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { resolve as resolveImport } from "import-meta-resolve";
 import {
-  ModuleResolver,
+  type AppManifest,
+  activateModules,
   formatModulesMap,
+  ModuleResolver,
 } from "@repo/backbone-common";
 import { getLogger } from "@repo/shared/logger";
-import { newRegistry } from "@repo/shared/registry";
-
-// --- Node-specific resolution callbacks ---
+import { resolve as resolveImport } from "import-meta-resolve";
 
 function toFilePath(url: string): string {
   return url.startsWith("file://") ? fileURLToPath(url) : url;
@@ -64,8 +63,6 @@ function createNodeResolver(): ModuleResolver {
           (error as NodeJS.ErrnoException).code ===
             "ERR_PACKAGE_PATH_NOT_EXPORTED"
         ) {
-          // Package exists but has no root export (e.g. only subpath exports).
-          // Fall back to locating its directory via node_modules.
           const baseDir = dirname(toFilePath(baseUrl));
           const pkgJsonPath = resolvePackageJsonFallback(moduleId, baseDir);
           return pathToFileURL(dirname(pkgJsonPath)).href;
@@ -89,58 +86,46 @@ function createNodeResolver(): ModuleResolver {
   });
 }
 
-// --- Bootstrap ---
-
+/**
+ * Node-side bootstrap. Accepts an `AppManifest`, resolves each root through
+ * the filesystem resolver, topo-sorts the dependency graph, and activates
+ * each module via the shared `activateModules` loop.
+ */
 export async function bootstrap(
-  moduleNames: string[],
+  manifest: AppManifest,
+  ctx: Record<string, unknown> = {},
 ): Promise<() => Promise<void>> {
-  const [register, cleanup] = newRegistry();
-  try {
-    const context: Record<string, unknown> = {};
+  const logger = getLogger(ctx);
+  logger.info("[backbone] Starting...");
 
-    // Logger
-    {
-      const logger = getLogger(context);
-      register(() => logger.info("[backbone] Shutting down..."));
-    }
+  const resolver = createNodeResolver();
+  const baseUrl = pathToFileURL(join(process.cwd(), "package.json")).href;
+  const ordered = await resolver.resolveModules(baseUrl, manifest.roots);
 
-    // Resolve modules in dependency order
-    const resolver = createNodeResolver();
-    const baseUrl = pathToFileURL(join(process.cwd(), "package.json")).href;
-    const ordered = await resolver.resolveModules(baseUrl, moduleNames);
+  const modulesMap: Record<string, string> = {};
+  for (const mod of ordered) modulesMap[mod.name] = mod.url;
 
-    // Load and initialise modules
-    const modulesMap: Record<string, string> = {};
-    for (const mod of ordered) {
-      const logger = getLogger(context);
+  const loggerCleanup = () => logger.info("[backbone] Shutting down...");
 
-      let imported: Record<string, unknown>;
+  const moduleCleanup = await activateModules(
+    ordered,
+    async (mod) => {
       try {
-        imported = await import(mod.url);
+        return (await import(mod.url)) as Record<string, unknown>;
       } catch {
-        continue;
+        return undefined;
       }
-      const init = imported.default;
-      if (typeof init !== "function") continue;
+    },
+    ctx,
+  );
 
-      logger.info(`[backbone] Loading module: ${mod.name}`);
-      modulesMap[mod.name] = mod.url;
-      const teardown: unknown = await init(context);
-      if (typeof teardown === "function") {
-        register(teardown as () => Promise<void>);
-      }
-    }
+  logger.info(
+    `[backbone] Started with ${ordered.length} module(s)`,
+    formatModulesMap(modulesMap),
+  );
 
-    const logger = getLogger(context);
-    logger.info(
-      `[backbone] Started with ${ordered.length} module(s)`,
-      formatModulesMap(modulesMap),
-    );
-
-    // Master cleanup (reverse order)
-    return cleanup;
-  } catch (error) {
-    await cleanup();
-    throw error;
-  }
+  return async () => {
+    await moduleCleanup();
+    loggerCleanup();
+  };
 }

@@ -1,15 +1,15 @@
 import { bootstrap } from "./bootstrap.js";
 
-const moduleNames = process.argv.slice(2).filter((arg) => arg !== "--");
+const roots = process.argv.slice(2).filter((arg) => arg !== "--");
 
 console.log("[backbone] Starting...");
-if (moduleNames.length > 0) {
-  console.log(`[backbone] Loading modules: ${moduleNames.join(", ")}`);
+if (roots.length > 0) {
+  console.log(`[backbone] Loading modules: ${roots.join(", ")}`);
 } else {
   console.log("[backbone] No modules specified — running bare backbone");
 }
 
-const shutdown = await bootstrap(moduleNames);
+const shutdown = await bootstrap({ roots });
 
 // Keep the event loop alive until a signal is received.
 const keepAlive = setInterval(() => {}, 1 << 30);
