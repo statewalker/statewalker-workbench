@@ -1,4 +1,4 @@
-import { newAdapter } from "@repo/shared-adapters";
+import { newAdapter } from "@statewalker/shared-adapters";
 import type { ComponentRegistry } from "./component-registry.js";
 
 export type HtmlComponentRegistry = ComponentRegistry<Element>;

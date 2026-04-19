@@ -19,8 +19,8 @@
   "dependencies": {
     "@repo/shared-views": "workspace:*",
     "htl": "^0.3.1",
-    "@repo/shared-registry": "workspace:*",
-    "@repo/shared-adapters": "workspace:*"
+    "@statewalker/shared-registry": "workspace:*",
+    "@statewalker/shared-adapters": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
