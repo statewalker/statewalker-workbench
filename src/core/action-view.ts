@@ -1,4 +1,4 @@
-import { BaseClass, onChange } from "@repo/shared/models";
+import { BaseClass, onChange } from "@repo/shared-baseclass";
 
 export type ActionViewVariant =
   | "primary"

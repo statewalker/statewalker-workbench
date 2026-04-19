@@ -1,4 +1,4 @@
-import { newAdapter } from "@repo/shared/adapters";
+import { newAdapter } from "@repo/shared-adapters";
 import { ViewModel } from "../core/view-model.js";
 import {
   addTabToPanel,

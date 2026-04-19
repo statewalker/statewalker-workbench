@@ -1,4 +1,4 @@
-import { newAdapter } from "@repo/shared/adapters";
+import { newAdapter } from "@repo/shared-adapters";
 import type { ActionView } from "../actions/action-view.js";
 import {
   createModelPoint,

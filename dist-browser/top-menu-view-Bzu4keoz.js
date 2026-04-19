@@ -1,8 +1,8 @@
 var b = Object.defineProperty;
 var f = (t, s, e) => s in t ? b(t, s, { enumerable: !0, configurable: !0, writable: !0, value: e }) : t[s] = e;
 var a = (t, s, e) => f(t, typeof s != "symbol" ? s + "" : s, e);
-import { newAdapter as o } from "@repo/shared/adapters";
-import { BaseClass as u } from "@repo/shared/models";
+import { newAdapter as o } from "@repo/shared-adapters";
+import { BaseClass as u } from "@repo/shared-baseclass";
 const g = /* @__PURE__ */ new Map();
 function w(t) {
   const s = (g.get(t) ?? 0) + 1;

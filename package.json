@@ -21,7 +21,8 @@
     "lint:check": "biome check ."
   },
   "dependencies": {
-    "@repo/shared": "workspace:*"
+    "@repo/shared-baseclass": "workspace:*",
+    "@repo/shared-adapters": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

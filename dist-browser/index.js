@@ -13,7 +13,7 @@ var sa = (r, h, e, a) => ({
     return s(r, h, a);
   }
 });
-import { BaseClass as Va, onChange as ba } from "@repo/shared/models";
+import { BaseClass as Va, onChange as ba } from "@repo/shared-baseclass";
 import { V as l } from "./top-menu-view-Bzu4keoz.js";
 import { A as pl, C as ol, D as eu, a as tu, K as su, T as iu, b as hu, U as ru, c as au, t as lu, g as uu, d as du, e as yu, f as cu, h as fu, i as gu, l as nu, j as bu, k as mu, m as vu, n as Vu, p as xu, o as wu, q as ku, r as Mu, s as Ou } from "./top-menu-view-Bzu4keoz.js";
 var G, W, j, N, me, ve, ia;

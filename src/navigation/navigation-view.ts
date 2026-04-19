@@ -1,4 +1,4 @@
-import { onChange } from "@repo/shared/models";
+import { onChange } from "@repo/shared-baseclass";
 import { ViewModel } from "../core/view-model.js";
 
 /**

@@ -1,5 +1,5 @@
-import { newAdapter } from "@repo/shared/adapters";
-import { BaseClass } from "@repo/shared/models";
+import { newAdapter } from "@repo/shared-adapters";
+import { BaseClass } from "@repo/shared-baseclass";
 
 /**
  * Low-level interaction model for pointer (mouse/touch) events.

@@ -1,4 +1,4 @@
-import { BaseClass } from "@repo/shared/models";
+import { BaseClass } from "@repo/shared-baseclass";
 
 const counters = new Map<string, number>();
 
