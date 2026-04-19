@@ -1,0 +1,21 @@
+{
+  "name": "@repo/shared-react.spectrum",
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@adobe/react-spectrum": "^3.46.2",
+    "@internationalized/date": "^3.8.2",
+    "@react-stately/color": "^3.9.0",
+    "@spectrum-icons/workflow": "^4.2.28",
+    "@repo/shared": "workspace:*",
+    "@statewalker/shared-react": "workspace:*",
+    "@statewalker/shared-views": "workspace:*",
+    "react-resizable-panels": "^4.8.0"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./init": "./init.js",
+    "./provider": "./provider.js",
+    "./layouts": "./layouts.js"
+  }
+}
