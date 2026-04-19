@@ -1,8 +1,10 @@
-export { ModuleResolver } from "./resolve-modules.js";
+export { activateModules } from "./activate-modules.js";
+export type { AppManifest, FragmentInit } from "./app-manifest.js";
+export { formatModulesMap } from "./format-modules-map.js";
 export type {
   ModuleResolverOptions,
   ResolvedModule,
 } from "./resolve-modules.js";
-export { topoSort } from "./topo-sort.js";
+export { ModuleResolver } from "./resolve-modules.js";
 export type { GraphNode } from "./topo-sort.js";
-export { formatModulesMap } from "./format-modules-map.js";
+export { topoSort } from "./topo-sort.js";
