@@ -18,8 +18,8 @@
     "lint:check": "biome check ."
   },
   "dependencies": {
-    "@repo/shared": "workspace:*",
-    "@repo/shared-views": "workspace:*"
+    "@repo/shared-views": "workspace:*",
+    "@repo/shared-registry": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",
