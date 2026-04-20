@@ -39,7 +39,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/shared-adapters": "^0.1.0",
+    "@statewalker/shared-adapters": "catalog:",
     "react": "catalog:"
   },
   "devDependencies": {
