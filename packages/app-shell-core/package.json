@@ -32,7 +32,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/shared-registry": "^0.1.0",
+    "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-views": "workspace:*"
   },
   "devDependencies": {

@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@statewalker/backbone-common": "workspace:*",
-    "sucrase": "^3.35.0"
+    "sucrase": "catalog:"
   },
   "devDependencies": {
     "rimraf": "catalog:",
