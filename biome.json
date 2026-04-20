@@ -16,6 +16,16 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "a11y": {
+        "useFocusableInteractive": "warn",
+        "useSemanticElements": "warn",
+        "noLabelWithoutControl": "warn",
+        "noStaticElementInteractions": "warn",
+        "noSvgWithoutTitle": "warn",
+        "useAriaPropsForRole": "warn",
+        "useValidAnchor": "warn",
+        "useKeyWithClickEvents": "warn"
+      },
       "correctness": {
         "noUnusedVariables": "error"
       }
@@ -33,5 +43,8 @@
       "enabled": true,
       "indentWidth": 2
     }
+  },
+  "files": {
+    "includes": ["**", "!**/*.css"]
   }
 }

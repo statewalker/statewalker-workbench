@@ -22,7 +22,9 @@ export function TabsRenderer({ model }: { model: TabsViewType }) {
                 ? "border-primary text-foreground"
                 : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
             } ${tab.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-            onClick={() => (model.selectedKey = tab.key)}
+            onClick={() => {
+              model.selectedKey = tab.key;
+            }}
           >
             {tab.label}
           </button>
