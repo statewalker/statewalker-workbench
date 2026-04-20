@@ -15,7 +15,14 @@
     "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./app-context": "./src/app-context.tsx",
+    "./component-registry": "./src/component-registry/index.ts",
+    "./dock": "./src/dock/index.ts",
+    "./dock-hooks": "./src/dock-hooks/index.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./icons": "./src/icons/index.ts",
+    "./shell-hooks": "./src/shell-hooks/index.ts"
   },
   "files": [
     "dist",

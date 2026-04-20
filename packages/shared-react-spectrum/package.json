@@ -15,7 +15,8 @@
     "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./*": "./src/*/index.ts"
   },
   "files": [
     "dist",

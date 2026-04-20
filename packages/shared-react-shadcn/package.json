@@ -15,7 +15,15 @@
     "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./components": "./src/components/index.ts",
+    "./icons": "./src/icons/index.ts",
+    "./layouts": "./src/layouts/index.ts",
+    "./renderers": "./src/renderers/index.ts",
+    "./routing": "./src/routing/index.ts",
+    "./init-views": "./src/init-views.ts",
+    "./init-common-views": "./src/init-common-views.ts",
+    "./init-ai-model-views": "./src/init-ai-model-views.ts"
   },
   "files": [
     "dist",

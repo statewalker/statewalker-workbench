@@ -1,4 +1,5 @@
 import React from "react";
+import type { Layout } from "react-resizable-panels";
 import { type DockNode, type DockSplit, isPanel, isSplit, useDockLayout } from "./dock-context.js";
 import { DockPanelComponent } from "./dock-panel.js";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./resizable.js";
@@ -6,7 +7,8 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./resizabl
 function DockSplitRenderer({ split }: { split: DockSplit }) {
   const { updateSizes } = useDockLayout();
 
-  const handleResize = (sizes: number[]) => {
+  const handleResize = (layout: Layout) => {
+    const sizes = split.children.map((c) => layout[c.id] ?? 0);
     updateSizes(split.id, sizes);
   };
 
