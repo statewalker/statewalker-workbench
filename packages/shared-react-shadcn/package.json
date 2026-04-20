@@ -32,9 +32,9 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/shared-adapters": "workspace:*",
+    "@statewalker/shared-adapters": "^0.1.0",
     "@statewalker/shared-react": "workspace:*",
-    "@statewalker/shared-registry": "workspace:*",
+    "@statewalker/shared-registry": "^0.1.0",
     "@statewalker/shared-views": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

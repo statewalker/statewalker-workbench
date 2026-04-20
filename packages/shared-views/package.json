@@ -32,8 +32,8 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/shared-adapters": "workspace:*",
-    "@statewalker/shared-baseclass": "workspace:*"
+    "@statewalker/shared-adapters": "^0.1.0",
+    "@statewalker/shared-baseclass": "^0.1.0"
   },
   "devDependencies": {
     "rimraf": "catalog:",
