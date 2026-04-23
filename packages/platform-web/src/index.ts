@@ -12,7 +12,7 @@ import { registerPreferenceSetBrowser } from "./handlers/preference-set.browser.
  * the context's shared `Intents` bus. Returns a cleanup that unregisters them
  * all in reverse order.
  */
-export default function initPlatformSys(ctx: Record<string, unknown>): () => void {
+export default function initPlatformWeb(ctx: Record<string, unknown>): () => void {
   const intents = getIntents(ctx);
   const cleanups = [
     registerPickDirectoryBrowser(intents),

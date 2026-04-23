@@ -11,7 +11,7 @@ import {
   runPreferenceSet,
 } from "@statewalker/platform.api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import initPlatformSys from "../src/index.js";
+import initPlatformWeb from "../src/index.js";
 
 const PLATFORM_INTENT_KEYS = [
   PICK_DIRECTORY_INTENT_KEY,
@@ -23,7 +23,7 @@ const PLATFORM_INTENT_KEYS = [
   PREFERENCE_SET_INTENT_KEY,
 ];
 
-describe("platform.sys initPlatformSys(ctx)", () => {
+describe("platform.web initPlatformWeb(ctx)", () => {
   beforeEach(() => {
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText: vi.fn(() => Promise.resolve()) },
@@ -39,7 +39,7 @@ describe("platform.sys initPlatformSys(ctx)", () => {
 
   it("registers all seven handlers and cleanup unregisters them", async () => {
     const ctx: Record<string, unknown> = {};
-    const cleanup = initPlatformSys(ctx);
+    const cleanup = initPlatformWeb(ctx);
     expect(cleanup).toBeTypeOf("function");
 
     // Quick sanity: two handler-backed intents resolve after init.
