@@ -1,4 +1,4 @@
-# @statewalker/platform.sys
+# @statewalker/platform.web
 
 Browser implementation of the `@statewalker/platform.api` intents. Provides default handlers for:
 
@@ -11,21 +11,21 @@ Browser implementation of the `@statewalker/platform.api` intents. Provides defa
 
 ## Usage
 
-The package has a single default export: `initPlatformSys(ctx)`. Register it as a fragment in the `AppManifest`:
+The package has a single default export: `initPlatformWeb(ctx)`. Register it as a fragment in the `AppManifest`:
 
 ```ts
-import initPlatformSys from "@statewalker/platform.sys";
+import initPlatformWeb from "@statewalker/platform.web";
 // or, via the manifest:
 const manifest: AppManifest = {
   roots: [
-    "@statewalker/platform.sys",
+    "@statewalker/platform.web",
     // ...your application fragments
   ],
 };
 ```
 
-`initPlatformSys(ctx)` resolves the shared `Intents` bus via `getIntents(ctx)` (from `@statewalker/platform.api`), registers every browser handler, and returns a cleanup function that unregisters them in reverse order.
+`initPlatformWeb(ctx)` resolves the shared `Intents` bus via `getIntents(ctx)` (from `@statewalker/platform.api`), registers every browser handler, and returns a cleanup function that unregisters them in reverse order.
 
-## Replacing handlers
+## Peer implementations
 
-The handlers are deliberately small and replaceable. A future `@statewalker/platform.sys-electron` or `@statewalker/platform.sys-node` can ship alternative implementations against the same `platform.api` contract. Only one `platform.sys*` should be listed in a given manifest.
+The package ships browser-only defaults. A future `@statewalker/platform.node` or `@statewalker/platform.electron` can provide alternative implementations against the same `platform.api` contract — parallel to the `backbone-web` / `backbone-server` split. Only one `platform.*` target should be listed in a given manifest.

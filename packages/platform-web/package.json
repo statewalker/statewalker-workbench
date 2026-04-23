@@ -1,5 +1,5 @@
 {
-  "name": "@statewalker/platform.sys",
+  "name": "@statewalker/platform.web",
   "version": "0.1.0",
   "private": false,
   "type": "module",
