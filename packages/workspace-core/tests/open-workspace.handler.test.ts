@@ -1,11 +1,9 @@
-import type { SecretsApi, Workspace } from "@statewalker/workspace-api";
 import {
-  getFilesApi,
-  getSecretsApi,
-  getSystemFilesApi,
   getWorkspace,
   runChangeWorkspace,
   runOpenWorkspace,
+  Secrets,
+  SystemFiles,
 } from "@statewalker/workspace-api";
 import type { PickDirectoryResult } from "@statewalker/platform.api";
 import {
@@ -35,11 +33,6 @@ interface PickStub {
   label: string;
 }
 
-/**
- * Register a stub `platform:pick-directory` handler that resolves with the
- * supplied sequence of picks. Each `runPickDirectory` call pops the next
- * entry; reject if the sequence is exhausted.
- */
 function registerPickStub(intents: Intents, picks: PickStub[]): () => void {
   const queue = [...picks];
   return handlePickDirectory(intents, (intent) => {
@@ -63,15 +56,7 @@ function registerNoPreferences(intents: Intents): () => void {
   });
 }
 
-/**
- * Drain pending microtasks so coalesced notifications flush.
- */
-async function settle(): Promise<void> {
-  await Promise.resolve();
-  await Promise.resolve();
-}
-
-describe("workspace.core / runOpenWorkspace", () => {
+describe("workspace.core / handlers", () => {
   let cleanups: Array<() => void> = [];
 
   afterEach(() => {
@@ -80,7 +65,7 @@ describe("workspace.core / runOpenWorkspace", () => {
     vi.restoreAllMocks();
   });
 
-  it("assembles a Workspace via the platform pick-directory intent", async () => {
+  it("open assembles a Workspace and publishes it in the opened state", async () => {
     const ctx: Record<string, unknown> = {};
     const root = await seededRoot();
     const intents = getIntents(ctx);
@@ -93,32 +78,31 @@ describe("workspace.core / runOpenWorkspace", () => {
 
     const { workspace } = await runOpenWorkspace(intents, {});
 
+    expect(workspace.isOpened).toBe(true);
     expect(workspace.label).toBe("project-a");
     expect(getWorkspace(ctx)).toBe(workspace);
-    expect(getFilesApi(ctx)).toBeDefined();
-    expect(getSystemFilesApi(ctx)).toBeDefined();
-    expect(getSecretsApi(ctx)).toBeDefined();
 
-    // main view hides the system folder
-    const mainTopLevel: string[] = [];
-    for await (const entry of getFilesApi(ctx).list("/"))
-      mainTopLevel.push(entry.name);
-    expect(mainTopLevel.sort()).toEqual(["README.md"]);
+    const systemFiles = workspace.requireAdapter(SystemFiles).files;
+    const secrets = workspace.requireAdapter(Secrets);
 
-    // system view shows the system subtree
-    const systemTopLevel: string[] = [];
-    for await (const entry of getSystemFilesApi(ctx).list("/"))
-      systemTopLevel.push(entry.name);
-    expect(systemTopLevel).toEqual(["secrets"]);
+    // System view is rooted at .settings
+    const systemEntries: string[] = [];
+    for await (const entry of systemFiles.list("/"))
+      systemEntries.push(entry.name);
+    expect(systemEntries).toEqual(["secrets"]);
 
-    // Secrets round-trip via the injected system view
-    const secrets: SecretsApi = getSecretsApi(ctx);
+    // workspace.files is the raw root — system subtree is visible.
+    const rootEntries: string[] = [];
+    for await (const entry of workspace.files.list("/"))
+      rootEntries.push(entry.name);
+    expect(rootEntries.sort()).toEqual([".settings", "README.md"]);
+
     expect(await secrets.get("ai:provider:openai")).toEqual({
       apiKey: "sk-test",
     });
   });
 
-  it("re-opens short-circuits to the live workspace without calling the picker", async () => {
+  it("re-opens short-circuits to the live workspace without re-prompting", async () => {
     const ctx: Record<string, unknown> = {};
     const root = await seededRoot();
     const intents = getIntents(ctx);
@@ -140,13 +124,12 @@ describe("workspace.core / runOpenWorkspace", () => {
     await runOpenWorkspace(intents, {});
     expect(pickHandler).toHaveBeenCalledTimes(1);
 
-    // Second call without force should not invoke the picker again.
     const { workspace } = await runOpenWorkspace(intents, {});
     expect(pickHandler).toHaveBeenCalledTimes(1);
     expect(workspace.label).toBe("first");
   });
 
-  it("force=true reprompts and swaps the live workspace in place", async () => {
+  it("force=true preserves workspace identity and rebinds the file system", async () => {
     const ctx: Record<string, unknown> = {};
     const firstRoot = await seededRoot();
     const secondRoot = new MemFilesApi();
@@ -163,24 +146,26 @@ describe("workspace.core / runOpenWorkspace", () => {
     cleanups.push(initWorkspaceCore(ctx));
 
     const { workspace: initial } = await runOpenWorkspace(intents, {});
-    const listener = vi.fn();
-    (initial as Workspace).onUpdate(listener);
+    const initialSecrets = initial.requireAdapter(Secrets);
 
     const { workspace: reopened } = await runOpenWorkspace(intents, {
       force: true,
     });
-    expect(reopened).toBe(initial); // same identity; fields swapped in place
-    expect(reopened.label).toBe("second");
-    expect(listener).toHaveBeenCalledTimes(1);
 
-    // Adapter reflects the new view
+    expect(reopened).toBe(initial);
+    expect(reopened.label).toBe("second");
+    expect(reopened.isOpened).toBe(true);
+
+    const freshSecrets = reopened.requireAdapter(Secrets);
+    expect(freshSecrets).not.toBe(initialSecrets);
+
     const mainEntries: string[] = [];
-    for await (const entry of getFilesApi(ctx).list("/"))
+    for await (const entry of reopened.files.list("/"))
       mainEntries.push(entry.name);
     expect(mainEntries).toEqual(["HELLO.md"]);
   });
 
-  it("runChangeWorkspace notifies observers exactly once", async () => {
+  it("change: fires onUnload then onLoad in order; preserves workspace identity; returns fresh adapters", async () => {
     const ctx: Record<string, unknown> = {};
     const intents = getIntents(ctx);
     cleanups.push(
@@ -193,19 +178,25 @@ describe("workspace.core / runOpenWorkspace", () => {
     cleanups.push(initWorkspaceCore(ctx));
 
     const { workspace } = await runOpenWorkspace(intents, {});
-    const listener = vi.fn();
-    workspace.onUpdate(listener);
+    const firstSecrets = workspace.requireAdapter(Secrets);
+
+    const order: string[] = [];
+    // onLoad fires synchronously when subscribing to an already-opened workspace.
+    workspace.onLoad(() => order.push("load"));
+    workspace.onUnload(() => order.push("unload"));
+    expect(order).toEqual(["load"]);
 
     const { workspace: changed } = await runChangeWorkspace(intents, {});
     expect(changed).toBe(workspace);
-    await settle();
-    expect(listener).toHaveBeenCalledTimes(1);
+    expect(order).toEqual(["load", "unload", "load"]);
+
+    const secondSecrets = workspace.requireAdapter(Secrets);
+    expect(secondSecrets).not.toBe(firstSecrets);
   });
 
   it("runs headless under Node without any browser shim", () => {
     expect(typeof globalThis.document).toBe("undefined");
     expect(typeof globalThis.window).toBe("undefined");
-    // Merely importing + activating the core must not throw.
     const ctx: Record<string, unknown> = {};
     cleanups.push(initWorkspaceCore(ctx));
   });

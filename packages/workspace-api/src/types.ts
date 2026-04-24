@@ -2,37 +2,70 @@ import type { BaseClass } from "@statewalker/shared-baseclass";
 import type { FilesApi } from "@statewalker/webrun-files";
 
 /**
- * Observable bundle a workspace publishes once a directory is opened. Every
- * other fragment consumes this — `files` for the main working set, `systemFiles`
- * for the hidden `.settings/` subtree, `secrets` for configs and credentials.
- *
- * `Workspace` extends `BaseClass`, so consumers can subscribe to `.onUpdate`
- * and react when the user switches to a different directory via
- * `workspace:change`. After the subscriber fires, re-reading `.files` etc.
- * returns the new values.
+ * Lifecycle hook an adapter MAY implement. `init` is not currently called by
+ * the workspace (adapters are lazily constructed and do setup in their ctor);
+ * it is reserved for future use. `close` runs during `workspace.close()` in
+ * reverse instantiation order.
  */
-export interface Workspace extends BaseClass {
-  readonly files: FilesApi;
-  readonly systemFiles: FilesApi;
-  readonly secrets: SecretsApi;
-  readonly label: string;
-  close(): Promise<void>;
+export interface WorkspaceAdapter {
+  init?(): void | Promise<void>;
+  close?(): void | Promise<void>;
 }
 
 /**
- * Per-key secret storage. The default implementation writes one JSON file per
- * key under `{systemFiles}/{secretsDir}/{encodedKey}.json`. Encryption hooks
- * (`lock`, `unlock`, `isLocked`) are optional — future impls can wrap the
- * base behaviour without breaking callers.
+ * Registry key type. Abstract classes (like the `Secrets` / `Settings` /
+ * `SystemFiles` tokens) MUST be usable as keys — hence `abstract new`.
  */
-export interface SecretsApi {
-  get(key: string): Promise<unknown | undefined>;
-  set(key: string, value: unknown): Promise<void>;
-  delete(key: string): Promise<boolean>;
-  list(): Promise<string[]>;
-  onUpdate(cb: (changedKeys: string[]) => void): () => void;
+export type AdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> =
+  abstract new (
+    workspace: Workspace,
+    ...args: unknown[]
+  ) => T;
 
-  readonly isLocked?: boolean;
-  lock?(): void;
-  unlock?(password: string): Promise<boolean>;
+/**
+ * Concrete implementation shape. Used as the value side of the registry —
+ * callable with `new` to produce an instance.
+ */
+export type ConcreteAdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> =
+  new (
+    workspace: Workspace,
+    ...args: unknown[]
+  ) => T;
+
+export type AdapterFactory<T extends WorkspaceAdapter = WorkspaceAdapter> = (
+  workspace: Workspace,
+) => T;
+
+/**
+ * Observable workspace the shell app and every fragment share. Holds a single
+ * primary `FilesApi` (the directory the user picked) plus a class-keyed
+ * registry of capability adapters (`SystemFiles`, `Secrets`, `Settings`, etc.).
+ *
+ * Lifecycle: the workspace is constructed in a closed state, adapters and the
+ * file system are installed via chainable `setAdapter` / `setFileSystem`, and
+ * `open()` transitions into the live state. Consumers subscribe via
+ * `onLoad` / `onUnload` to run per-open and per-close work; `BaseClass.onUpdate`
+ * fires on any state transition including `setFileSystem` rebinds.
+ */
+export interface Workspace extends BaseClass {
+  readonly isOpened: boolean;
+  readonly label: string;
+  readonly files: FilesApi;
+
+  setFileSystem(files: FilesApi, label?: string): this;
+
+  setAdapter<T extends WorkspaceAdapter>(type: ConcreteAdapterCtor<T>): this;
+  setAdapter<T extends WorkspaceAdapter, C extends T>(
+    type: AdapterCtor<T>,
+    impl: ConcreteAdapterCtor<C> | AdapterFactory<C>,
+  ): this;
+
+  getAdapter<T extends WorkspaceAdapter>(type: AdapterCtor<T>): T | null;
+  requireAdapter<T extends WorkspaceAdapter>(type: AdapterCtor<T>): T;
+
+  onLoad(cb: () => void): () => void;
+  onUnload(cb: () => void): () => void;
+
+  open(): Promise<this>;
+  close(): Promise<void>;
 }

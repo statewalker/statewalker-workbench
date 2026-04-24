@@ -1,11 +1,15 @@
-import { getWorkspaceConfig, handleChangeWorkspace } from "@statewalker/workspace-api";
+import {
+  getWorkspace,
+  handleChangeWorkspace,
+  runOpenWorkspace,
+} from "@statewalker/workspace-api";
 import { getIntents, runPickDirectory } from "@statewalker/platform.api";
-import { assembleWorkspace } from "../impl/assemble-workspace.ts";
+import type { Workspace } from "../impl/workspace.impl.ts";
 
 /**
- * Register the `workspace:change` handler. Re-runs the picker, assembles a
- * fresh workspace, and swaps the existing `Workspace` object in-place so
- * `onUpdate` subscribers see exactly one notification per change.
+ * Register the `workspace:change` handler. Orchestrates the three-step
+ * rebind: `close()` → `setFileSystem()` → `open()` so workspace identity is
+ * preserved. If no workspace exists yet, delegates to `workspace:open`.
  */
 export function registerChangeWorkspaceHandler(
   ctx: Record<string, unknown>,
@@ -13,12 +17,18 @@ export function registerChangeWorkspaceHandler(
   const intents = getIntents(ctx);
   return handleChangeWorkspace(intents, (intent) => {
     void (async () => {
+      const existing = getWorkspace(ctx, true) as Workspace | undefined;
+      if (!existing) {
+        const { workspace } = await runOpenWorkspace(intents, {});
+        return workspace as Workspace;
+      }
       const { files, label } = await runPickDirectory(intents, {
         title: "Change workspace folder",
       });
-      const config = getWorkspaceConfig(ctx);
-      const workspace = assembleWorkspace(ctx, files, label, config);
-      return workspace;
+      await existing.close();
+      existing.setFileSystem(files, label);
+      await existing.open();
+      return existing;
     })()
       .then((workspace) => {
         intent.resolve({ workspace });

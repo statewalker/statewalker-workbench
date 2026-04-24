@@ -1,24 +1,22 @@
-import { Secrets, SystemFiles, type Workspace } from "@statewalker/workspace-api";
+import { Settings, SystemFiles, type Workspace } from "@statewalker/workspace-api";
 import { JsonPerKeyStore } from "./json-per-key-store.ts";
 
 /**
- * Default `Secrets` impl. Stores each secret as one JSON file per key under
- * `{systemFiles}/{secretsDir}/{encodedKey}.json`. `onUpdate` notifications
- * coalesce across a microtask.
+ * Default `Settings` impl. Same JSON-per-key shape as `FilesBackedSecrets`,
+ * but under a sibling subtree (`settingsDir`) and without the lock/unlock
+ * surface.
  */
-export class FilesBackedSecrets extends Secrets {
+export class FilesBackedSettings extends Settings {
   private readonly store: JsonPerKeyStore;
 
-  readonly isLocked = false;
-
-  constructor(workspace: Workspace, secretsDir: string) {
+  constructor(workspace: Workspace, settingsDir: string) {
     super();
     const systemFiles = workspace.requireAdapter(SystemFiles).files;
-    this.store = new JsonPerKeyStore(systemFiles, secretsDir);
+    this.store = new JsonPerKeyStore(systemFiles, settingsDir);
   }
 
-  get(key: string): Promise<unknown | undefined> {
-    return this.store.get(key);
+  get<T = unknown>(key: string): Promise<T | undefined> {
+    return this.store.get<T>(key);
   }
 
   set(key: string, value: unknown): Promise<void> {
@@ -37,7 +35,7 @@ export class FilesBackedSecrets extends Secrets {
     return this.store.onUpdate(cb);
   }
 
-  override close(): void {
+  close(): void {
     this.store.flushPendingNotifications();
   }
 }

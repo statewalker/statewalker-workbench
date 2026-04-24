@@ -2,6 +2,7 @@ import {
   getWorkspace,
   getWorkspaceConfig,
   handleOpenWorkspace,
+  setWorkspace,
 } from "@statewalker/workspace-api";
 import {
   getIntents,
@@ -9,8 +10,8 @@ import {
   runPreferenceGet,
 } from "@statewalker/platform.api";
 import type { Intents } from "@statewalker/shared-intents";
-import { assembleWorkspace } from "../impl/assemble-workspace.ts";
-import type { WorkspaceImpl } from "../impl/workspace.impl.ts";
+import { buildWorkspace } from "../impl/build-workspace.ts";
+import type { Workspace } from "../impl/workspace.impl.ts";
 
 /**
  * Key under which we remember a handle-identifier for the last-opened
@@ -22,10 +23,9 @@ import type { WorkspaceImpl } from "../impl/workspace.impl.ts";
 export const WORKSPACE_LAST_HANDLE_PREFERENCE_KEY = "workspace:last-handle";
 
 /**
- * Register the `workspace:open` handler. The handler is platform-neutral —
- * directory picking is delegated to `platform.api`'s `runPickDirectory`
- * intent, and preference lookup is delegated to `platform.api`'s
- * `runPreferenceGet`. Under Node tests you stub both.
+ * Register the `workspace:open` handler. Platform-neutral — directory
+ * picking is delegated to `platform.api`'s `runPickDirectory` intent, and
+ * preference lookup to `runPreferenceGet`.
  */
 export function registerOpenWorkspaceHandler(
   ctx: Record<string, unknown>,
@@ -47,31 +47,33 @@ async function performOpen(
   ctx: Record<string, unknown>,
   intents: Intents,
   force: boolean,
-): Promise<WorkspaceImpl> {
-  // If a workspace is already open and the caller didn't ask for a fresh
-  // picker, short-circuit — the plan's §2.1 open flow says force=true is the
-  // way to re-prompt.
-  if (!force) {
-    const existing = getWorkspace(ctx, true) as WorkspaceImpl | undefined;
-    if (existing) return existing;
-    // Best-effort: honor a remembered handle when one is persisted.
-    // We don't interpret the value here — we just check whether the handler
-    // is registered AND something non-empty came back. When running without
-    // a preference handler, `runPreferenceGet` rejects as unhandled; we
-    // swallow that and fall through to the picker.
-    const remembered = await tryReadRememberedHandle(intents);
-    if (remembered !== undefined) {
-      // Present-day platform.browser doesn't persist opaque handles (browsers
-      // require a fresh user gesture), so for v1 we still prompt. Placeholder
-      // kept so a future host that CAN restore handles has a hook.
-    }
+): Promise<Workspace> {
+  const existing = getWorkspace(ctx, true) as Workspace | undefined;
+
+  if (existing && !force) return existing;
+
+  if (existing && force) {
+    // Delegate to the change flow so workspace identity is preserved.
+    const { files, label } = await runPickDirectory(intents, {
+      title: "Select workspace folder",
+    });
+    await existing.close();
+    existing.setFileSystem(files, label);
+    await existing.open();
+    return existing;
   }
+
+  // No workspace yet. Honor remembered handle if any preference handler replies.
+  await tryReadRememberedHandle(intents);
 
   const { files, label } = await runPickDirectory(intents, {
     title: "Select workspace folder",
   });
   const config = getWorkspaceConfig(ctx);
-  return assembleWorkspace(ctx, files, label, config);
+  const workspace = buildWorkspace(ctx, files, label, config);
+  await workspace.open();
+  setWorkspace(ctx, workspace);
+  return workspace;
 }
 
 async function tryReadRememberedHandle(
