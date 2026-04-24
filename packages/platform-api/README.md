@@ -1,6 +1,6 @@
 # @statewalker/platform.api
 
-Type-only vocabulary for platform-capability intents shared by every application composed of `statewalker-workbench` fragments. A platform-specific implementation is provided by a peer fragment (`@statewalker/platform.web` for browsers; future `platform.node` / `platform.electron`); this package stays free of runtime code and can be imported under Node without a DOM shim.
+Type-only vocabulary for platform-capability intents shared by every application composed of `statewalker-workbench` fragments. A platform-specific implementation is provided by a peer fragment (`@statewalker/platform.browser` for browsers; future `platform.node` / `platform.electron`); this package stays free of runtime code and can be imported under Node without a DOM shim.
 
 ## Intents
 

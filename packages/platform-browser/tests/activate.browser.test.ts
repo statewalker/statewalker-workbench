@@ -23,7 +23,7 @@ const PLATFORM_INTENT_KEYS = [
   PREFERENCE_SET_INTENT_KEY,
 ];
 
-describe("platform.web initPlatformWeb(ctx)", () => {
+describe("platform.browser initPlatformWeb(ctx)", () => {
   beforeEach(() => {
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText: vi.fn(() => Promise.resolve()) },
