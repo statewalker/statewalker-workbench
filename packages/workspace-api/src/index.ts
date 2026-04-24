@@ -1,3 +1,4 @@
+export * from "./adapters/index.ts";
 export * from "./adapters.ts";
 export * from "./config.ts";
 export * from "./intents/index.ts";
