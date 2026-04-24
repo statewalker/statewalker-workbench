@@ -6,7 +6,7 @@ import { registerOpenWorkspaceHandler } from "./handlers/open-workspace.handler.
  * shared `Intents` bus. Returns a cleanup that unregisters both.
  *
  * The function itself is platform-neutral — it's the intent handlers that
- * delegate browser work to `platform.web` via the `platform:*` intents.
+ * delegate browser work to `platform.browser` via the `platform:*` intents.
  * Under Node tests, stub `platform:pick-directory` (and optionally
  * `platform:preference-get`) before calling this.
  */

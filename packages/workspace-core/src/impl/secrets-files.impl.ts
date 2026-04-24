@@ -1,5 +1,5 @@
 import type { SecretsApi } from "@statewalker/workspace-api";
-import type { FilesApi } from "@statewalker/webrun-files";
+import { type FilesApi, readText } from "@statewalker/webrun-files";
 
 interface SecretsFilesOptions {
   /** Backing FilesApi. Typically the workspace's `systemFiles` view. */
@@ -9,7 +9,6 @@ interface SecretsFilesOptions {
 }
 
 const textEncoder = new TextEncoder();
-const textDecoder = new TextDecoder();
 
 /**
  * Encode a secret key so it is safe for a filesystem name. We reserve
@@ -55,14 +54,9 @@ export class SecretsFilesImpl implements SecretsApi {
   async get(key: string): Promise<unknown | undefined> {
     const path = this.path(key);
     if (!(await this.files.exists(path))) return undefined;
-    const chunks: Uint8Array[] = [];
-    for await (const chunk of this.files.read(path)) {
-      chunks.push(chunk);
-    }
-    const bytes = concatChunks(chunks);
-    if (bytes.byteLength === 0) return undefined;
+    const text = await readText(this.files, path);
     try {
-      return JSON.parse(textDecoder.decode(bytes)) as unknown;
+      return JSON.parse(text);
     } catch {
       return undefined;
     }
@@ -124,18 +118,6 @@ export class SecretsFilesImpl implements SecretsApi {
       }
     });
   }
-}
-
-function concatChunks(chunks: Uint8Array[]): Uint8Array {
-  let total = 0;
-  for (const chunk of chunks) total += chunk.byteLength;
-  const out = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    out.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return out;
 }
 
 function trimSlashes(path: string): string {

@@ -14,7 +14,7 @@ import type { WorkspaceImpl } from "../impl/workspace.impl.ts";
 
 /**
  * Key under which we remember a handle-identifier for the last-opened
- * workspace. Today the serialised value is whatever `platform.web` chooses
+ * workspace. Today the serialised value is whatever `platform.browser` chooses
  * to store; `workspace.core` treats it as opaque — if a preference handler
  * is registered AND it returns a remembered handle, we fire `pick-directory`
  * in resume mode; otherwise we prompt.
@@ -61,7 +61,7 @@ async function performOpen(
     // swallow that and fall through to the picker.
     const remembered = await tryReadRememberedHandle(intents);
     if (remembered !== undefined) {
-      // Present-day platform.web doesn't persist opaque handles (browsers
+      // Present-day platform.browser doesn't persist opaque handles (browsers
       // require a fresh user gesture), so for v1 we still prompt. Placeholder
       // kept so a future host that CAN restore handles has a hook.
     }
