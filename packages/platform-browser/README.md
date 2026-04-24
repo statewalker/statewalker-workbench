@@ -1,4 +1,4 @@
-# @statewalker/platform.web
+# @statewalker/platform.browser
 
 Browser implementation of the `@statewalker/platform.api` intents. Provides default handlers for:
 
@@ -14,11 +14,11 @@ Browser implementation of the `@statewalker/platform.api` intents. Provides defa
 The package has a single default export: `initPlatformWeb(ctx)`. Register it as a fragment in the `AppManifest`:
 
 ```ts
-import initPlatformWeb from "@statewalker/platform.web";
+import initPlatformWeb from "@statewalker/platform.browser";
 // or, via the manifest:
 const manifest: AppManifest = {
   roots: [
-    "@statewalker/platform.web",
+    "@statewalker/platform.browser",
     // ...your application fragments
   ],
 };
