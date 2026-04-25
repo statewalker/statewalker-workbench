@@ -7,4 +7,5 @@ export * from "./progress-circle-view.js";
 export * from "./skeleton-view.js";
 export * from "./spinner-view.js";
 export * from "./status-light-view.js";
+export * from "./toast-stack-view.js";
 export * from "./toast-view.js";
