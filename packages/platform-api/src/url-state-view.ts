@@ -92,5 +92,7 @@ export class UrlStateView extends BaseClass {
  * bootstrap step. The browser-side wiring (`bindUrlState` registered by
  * `@statewalker/platform-browser`) consumes this same adapter.
  */
-export const [getUrlStateView, setUrlStateView, removeUrlStateView] =
-  newAdapter<UrlStateView>("model:url-state", () => new UrlStateView());
+export const [getUrlStateView, setUrlStateView, removeUrlStateView] = newAdapter<UrlStateView>(
+  "model:url-state",
+  () => new UrlStateView(),
+);
