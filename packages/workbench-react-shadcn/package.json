@@ -21,7 +21,6 @@
     "./layouts": "./src/layouts/index.ts",
     "./renderers": "./src/renderers/index.ts",
     "./init-views": "./src/init-views.ts",
-    "./init-ai-model-views": "./src/init-ai-model-views.ts",
     "./theme.css": "./src/layouts/theme.css",
     "./index.css": "./src/index.css"
   },
