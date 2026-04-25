@@ -1,6 +1,6 @@
-# @statewalker/platform.api
+# @statewalker/platform-api
 
-Type-only vocabulary for platform-capability intents shared by every application composed of `statewalker-workbench` fragments. A platform-specific implementation is provided by a peer fragment (`@statewalker/platform.browser` for browsers; future `platform.node` / `platform.electron`); this package stays free of runtime code and can be imported under Node without a DOM shim.
+Type-only vocabulary for platform-capability intents shared by every application composed of `statewalker-workbench` fragments. A platform-specific implementation is provided by a peer fragment (`@statewalker/platform-browser` for browsers; future `platform.node` / `platform.electron`); this package stays free of runtime code and can be imported under Node without a DOM shim.
 
 ## Intents
 
@@ -23,7 +23,7 @@ Each intent is a self-contained folder under `src/intents/`. Every folder export
 The package also owns the one shared `Intents` bus every fragment uses to talk to every other fragment:
 
 ```ts
-import { getIntents } from "@statewalker/platform.api";
+import { getIntents } from "@statewalker/platform-api";
 
 const intents = getIntents(ctx); // auto-creates on first access
 ```
@@ -33,7 +33,7 @@ const intents = getIntents(ctx); // auto-creates on first access
 ## Usage
 
 ```ts
-import { runPickDirectory, getIntents } from "@statewalker/platform.api";
+import { runPickDirectory, getIntents } from "@statewalker/platform-api";
 
 const { files, label } = await runPickDirectory(getIntents(ctx), { title: "Select workspace" });
 ```

@@ -1,4 +1,4 @@
-import type { UrlState, UrlStateView } from "@statewalker/platform.api";
+import type { UrlState, UrlStateView } from "@statewalker/platform-api";
 import { newRegistry } from "@statewalker/shared-registry";
 
 /**

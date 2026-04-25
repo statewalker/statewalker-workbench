@@ -1,4 +1,4 @@
-import { getIntents, runPickDirectory } from "@statewalker/platform.api";
+import { getIntents, runPickDirectory } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerPickDirectoryBrowser } from "../src/handlers/pick-directory.browser.js";
 

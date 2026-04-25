@@ -1,5 +1,5 @@
-import type { DownloadProgress } from "@statewalker/platform.api";
-import { handleDownloadToFiles } from "@statewalker/platform.api";
+import type { DownloadProgress } from "@statewalker/platform-api";
+import { handleDownloadToFiles } from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 import type { FilesApi } from "@statewalker/webrun-files";
 

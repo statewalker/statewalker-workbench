@@ -1,4 +1,4 @@
-import { handleCopyToClipboard } from "@statewalker/platform.api";
+import { handleCopyToClipboard } from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 
 /**

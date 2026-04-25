@@ -1,4 +1,4 @@
-import { getIntents, getUrlStateView } from "@statewalker/platform.api";
+import { getIntents, getUrlStateView } from "@statewalker/platform-api";
 import { newRegistry } from "@statewalker/shared-registry";
 import { bindUrlState } from "./bind-url-state.js";
 import { registerCopyToClipboardBrowser } from "./handlers/copy-to-clipboard.browser.js";
@@ -12,7 +12,7 @@ import { registerPreferenceSetBrowser } from "./handlers/preference-set.browser.
 export * from "./bind-url-state.js";
 
 /**
- * Register every browser-backed capability for `@statewalker/platform.api`
+ * Register every browser-backed capability for `@statewalker/platform-api`
  * against the context's shared `Intents` bus, and bind the context's
  * `UrlStateView` to `location.hash` so navigation synchronisation activates
  * automatically. Returns a cleanup that unregisters everything in reverse.

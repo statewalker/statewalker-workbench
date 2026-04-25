@@ -23,7 +23,7 @@ export interface UrlSerializer {
  * Bidirectional URL ↔ model state synchronisation.
  *
  * Models register `UrlSerializer`s; the browser binding (provided by
- * `@statewalker/platform.browser`) flushes the serialized state to
+ * `@statewalker/platform-browser`) flushes the serialized state to
  * `location.hash` whenever `sync()` notifies, and feeds incoming
  * `hashchange` events back to all deserializers via `applyUrl()`.
  *
@@ -90,7 +90,7 @@ export class UrlStateView extends BaseClass {
  * Context-bound `UrlStateView`. Auto-creates a fresh instance on first
  * access so any fragment can register serializers without an explicit
  * bootstrap step. The browser-side wiring (`bindUrlState` registered by
- * `@statewalker/platform.browser`) consumes this same adapter.
+ * `@statewalker/platform-browser`) consumes this same adapter.
  */
 export const [getUrlStateView, setUrlStateView, removeUrlStateView] =
   newAdapter<UrlStateView>("model:url-state", () => new UrlStateView());

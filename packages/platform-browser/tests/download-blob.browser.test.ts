@@ -1,4 +1,4 @@
-import { getIntents, runDownloadBlob } from "@statewalker/platform.api";
+import { getIntents, runDownloadBlob } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerDownloadBlobBrowser } from "../src/handlers/download-blob.browser.js";
 

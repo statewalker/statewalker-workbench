@@ -1,4 +1,4 @@
-import { getIntents, runPreferenceGet, runPreferenceSet } from "@statewalker/platform.api";
+import { getIntents, runPreferenceGet, runPreferenceSet } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { registerPreferenceGetBrowser } from "../src/handlers/preference-get.browser.js";
 import { registerPreferenceSetBrowser } from "../src/handlers/preference-set.browser.js";

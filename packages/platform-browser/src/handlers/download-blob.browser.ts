@@ -1,4 +1,4 @@
-import { handleDownloadBlob } from "@statewalker/platform.api";
+import { handleDownloadBlob } from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 
 /**

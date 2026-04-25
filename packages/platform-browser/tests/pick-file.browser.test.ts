@@ -1,4 +1,4 @@
-import { getIntents, runPickFile } from "@statewalker/platform.api";
+import { getIntents, runPickFile } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerPickFileBrowser } from "../src/handlers/pick-file.browser.js";
 

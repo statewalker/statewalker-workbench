@@ -1,4 +1,4 @@
-import { getIntents, runCopyToClipboard } from "@statewalker/platform.api";
+import { getIntents, runCopyToClipboard } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerCopyToClipboardBrowser } from "../src/handlers/copy-to-clipboard.browser.js";
 

@@ -1,5 +1,5 @@
-import type { PickFilePayload, PickFileResult } from "@statewalker/platform.api";
-import { handlePickFile } from "@statewalker/platform.api";
+import type { PickFilePayload, PickFileResult } from "@statewalker/platform-api";
+import { handlePickFile } from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 
 /** Minimal shape of the File System Access API file-picker. */
