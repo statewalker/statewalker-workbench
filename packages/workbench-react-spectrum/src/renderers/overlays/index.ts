@@ -1,4 +1,5 @@
 export * from "./alert-dialog.renderer.js";
+export * from "./context-menu.renderer.js";
 export * from "./contextual-help.renderer.js";
 export * from "./dialog.renderer.js";
 export * from "./popover.renderer.js";

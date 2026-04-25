@@ -4,6 +4,7 @@ import "./index.css";
 import {
   AccordionView,
   ActionBarView,
+  ActionButtonView,
   ActionGroupView,
   ActionMenuView,
   AlertDialogView,
@@ -26,9 +27,11 @@ import {
   ComboBoxView,
   ContentPanelView,
   ContextMenuView,
+  ContextualHelpView,
   DateFieldView,
   DatePickerView,
   DateRangePickerView,
+  DialogView,
   DividerView,
   EmptyView,
   FileTriggerView,
@@ -44,6 +47,7 @@ import {
   LinkView,
   ListBoxView,
   ListView,
+  LogicButtonView,
   MenuBarView,
   MenuTriggerView,
   MenuView,
@@ -82,9 +86,11 @@ import {
 import { getComponentRegistry } from "./layouts/app-shell.js";
 
 // Actions
+import { ActionButtonRenderer } from "./renderers/actions/action-button.renderer.js";
 import { ActionGroupRenderer } from "./renderers/actions/action-group.renderer.js";
 import { ButtonRenderer } from "./renderers/actions/button.renderer.js";
 import { FileTriggerRenderer } from "./renderers/actions/file-trigger.renderer.js";
+import { LogicButtonRenderer } from "./renderers/actions/logic-button.renderer.js";
 import { ToggleButtonRenderer } from "./renderers/actions/toggle-button.renderer.js";
 // Collections
 import { ListBoxRenderer } from "./renderers/collections/list-box.renderer.js";
@@ -166,6 +172,8 @@ import { TabsRenderer } from "./renderers/navigation/tabs.renderer.js";
 // Overlays
 import { AlertDialogRenderer } from "./renderers/overlays/alert-dialog.renderer.js";
 import { ContextMenuRenderer } from "./renderers/overlays/context-menu.renderer.js";
+import { ContextualHelpRenderer } from "./renderers/overlays/contextual-help.renderer.js";
+import { DialogRenderer } from "./renderers/overlays/dialog.renderer.js";
 import { PopoverRenderer } from "./renderers/overlays/popover.renderer.js";
 import { SheetRenderer } from "./renderers/overlays/sheet.renderer.js";
 import { TooltipRenderer } from "./renderers/overlays/tooltip.renderer.js";
@@ -174,9 +182,11 @@ export function initViews(ctx: Record<string, unknown>): () => void {
   const registry = getComponentRegistry(ctx);
   const cleanups = [
     // Actions
+    registry.register(ActionButtonView, ActionButtonRenderer),
     registry.register(ActionGroupView, ActionGroupRenderer),
     registry.register(ButtonView, ButtonRenderer),
     registry.register(FileTriggerView, FileTriggerRenderer),
+    registry.register(LogicButtonView, LogicButtonRenderer),
     registry.register(ToggleButtonView, ToggleButtonRenderer),
     // Collections
     registry.register(ListBoxView, ListBoxRenderer),
@@ -258,6 +268,8 @@ export function initViews(ctx: Record<string, unknown>): () => void {
     // Overlays
     registry.register(AlertDialogView, AlertDialogRenderer),
     registry.register(ContextMenuView, ContextMenuRenderer),
+    registry.register(ContextualHelpView, ContextualHelpRenderer),
+    registry.register(DialogView, DialogRenderer),
     registry.register(PopoverView, PopoverRenderer),
     registry.register(SheetView, SheetRenderer),
     registry.register(TooltipView, TooltipRenderer),

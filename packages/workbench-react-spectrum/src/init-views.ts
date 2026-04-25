@@ -23,6 +23,7 @@ import {
   ColorWheelView,
   ComboBoxView,
   ContentPanelView,
+  ContextMenuView,
   ContextualHelpView,
   DateFieldView,
   DatePickerView,
@@ -155,6 +156,7 @@ import { LinkRenderer } from "./renderers/navigation/link.renderer.js";
 import { PaginationRenderer } from "./renderers/navigation/pagination.renderer.js";
 import { TabsRenderer } from "./renderers/navigation/tabs.renderer.js";
 import { AlertDialogRenderer } from "./renderers/overlays/alert-dialog.renderer.js";
+import { ContextMenuRenderer } from "./renderers/overlays/context-menu.renderer.js";
 import { ContextualHelpRenderer } from "./renderers/overlays/contextual-help.renderer.js";
 import { DialogRenderer } from "./renderers/overlays/dialog.renderer.js";
 import { PopoverRenderer } from "./renderers/overlays/popover.renderer.js";
@@ -238,6 +240,7 @@ export function initSpectrumViews(ctx: Record<string, unknown>): () => void {
     registry.register(PaginationView, PaginationRenderer),
     registry.register(TabsView, TabsRenderer),
     registry.register(AlertDialogView, AlertDialogRenderer),
+    registry.register(ContextMenuView, ContextMenuRenderer),
     registry.register(ContextualHelpView, ContextualHelpRenderer),
     registry.register(DialogView, DialogRenderer),
     registry.register(PopoverView, PopoverRenderer),
