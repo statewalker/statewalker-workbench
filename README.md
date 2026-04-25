@@ -1,6 +1,6 @@
 # statewalker-workbench
 
-Application shell and fragment platform for the statewalker ecosystem — backbone runtimes, view/dom/react renderers, and the Eclipse-style app-shell core.
+Application shell and fragment platform for the statewalker ecosystem — backbone runtimes and view/dom/react renderers.
 
 ## Packages
 
@@ -14,7 +14,6 @@ Application shell and fragment platform for the statewalker ecosystem — backbo
 | [`@statewalker/shared-react`](packages/shared-react) | React renderers, view-to-hook bridges, layout primitives. |
 | [`@statewalker/shared-react-shadcn`](packages/shared-react-shadcn) | shadcn/ui design-system renderer set. |
 | [`@statewalker/shared-react-spectrum`](packages/shared-react-spectrum) | Adobe Spectrum design-system renderer set. |
-| [`@statewalker/app-shell-core`](packages/app-shell-core) | Eclipse-style panel/fragment lifecycle and shared registries. |
 
 ## Backbone independence rule
 
@@ -48,7 +47,7 @@ The initial commit on `main` is a fresh template expansion; pre-split history is
 - `history/shared-views`, `history/shared-dom`, `history/shared-react`
 - `history/shared-react-shadcn` (sourced from `shared-react.shadcn/`)
 - `history/shared-react-spectrum` (sourced from `shared-react.spectrum/`)
-- `history/app-shell-core` (sourced from `workspaces/workspace-explorer/apps/app.shell.core/`)
+- `history/app-shell-core` (sourced from `workspaces/workspace-explorer/apps/app.shell.core/`; package later folded into `shared-views`)
 
 These branches are never merged into `main`; `git log` them when walking blame across the split.
 
