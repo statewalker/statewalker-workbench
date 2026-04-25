@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildHash, parseHash } from "./bind-url-state.js";
+import { buildHash, parseHash } from "../src/bind-url-state.js";
 
 describe("parseHash", () => {
   it("parses empty hash", () => {
@@ -58,7 +58,6 @@ describe("parseHash ↔ buildHash round-trip", () => {
     const hash = buildHash(original);
     const parsed = parseHash(hash);
     expect(parsed.path).toBe(original.path);
-    // URLSearchParams may reorder keys, so check values individually
     expect(parsed.query.id).toBe("abc");
     expect(parsed.query.tab).toBe("main");
   });

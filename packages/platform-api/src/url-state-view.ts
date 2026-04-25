@@ -1,30 +1,38 @@
-import { ViewModel } from "../core/view-model.js";
+import { BaseClass } from "@statewalker/shared-baseclass";
 
+/**
+ * Serialized URL state — what gets written to / read from the URL hash.
+ */
 export interface UrlState {
   path: string;
   query: Record<string, string>;
 }
 
+/**
+ * A reversible mapping between application state and the URL.
+ * `serialize` builds an outgoing URL state from the in-memory model;
+ * `deserialize` applies an incoming URL state back onto the model.
+ */
 export interface UrlSerializer {
   serialize(state: UrlState): UrlState;
   deserialize(state: UrlState): void;
 }
 
 /**
- * Manages bidirectional URL↔model state synchronization.
+ * Bidirectional URL ↔ model state synchronisation.
  *
- * Models register serializers (state→URL) and deserializers (URL→state).
+ * Models register `UrlSerializer`s; the browser binding (provided by
+ * `@statewalker/platform.browser`) flushes the serialized state to
+ * `location.hash` whenever `sync()` notifies, and feeds incoming
+ * `hashchange` events back to all deserializers via `applyUrl()`.
+ *
  * A directional lock prevents feedback loops: at any moment sync flows
  * in only one direction.
  */
-export class UrlStateView extends ViewModel {
+export class UrlStateView extends BaseClass {
   #serializers: Set<UrlSerializer> = new Set();
   #syncing = false;
 
-  /**
-   * Register a serializer/deserializer pair for URL↔state sync.
-   * Returns a dispose function that removes it.
-   */
   register(serializer: UrlSerializer): () => void {
     this.#serializers.add(serializer);
     return () => {
@@ -33,10 +41,9 @@ export class UrlStateView extends ViewModel {
   }
 
   /**
-   * Run all serializers to build the current URL state from model state,
-   * then notify listeners (the DOM binding writes the result to location.hash).
-   * Sets the syncing flag to prevent deserializers from reacting to the
-   * resulting hashchange event.
+   * Run all serializers (model → URL) and notify listeners. The URL
+   * binding writes the result to `location.hash`. The syncing flag
+   * prevents the resulting `hashchange` event from re-entering.
    */
   sync(): void {
     if (this.#syncing) return;
@@ -48,9 +55,6 @@ export class UrlStateView extends ViewModel {
     }
   }
 
-  /**
-   * Build the serialized URL state by running all registered serializers.
-   */
   buildState(): UrlState {
     let state: UrlState = { path: "", query: {} };
     for (const s of this.#serializers) {
@@ -60,9 +64,8 @@ export class UrlStateView extends ViewModel {
   }
 
   /**
-   * Apply an incoming URL state (from hashchange/popstate) to model state
-   * by running all registered deserializers.
-   * No-ops if a sync() is in progress (loop prevention).
+   * Apply an incoming URL state (URL → model) by running all
+   * registered deserializers. No-ops if a `sync()` is in progress.
    */
   applyUrl(state: UrlState): void {
     if (this.#syncing) return;

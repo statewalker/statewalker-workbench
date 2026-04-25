@@ -7,6 +7,8 @@ import { registerPickFileBrowser } from "./handlers/pick-file.browser.js";
 import { registerPreferenceGetBrowser } from "./handlers/preference-get.browser.js";
 import { registerPreferenceSetBrowser } from "./handlers/preference-set.browser.js";
 
+export { bindUrlState, buildHash, parseHash } from "./bind-url-state.js";
+
 /**
  * Register every browser-backed handler for the `platform:*` intents against
  * the context's shared `Intents` bus. Returns a cleanup that unregisters them
