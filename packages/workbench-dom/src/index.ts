@@ -1,5 +1,6 @@
 /// <reference path="./htl.d.ts" />
 export { html, svg } from "htl";
+export { bindDialogStack } from "./bind-dialog-stack.js";
 export {
   type ComponentFactory,
   ComponentRegistry,
