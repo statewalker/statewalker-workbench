@@ -5,12 +5,12 @@ import {
   Secrets,
   SystemFiles,
 } from "@statewalker/workspace-api";
-import type { PickDirectoryResult } from "@statewalker/platform.api";
+import type { PickDirectoryResult } from "@statewalker/platform-api";
 import {
   getIntents,
   handlePickDirectory,
   handlePreferenceGet,
-} from "@statewalker/platform.api";
+} from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";

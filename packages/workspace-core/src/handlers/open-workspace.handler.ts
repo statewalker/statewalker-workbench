@@ -8,7 +8,7 @@ import {
   getIntents,
   runPickDirectory,
   runPreferenceGet,
-} from "@statewalker/platform.api";
+} from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 import { buildWorkspace } from "../impl/build-workspace.ts";
 import type { Workspace } from "../impl/workspace.impl.ts";
