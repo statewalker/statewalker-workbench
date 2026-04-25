@@ -1,1 +1,1 @@
-export { initShellCore } from "./init-shell-core.js";
+export { initShellCore, initShellCore as default } from "./init-shell-core.js";

@@ -158,6 +158,25 @@ export class PanelManagerView extends ViewModel {
     return () => this.removePanel(panel.key);
   }
 
+  /**
+   * Reconcile the registered panels with the given list: add any that are
+   * new, remove any that are missing. Used by the shell to bridge the
+   * `publishPanel` extension point to the dock layout.
+   */
+  syncPanels(panels: DockPanelView[]): void {
+    const incomingKeys = new Set(panels.map((p) => p.key));
+    for (const p of panels) {
+      if (!this.#panels.has(p.key)) {
+        this.addPanel(p);
+      }
+    }
+    for (const key of [...this.#panels.keys()]) {
+      if (!incomingKeys.has(key)) {
+        this.removePanel(key);
+      }
+    }
+  }
+
   removePanel(key: string): void {
     if (!this.#panels.has(key)) return;
     this.#panels.delete(key);
