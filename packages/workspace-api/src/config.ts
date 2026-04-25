@@ -20,14 +20,13 @@ export interface WorkspaceConfig {
   modelsDir: string;
 }
 
-export const DEFAULT_WORKSPACE_CONFIG: Readonly<WorkspaceConfig> =
-  Object.freeze({
-    systemDir: ".settings",
-    secretsDir: "secrets",
-    settingsDir: "settings",
-    sessionsDir: "",
-    modelsDir: "models",
-  });
+export const DEFAULT_WORKSPACE_CONFIG: Readonly<WorkspaceConfig> = Object.freeze({
+  systemDir: ".settings",
+  secretsDir: "secrets",
+  settingsDir: "settings",
+  sessionsDir: "",
+  modelsDir: "models",
+});
 
 export const [getWorkspaceConfig, setWorkspaceConfig, removeWorkspaceConfig] =
   newAdapter<WorkspaceConfig>("workspace:config", () => ({

@@ -1,5 +1,5 @@
-import type { WorkspaceAdapter } from "@statewalker/workspace-api";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import type { WorkspaceAdapter } from "@statewalker/workspace-api";
 import { describe, expect, it, vi } from "vitest";
 import { Workspace } from "../src/impl/workspace.impl.ts";
 
@@ -73,9 +73,7 @@ describe("Workspace — lifecycle invariants", () => {
     const ws = new Workspace();
     ws.setFileSystem(new MemFilesApi(), "A");
     await ws.open();
-    expect(() => ws.setFileSystem(new MemFilesApi(), "B")).toThrow(
-      /only legal while closed/i,
-    );
+    expect(() => ws.setFileSystem(new MemFilesApi(), "B")).toThrow(/only legal while closed/i);
   });
 
   it("double open() is a no-op; onLoad fires once per actual open", async () => {

@@ -1,3 +1,8 @@
+import type { PickDirectoryResult } from "@statewalker/platform-api";
+import { getIntents, handlePickDirectory, handlePreferenceGet } from "@statewalker/platform-api";
+import type { Intents } from "@statewalker/shared-intents";
+import type { FilesApi } from "@statewalker/webrun-files";
+import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import {
   getWorkspace,
   runChangeWorkspace,
@@ -5,15 +10,6 @@ import {
   Secrets,
   SystemFiles,
 } from "@statewalker/workspace-api";
-import type { PickDirectoryResult } from "@statewalker/platform-api";
-import {
-  getIntents,
-  handlePickDirectory,
-  handlePreferenceGet,
-} from "@statewalker/platform-api";
-import type { Intents } from "@statewalker/shared-intents";
-import type { FilesApi } from "@statewalker/webrun-files";
-import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import initWorkspaceCore from "../src/init-workspace-core.ts";
 
@@ -70,9 +66,7 @@ describe("workspace.core / handlers", () => {
     const root = await seededRoot();
     const intents = getIntents(ctx);
 
-    cleanups.push(
-      registerPickStub(intents, [{ files: root, label: "project-a" }]),
-    );
+    cleanups.push(registerPickStub(intents, [{ files: root, label: "project-a" }]));
     cleanups.push(registerNoPreferences(intents));
     cleanups.push(initWorkspaceCore(ctx));
 
@@ -87,14 +81,12 @@ describe("workspace.core / handlers", () => {
 
     // System view is rooted at .settings
     const systemEntries: string[] = [];
-    for await (const entry of systemFiles.list("/"))
-      systemEntries.push(entry.name);
+    for await (const entry of systemFiles.list("/")) systemEntries.push(entry.name);
     expect(systemEntries).toEqual(["secrets"]);
 
     // workspace.files is the raw root — system subtree is visible.
     const rootEntries: string[] = [];
-    for await (const entry of workspace.files.list("/"))
-      rootEntries.push(entry.name);
+    for await (const entry of workspace.files.list("/")) rootEntries.push(entry.name);
     expect(rootEntries.sort()).toEqual([".settings", "README.md"]);
 
     expect(await secrets.get("ai:provider:openai")).toEqual({
@@ -160,8 +152,7 @@ describe("workspace.core / handlers", () => {
     expect(freshSecrets).not.toBe(initialSecrets);
 
     const mainEntries: string[] = [];
-    for await (const entry of reopened.files.list("/"))
-      mainEntries.push(entry.name);
+    for await (const entry of reopened.files.list("/")) mainEntries.push(entry.name);
     expect(mainEntries).toEqual(["HELLO.md"]);
   });
 
@@ -204,15 +195,11 @@ describe("workspace.core / handlers", () => {
   it("cleanup unregisters handlers so subsequent fires reject as unhandled", async () => {
     const ctx: Record<string, unknown> = {};
     const intents = getIntents(ctx);
-    cleanups.push(
-      registerPickStub(intents, [{ files: await seededRoot(), label: "once" }]),
-    );
+    cleanups.push(registerPickStub(intents, [{ files: await seededRoot(), label: "once" }]));
     cleanups.push(registerNoPreferences(intents));
     const teardown = initWorkspaceCore(ctx);
     teardown();
 
-    await expect(runOpenWorkspace(intents, {})).rejects.toThrow(
-      /unhandled intent/i,
-    );
+    await expect(runOpenWorkspace(intents, {})).rejects.toThrow(/unhandled intent/i);
   });
 });

@@ -1,5 +1,5 @@
-import { Secrets, Settings, SystemFiles } from "@statewalker/workspace-api";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { Secrets, Settings, SystemFiles } from "@statewalker/workspace-api";
 import { describe, expect, it } from "vitest";
 import { buildWorkspace } from "../src/impl/build-workspace.ts";
 
@@ -43,11 +43,7 @@ describe("FilesBackedSecrets", () => {
     const calls: string[][] = [];
     secrets.onUpdate((keys) => calls.push([...keys]));
 
-    await Promise.all([
-      secrets.set("a", 1),
-      secrets.set("b", 2),
-      secrets.set("c", 3),
-    ]);
+    await Promise.all([secrets.set("a", 1), secrets.set("b", 2), secrets.set("c", 3)]);
     await flushMicrotasks();
 
     expect(calls).toHaveLength(1);

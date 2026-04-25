@@ -1,9 +1,5 @@
-import {
-  getWorkspace,
-  handleChangeWorkspace,
-  runOpenWorkspace,
-} from "@statewalker/workspace-api";
 import { getIntents, runPickDirectory } from "@statewalker/platform-api";
+import { getWorkspace, handleChangeWorkspace, runOpenWorkspace } from "@statewalker/workspace-api";
 import type { Workspace } from "../impl/workspace.impl.ts";
 
 /**
@@ -11,9 +7,7 @@ import type { Workspace } from "../impl/workspace.impl.ts";
  * rebind: `close()` → `setFileSystem()` → `open()` so workspace identity is
  * preserved. If no workspace exists yet, delegates to `workspace:open`.
  */
-export function registerChangeWorkspaceHandler(
-  ctx: Record<string, unknown>,
-): () => void {
+export function registerChangeWorkspaceHandler(ctx: Record<string, unknown>): () => void {
   const intents = getIntents(ctx);
   return handleChangeWorkspace(intents, (intent) => {
     void (async () => {

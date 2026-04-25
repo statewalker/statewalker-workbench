@@ -5,11 +5,7 @@ import { buildWorkspaceViews } from "../src/impl/composite-setup.ts";
 
 const textEncoder = new TextEncoder();
 
-async function writeString(
-  files: FilesApi,
-  path: string,
-  content: string,
-): Promise<void> {
+async function writeString(files: FilesApi, path: string, content: string): Promise<void> {
   await files.write(path, [textEncoder.encode(content)]);
 }
 
@@ -68,10 +64,7 @@ describe("buildWorkspaceViews", () => {
     const root = await seedRoot();
     const { system } = buildWorkspaceViews(root, ".settings");
 
-    expect((await listNames(system, "/")).sort()).toEqual([
-      "secrets",
-      "sessions",
-    ]);
+    expect((await listNames(system, "/")).sort()).toEqual(["secrets", "sessions"]);
     expect(await system.exists("/secrets/openai.json")).toBe(true);
 
     const chunks: Uint8Array[] = [];
