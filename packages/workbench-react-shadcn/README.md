@@ -40,13 +40,12 @@ Importing `initShadcnViews` (or any other entry that pulls `init-views.ts`) auto
 
 | Path | What you get |
 |---|---|
-| `@statewalker/workbench-react-shadcn` | `initViews`, `initAiModelViews` |
+| `@statewalker/workbench-react-shadcn` | `initViews` |
 | `.../layouts` | `AppShell`, `getComponentRegistry`, `initShadcnViews`, `LayoutRenderer`, dock primitives, `useColorScheme` |
 | `.../components` | Raw Radix/Tailwind components (Button, Card, Tabs, etc.) for direct use |
 | `.../renderers` | Individual `XxxRenderer` components keyed off `XxxView` view models |
 | `.../icons` | Lucide icon set used by the renderers |
 | `.../init-views` | `initViews(ctx)` — the full registration call (CSS side-effect) |
-| `.../init-ai-model-views` | AI provider model picker / catalog renderers |
 | `.../theme.css`, `.../index.css` | Direct CSS entry points (rarely needed; `init-views` already auto-loads them) |
 
 ## CSS
