@@ -3,7 +3,7 @@ import {
   handleChangeWorkspace,
   runOpenWorkspace,
 } from "@statewalker/workspace-api";
-import { getIntents, runPickDirectory } from "@statewalker/platform.api";
+import { getIntents, runPickDirectory } from "@statewalker/platform-api";
 import type { Workspace } from "../impl/workspace.impl.ts";
 
 /**
