@@ -15,7 +15,7 @@
 import { describe, expect, it } from "vitest";
 import { ViewModel } from "../core/view-model.js";
 import { type DockNode, type DockPanel, isPanel } from "../dock/index.js";
-import { initShellCore } from "./init-shell-core.js";
+import initShellCore from "./init-shell-core.js";
 import { getPanelManagerView } from "./panel-manager-view.js";
 import { DockPanelView, publishPanel } from "./panel-view.js";
 
