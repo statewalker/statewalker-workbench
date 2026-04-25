@@ -6,7 +6,7 @@ export default defineConfig({
       entry: {
         components: "src/components/index.ts",
         renderers: "src/renderers/index.ts",
-        init: "src/init-common-views.ts",
+        init: "src/init-views.ts",
         layouts: "src/layouts/index.ts",
         "lib/utils": "src/lib/utils.ts",
         routing: "src/routing/hash-routing.ts",
