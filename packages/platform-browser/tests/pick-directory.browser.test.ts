@@ -1,4 +1,4 @@
-import { getIntents, runPickDirectory } from "@statewalker/platform-api";
+import { getIntents, runPickDirectory, UserCancelledError } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerPickDirectoryBrowser } from "../src/handlers/pick-directory.browser.js";
 
@@ -50,13 +50,42 @@ describe("pick-directory browser handler", () => {
     }
   });
 
-  it("rejects when the picker throws (e.g. user cancels)", async () => {
+  it("maps AbortError onto UserCancelledError when the user dismisses", async () => {
     (globalThis as unknown as { showDirectoryPicker: () => Promise<never> }).showDirectoryPicker =
       () => Promise.reject(new DOMException("The user aborted a request.", "AbortError"));
     const ctx = {};
     const unregister = registerPickDirectoryBrowser(getIntents(ctx));
     try {
-      await expect(runPickDirectory(getIntents(ctx), {})).rejects.toThrow(/user aborted/i);
+      await expect(runPickDirectory(getIntents(ctx), {})).rejects.toBeInstanceOf(
+        UserCancelledError,
+      );
+    } finally {
+      unregister();
+    }
+  });
+
+  it("passes non-AbortError rejections through unchanged", async () => {
+    const original = new Error("permission denied");
+    (globalThis as unknown as { showDirectoryPicker: () => Promise<never> }).showDirectoryPicker =
+      () => Promise.reject(original);
+    const ctx = {};
+    const unregister = registerPickDirectoryBrowser(getIntents(ctx));
+    try {
+      await expect(runPickDirectory(getIntents(ctx), {})).rejects.toBe(original);
+    } finally {
+      unregister();
+    }
+  });
+
+  it("recognises a plain object whose name is AbortError as cancellation", async () => {
+    (globalThis as unknown as { showDirectoryPicker: () => Promise<never> }).showDirectoryPicker =
+      () => Promise.reject({ name: "AbortError", message: "shaped like a DOMException" });
+    const ctx = {};
+    const unregister = registerPickDirectoryBrowser(getIntents(ctx));
+    try {
+      await expect(runPickDirectory(getIntents(ctx), {})).rejects.toBeInstanceOf(
+        UserCancelledError,
+      );
     } finally {
       unregister();
     }

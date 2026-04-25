@@ -1,4 +1,4 @@
-import { handlePickDirectory } from "@statewalker/platform-api";
+import { handlePickDirectory, UserCancelledError } from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 import { BrowserFilesApi } from "@statewalker/webrun-files-browser";
 
@@ -30,9 +30,17 @@ export function registerPickDirectoryBrowser(intents: Intents): () => void {
         const files = new BrowserFilesApi({ rootHandle: handle });
         intent.resolve({ files, label: handle.name });
       })
-      .catch((error) => {
-        intent.reject(error);
+      .catch((error: unknown) => {
+        intent.reject(isAbortError(error) ? new UserCancelledError() : error);
       });
     return true;
   });
+}
+
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { name?: unknown }).name === "AbortError"
+  );
 }
