@@ -9,9 +9,7 @@
 import { getPanelManagerView } from "./panel-manager-view.js";
 import { listenPanel } from "./panel-view.js";
 
-export default function initShellCore(
-  ctx: Record<string, unknown>,
-): () => void {
+export default function initShellCore(ctx: Record<string, unknown>): () => void {
   const panelManager = getPanelManagerView(ctx);
 
   return listenPanel(ctx, (panels) => panelManager.syncPanels(panels));

@@ -1,9 +1,5 @@
 import { useUpdates } from "@statewalker/workbench-react/hooks";
-import type {
-  ActionButtonView,
-  ActionView,
-  ActionViewVariant,
-} from "@statewalker/workbench-views";
+import type { ActionButtonView, ActionView, ActionViewVariant } from "@statewalker/workbench-views";
 import { Button, type ButtonProps } from "../../components/index.js";
 
 const variantMap: Record<ActionViewVariant, ButtonProps["variant"]> = {

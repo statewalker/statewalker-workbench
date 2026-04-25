@@ -55,6 +55,7 @@ const [getComponentRegistry] = newAdapter<ReactComponentRegistry>(
   "aspect:component-registry",
   () => new ReactComponentRegistry(),
 );
+
 export { getComponentRegistry };
 
 // ─── Theme hook (reads from ThemeView model) ───────────
@@ -249,24 +250,14 @@ function SpectrumToastOverlay({ context }: { context: Record<string, unknown> })
     >
       <Flex direction="column-reverse" gap="size-100">
         {toasts.map((toast) => (
-          <SpectrumToastCard
-            key={toast.key}
-            toast={toast}
-            onDismiss={() => stack.remove(toast)}
-          />
+          <SpectrumToastCard key={toast.key} toast={toast} onDismiss={() => stack.remove(toast)} />
         ))}
       </Flex>
     </View>
   );
 }
 
-function SpectrumToastCard({
-  toast,
-  onDismiss,
-}: {
-  toast: ToastView;
-  onDismiss: () => void;
-}) {
+function SpectrumToastCard({ toast, onDismiss }: { toast: ToastView; onDismiss: () => void }) {
   const [, force] = useState({});
   useEffect(() => toast.onUpdate(() => force({})), [toast]);
 
@@ -302,11 +293,7 @@ function SpectrumToastCard({
             <Text>{toast.message}</Text>
           </View>
           {toast.action && (
-            <ActionButton
-              isQuiet
-              isDisabled={toast.action.disabled}
-              onPress={handleAction}
-            >
+            <ActionButton isQuiet isDisabled={toast.action.disabled} onPress={handleAction}>
               <Text>{toast.action.label ?? toast.action.actionKey}</Text>
             </ActionButton>
           )}

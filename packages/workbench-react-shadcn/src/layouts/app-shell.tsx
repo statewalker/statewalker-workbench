@@ -1,20 +1,12 @@
 import { newAdapter } from "@statewalker/shared-adapters";
-import {
-  AppContextProvider,
-  useAppContext,
-} from "@statewalker/workbench-react/app-context";
+import { AppContextProvider, useAppContext } from "@statewalker/workbench-react/app-context";
 import {
   ComponentRegistryContext,
   ReactComponentRegistry,
 } from "@statewalker/workbench-react/component-registry";
 import { useUpdates } from "@statewalker/workbench-react/hooks";
 import { Icon, IconRegistryProvider } from "@statewalker/workbench-react/icons";
-import type {
-  ActionView,
-  DialogView,
-  ToastView,
-  ViewModel,
-} from "@statewalker/workbench-views";
+import type { ActionView, DialogView, ToastView, ViewModel } from "@statewalker/workbench-views";
 import {
   getDialogStackView,
   getPanelManagerView,
@@ -95,8 +87,7 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
   const toolbarActions = useModelItems(toolbarModel);
   const menus = useModelItems(menuModel);
 
-  const topDialog =
-    dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
+  const topDialog = dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
 
   const content = (
     <TooltipProvider>
@@ -264,12 +255,8 @@ function DialogOverlay({
         showCloseButton={dialog.isDismissable}
         className={`${sizeClass} ${dialog.fullScreen ? "w-screen! h-screen! max-w-none! max-h-none! rounded-none!" : "max-h-[85vh]"} flex flex-col`}
         style={sizeStyle}
-        onEscapeKeyDown={
-          dialog.closeOnEscape ? undefined : (e) => e.preventDefault()
-        }
-        onPointerDownOutside={
-          dialog.closeOnClickOutside ? undefined : (e) => e.preventDefault()
-        }
+        onEscapeKeyDown={dialog.closeOnEscape ? undefined : (e) => e.preventDefault()}
+        onPointerDownOutside={dialog.closeOnClickOutside ? undefined : (e) => e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -284,9 +271,7 @@ function DialogOverlay({
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end pt-4 border-t">
             {dialog.footer &&
               (typeof dialog.footer === "string" ? (
-                <span className="mr-auto text-sm text-muted-foreground">
-                  {dialog.footer}
-                </span>
+                <span className="mr-auto text-sm text-muted-foreground">{dialog.footer}</span>
               ) : (
                 <div className="mr-auto">
                   <RenderChild model={dialog.footer} />
@@ -358,12 +343,7 @@ function ToastCard({ toast, onDismiss }: { toast: ToastView; onDismiss: () => vo
     >
       <span className="flex-1 text-sm">{toast.message}</span>
       {toast.action && (
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={toast.action.disabled}
-          onClick={handleAction}
-        >
+        <Button variant="ghost" size="sm" disabled={toast.action.disabled} onClick={handleAction}>
           {toast.action.label ?? toast.action.actionKey}
         </Button>
       )}

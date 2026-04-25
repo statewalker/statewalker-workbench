@@ -17,9 +17,7 @@ export * from "./bind-url-state.js";
  * `UrlStateView` to `location.hash` so navigation synchronisation activates
  * automatically. Returns a cleanup that unregisters everything in reverse.
  */
-export default function initPlatformWeb(
-  ctx: Record<string, unknown>,
-): () => void {
+export default function initPlatformWeb(ctx: Record<string, unknown>): () => void {
   const [register, cleanup] = newRegistry();
 
   const stateView = getUrlStateView(ctx);
