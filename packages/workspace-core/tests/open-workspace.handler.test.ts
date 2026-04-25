@@ -3,6 +3,7 @@ import { getIntents, handlePickDirectory, handlePreferenceGet } from "@statewalk
 import type { Intents } from "@statewalker/shared-intents";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { type DialogView, getDialogStackView } from "@statewalker/workbench-views";
 import {
   getWorkspace,
   runChangeWorkspace,
@@ -11,7 +12,7 @@ import {
   SystemFiles,
 } from "@statewalker/workspace-api";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import initWorkspaceCore from "../src/init-workspace-core.ts";
+import initWorkspaceCore from "../src/init.ts";
 
 const textEncoder = new TextEncoder();
 
@@ -52,6 +53,29 @@ function registerNoPreferences(intents: Intents): () => void {
   });
 }
 
+/**
+ * Stub renderer that subscribes to `DialogStackView` and synchronously
+ * fires the OK button (`variant === "default"`) on every published
+ * `DialogView`. Lets these handler-focused tests drive the new dialog
+ * path without spinning up a real UI binding — the OK button's onClick
+ * kicks off `runPickDirectory` (which the existing pick-stub answers) and
+ * closes the dialog. Returns a cleanup that unsubscribes.
+ */
+function registerAutoConfirmDialog(ctx: Record<string, unknown>): () => void {
+  const stack = getDialogStackView(ctx);
+  const seen = new WeakSet<DialogView>();
+  const driveAll = () => {
+    for (const view of stack.getAll()) {
+      if (seen.has(view)) continue;
+      seen.add(view);
+      const ok = view.buttons.find((b) => b.variant === "default");
+      ok?.onClick?.();
+    }
+  };
+  driveAll();
+  return stack.onUpdate(driveAll);
+}
+
 describe("workspace.core / handlers", () => {
   let cleanups: Array<() => void> = [];
 
@@ -68,7 +92,8 @@ describe("workspace.core / handlers", () => {
 
     cleanups.push(registerPickStub(intents, [{ files: root, label: "project-a" }]));
     cleanups.push(registerNoPreferences(intents));
-    cleanups.push(initWorkspaceCore(ctx));
+    cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
+    cleanups.push(registerAutoConfirmDialog(ctx));
 
     const { workspace } = await runOpenWorkspace(intents, {});
 
@@ -111,7 +136,8 @@ describe("workspace.core / handlers", () => {
       }),
     );
     cleanups.push(registerNoPreferences(intents));
-    cleanups.push(initWorkspaceCore(ctx));
+    cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
+    cleanups.push(registerAutoConfirmDialog(ctx));
 
     await runOpenWorkspace(intents, {});
     expect(pickHandler).toHaveBeenCalledTimes(1);
@@ -135,7 +161,8 @@ describe("workspace.core / handlers", () => {
       ]),
     );
     cleanups.push(registerNoPreferences(intents));
-    cleanups.push(initWorkspaceCore(ctx));
+    cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
+    cleanups.push(registerAutoConfirmDialog(ctx));
 
     const { workspace: initial } = await runOpenWorkspace(intents, {});
     const initialSecrets = initial.requireAdapter(Secrets);
@@ -166,7 +193,8 @@ describe("workspace.core / handlers", () => {
       ]),
     );
     cleanups.push(registerNoPreferences(intents));
-    cleanups.push(initWorkspaceCore(ctx));
+    cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
+    cleanups.push(registerAutoConfirmDialog(ctx));
 
     const { workspace } = await runOpenWorkspace(intents, {});
     const firstSecrets = workspace.requireAdapter(Secrets);
@@ -189,7 +217,7 @@ describe("workspace.core / handlers", () => {
     expect(typeof globalThis.document).toBe("undefined");
     expect(typeof globalThis.window).toBe("undefined");
     const ctx: Record<string, unknown> = {};
-    cleanups.push(initWorkspaceCore(ctx));
+    cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
   });
 
   it("cleanup unregisters handlers so subsequent fires reject as unhandled", async () => {

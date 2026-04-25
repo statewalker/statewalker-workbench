@@ -9,7 +9,12 @@ export { FilesBackedSecrets } from "./impl/secrets-files.impl.ts";
 export { FilesBackedSettings } from "./impl/settings-files.impl.ts";
 export { FilesBackedSystemFiles } from "./impl/system-files.impl.ts";
 export { Workspace } from "./impl/workspace.impl.ts";
+export { default, initWorkspace } from "./init.ts";
+export { startWorkspace } from "./main.controller.ts";
 export {
-  default,
-  default as initWorkspaceCore,
-} from "./init-workspace-core.ts";
+  buildRequestFileSystemDialog,
+  openRequestFileSystemDialog,
+  type RequestFileSystemDialog,
+  type RequestFileSystemDialogOptions,
+  type RequestFileSystemResult,
+} from "./views/request-file-system.view.ts";

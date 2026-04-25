@@ -1,4 +1,4 @@
-import { getIntents, runPickDirectory, runPreferenceGet } from "@statewalker/platform-api";
+import { getIntents, runPreferenceGet } from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 import {
   getWorkspace,
@@ -8,20 +8,23 @@ import {
 } from "@statewalker/workspace-api";
 import { buildWorkspace } from "../impl/build-workspace.ts";
 import type { Workspace } from "../impl/workspace.impl.ts";
+import { openRequestFileSystemDialog } from "../views/request-file-system.view.ts";
 
 /**
  * Key under which we remember a handle-identifier for the last-opened
- * workspace. Today the serialised value is whatever `platform.browser` chooses
- * to store; `workspace.core` treats it as opaque — if a preference handler
- * is registered AND it returns a remembered handle, we fire `pick-directory`
- * in resume mode; otherwise we prompt.
+ * workspace. Today the serialised value is whatever `platform.browser`
+ * chooses to store; `workspace.core` treats it as opaque — if a preference
+ * handler is registered AND it returns a remembered handle, we will
+ * eventually use it to skip the prompt. For now, the remembered handle is
+ * fetched but not yet acted on.
  */
 export const WORKSPACE_LAST_HANDLE_PREFERENCE_KEY = "workspace:last-handle";
 
 /**
  * Register the `workspace:open` handler. Platform-neutral — directory
- * picking is delegated to `platform.api`'s `runPickDirectory` intent, and
- * preference lookup to `runPreferenceGet`.
+ * picking is delegated to the unified request-file-system dialog
+ * (`openRequestFileSystemDialog`) which mounts a `DialogView` via the
+ * shared `publishDialog` registry.
  */
 export function registerOpenWorkspaceHandler(ctx: Record<string, unknown>): () => void {
   const intents = getIntents(ctx);
@@ -48,7 +51,7 @@ async function performOpen(
 
   if (existing && force) {
     // Delegate to the change flow so workspace identity is preserved.
-    const { files, label } = await runPickDirectory(intents, {
+    const { files, label } = await openRequestFileSystemDialog(ctx, {
       title: "Select workspace folder",
     });
     await existing.close();
@@ -60,7 +63,7 @@ async function performOpen(
   // No workspace yet. Honor remembered handle if any preference handler replies.
   await tryReadRememberedHandle(intents);
 
-  const { files, label } = await runPickDirectory(intents, {
+  const { files, label } = await openRequestFileSystemDialog(ctx, {
     title: "Select workspace folder",
   });
   const config = getWorkspaceConfig(ctx);
