@@ -9,7 +9,6 @@ export default defineConfig({
         init: "src/init-views.ts",
         layouts: "src/layouts/index.ts",
         "lib/utils": "src/lib/utils.ts",
-        routing: "src/routing/hash-routing.ts",
       },
       formats: ["es"],
     },

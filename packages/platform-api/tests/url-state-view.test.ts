@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { UrlSerializer } from "./url-state-view.js";
-import { UrlStateView } from "./url-state-view.js";
+import type { UrlSerializer } from "../src/url-state-view.js";
+import { UrlStateView } from "../src/url-state-view.js";
 
 describe("UrlStateView", () => {
   it("registers and disposes serializers", () => {
@@ -45,10 +45,9 @@ describe("UrlStateView", () => {
     let reentrantCalled = false;
 
     view.onUpdate(() => {
-      // Simulate a model change trying to trigger another sync
       if (!reentrantCalled) {
         reentrantCalled = true;
-        view.sync(); // should be no-op
+        view.sync();
       }
     });
 
@@ -79,7 +78,6 @@ describe("UrlStateView", () => {
       deserialize: deserializeFn,
     });
 
-    // During sync, applyUrl should be a no-op
     view.onUpdate(() => {
       view.applyUrl({ path: "/x", query: {} });
     });
@@ -95,14 +93,12 @@ describe("UrlStateView", () => {
     view.register({
       serialize: (s) => s,
       deserialize: () => {
-        // Deserializer tries to trigger sync — should be blocked
         view.sync();
       },
     });
 
     view.onUpdate(listener);
     view.applyUrl({ path: "/", query: {} });
-    // listener should NOT have been called because sync() was blocked
     expect(listener).not.toHaveBeenCalled();
   });
 });

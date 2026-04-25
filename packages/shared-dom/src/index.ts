@@ -1,6 +1,5 @@
 /// <reference path="./htl.d.ts" />
 export { html, svg } from "htl";
-export { bindUrlState, buildHash, parseHash } from "./bind-url-state.js";
 export {
   type ComponentFactory,
   ComponentRegistry,

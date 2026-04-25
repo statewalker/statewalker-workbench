@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@statewalker/shared-adapters": "catalog:",
+    "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/webrun-files": "catalog:"
   },

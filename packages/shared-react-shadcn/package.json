@@ -20,7 +20,6 @@
     "./icons": "./src/icons/index.ts",
     "./layouts": "./src/layouts/index.ts",
     "./renderers": "./src/renderers/index.ts",
-    "./routing": "./src/routing/index.ts",
     "./init-views": "./src/init-views.ts",
     "./init-ai-model-views": "./src/init-ai-model-views.ts",
     "./theme.css": "./src/layouts/theme.css",
