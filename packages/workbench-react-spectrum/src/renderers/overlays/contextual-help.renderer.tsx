@@ -1,0 +1,16 @@
+import { Content, ContextualHelp, Heading } from "@adobe/react-spectrum";
+import { useUpdates } from "@statewalker/workbench-react/hooks";
+import type { ContextualHelpView } from "@statewalker/workbench-views";
+import { RenderSlot } from "../_shared/render-slot.js";
+
+export function ContextualHelpRenderer({ model }: { model: ContextualHelpView }) {
+  useUpdates(model.onUpdate);
+  return (
+    <ContextualHelp variant={model.variant}>
+      {model.title && <Heading>{model.title}</Heading>}
+      <Content>
+        <RenderSlot value={model.content} />
+      </Content>
+    </ContextualHelp>
+  );
+}

@@ -1,4 +1,4 @@
-import { handlePickDirectory } from "@statewalker/platform.api";
+import { handlePickDirectory } from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 import { BrowserFilesApi } from "@statewalker/webrun-files-browser";
 

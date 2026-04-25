@@ -1,5 +1,5 @@
 {
-  "name": "@statewalker/platform.api",
+  "name": "@statewalker/platform-api",
   "version": "0.1.0",
   "private": false,
   "type": "module",

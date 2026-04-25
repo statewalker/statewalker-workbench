@@ -1,0 +1,59 @@
+{
+  "name": "@statewalker/workbench-react-spectrum",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Adobe Spectrum renderers for shared-react: Spectrum component set built on @adobe/react-spectrum.",
+  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "author": {
+    "name": "Mikhail Kotelnikov",
+    "email": "mikhail.kotelnikov@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*/index.ts",
+    "./init": "./src/init-views.ts",
+    "./provider": "./src/spectrum-provider.tsx"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "lint": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@adobe/react-spectrum": "catalog:",
+    "@internationalized/date": "catalog:",
+    "@react-stately/color": "catalog:",
+    "@spectrum-icons/workflow": "catalog:",
+    "@statewalker/shared-adapters": "catalog:",
+    "@statewalker/workbench-react": "workspace:*",
+    "@statewalker/workbench-views": "workspace:*",
+    "react": "catalog:",
+    "react-resizable-panels": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "rimraf": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

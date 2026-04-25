@@ -1,5 +1,5 @@
 {
-  "name": "@statewalker/platform.browser",
+  "name": "@statewalker/platform-browser",
   "version": "0.1.0",
   "private": false,
   "type": "module",
@@ -32,7 +32,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/platform.api": "workspace:*",
+    "@statewalker/platform-api": "workspace:*",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/webrun-files": "catalog:",

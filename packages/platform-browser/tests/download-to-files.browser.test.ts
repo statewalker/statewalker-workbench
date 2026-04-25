@@ -1,5 +1,5 @@
-import type { DownloadProgress } from "@statewalker/platform.api";
-import { getIntents, runDownloadToFiles } from "@statewalker/platform.api";
+import type { DownloadProgress } from "@statewalker/platform-api";
+import { getIntents, runDownloadToFiles } from "@statewalker/platform-api";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerDownloadToFilesBrowser } from "../src/handlers/download-to-files.browser.js";

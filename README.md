@@ -9,11 +9,11 @@ Application shell and fragment platform for the statewalker ecosystem — backbo
 | [`@statewalker/backbone-common`](packages/backbone-common) | Backbone primitives: resolver, topo sort, activation, manifest types, vendored logger. |
 | [`@statewalker/backbone-server`](packages/backbone-server) | Node bootstrap: resolves `AppManifest` against the filesystem and activates modules. |
 | [`@statewalker/backbone-web`](packages/backbone-web) | Browser runtime: fragment loader + web-side module activation. |
-| [`@statewalker/shared-views`](packages/shared-views) | Framework-agnostic observable view/model primitives. |
-| [`@statewalker/shared-dom`](packages/shared-dom) | DOM bindings (pointer, keyboard, theme, URL state) + HTML component registry. |
-| [`@statewalker/shared-react`](packages/shared-react) | React renderers, view-to-hook bridges, layout primitives. |
-| [`@statewalker/shared-react-shadcn`](packages/shared-react-shadcn) | shadcn/ui design-system renderer set. |
-| [`@statewalker/shared-react-spectrum`](packages/shared-react-spectrum) | Adobe Spectrum design-system renderer set. |
+| [`@statewalker/workbench-views`](packages/workbench-views) | Framework-agnostic observable view/model primitives. |
+| [`@statewalker/workbench-dom`](packages/workbench-dom) | DOM bindings (pointer, keyboard, theme, URL state) + HTML component registry. |
+| [`@statewalker/workbench-react`](packages/workbench-react) | React renderers, view-to-hook bridges, layout primitives. |
+| [`@statewalker/workbench-react-shadcn`](packages/workbench-react-shadcn) | shadcn/ui design-system renderer set. |
+| [`@statewalker/workbench-react-spectrum`](packages/workbench-react-spectrum) | Adobe Spectrum design-system renderer set. |
 
 ## Backbone independence rule
 

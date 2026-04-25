@@ -1,4 +1,4 @@
-import { handlePreferenceGet } from "@statewalker/platform.api";
+import { handlePreferenceGet } from "@statewalker/platform-api";
 import type { Intents } from "@statewalker/shared-intents";
 
 const PREFIX = "workbench:";

@@ -1,6 +1,6 @@
-# @statewalker/platform.browser
+# @statewalker/platform-browser
 
-Browser implementation of the `@statewalker/platform.api` intents. Provides default handlers for:
+Browser implementation of the `@statewalker/platform-api` intents. Provides default handlers for:
 
 - `platform:pick-directory` — File System Access API `showDirectoryPicker()`, wrapped in `BrowserFilesApi`.
 - `platform:pick-file` — `showOpenFilePicker()` with `<input type="file">` fallback.
@@ -14,17 +14,17 @@ Browser implementation of the `@statewalker/platform.api` intents. Provides defa
 The package has a single default export: `initPlatformWeb(ctx)`. Register it as a fragment in the `AppManifest`:
 
 ```ts
-import initPlatformWeb from "@statewalker/platform.browser";
+import initPlatformWeb from "@statewalker/platform-browser";
 // or, via the manifest:
 const manifest: AppManifest = {
   roots: [
-    "@statewalker/platform.browser",
+    "@statewalker/platform-browser",
     // ...your application fragments
   ],
 };
 ```
 
-`initPlatformWeb(ctx)` resolves the shared `Intents` bus via `getIntents(ctx)` (from `@statewalker/platform.api`), registers every browser handler, and returns a cleanup function that unregisters them in reverse order.
+`initPlatformWeb(ctx)` resolves the shared `Intents` bus via `getIntents(ctx)` (from `@statewalker/platform-api`), registers every browser handler, and returns a cleanup function that unregisters them in reverse order.
 
 ## Peer implementations
 

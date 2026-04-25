@@ -9,7 +9,7 @@ import {
   PREFERENCE_SET_INTENT_KEY,
   runCopyToClipboard,
   runPreferenceSet,
-} from "@statewalker/platform.api";
+} from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import initPlatformWeb from "../src/index.js";
 
