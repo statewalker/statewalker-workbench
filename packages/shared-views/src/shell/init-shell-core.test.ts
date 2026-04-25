@@ -1,6 +1,6 @@
 /**
  * Integration test for the publishPanel → PanelManagerView bridge
- * (app-shell-core) combined with drag-and-drop operations.
+ * combined with drag-and-drop operations.
  *
  * The scenario mirrors the real chat app layout:
  *   - a "Sessions" panel published into the left area
@@ -12,17 +12,12 @@
  *
  * Uses ONLY view models — no React, no DOM.
  */
-import {
-  type DockNode,
-  type DockPanel,
-  DockPanelView,
-  getPanelManagerView,
-  isPanel,
-  publishPanel,
-  ViewModel,
-} from "@statewalker/shared-views";
 import { describe, expect, it } from "vitest";
+import { ViewModel } from "../core/view-model.js";
+import { type DockNode, type DockPanel, isPanel } from "../dock/index.js";
 import { initShellCore } from "./init-shell-core.js";
+import { getPanelManagerView } from "./panel-manager-view.js";
+import { DockPanelView, publishPanel } from "./panel-view.js";
 
 class StubContent extends ViewModel {}
 
@@ -62,19 +57,15 @@ describe("chat layout — Sessions (left) + Chat (center) via publishPanel", () 
 
       const pm = getPanelManagerView(ctx);
 
-      // Both panels registered
       expect(pm.getPanel("sessions")).toBe(sessions);
       expect(pm.getPanel("chat")).toBe(chat);
 
-      // Both area panels exist in the tree
       const tree = pm.getTree();
       const leftArea = findPanelById(tree, "area-left");
       const centerArea = findPanelById(tree, "area-center");
 
       expect(leftArea).not.toBeNull();
       expect(centerArea).not.toBeNull();
-
-      // Each area contains the right tab — "Sessions" is NOT lost
       expect(tabIds(leftArea!)).toEqual(["sessions"]);
       expect(tabIds(centerArea!)).toEqual(["chat"]);
     } finally {
@@ -87,8 +78,8 @@ describe("chat layout — Sessions (left) + Chat (center) via publishPanel", () 
     const cleanupBridge = initShellCore(ctx);
 
     try {
-      // Deliberately publish the non-center panel first — this is the
-      // order that used to lose the Sessions tab.
+      // Publish the non-center panel first — this is the order that used
+      // to lose the Sessions tab.
       publishPanel(ctx, makePanel("sessions", "Sessions", "left"));
       publishPanel(ctx, makePanel("chat", "Chat", "center"));
 
@@ -116,28 +107,16 @@ describe("chat layout — Sessions (left) + Chat (center) via publishPanel", () 
 
       const pm = getPanelManagerView(ctx);
 
-      // Simulate DnD: drag the Sessions tab out of the left pane and
-      // drop it on the center pane at position "center" (merge).
       pm.moveTab("sessions", "area-left", "area-center", "center");
 
       const tree = pm.getTree();
       const centerArea = findPanelById(tree, "area-center");
 
-      // Central pane contains BOTH tabs
       expect(centerArea).not.toBeNull();
       expect(tabIds(centerArea!).sort()).toEqual(["chat", "sessions"]);
-
-      // Sessions is the active tab in the central pane
       expect(centerArea?.activeTabId).toBe("sessions");
-
-      // Sessions is the globally focused tab
       expect(pm.focusedTabKey).toBe("sessions");
-
-      // The left pane is gone — its only tab was moved out and the
-      // empty dock was pruned from the tree.
       expect(findPanelById(tree, "area-left")).toBeNull();
-
-      // Both panels are still registered as published panels
       expect(pm.getPanel("sessions")).toBeDefined();
       expect(pm.getPanel("chat")).toBeDefined();
     } finally {

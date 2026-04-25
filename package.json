@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.16.1",
-  "description": "Application shell and fragment platform: backbone-common/server/web + shared-dom/views/react renderers + app-shell-core",
+  "description": "Application shell and fragment platform: backbone-common/server/web + shared-dom/views/react renderers",
   "homepage": "https://github.com/statewalker/statewalker-workbench",
   "author": {
     "name": "Mikhail Kotelnikov",

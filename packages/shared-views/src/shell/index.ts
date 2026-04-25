@@ -2,6 +2,7 @@ export * from "./active-panel-view.js";
 export * from "./context-menu-registry-view.js";
 export * from "./dialog-stack-view.js";
 export * from "./dnd-interaction-view.js";
+export * from "./init-shell-core.js";
 export * from "./keyboard-interaction-view.js";
 export * from "./keyboard-view.js";
 export * from "./panel-manager-view.js";
