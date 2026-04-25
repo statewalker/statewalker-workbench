@@ -16,13 +16,14 @@ import {
   ComponentRegistryContext,
   ReactComponentRegistry,
 } from "@statewalker/workbench-react/component-registry";
-import type { ActionView, DialogView } from "@statewalker/workbench-views";
+import type { ActionView, DialogView, ToastView } from "@statewalker/workbench-views";
 import {
   type ActivePanelView,
   type DockPanelView,
   getActivePanelView,
   getDialogStackView,
   getThemeView,
+  getToastStackView,
   getToolbarView,
   getTopMenuView,
   listenPanel,
@@ -123,6 +124,7 @@ export function SpectrumAppShell({ context, wrapper: Wrapper }: AppShellProps) {
         </View>
         {toolbarActions.length > 0 && <SpectrumToolbar actions={toolbarActions} />}
         <SpectrumDialogOverlay dialog={topDialog} registry={registry} />
+        <SpectrumToastOverlay context={context} />
       </Flex>
     </ComponentRegistryContext.Provider>
   );
@@ -223,5 +225,97 @@ function SpectrumDialogOverlay({
         </Content>
       </Dialog>
     </DialogContainer>
+  );
+}
+
+// ─── Toast Overlay ──────────────────────────────────────
+
+const toastBorderColor: Record<string, string> = {
+  positive: "var(--spectrum-global-color-green-500, #2d9d5c)",
+  negative: "var(--spectrum-global-color-red-500, #d7373f)",
+  info: "var(--spectrum-global-color-blue-500, #2680eb)",
+  neutral: "var(--spectrum-alias-border-color-mid, rgba(255,255,255,0.2))",
+};
+
+function SpectrumToastOverlay({ context }: { context: Record<string, unknown> }) {
+  const stack = useMemo(() => getToastStackView(context), [context]);
+  const toasts = useModelItems(stack);
+  if (toasts.length === 0) return null;
+  return (
+    <View
+      position="fixed"
+      bottom="size-200"
+      right="size-200"
+      UNSAFE_style={{ zIndex: 50, pointerEvents: "none" }}
+    >
+      <Flex direction="column-reverse" gap="size-100">
+        {toasts.map((toast) => (
+          <SpectrumToastCard
+            key={toast.key}
+            toast={toast}
+            onDismiss={() => stack.remove(toast)}
+          />
+        ))}
+      </Flex>
+    </View>
+  );
+}
+
+function SpectrumToastCard({
+  toast,
+  onDismiss,
+}: {
+  toast: ToastView;
+  onDismiss: () => void;
+}) {
+  const [, force] = useState({});
+  useEffect(() => toast.onUpdate(() => force({})), [toast]);
+
+  useEffect(() => {
+    if (toast.timeout <= 0) return;
+    const id = setTimeout(onDismiss, toast.timeout);
+    return () => clearTimeout(id);
+  }, [toast.timeout, onDismiss]);
+
+  function handleAction() {
+    toast.action?.submit();
+    if (toast.shouldCloseOnAction) onDismiss();
+  }
+
+  return (
+    <div
+      role="alert"
+      style={{
+        pointerEvents: "auto",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
+        borderLeft: `4px solid ${toastBorderColor[toast.variant] ?? toastBorderColor.neutral}`,
+      }}
+    >
+      <View
+        borderColor="default"
+        borderWidth="thin"
+        borderRadius="medium"
+        backgroundColor="gray-100"
+        padding="size-200"
+      >
+        <Flex alignItems="center" gap="size-200">
+          <View flex>
+            <Text>{toast.message}</Text>
+          </View>
+          {toast.action && (
+            <ActionButton
+              isQuiet
+              isDisabled={toast.action.disabled}
+              onPress={handleAction}
+            >
+              <Text>{toast.action.label ?? toast.action.actionKey}</Text>
+            </ActionButton>
+          )}
+          <ActionButton isQuiet onPress={onDismiss} aria-label="Dismiss notification">
+            <Text>✕</Text>
+          </ActionButton>
+        </Flex>
+      </View>
+    </div>
   );
 }

@@ -1,20 +1,30 @@
 import { newAdapter } from "@statewalker/shared-adapters";
-import { AppContextProvider, useAppContext } from "@statewalker/workbench-react/app-context";
+import {
+  AppContextProvider,
+  useAppContext,
+} from "@statewalker/workbench-react/app-context";
 import {
   ComponentRegistryContext,
   ReactComponentRegistry,
 } from "@statewalker/workbench-react/component-registry";
+import { useUpdates } from "@statewalker/workbench-react/hooks";
 import { Icon, IconRegistryProvider } from "@statewalker/workbench-react/icons";
-import type { ActionView, DialogView, ViewModel } from "@statewalker/workbench-views";
+import type {
+  ActionView,
+  DialogView,
+  ToastView,
+  ViewModel,
+} from "@statewalker/workbench-views";
 import {
   getDialogStackView,
   getPanelManagerView,
   getThemeView,
+  getToastStackView,
   getToolbarView,
   getTopMenuView,
   type PanelManagerView,
 } from "@statewalker/workbench-views";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, X } from "lucide-react";
 import {
   type ComponentType,
   createContext,
@@ -39,6 +49,7 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "../components/ui/menubar.js";
+import { TooltipProvider } from "../components/ui/tooltip.js";
 import { createIconRegistry } from "../icons/init-icons.js";
 import { DockProvider } from "./dock-context.js";
 import { DockLayout } from "./dock-layout.js";
@@ -84,27 +95,31 @@ export function AppShell({ context, wrapper: Wrapper }: AppShellProps) {
   const toolbarActions = useModelItems(toolbarModel);
   const menus = useModelItems(menuModel);
 
-  const topDialog = dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
+  const topDialog =
+    dialogs.length > 0 ? dialogs[dialogs.length - 1] : undefined;
 
   const content = (
-    <AppContextProvider value={context}>
-      <IconRegistryProvider value={iconRegistry}>
-        <ComponentRegistryContext.Provider value={registry}>
-          <div className="flex flex-col h-full w-full bg-background text-foreground">
-            <AppMenuBar menus={menus} />
-            <div className="flex-1 overflow-hidden">
-              <PanelManagerCtx.Provider value={panelManager}>
-                <DockProvider panelManager={panelManager}>
-                  <DockLayout />
-                </DockProvider>
-              </PanelManagerCtx.Provider>
+    <TooltipProvider>
+      <AppContextProvider value={context}>
+        <IconRegistryProvider value={iconRegistry}>
+          <ComponentRegistryContext.Provider value={registry}>
+            <div className="flex flex-col h-full w-full bg-background text-foreground">
+              <AppMenuBar menus={menus} />
+              <div className="flex-1 overflow-hidden">
+                <PanelManagerCtx.Provider value={panelManager}>
+                  <DockProvider panelManager={panelManager}>
+                    <DockLayout />
+                  </DockProvider>
+                </PanelManagerCtx.Provider>
+              </div>
+              <Toolbar actions={toolbarActions} />
+              <DialogOverlay dialog={topDialog} context={context} />
+              <ToastOverlay context={context} />
             </div>
-            <Toolbar actions={toolbarActions} />
-            <DialogOverlay dialog={topDialog} context={context} />
-          </div>
-        </ComponentRegistryContext.Provider>
-      </IconRegistryProvider>
-    </AppContextProvider>
+          </ComponentRegistryContext.Provider>
+        </IconRegistryProvider>
+      </AppContextProvider>
+    </TooltipProvider>
   );
 
   if (Wrapper) {
@@ -249,8 +264,12 @@ function DialogOverlay({
         showCloseButton={dialog.isDismissable}
         className={`${sizeClass} ${dialog.fullScreen ? "w-screen! h-screen! max-w-none! max-h-none! rounded-none!" : "max-h-[85vh]"} flex flex-col`}
         style={sizeStyle}
-        onEscapeKeyDown={dialog.closeOnEscape ? undefined : (e) => e.preventDefault()}
-        onPointerDownOutside={dialog.closeOnClickOutside ? undefined : (e) => e.preventDefault()}
+        onEscapeKeyDown={
+          dialog.closeOnEscape ? undefined : (e) => e.preventDefault()
+        }
+        onPointerDownOutside={
+          dialog.closeOnClickOutside ? undefined : (e) => e.preventDefault()
+        }
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -265,7 +284,9 @@ function DialogOverlay({
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end pt-4 border-t">
             {dialog.footer &&
               (typeof dialog.footer === "string" ? (
-                <span className="mr-auto text-sm text-muted-foreground">{dialog.footer}</span>
+                <span className="mr-auto text-sm text-muted-foreground">
+                  {dialog.footer}
+                </span>
               ) : (
                 <div className="mr-auto">
                   <RenderChild model={dialog.footer} />
@@ -292,4 +313,69 @@ function RenderChild({ model }: { model: ViewModel }) {
   const Component = registry.resolve(model);
   if (!Component) return null;
   return <Component model={model} />;
+}
+
+const toastVariantClasses: Record<string, string> = {
+  positive: "border-green-500",
+  negative: "border-red-500",
+  info: "border-blue-500",
+  neutral: "border-border",
+};
+
+function ToastOverlay({ context }: { context: Record<string, unknown> }) {
+  const stack = useMemo(() => getToastStackView(context), [context]);
+  const toasts = useModelItems(stack);
+  if (toasts.length === 0) return null;
+  return (
+    <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col-reverse gap-2">
+      {toasts.map((toast) => (
+        <ToastCard key={toast.key} toast={toast} onDismiss={() => stack.remove(toast)} />
+      ))}
+    </div>
+  );
+}
+
+function ToastCard({ toast, onDismiss }: { toast: ToastView; onDismiss: () => void }) {
+  useUpdates(toast.onUpdate);
+
+  useEffect(() => {
+    if (toast.timeout <= 0) return;
+    const id = setTimeout(onDismiss, toast.timeout);
+    return () => clearTimeout(id);
+  }, [toast.timeout, onDismiss]);
+
+  const variantClass = toastVariantClasses[toast.variant] ?? toastVariantClasses.neutral;
+
+  function handleAction() {
+    toast.action?.submit();
+    if (toast.shouldCloseOnAction) onDismiss();
+  }
+
+  return (
+    <div
+      role="alert"
+      className={`pointer-events-auto flex items-center gap-3 rounded-lg border bg-card p-4 shadow-lg ${variantClass}`}
+    >
+      <span className="flex-1 text-sm">{toast.message}</span>
+      {toast.action && (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={toast.action.disabled}
+          onClick={handleAction}
+        >
+          {toast.action.label ?? toast.action.actionKey}
+        </Button>
+      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="size-6"
+        onClick={onDismiss}
+        aria-label="Dismiss notification"
+      >
+        <X className="size-4" />
+      </Button>
+    </div>
+  );
 }
