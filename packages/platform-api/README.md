@@ -1,10 +1,14 @@
 # @statewalker/platform-api
 
-Type-only vocabulary for platform-capability intents shared by every application composed of `statewalker-workbench` fragments. A platform-specific implementation is provided by a peer fragment (`@statewalker/platform-browser` for browsers; future `platform.node` / `platform.electron`); this package stays free of runtime code and can be imported under Node without a DOM shim.
+Type-only vocabulary of platform-capability intents shared by every application composed of `statewalker-workbench` fragments. A platform-specific implementation is provided by a peer fragment ([`@statewalker/platform-browser`](../platform-browser) for browsers; future `platform-node` / `platform-electron`); this package stays free of runtime browser code and runs unchanged under Node.
+
+## Why it exists
+
+Fragments need a single, typed surface to ask the host environment to do environment-y things — pick a directory, save a file, copy to clipboard, persist a preference, sync URL state — without binding to any particular host. Keeping the contract here (and the implementations in `platform-browser` / future siblings) means a fragment that uses `runPickDirectory` works the same in a browser app, a Node test, and a future Electron build.
 
 ## Intents
 
-Each intent is a self-contained folder under `src/intents/`. Every folder exports four things: the string key constant, the payload / result type declarations, and the `run*` / `handle*` factory pair created via `@statewalker/shared-intents`.
+Each intent is a self-contained folder under `src/intents/` exporting four things: the string key constant, the payload / result type declarations, and the `run*` / `handle*` factory pair created via `@statewalker/shared-intents`.
 
 | Folder | Key | Purpose |
 |---|---|---|
@@ -16,24 +20,56 @@ Each intent is a self-contained folder under `src/intents/`. Every folder export
 | [`preference-get/`](src/intents/preference-get/) | `platform:preference-get` | Read a durable host-provided key/value pair. |
 | [`preference-set/`](src/intents/preference-set/) | `platform:preference-set` | Write a durable host-provided key/value pair. |
 
-`src/intents/index.ts` re-exports every folder; `src/index.ts` re-exports `./intents/index.ts` together with `./adapters.ts`.
+`src/intents/index.ts` re-exports every folder; `src/index.ts` re-exports `./intents/index.ts` plus the adapters and `UrlStateView`.
 
-## Adapter
+## Adapters
 
-The package also owns the one shared `Intents` bus every fragment uses to talk to every other fragment:
+The package owns three context-bound adapters consumed by every fragment:
 
 ```ts
-import { getIntents } from "@statewalker/platform-api";
+import { getIntents, getUrlStateView } from "@statewalker/platform-api";
 
-const intents = getIntents(ctx); // auto-creates on first access
+const intents = getIntents(ctx);          // Intents bus (auto-created on first access)
+const urlState = getUrlStateView(ctx);    // URL ↔ state sync model
 ```
 
-`getIntents` has a default factory, so there is no explicit bootstrap step — the first consumer to call it seeds the instance, and every subsequent consumer in the same `ctx` sees the same `Intents`.
+- **`Intents`** — the single `Intents` bus shared by every fragment in a composed app. Auto-creates on first access; no explicit bootstrap step.
+- **`UrlStateView`** — bidirectional URL ↔ model state synchronisation. Fragments register `UrlSerializer`s; the browser binding (in `platform-browser`) flushes serialised state to `location.hash` and feeds incoming `hashchange` back. Auto-created on first access.
 
 ## Usage
 
 ```ts
-import { runPickDirectory, getIntents } from "@statewalker/platform-api";
+import { getIntents, runPickDirectory } from "@statewalker/platform-api";
 
-const { files, label } = await runPickDirectory(getIntents(ctx), { title: "Select workspace" });
+const { files, label } = await runPickDirectory(getIntents(ctx), {
+  title: "Select workspace",
+});
 ```
+
+Registering a serializer with `UrlStateView`:
+
+```ts
+import { getUrlStateView, type UrlSerializer } from "@statewalker/platform-api";
+
+const serializer: UrlSerializer = {
+  serialize: (state) => ({ ...state, query: { ...state.query, session: activeSessionId } }),
+  deserialize: (state) => switchToSession(state.query.session),
+};
+
+const dispose = getUrlStateView(ctx).register(serializer);
+```
+
+## Internals
+
+- **Zero runtime DOM dependencies.** `UrlStateView` extends `BaseClass` and is built from observable primitives only; nothing in the package touches `window`, `document`, or any browser global.
+- **Intent-folder layout** — every intent lives in its own folder so a future code-gen (e.g. JSON-RPC bindings) can iterate cleanly without text-grepping.
+- **Loop prevention in `UrlStateView`** — a single `#syncing` flag blocks reentrancy: `applyUrl()` is a no-op while `sync()` is running, and vice versa.
+
+## Related
+
+- [`@statewalker/platform-browser`](../platform-browser) — browser implementation of every intent above plus `bindUrlState`.
+- [`@statewalker/workbench-views`](../workbench-views) — view-model layer that consumes `UrlStateView` (e.g. via chat session controllers).
+
+## License
+
+MIT — see the monorepo root `LICENSE`.
