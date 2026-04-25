@@ -1,0 +1,45 @@
+{
+  "name": "@statewalker/workspace-api",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Type-only contract for the workspace fragment: the Workspace interface, the workspace-scope adapter, and the workspace:open / workspace:change intents.",
+  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "author": {
+    "name": "Mikhail Kotelnikov",
+    "email": "mikhail.kotelnikov@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@statewalker/platform-api": "workspace:*",
+    "@statewalker/shared-adapters": "catalog:",
+    "@statewalker/shared-baseclass": "catalog:",
+    "@statewalker/shared-intents": "catalog:",
+    "@statewalker/webrun-files": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

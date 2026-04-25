@@ -1,0 +1,50 @@
+{
+  "name": "@statewalker/workspace-core",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Runtime for the workspace fragment: builds the Workspace, registers the workspace:open / workspace:change handlers, exposes the request-file-system dialog factory and the main controller that publishes the menu item and fires the bootstrap intent. Loaded by host apps via initWorkspace(ctx).",
+  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "author": {
+    "name": "Mikhail Kotelnikov",
+    "email": "mikhail.kotelnikov@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@statewalker/platform-api": "workspace:*",
+    "@statewalker/shared-adapters": "catalog:",
+    "@statewalker/shared-baseclass": "catalog:",
+    "@statewalker/shared-intents": "catalog:",
+    "@statewalker/shared-registry": "catalog:",
+    "@statewalker/webrun-files": "catalog:",
+    "@statewalker/webrun-files-composite": "catalog:",
+    "@statewalker/workbench-views": "workspace:*",
+    "@statewalker/workspace-api": "workspace:*"
+  },
+  "devDependencies": {
+    "@statewalker/webrun-files-mem": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}
