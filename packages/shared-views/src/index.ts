@@ -13,4 +13,5 @@ export * from "./menus/index.js";
 export * from "./navigation/index.js";
 export * from "./overlays/index.js";
 export * from "./shell/index.js";
-export { initShellCore as default } from "./shell/init-shell-core.js";
+
+export { default } from "./shell/init-shell-core.js";
