@@ -49,7 +49,7 @@ describe("platform.browser initPlatformWeb(ctx)", () => {
     ).resolves.toBeUndefined();
 
     // After cleanup, every platform intent rejects as unhandled.
-    cleanup();
+    await cleanup();
     for (const key of PLATFORM_INTENT_KEYS) {
       await expect(getIntents(ctx).run(key, {})).rejects.toThrow(/unhandled intent/i);
     }

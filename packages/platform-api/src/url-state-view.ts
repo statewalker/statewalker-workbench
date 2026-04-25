@@ -1,3 +1,4 @@
+import { newAdapter } from "@statewalker/shared-adapters";
 import { BaseClass } from "@statewalker/shared-baseclass";
 
 /**
@@ -84,3 +85,12 @@ export class UrlStateView extends BaseClass {
     return this.#syncing;
   }
 }
+
+/**
+ * Context-bound `UrlStateView`. Auto-creates a fresh instance on first
+ * access so any fragment can register serializers without an explicit
+ * bootstrap step. The browser-side wiring (`bindUrlState` registered by
+ * `@statewalker/platform.browser`) consumes this same adapter.
+ */
+export const [getUrlStateView, setUrlStateView, removeUrlStateView] =
+  newAdapter<UrlStateView>("model:url-state", () => new UrlStateView());
