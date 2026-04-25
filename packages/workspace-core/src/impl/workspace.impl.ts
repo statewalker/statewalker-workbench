@@ -1,3 +1,5 @@
+import { BaseClass } from "@statewalker/shared-baseclass";
+import type { FilesApi } from "@statewalker/webrun-files";
 import type {
   AdapterCtor,
   AdapterFactory,
@@ -5,8 +7,6 @@ import type {
   WorkspaceAdapter,
   Workspace as WorkspaceInterface,
 } from "@statewalker/workspace-api";
-import { BaseClass } from "@statewalker/shared-baseclass";
-import type { FilesApi } from "@statewalker/webrun-files";
 
 /**
  * Concrete `Workspace` implementation. Starts closed, publishes its live state
@@ -43,18 +43,14 @@ export class Workspace extends BaseClass implements WorkspaceInterface {
 
   get files(): FilesApi {
     if (!this._files) {
-      throw new Error(
-        "Workspace has no file system installed — call setFileSystem() first",
-      );
+      throw new Error("Workspace has no file system installed — call setFileSystem() first");
     }
     return this._files;
   }
 
   setFileSystem(files: FilesApi, label?: string): this {
     if (this._isOpened) {
-      throw new Error(
-        "Workspace.setFileSystem is only legal while closed — call close() first",
-      );
+      throw new Error("Workspace.setFileSystem is only legal while closed — call close() first");
     }
     this._files = files;
     if (label !== undefined) this._label = label;
@@ -86,15 +82,11 @@ export class Workspace extends BaseClass implements WorkspaceInterface {
     const registered = this._registrations.get(type);
     if (!registered) return null;
     if (this._instantiating.has(type)) {
-      throw new Error(
-        `Adapter cycle detected while constructing ${describe(type)}`,
-      );
+      throw new Error(`Adapter cycle detected while constructing ${describe(type)}`);
     }
     this._instantiating.add(type);
     try {
-      const instance = isClass(registered)
-        ? new registered(this)
-        : registered(this);
+      const instance = isClass(registered) ? new registered(this) : registered(this);
       this._instances.set(type, instance);
       this._instantiatedInOrder.push(instance);
       return instance as T;
@@ -135,9 +127,7 @@ export class Workspace extends BaseClass implements WorkspaceInterface {
   async open(): Promise<this> {
     if (this._isOpened) return this;
     if (!this._files) {
-      throw new Error(
-        "Workspace.open requires a file system — call setFileSystem() first",
-      );
+      throw new Error("Workspace.open requires a file system — call setFileSystem() first");
     }
     this._isOpened = true;
     this.notify();
@@ -175,10 +165,7 @@ export class Workspace extends BaseClass implements WorkspaceInterface {
     this._isOpened = false;
     this.notify();
     if (errors.length > 0) {
-      throw new AggregateError(
-        errors,
-        "One or more workspace adapters threw during close()",
-      );
+      throw new AggregateError(errors, "One or more workspace adapters threw during close()");
     }
   }
 
@@ -193,9 +180,7 @@ export class Workspace extends BaseClass implements WorkspaceInterface {
 
 function isClass(value: AnyCtor | AnyFactory): value is AnyCtor {
   return (
-    typeof value === "function" &&
-    typeof value.prototype === "object" &&
-    value.prototype !== null
+    typeof value === "function" && typeof value.prototype === "object" && value.prototype !== null
   );
 }
 

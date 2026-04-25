@@ -1,3 +1,4 @@
+import type { FilesApi } from "@statewalker/webrun-files";
 import {
   getWorkspaceConfig,
   Secrets,
@@ -5,7 +6,6 @@ import {
   SystemFiles,
   type WorkspaceConfig,
 } from "@statewalker/workspace-api";
-import type { FilesApi } from "@statewalker/webrun-files";
 import { FilesBackedSecrets } from "./secrets-files.impl.ts";
 import { FilesBackedSettings } from "./settings-files.impl.ts";
 import { FilesBackedSystemFiles } from "./system-files.impl.ts";
@@ -30,18 +30,9 @@ export function buildWorkspace(
   const resolved = config ?? getWorkspaceConfig(ctx);
   const workspace = new Workspace();
   workspace
-    .setAdapter(
-      SystemFiles,
-      (ws) => new FilesBackedSystemFiles(ws, resolved.systemDir),
-    )
-    .setAdapter(
-      Secrets,
-      (ws) => new FilesBackedSecrets(ws, resolved.secretsDir),
-    )
-    .setAdapter(
-      Settings,
-      (ws) => new FilesBackedSettings(ws, resolved.settingsDir),
-    )
+    .setAdapter(SystemFiles, (ws) => new FilesBackedSystemFiles(ws, resolved.systemDir))
+    .setAdapter(Secrets, (ws) => new FilesBackedSecrets(ws, resolved.secretsDir))
+    .setAdapter(Settings, (ws) => new FilesBackedSettings(ws, resolved.settingsDir))
     .setFileSystem(files, label);
   return workspace;
 }

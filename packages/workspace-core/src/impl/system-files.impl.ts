@@ -1,5 +1,5 @@
-import { SystemFiles, type Workspace } from "@statewalker/workspace-api";
 import type { FilesApi } from "@statewalker/webrun-files";
+import { SystemFiles, type Workspace } from "@statewalker/workspace-api";
 import { buildWorkspaceViews } from "./composite-setup.ts";
 
 /**

@@ -16,21 +16,19 @@ export interface WorkspaceAdapter {
  * Registry key type. Abstract classes (like the `Secrets` / `Settings` /
  * `SystemFiles` tokens) MUST be usable as keys — hence `abstract new`.
  */
-export type AdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> =
-  abstract new (
-    workspace: Workspace,
-    ...args: unknown[]
-  ) => T;
+export type AdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> = abstract new (
+  workspace: Workspace,
+  ...args: unknown[]
+) => T;
 
 /**
  * Concrete implementation shape. Used as the value side of the registry —
  * callable with `new` to produce an instance.
  */
-export type ConcreteAdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> =
-  new (
-    workspace: Workspace,
-    ...args: unknown[]
-  ) => T;
+export type ConcreteAdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> = new (
+  workspace: Workspace,
+  ...args: unknown[]
+) => T;
 
 export type AdapterFactory<T extends WorkspaceAdapter = WorkspaceAdapter> = (
   workspace: Workspace,

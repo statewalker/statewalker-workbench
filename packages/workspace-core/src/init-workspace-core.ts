@@ -10,13 +10,8 @@ import { registerOpenWorkspaceHandler } from "./handlers/open-workspace.handler.
  * Under Node tests, stub `platform:pick-directory` (and optionally
  * `platform:preference-get`) before calling this.
  */
-export default function initWorkspaceCore(
-  ctx: Record<string, unknown>,
-): () => void {
-  const cleanups = [
-    registerOpenWorkspaceHandler(ctx),
-    registerChangeWorkspaceHandler(ctx),
-  ];
+export default function initWorkspaceCore(ctx: Record<string, unknown>): () => void {
+  const cleanups = [registerOpenWorkspaceHandler(ctx), registerChangeWorkspaceHandler(ctx)];
   return () => {
     for (let i = cleanups.length - 1; i >= 0; i--) {
       cleanups[i]?.();

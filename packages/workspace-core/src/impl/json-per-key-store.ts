@@ -30,9 +30,7 @@ export class JsonPerKeyStore {
   }
 
   private path(key: string): string {
-    return this.dir
-      ? `/${this.dir}/${encodeKey(key)}.json`
-      : `/${encodeKey(key)}.json`;
+    return this.dir ? `/${this.dir}/${encodeKey(key)}.json` : `/${encodeKey(key)}.json`;
   }
 
   async get<T = unknown>(key: string): Promise<T | undefined> {

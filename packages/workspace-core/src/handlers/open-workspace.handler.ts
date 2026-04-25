@@ -1,15 +1,11 @@
+import { getIntents, runPickDirectory, runPreferenceGet } from "@statewalker/platform-api";
+import type { Intents } from "@statewalker/shared-intents";
 import {
   getWorkspace,
   getWorkspaceConfig,
   handleOpenWorkspace,
   setWorkspace,
 } from "@statewalker/workspace-api";
-import {
-  getIntents,
-  runPickDirectory,
-  runPreferenceGet,
-} from "@statewalker/platform-api";
-import type { Intents } from "@statewalker/shared-intents";
 import { buildWorkspace } from "../impl/build-workspace.ts";
 import type { Workspace } from "../impl/workspace.impl.ts";
 
@@ -27,9 +23,7 @@ export const WORKSPACE_LAST_HANDLE_PREFERENCE_KEY = "workspace:last-handle";
  * picking is delegated to `platform.api`'s `runPickDirectory` intent, and
  * preference lookup to `runPreferenceGet`.
  */
-export function registerOpenWorkspaceHandler(
-  ctx: Record<string, unknown>,
-): () => void {
+export function registerOpenWorkspaceHandler(ctx: Record<string, unknown>): () => void {
   const intents = getIntents(ctx);
   return handleOpenWorkspace(intents, (intent) => {
     void performOpen(ctx, intents, intent.payload.force ?? false)
@@ -76,9 +70,7 @@ async function performOpen(
   return workspace;
 }
 
-async function tryReadRememberedHandle(
-  intents: Intents,
-): Promise<unknown | undefined> {
+async function tryReadRememberedHandle(intents: Intents): Promise<unknown | undefined> {
   try {
     const result = await runPreferenceGet(intents, {
       key: WORKSPACE_LAST_HANDLE_PREFERENCE_KEY,

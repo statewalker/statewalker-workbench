@@ -107,17 +107,13 @@ export function buildWorkspaceViews(
 function normalizePrefix(prefix: string): string {
   if (!prefix) return "";
   const trimmed = prefix.startsWith("/") ? prefix : `/${prefix}`;
-  return trimmed.endsWith("/") && trimmed.length > 1
-    ? trimmed.slice(0, -1)
-    : trimmed;
+  return trimmed.endsWith("/") && trimmed.length > 1 ? trimmed.slice(0, -1) : trimmed;
 }
 
 function normalizePath(path: string): string {
   if (!path) return "/";
   const prefixed = path.startsWith("/") ? path : `/${path}`;
-  return prefixed.length > 1 && prefixed.endsWith("/")
-    ? prefixed.slice(0, -1)
-    : prefixed;
+  return prefixed.length > 1 && prefixed.endsWith("/") ? prefixed.slice(0, -1) : prefixed;
 }
 
 async function* emptyAsyncIterable(): AsyncIterable<Uint8Array> {
