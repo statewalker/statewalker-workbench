@@ -1,26 +1,32 @@
 /**
- * Spectrum dock context — reuses shared dock tree logic,
- * provides DockProvider and panelsToTreeFromViews.
- * Identical to shadcn dock-context but without any UI dependencies.
+ * Spectrum dock context — thin React adapter over `PanelManagerView`.
+ * Mirrors the shadcn dock-context: holds only UI-local state
+ * (drag-in-progress + drop-confirmation); reads the dock tree via
+ * `panelManager.getTree()` and forwards every mutation to the
+ * PanelManagerView methods. The tree is never mutated locally.
  */
 import {
-  panelsToTree as _panelsToTree,
-  addTabToPanel,
   type DockNode,
   type DockPanel,
+  type DockSplit,
   type DockTab,
   type DropPosition,
-  findAndRemoveTab,
-  findPanel,
-  updatePanelActiveTab,
-  updateSplitSizes,
-} from "@statewalker/workbench-react/dock";
-import type { DockPanelView } from "@statewalker/workbench-views";
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+  isPanel,
+  isSplit,
+  type PanelManagerView,
+} from "@statewalker/workbench-views";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
-export type { DockNode, DockPanel, DockTab, DropPosition };
-export type { DockSplit } from "@statewalker/workbench-react/dock";
-export { isPanel, isSplit } from "@statewalker/workbench-react/dock";
+export type { DockNode, DockPanel, DockSplit, DockTab, DropPosition };
+export { isPanel, isSplit };
 
 interface DragState {
   tabId: string;
@@ -67,31 +73,22 @@ export function useDockLayout() {
   return ctx;
 }
 
-export function panelsToTreeFromViews(panels: DockPanelView[]): DockNode {
-  return _panelsToTree(
-    panels.map((p) => ({
-      key: p.key,
-      label: p.label,
-      icon: p.icon,
-      area: p.area,
-      closable: p.closable,
-      content: p,
-    })),
-  );
-}
-
 export function DockProvider({
   children,
-  initialLayout,
+  panelManager,
 }: {
   children: ReactNode;
-  initialLayout: DockNode;
+  panelManager: PanelManagerView;
 }) {
-  const [root, setRoot] = useState<DockNode>(initialLayout);
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => panelManager.onUpdate(onStoreChange),
+    [panelManager],
+  );
+  const getSnapshot = useCallback(() => panelManager.getTree(), [panelManager]);
+  const root = useSyncExternalStore(subscribe, getSnapshot);
+
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
-
-  useEffect(() => setRoot(initialLayout), [initialLayout]);
 
   const startDrag = useCallback(
     (tabId: string, sourcePanelId: string) => setDragState({ tabId, sourcePanelId }),
@@ -105,85 +102,93 @@ export function DockProvider({
       suggestedPosition: DropPosition,
       dropCoords: { x: number; y: number },
     ) => {
-      const drag = dragState;
-      setDragState(null);
-      if (!drag) return;
-      if (drag.sourcePanelId === targetPanelId) {
-        const panel = findPanel(root, drag.sourcePanelId);
-        if (!panel || panel.tabs.length <= 1) return;
-      }
-      setPendingDrop({
-        tabId: drag.tabId,
-        sourcePanelId: drag.sourcePanelId,
-        targetPanelId,
-        suggestedPosition,
-        dropCoords,
+      setDragState((drag) => {
+        if (!drag) return null;
+        if (!panelManager.canMoveTab(drag.sourcePanelId, targetPanelId, suggestedPosition)) {
+          return null;
+        }
+        setPendingDrop({
+          tabId: drag.tabId,
+          sourcePanelId: drag.sourcePanelId,
+          targetPanelId,
+          suggestedPosition,
+          dropCoords,
+        });
+        return null;
       });
     },
-    [dragState, root],
+    [panelManager],
   );
 
   const moveTab = useCallback(
-    (tabId: string, sourcePanelId: string, targetPanelId: string, position: DropPosition) => {
-      setRoot((cur) => {
-        if (sourcePanelId === targetPanelId && position === "center") return cur;
-        if (sourcePanelId === targetPanelId && position !== "center") {
-          const panel = findPanel(cur, sourcePanelId);
-          if (panel && panel.tabs.length <= 1) return cur;
-        }
-        const { node, tab } = findAndRemoveTab(cur, sourcePanelId, tabId);
-        if (!tab || !node) return cur;
-        return addTabToPanel(node, targetPanelId, tab, position);
-      });
-    },
-    [],
+    (tabId: string, sourcePanelId: string, targetPanelId: string, position: DropPosition) =>
+      panelManager.moveTab(tabId, sourcePanelId, targetPanelId, position),
+    [panelManager],
   );
 
   const confirmDrop = useCallback(
     (position: DropPosition) => {
-      if (pendingDrop) {
-        moveTab(pendingDrop.tabId, pendingDrop.sourcePanelId, pendingDrop.targetPanelId, position);
-        setPendingDrop(null);
-      }
+      setPendingDrop((pd) => {
+        if (pd) {
+          panelManager.moveTab(pd.tabId, pd.sourcePanelId, pd.targetPanelId, position);
+        }
+        return null;
+      });
     },
-    [pendingDrop, moveTab],
+    [panelManager],
   );
 
   const cancelDrop = useCallback(() => setPendingDrop(null), []);
 
-  const closeTab = useCallback((panelId: string, tabId: string) => {
-    setRoot((cur) => {
-      const { node } = findAndRemoveTab(cur, panelId, tabId);
-      return node || cur;
-    });
-  }, []);
-
-  const setActiveTab = useCallback((panelId: string, tabId: string) => {
-    setRoot((cur) => updatePanelActiveTab(cur, panelId, tabId));
-  }, []);
-
-  const handleUpdateSizes = useCallback((splitId: string, sizes: number[]) => {
-    setRoot((cur) => updateSplitSizes(cur, splitId, sizes));
-  }, []);
-
-  return (
-    <DockCtx.Provider
-      value={{
-        root,
-        dragState,
-        pendingDrop,
-        startDrag,
-        endDrag,
-        requestDrop,
-        confirmDrop,
-        cancelDrop,
-        moveTab,
-        closeTab,
-        setActiveTab,
-        updateSizes: handleUpdateSizes,
-      }}
-    >
-      {children}
-    </DockCtx.Provider>
+  const closeTab = useCallback(
+    (_panelId: string, tabId: string) => {
+      const pv = panelManager.getPanel(tabId);
+      pv?.onClose?.();
+      panelManager.removePanel(tabId);
+    },
+    [panelManager],
   );
+
+  const setActiveTab = useCallback(
+    (panelId: string, tabId: string) => panelManager.setActiveTab(panelId, tabId),
+    [panelManager],
+  );
+
+  const updateSizes = useCallback(
+    (splitId: string, sizes: number[]) => panelManager.updateSplitSizes(splitId, sizes),
+    [panelManager],
+  );
+
+  const value = useMemo<DockContextType>(
+    () => ({
+      root,
+      dragState,
+      pendingDrop,
+      startDrag,
+      endDrag,
+      requestDrop,
+      confirmDrop,
+      cancelDrop,
+      moveTab,
+      closeTab,
+      setActiveTab,
+      updateSizes,
+    }),
+    [
+      root,
+      dragState,
+      pendingDrop,
+      startDrag,
+      endDrag,
+      requestDrop,
+      confirmDrop,
+      cancelDrop,
+      moveTab,
+      closeTab,
+      setActiveTab,
+      updateSizes,
+    ],
+  );
+
+  return <DockCtx.Provider value={value}>{children}</DockCtx.Provider>;
 }

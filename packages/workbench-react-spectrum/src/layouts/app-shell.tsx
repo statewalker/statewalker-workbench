@@ -18,15 +18,13 @@ import {
 } from "@statewalker/workbench-react/component-registry";
 import type { ActionView, DialogView, ToastView } from "@statewalker/workbench-views";
 import {
-  type ActivePanelView,
-  type DockPanelView,
-  getActivePanelView,
   getDialogStackView,
+  getPanelManagerView,
   getThemeView,
   getToastStackView,
   getToolbarView,
   getTopMenuView,
-  listenPanel,
+  type PanelManagerView,
   type UIModelRegistry,
 } from "@statewalker/workbench-views";
 import {
@@ -38,14 +36,19 @@ import {
   useMemo,
   useState,
 } from "react";
-import { DockProvider, panelsToTreeFromViews } from "./dock-context.js";
+import { DockProvider } from "./dock-context.js";
 import { SpectrumDockLayout } from "./dock-layout.js";
 
 // ─── Shared adapters ────────────────────────────────────
 
-const ActivePanelCtx = createContext<ActivePanelView | null>(null);
-export function useActivePanelView(): ActivePanelView | null {
-  return useContext(ActivePanelCtx);
+const PanelManagerCtx = createContext<PanelManagerView | null>(null);
+export function usePanelManagerView(): PanelManagerView | null {
+  return useContext(PanelManagerCtx);
+}
+
+/** @deprecated Use usePanelManagerView instead. */
+export function useActivePanelView(): PanelManagerView | null {
+  return useContext(PanelManagerCtx);
 }
 
 const [getComponentRegistry] = newAdapter<ReactComponentRegistry>(
@@ -90,15 +93,11 @@ export function SpectrumAppShell({ context, wrapper: Wrapper }: AppShellProps) {
   const dialogsModel = getDialogStackView(context);
   const toolbarModel = getToolbarView(context);
   const menuModel = getTopMenuView(context);
+  const panelManager = useMemo(() => getPanelManagerView(context), [context]);
 
-  const [panels, setPanels] = useState<DockPanelView[]>([]);
-  useEffect(() => listenPanel(context, setPanels), [context]);
   const dialogs = useModelItems(dialogsModel);
   const toolbarActions = useModelItems(toolbarModel) as ActionView[];
   const menus = useModelItems(menuModel) as ActionView[];
-
-  const tree = useMemo(() => panelsToTreeFromViews(panels), [panels]);
-  const activePanelModel = getActivePanelView(context);
 
   // Theme state — driven by ThemeView model
   const themeModel = useMemo(() => getThemeView(context), [context]);
@@ -116,11 +115,11 @@ export function SpectrumAppShell({ context, wrapper: Wrapper }: AppShellProps) {
       <Flex direction="column" height="100%" width="100%">
         <SpectrumMenuBar menus={menus} />
         <View flex UNSAFE_style={{ overflow: "hidden" }}>
-          <ActivePanelCtx.Provider value={activePanelModel}>
-            <DockProvider initialLayout={tree}>
+          <PanelManagerCtx.Provider value={panelManager}>
+            <DockProvider panelManager={panelManager}>
               <SpectrumDockLayout />
             </DockProvider>
-          </ActivePanelCtx.Provider>
+          </PanelManagerCtx.Provider>
         </View>
         {toolbarActions.length > 0 && <SpectrumToolbar actions={toolbarActions} />}
         <SpectrumDialogOverlay dialog={topDialog} registry={registry} />
