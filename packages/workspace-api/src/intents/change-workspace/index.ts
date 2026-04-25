@@ -1,6 +1,6 @@
 import { newIntent } from "@statewalker/shared-intents";
 import type { FilesApi } from "@statewalker/webrun-files";
-import type { Workspace } from "../../types.ts";
+import type { Workspace } from "../../types.js";
 
 export const CHANGE_WORKSPACE_INTENT_KEY = "workspace:change";
 

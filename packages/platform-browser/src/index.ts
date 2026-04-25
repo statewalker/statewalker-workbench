@@ -10,6 +10,13 @@ import { registerPreferenceGetBrowser } from "./handlers/preference-get.browser.
 import { registerPreferenceSetBrowser } from "./handlers/preference-set.browser.js";
 
 export * from "./bind-url-state.js";
+export { registerCopyToClipboardBrowser } from "./handlers/copy-to-clipboard.browser.js";
+export { registerDownloadBlobBrowser } from "./handlers/download-blob.browser.js";
+export { registerDownloadToFilesBrowser } from "./handlers/download-to-files.browser.js";
+export { registerPickDirectoryBrowser } from "./handlers/pick-directory.browser.js";
+export { registerPickFileBrowser } from "./handlers/pick-file.browser.js";
+export { registerPreferenceGetBrowser } from "./handlers/preference-get.browser.js";
+export { registerPreferenceSetBrowser } from "./handlers/preference-set.browser.js";
 
 /**
  * Register every browser-backed capability for `@statewalker/platform-api`

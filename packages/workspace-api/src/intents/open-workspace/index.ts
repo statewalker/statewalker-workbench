@@ -1,5 +1,5 @@
 import { newIntent } from "@statewalker/shared-intents";
-import type { Workspace } from "../../types.ts";
+import type { Workspace } from "../../types.js";
 
 export const OPEN_WORKSPACE_INTENT_KEY = "workspace:open";
 
