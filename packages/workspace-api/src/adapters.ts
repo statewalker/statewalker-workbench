@@ -1,5 +1,5 @@
 import { newAdapter } from "@statewalker/shared-adapters";
-import type { Workspace } from "./types.ts";
+import type { Workspace } from "./types.js";
 
 export const [getWorkspace, setWorkspace, removeWorkspace] =
   newAdapter<Workspace>("workspace:workspace");

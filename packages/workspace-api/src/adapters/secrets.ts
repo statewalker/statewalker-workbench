@@ -1,4 +1,4 @@
-import type { WorkspaceAdapter } from "../types.ts";
+import type { WorkspaceAdapter } from "../types.js";
 
 /**
  * Abstract adapter token for per-workspace secrets (API keys, tokens). The

@@ -1,3 +1,3 @@
-export { Secrets } from "./secrets.ts";
-export { Settings } from "./settings.ts";
-export { SystemFiles } from "./system-files.ts";
+export { Secrets } from "./secrets.js";
+export { Settings } from "./settings.js";
+export { SystemFiles } from "./system-files.js";
