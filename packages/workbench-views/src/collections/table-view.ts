@@ -1,3 +1,4 @@
+import { onChangeNotifier } from "@statewalker/shared-baseclass";
 import { ContainerView } from "../core/index.js";
 
 export interface ColumnDescriptor<T = Record<string, unknown>> {
@@ -83,6 +84,22 @@ export class TableView<T = Record<string, unknown>> extends ContainerView<T> {
     return this.#overflowMode;
   }
 
+  /**
+   * Key of the most recently activated row (clicked / Enter pressed).
+   * Set by `activateRow(key)`. The `onRowActivate` notifier fires
+   * whenever this value changes.
+   */
+  #activeRowKey: string | undefined = undefined;
+  get activeRowKey(): string | undefined {
+    return this.#activeRowKey;
+  }
+
+  /** Convenience: the row matching `activeRowKey`, if any. */
+  get activeRow(): T | undefined {
+    if (this.#activeRowKey === undefined) return undefined;
+    return this.#rows.find((r) => this.rowKey(r) === this.#activeRowKey);
+  }
+
   constructor(options: {
     columns?: ColumnDescriptor<T>[];
     rows?: T[];
@@ -105,9 +122,42 @@ export class TableView<T = Record<string, unknown>> extends ContainerView<T> {
     this.#overflowMode = options.overflowMode ?? "truncate";
   }
 
-  setRows(rows: T[]): void {
+  /**
+   * Subscribe to row activations. Fires when `activeRowKey` changes
+   * (re-clicking the same row is a no-op — by design).
+   */
+  onRowActivate = onChangeNotifier(this.onUpdate, () => this.#activeRowKey);
+
+  /**
+   * Subscribe to sort requests. Fires when the sort descriptor (column
+   * or direction) changes.
+   */
+  onSort = onChangeNotifier(
+    this.onUpdate,
+    () => `${this.#sortDescriptor?.column ?? ""}:${this.#sortDescriptor?.direction ?? ""}`,
+  );
+
+  /**
+   * Mark a row as activated. Updates `activeRowKey` and notifies; the
+   * `onRowActivate` notifier fires when the value changes.
+   */
+  activateRow(key: string): void {
+    if (this.#activeRowKey === key) return;
+    this.#activeRowKey = key;
+    this.notify();
+  }
+
+  /**
+   * Replace the table data. Optionally also updates the selection and
+   * the sort descriptor in a single notify().
+   */
+  setRows(rows: T[], params?: { selected?: Set<string>; sortDescriptor?: SortDescriptor }): void {
     this.#rows = rows;
-    this.#selectedKeys = new Set();
+    this.#selectedKeys = params?.selected ?? new Set();
+    if (params?.sortDescriptor !== undefined) {
+      this.#sortDescriptor = params.sortDescriptor;
+    }
+    // TODO: check if parameters are changed before calling notify().
     this.notify();
   }
 
@@ -123,10 +173,8 @@ export class TableView<T = Record<string, unknown>> extends ContainerView<T> {
     this.notify();
   }
 
-  get sortedRows(): T[] {
-    if (!this.#sortDescriptor) return this.#rows;
-    const { column, direction } = this.#sortDescriptor;
-    return [...this.#rows].sort((a, b) => {
+  protected sortRows(rows: T[], column: string, direction: "ascending" | "descending"): T[] {
+    return rows.sort((a, b) => {
       const aVal = (a as Record<string, unknown>)[column];
       const bVal = (b as Record<string, unknown>)[column];
       if (aVal == null && bVal == null) return 0;
@@ -135,6 +183,13 @@ export class TableView<T = Record<string, unknown>> extends ContainerView<T> {
       const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
       return direction === "ascending" ? cmp : -cmp;
     });
+  }
+
+  get sortedRows(): T[] {
+    if (!this.#sortDescriptor) return this.#rows;
+    const { column, direction } = this.#sortDescriptor;
+    const rows = [...this.#rows];
+    return this.sortRows(rows, column, direction);
   }
 
   toggleSelection(key: string): void {

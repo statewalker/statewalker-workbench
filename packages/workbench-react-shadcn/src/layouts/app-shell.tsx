@@ -150,13 +150,30 @@ function ThemeToggle() {
 function AppMenuBar({ menus }: { menus: ActionView[] }) {
   return (
     <Menubar className="border-0 border-b border-border rounded-none shadow-none bg-card">
-      {menus.map((menu) => (
-        <MenubarMenu key={menu.actionKey}>
-          <MenubarTrigger>
+      {menus.map((menu) =>
+        menu.children.length === 0 ? (
+          // Leaf action — render as a plain button. radix `MenubarTrigger`
+          // always toggles its (empty) menu on click and swallows the
+          // `onClick` payload, so a top-level action without children would
+          // appear unresponsive. A Button inside the Menubar styles the
+          // same way and fires `submit()` cleanly.
+          <Button
+            key={menu.actionKey}
+            variant="ghost"
+            size="sm"
+            disabled={menu.disabled}
+            onClick={() => menu.submit()}
+            className="h-8 px-3 text-sm font-medium"
+          >
             {menu.icon && <Icon name={menu.icon} className="size-4 mr-1.5" />}
             {menu.label ?? menu.actionKey}
-          </MenubarTrigger>
-          {menu.children.length > 0 && (
+          </Button>
+        ) : (
+          <MenubarMenu key={menu.actionKey}>
+            <MenubarTrigger>
+              {menu.icon && <Icon name={menu.icon} className="size-4 mr-1.5" />}
+              {menu.label ?? menu.actionKey}
+            </MenubarTrigger>
             <MenubarContent>
               {menu.children.map((item) => (
                 <MenubarItem
@@ -168,9 +185,9 @@ function AppMenuBar({ menus }: { menus: ActionView[] }) {
                 </MenubarItem>
               ))}
             </MenubarContent>
-          )}
-        </MenubarMenu>
-      ))}
+          </MenubarMenu>
+        ),
+      )}
       <ThemeToggle />
     </Menubar>
   );
@@ -227,7 +244,10 @@ function DialogOverlay({
 }) {
   if (!dialog) return null;
 
-  const title = typeof dialog.header === "string" ? dialog.header : "Dialog";
+  const headerText = typeof dialog.header === "string" ? dialog.header : undefined;
+  // Radix DialogContent requires an accessible title, even when no
+  // visible header is rendered; fall back to "Dialog" only for a11y.
+  const a11yTitle = headerText ?? "Dialog";
 
   const dismiss = () => {
     dialog.close(undefined);
@@ -258,10 +278,14 @@ function DialogOverlay({
         onEscapeKeyDown={dialog.closeOnEscape ? undefined : (e) => e.preventDefault()}
         onPointerDownOutside={dialog.closeOnClickOutside ? undefined : (e) => e.preventDefault()}
       >
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription className="sr-only">{title}</DialogDescription>
-        </DialogHeader>
+        {headerText !== undefined ? (
+          <DialogHeader>
+            <DialogTitle>{headerText}</DialogTitle>
+            <DialogDescription className="sr-only">{headerText}</DialogDescription>
+          </DialogHeader>
+        ) : (
+          <DialogTitle className="sr-only">{a11yTitle}</DialogTitle>
+        )}
         <div className="flex-1 overflow-y-auto">
           {dialog.children.map((child: ViewModel) => (
             <RenderChild key={child.key} model={child} />

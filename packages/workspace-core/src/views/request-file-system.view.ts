@@ -5,15 +5,31 @@ import {
   UserCancelledError,
 } from "@statewalker/platform-api";
 import type { FilesApi } from "@statewalker/webrun-files";
-import { ContentPanelView, DialogView, publishDialog } from "@statewalker/workbench-views";
+import { ActionView, DialogView, EmptyView, publishDialog } from "@statewalker/workbench-views";
 
 export interface RequestFileSystemDialogOptions {
-  /** Dialog header. Defaults to "Open workspace folder". */
+  /**
+   * Dialog header (window title). When omitted, the dialog is shown
+   * without a visible header — the body's `heading` becomes the
+   * primary label.
+   */
   title?: string;
+  /** Body heading (large, prominent). Defaults to "Select workspace folder". */
+  heading?: string;
   /** Body description. Defaults to a sensible English fallback. */
   description?: string;
-  /** Primary "Open Folder" button label. Defaults to "Open Folder". */
+  /** Primary call-to-action button label. Defaults to "Open Folder". */
   okLabel?: string;
+  /** Optional icon name (forwarded to `EmptyView.icon`). */
+  icon?: string;
+  /**
+   * When true, render an explicit "Cancel" button in the dialog footer
+   * so the user can dismiss without picking a folder. Defaults to
+   * `false` — initial-open flows that have no current workspace should
+   * leave the user no exit other than picking a folder; "change
+   * workspace" flows should set this to `true`.
+   */
+  showCancel?: boolean;
   /** Cancel button label. Defaults to "Cancel". */
   cancelLabel?: string;
 }
@@ -28,11 +44,16 @@ export interface RequestFileSystemDialog {
   result: Promise<RequestFileSystemResult>;
 }
 
+const DONE_LABEL = "__picked";
+
 /**
  * Builds the request-file-system dialog as a pure view-model declaration:
- * a `DialogView` wrapping a `ContentPanelView` (header + description) plus
- * Cancel / "Open Folder" buttons in `DialogView.buttons`. The factory
- * returns the view (for the host to render via `publishDialog`) and a
+ * a `DialogView` whose body is an `EmptyView` (large icon + heading +
+ * description + a primary `ActionView` call-to-action). Mirrors the
+ * standard "empty state / drag-and-drop" pattern — the centred CTA is the
+ * dialog's main affordance, not a footer button.
+ *
+ * Returns the view (for the host to render via `publishDialog`) and a
  * result promise that resolves with `{ files, label }` when the user picks
  * a folder, or rejects with `UserCancelledError` when the user dismisses
  * the dialog or the OS directory picker.
@@ -46,11 +67,15 @@ export function buildRequestFileSystemDialog(
   options: RequestFileSystemDialogOptions = {},
 ): RequestFileSystemDialog {
   const intents = getIntents(ctx);
-  const title = options.title ?? "Open workspace folder";
+  const title = options.title; // optional — undefined means no header
+  const heading = options.heading ?? "Select workspace folder";
   const description =
-    options.description ?? "Select a folder on your machine to use as the workspace root.";
+    options.description ??
+    "Select a folder on your machine to use as the workspace root. The folder's contents become the workspace's file system.";
   const okLabel = options.okLabel ?? "Open Folder";
-  const cancelLabel = options.cancelLabel ?? "Cancel";
+  const icon = options.icon ?? "folder-open";
+  // OS picker still wants a window title; fall back to the body heading.
+  const pickerTitle = title ?? heading;
 
   let pickedFiles: FilesApi | undefined;
   let pickedLabel: string | undefined;
@@ -62,59 +87,76 @@ export function buildRequestFileSystemDialog(
     reject = rej;
   });
 
+  // Primary CTA — fires runPickDirectory, then closes the dialog with a
+  // sentinel label. The user-cancel-of-OS-picker path leaves the dialog
+  // open so the user can retry without re-mounting.
+  const openAction = new ActionView({
+    key: "request-file-system.open",
+    label: okLabel,
+    variant: "primary",
+    execute: () => {
+      void runPickDirectory(intents, { title: pickerTitle })
+        .promise.then(({ files, label }) => {
+          pickedFiles = files;
+          pickedLabel = label;
+          view.close(DONE_LABEL);
+        })
+        .catch((error: unknown) => {
+          if (isUserCancelled(error)) {
+            // OS picker dismissed — leave the dialog open for retry.
+            return;
+          }
+          pickerError = error;
+          view.close(DONE_LABEL);
+        });
+    },
+  });
+
+  const body = new EmptyView({
+    key: "request-file-system.body",
+    icon,
+    heading,
+    description,
+    action: openAction,
+  });
+
+  // Footer buttons. Empty by default — the EmptyView's own CTA is the
+  // primary action, and the dialog's built-in close affordance handles
+  // dismissal. When `showCancel` is true (e.g. "change workspace"
+  // flows where the user already has a workspace and may decide to
+  // keep it), an explicit Cancel button is added so dismissal is a
+  // visible choice.
+  const buttons = options.showCancel
+    ? [
+        {
+          label: options.cancelLabel ?? "Cancel",
+          variant: "outline" as const,
+        },
+      ]
+    : [];
+
   const view = new DialogView({
     key: "request-file-system",
     header: title,
-    children: [new ContentPanelView({ key: "request-file-system.body", header: description })],
+    children: [body],
     isDismissable: true,
     closeOnEscape: true,
     closeOnClickOutside: true,
     isOpen: true,
-    buttons: [
-      { label: cancelLabel, variant: "ghost" },
-      {
-        label: okLabel,
-        variant: "default",
-        // Returning `false` keeps the dialog open; returning anything else
-        // tells the renderer to call `view.close(label)` and remove from
-        // the registry. We veto close on user-cancel of the OS picker so
-        // the user can retry; on success or real error we let the dialog
-        // close with the OK label and let the result-promise branching
-        // (in the waitForClose watcher below) decide resolve vs. reject.
-        onClick: () => {
-          // Synchronously kick off the picker. The renderer will close the
-          // dialog AFTER this handler returns; we have to defer that close
-          // until the picker settles. So always return `false` here, and
-          // call `view.close(...)` ourselves once the picker resolves.
-          void runPickDirectory(intents, { title })
-            .then(({ files, label }) => {
-              pickedFiles = files;
-              pickedLabel = label;
-              view.close(okLabel);
-            })
-            .catch((error: unknown) => {
-              if (isUserCancelled(error)) {
-                // OS picker dismissed — leave the dialog open for retry.
-                return;
-              }
-              pickerError = error;
-              view.close(okLabel);
-            });
-          return false;
-        },
-      },
-    ],
+    size: "md",
+    centered: true,
+    buttons,
   });
 
   // Branch the result promise off `waitForClose`. Resolves only when the
-  // picker fed valid files; otherwise (cancel button, dismiss, picker
-  // error) rejects with UserCancelledError or the real picker error.
+  // picker fed valid files; otherwise (dismiss, picker error) rejects with
+  // UserCancelledError or the real picker error.
   void view.waitForClose().then((closedBy) => {
     if (pickerError !== undefined) {
       reject(pickerError);
       return;
     }
-    if (closedBy === okLabel && pickedFiles !== undefined && pickedLabel !== undefined) {
+    if (closedBy === DONE_LABEL && pickedFiles !== undefined && pickedLabel !== undefined) {
       resolve({ files: pickedFiles, label: pickedLabel });
       return;
     }

@@ -51,8 +51,15 @@ async function performOpen(
 
   if (existing && force) {
     // Delegate to the change flow so workspace identity is preserved.
+    // The body heading is the only label the user sees (no dialog
+    // title bar) — make it specific to the "replace existing" flow,
+    // and offer an explicit Cancel button so dismissal is a visible
+    // choice.
     const { files, label } = await openRequestFileSystemDialog(ctx, {
-      title: "Select workspace folder",
+      heading: "Change workspace folder",
+      description: `Pick a new folder to use as the workspace root. The current workspace (${existing.label}) will be replaced.`,
+      okLabel: "Replace Folder",
+      showCancel: true,
     });
     await existing.close();
     existing.setFileSystem(files, label);
@@ -63,8 +70,10 @@ async function performOpen(
   // No workspace yet. Honor remembered handle if any preference handler replies.
   await tryReadRememberedHandle(intents);
 
+  // No dialog header — body heading "Select workspace folder" is the
+  // primary label.
   const { files, label } = await openRequestFileSystemDialog(ctx, {
-    title: "Select workspace folder",
+    heading: "Select workspace folder",
   });
   const config = getWorkspaceConfig(ctx);
   const workspace = buildWorkspace(ctx, files, label, config);

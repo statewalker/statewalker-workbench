@@ -35,7 +35,12 @@ export function TableRenderer({ model }: { model: TableViewType }) {
                   col.sortable ? "cursor-pointer hover:text-foreground select-none" : ""
                 }`}
                 style={col.width ? { width: col.width } : undefined}
-                onClick={() => model.sort(col.key)}
+                onClick={() => {
+                  if (!col.sortable) return;
+                  // Always update the sort descriptor; consumers
+                  // observe via `onSort` (a change notifier).
+                  model.sort(col.key);
+                }}
               >
                 <span className="flex items-center gap-1">
                   {col.label}
@@ -56,9 +61,17 @@ export function TableRenderer({ model }: { model: TableViewType }) {
             return (
               <tr
                 key={key}
-                className={`border-b border-border transition-colors hover:bg-muted/50 ${
+                className={`border-b border-border transition-colors hover:bg-muted/50 cursor-pointer ${
                   model.isSelected(key) ? "bg-muted" : ""
                 }`}
+                onClick={() => model.activateRow(key)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    model.activateRow(key);
+                  }
+                }}
+                tabIndex={0}
               >
                 {selectable && (
                   <td className="px-2 align-middle">
@@ -67,6 +80,7 @@ export function TableRenderer({ model }: { model: TableViewType }) {
                       className="cursor-pointer"
                       checked={model.isSelected(key)}
                       onChange={() => model.toggleSelection(key)}
+                      onClick={(e) => e.stopPropagation()}
                     />
                   </td>
                 )}

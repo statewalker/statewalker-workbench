@@ -4,6 +4,8 @@ import { ViewModel } from "../core/index.js";
 export interface BreadcrumbItem {
   key: string;
   label: string;
+  /** Optional icon name resolved by the renderer's icon registry. */
+  icon?: string;
   action?: ActionView;
 }
 
