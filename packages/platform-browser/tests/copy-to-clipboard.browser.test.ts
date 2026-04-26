@@ -21,7 +21,7 @@ describe("copy-to-clipboard browser handler", () => {
     const ctx = {};
     const unregister = registerCopyToClipboardBrowser(getIntents(ctx));
     try {
-      await runCopyToClipboard(getIntents(ctx), { text: "hello" });
+      await runCopyToClipboard(getIntents(ctx), { text: "hello" }).promise;
       expect(writeText).toHaveBeenCalledWith("hello");
     } finally {
       unregister();
@@ -33,7 +33,7 @@ describe("copy-to-clipboard browser handler", () => {
     writeText.mockRejectedValueOnce(new Error("permission denied"));
     const unregister = registerCopyToClipboardBrowser(getIntents(ctx));
     try {
-      await expect(runCopyToClipboard(getIntents(ctx), { text: "x" })).rejects.toThrow(
+      await expect(runCopyToClipboard(getIntents(ctx), { text: "x" }).promise).rejects.toThrow(
         "permission denied",
       );
     } finally {
@@ -41,12 +41,11 @@ describe("copy-to-clipboard browser handler", () => {
     }
   });
 
-  it("unregister makes subsequent fires reject as unhandled", async () => {
+  it("unregister leaves subsequent fires unsettled (noop default)", () => {
     const ctx = {};
     const unregister = registerCopyToClipboardBrowser(getIntents(ctx));
     unregister();
-    await expect(runCopyToClipboard(getIntents(ctx), { text: "x" })).rejects.toThrow(
-      /unhandled intent/i,
-    );
+    const intent = runCopyToClipboard(getIntents(ctx), { text: "x" });
+    expect(intent.settled).toBe(false);
   });
 });

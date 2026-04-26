@@ -3,7 +3,7 @@ import { getIntents, handlePickDirectory, handlePreferenceGet } from "@statewalk
 import type { Intents } from "@statewalker/shared-intents";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { type DialogView, getDialogStackView } from "@statewalker/workbench-views";
+import { type DialogView, EmptyView, getDialogStackView } from "@statewalker/workbench-views";
 import {
   getWorkspace,
   runChangeWorkspace,
@@ -55,11 +55,12 @@ function registerNoPreferences(intents: Intents): () => void {
 
 /**
  * Stub renderer that subscribes to `DialogStackView` and synchronously
- * fires the OK button (`variant === "default"`) on every published
- * `DialogView`. Lets these handler-focused tests drive the new dialog
- * path without spinning up a real UI binding — the OK button's onClick
- * kicks off `runPickDirectory` (which the existing pick-stub answers) and
- * closes the dialog. Returns a cleanup that unsubscribes.
+ * submits the primary `ActionView` of every published `DialogView`'s
+ * `EmptyView` body. Lets these handler-focused tests drive the new
+ * dialog path without spinning up a real UI binding — the action's
+ * `submit()` triggers the `runPickDirectory` call (which the existing
+ * pick-stub answers) and closes the dialog. Returns a cleanup that
+ * unsubscribes.
  */
 function registerAutoConfirmDialog(ctx: Record<string, unknown>): () => void {
   const stack = getDialogStackView(ctx);
@@ -68,8 +69,8 @@ function registerAutoConfirmDialog(ctx: Record<string, unknown>): () => void {
     for (const view of stack.getAll()) {
       if (seen.has(view)) continue;
       seen.add(view);
-      const ok = view.buttons.find((b) => b.variant === "default");
-      ok?.onClick?.();
+      const empty = view.children.find((c) => c instanceof EmptyView) as EmptyView | undefined;
+      empty?.action?.submit();
     }
   };
   driveAll();
@@ -95,7 +96,7 @@ describe("workspace.core / handlers", () => {
     cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
     cleanups.push(registerAutoConfirmDialog(ctx));
 
-    const { workspace } = await runOpenWorkspace(intents, {});
+    const { workspace } = await runOpenWorkspace(intents, {}).promise;
 
     expect(workspace.isOpened).toBe(true);
     expect(workspace.label).toBe("project-a");
@@ -139,10 +140,10 @@ describe("workspace.core / handlers", () => {
     cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
     cleanups.push(registerAutoConfirmDialog(ctx));
 
-    await runOpenWorkspace(intents, {});
+    await runOpenWorkspace(intents, {}).promise;
     expect(pickHandler).toHaveBeenCalledTimes(1);
 
-    const { workspace } = await runOpenWorkspace(intents, {});
+    const { workspace } = await runOpenWorkspace(intents, {}).promise;
     expect(pickHandler).toHaveBeenCalledTimes(1);
     expect(workspace.label).toBe("first");
   });
@@ -164,12 +165,12 @@ describe("workspace.core / handlers", () => {
     cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
     cleanups.push(registerAutoConfirmDialog(ctx));
 
-    const { workspace: initial } = await runOpenWorkspace(intents, {});
+    const { workspace: initial } = await runOpenWorkspace(intents, {}).promise;
     const initialSecrets = initial.requireAdapter(Secrets);
 
     const { workspace: reopened } = await runOpenWorkspace(intents, {
       force: true,
-    });
+    }).promise;
 
     expect(reopened).toBe(initial);
     expect(reopened.label).toBe("second");
@@ -196,7 +197,7 @@ describe("workspace.core / handlers", () => {
     cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
     cleanups.push(registerAutoConfirmDialog(ctx));
 
-    const { workspace } = await runOpenWorkspace(intents, {});
+    const { workspace } = await runOpenWorkspace(intents, {}).promise;
     const firstSecrets = workspace.requireAdapter(Secrets);
 
     const order: string[] = [];
@@ -205,7 +206,7 @@ describe("workspace.core / handlers", () => {
     workspace.onUnload(() => order.push("unload"));
     expect(order).toEqual(["load"]);
 
-    const { workspace: changed } = await runChangeWorkspace(intents, {});
+    const { workspace: changed } = await runChangeWorkspace(intents, {}).promise;
     expect(changed).toBe(workspace);
     expect(order).toEqual(["load", "unload", "load"]);
 
@@ -220,7 +221,7 @@ describe("workspace.core / handlers", () => {
     cleanups.push(initWorkspaceCore(ctx, { skipBootstrap: true }));
   });
 
-  it("cleanup unregisters handlers so subsequent fires reject as unhandled", async () => {
+  it("cleanup unregisters handlers so subsequent fires stay unhandled", async () => {
     const ctx: Record<string, unknown> = {};
     const intents = getIntents(ctx);
     cleanups.push(registerPickStub(intents, [{ files: await seededRoot(), label: "once" }]));
@@ -228,6 +229,7 @@ describe("workspace.core / handlers", () => {
     const teardown = initWorkspaceCore(ctx);
     teardown();
 
-    await expect(runOpenWorkspace(intents, {})).rejects.toThrow(/unhandled intent/i);
+    const intent = runOpenWorkspace(intents, {});
+    expect(intent.settled).toBe(false);
   });
 });

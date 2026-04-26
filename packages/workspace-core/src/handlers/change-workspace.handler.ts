@@ -7,9 +7,9 @@ import {
   runOpenWorkspace,
   setWorkspace,
 } from "@statewalker/workspace-api";
-import { buildWorkspace } from "../impl/build-workspace.ts";
-import type { Workspace } from "../impl/workspace.impl.ts";
-import { openRequestFileSystemDialog } from "../views/request-file-system.view.ts";
+import { buildWorkspace } from "../impl/build-workspace.js";
+import type { Workspace } from "../impl/workspace.impl.js";
+import { openRequestFileSystemDialog } from "../views/request-file-system.view.js";
 
 /**
  * Register the `workspace:change` handler.
@@ -54,7 +54,7 @@ export function registerChangeWorkspaceHandler(ctx: Record<string, unknown>): ()
           setWorkspace(ctx, workspace);
           return workspace as Workspace;
         }
-        const { workspace } = await runOpenWorkspace(intents, {});
+        const { workspace } = await runOpenWorkspace(intents, {}).promise;
         return workspace as Workspace;
       }
       const { files, label } = await resolveFiles(ctx, intent.payload.files, intent.payload.label);

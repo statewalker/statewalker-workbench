@@ -7,7 +7,12 @@ import {
 import type { Intents } from "@statewalker/shared-intents";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { type DialogView, getDialogStackView, getTopMenuView } from "@statewalker/workbench-views";
+import {
+  type DialogView,
+  EmptyView,
+  getDialogStackView,
+  getTopMenuView,
+} from "@statewalker/workbench-views";
 import { getWorkspace, runChangeWorkspace, setWorkspace } from "@statewalker/workspace-api";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildWorkspace } from "../src/impl/build-workspace.ts";
@@ -91,9 +96,9 @@ function makeTestApp(opts: { preopen: boolean }): TestApp {
 }
 
 /**
- * Stub renderer that auto-clicks the OK button on every published
- * `DialogView`. Triggers the dialog's runPickDirectory call and lets the
- * factory close the dialog with the OK label.
+ * Stub renderer that auto-submits the EmptyView's primary action on
+ * every published `DialogView`. Triggers the dialog's runPickDirectory
+ * call and lets the factory close the dialog with the sentinel label.
  */
 function registerAutoConfirmDialog(ctx: Record<string, unknown>): () => void {
   const stack = getDialogStackView(ctx);
@@ -102,8 +107,8 @@ function registerAutoConfirmDialog(ctx: Record<string, unknown>): () => void {
     for (const view of stack.getAll()) {
       if (seen.has(view)) continue;
       seen.add(view);
-      const ok = view.buttons.find((b) => b.variant === "default");
-      ok?.onClick?.();
+      const empty = view.children.find((c) => c instanceof EmptyView) as EmptyView | undefined;
+      empty?.action?.submit();
     }
   };
   driveAll();
@@ -143,7 +148,8 @@ describe("workspace.core / activation integration", () => {
     cleanups.push(initWorkspace(app.ctx, { skipBootstrap: true }));
 
     const memFs = new MemFilesApi();
-    const { workspace } = await runChangeWorkspace(app.intents, { files: memFs, label: "boot" });
+    const { workspace } = await runChangeWorkspace(app.intents, { files: memFs, label: "boot" })
+      .promise;
 
     expect(workspace.isOpened).toBe(true);
     expect(workspace.files).toBe(memFs);
@@ -175,9 +181,10 @@ describe("workspace.core / activation integration", () => {
 
     cleanups.push(registerAutoConfirmDialog(app.ctx));
 
-    const action = getTopMenuView(app.ctx)
+    const settings = getTopMenuView(app.ctx)
       .getAll()
-      .find((a) => a.actionKey === "workspace.change");
+      .find((a) => a.actionKey === "settings");
+    const action = settings?.getChild("workspace.change");
     expect(action).toBeDefined();
 
     const before = app.loadCount();
@@ -196,7 +203,7 @@ describe("workspace.core / activation integration", () => {
     expect(
       getTopMenuView(app.ctx)
         .getAll()
-        .some((a) => a.actionKey === "workspace.change"),
+        .some((a) => a.actionKey === "settings"),
     ).toBe(true);
 
     teardown();
@@ -204,9 +211,10 @@ describe("workspace.core / activation integration", () => {
     expect(
       getTopMenuView(app.ctx)
         .getAll()
-        .some((a) => a.actionKey === "workspace.change"),
+        .some((a) => a.actionKey === "settings"),
     ).toBe(false);
-    await expect(runChangeWorkspace(app.intents, {})).rejects.toThrow(/unhandled intent/i);
+    const intent = runChangeWorkspace(app.intents, {});
+    expect(intent.settled).toBe(false);
   });
 
   it("scenario 5 — UserCancelledError is swallowed silently by the bootstrap path", async () => {

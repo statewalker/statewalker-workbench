@@ -14,14 +14,18 @@ describe("workspace.core / menu", () => {
     cleanups = [];
   });
 
-  it("publishes exactly one ActionView with key 'workspace.change'", () => {
+  it("publishes a 'Settings' parent with one 'Change workspace' child", () => {
     const ctx: Record<string, unknown> = {};
     cleanups.push(initWorkspace(ctx, { skipBootstrap: true }));
 
     const items = getTopMenuView(ctx).getAll();
-    const matching = items.filter((a) => a.actionKey === "workspace.change");
-    expect(matching).toHaveLength(1);
-    expect(matching[0]?.label).toBe("Change workspace folder…");
+    const settings = items.filter((a) => a.actionKey === "settings");
+    expect(settings).toHaveLength(1);
+    expect(settings[0]?.label).toBe("Settings");
+
+    const change = settings[0]?.getChild("workspace.change");
+    expect(change).toBeDefined();
+    expect(change?.label).toBe("Change workspace");
   });
 
   it("submitting the menu action re-fires workspace:change", async () => {
@@ -33,7 +37,7 @@ describe("workspace.core / menu", () => {
     const { workspace } = await runChangeWorkspace(intents, {
       files: initialFs,
       label: "initial",
-    });
+    }).promise;
     expect(workspace.files).toBe(initialFs);
 
     // Submitting the menu action fires `runChangeWorkspace({})`. The
@@ -42,9 +46,10 @@ describe("workspace.core / menu", () => {
     // is overkill — instead, fire `runChangeWorkspace` ourselves and assert
     // that the action's submit path is wired.
     let submitCount = 0;
-    const action = getTopMenuView(ctx)
+    const settings = getTopMenuView(ctx)
       .getAll()
-      .find((a: ActionView) => a.actionKey === "workspace.change");
+      .find((a: ActionView) => a.actionKey === "settings");
+    const action = settings?.getChild("workspace.change");
     if (!action) throw new Error("workspace.change action not published");
     cleanups.push(action.onSubmit(() => submitCount++));
     action.submit();
@@ -71,7 +76,7 @@ describe("workspace.core / menu", () => {
     expect(
       getTopMenuView(ctx)
         .getAll()
-        .some((a) => a.actionKey === "workspace.change"),
+        .some((a) => a.actionKey === "settings"),
     ).toBe(true);
 
     teardown();
@@ -79,8 +84,9 @@ describe("workspace.core / menu", () => {
     expect(
       getTopMenuView(ctx)
         .getAll()
-        .some((a) => a.actionKey === "workspace.change"),
+        .some((a) => a.actionKey === "settings"),
     ).toBe(false);
-    await expect(runChangeWorkspace(intents, {})).rejects.toThrow(/unhandled intent/i);
+    const intent = runChangeWorkspace(intents, {});
+    expect(intent.settled).toBe(false);
   });
 });

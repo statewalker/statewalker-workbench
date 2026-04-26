@@ -18,8 +18,8 @@ describe("preference-get/set browser handlers", () => {
     const unregisterGet = registerPreferenceGetBrowser(intents);
     const unregisterSet = registerPreferenceSetBrowser(intents);
     try {
-      await runPreferenceSet(intents, { key: "k", value: { a: 1, b: [true, "s"] } });
-      const result = await runPreferenceGet(intents, { key: "k" });
+      await runPreferenceSet(intents, { key: "k", value: { a: 1, b: [true, "s"] } }).promise;
+      const result = await runPreferenceGet(intents, { key: "k" }).promise;
       expect(result.value).toEqual({ a: 1, b: [true, "s"] });
 
       // Namespaced under workbench: prefix.
@@ -35,7 +35,7 @@ describe("preference-get/set browser handlers", () => {
     const intents = getIntents(ctx);
     const unregisterGet = registerPreferenceGetBrowser(intents);
     try {
-      const result = await runPreferenceGet(intents, { key: "never-set" });
+      const result = await runPreferenceGet(intents, { key: "never-set" }).promise;
       expect(result).toEqual({ value: undefined });
     } finally {
       unregisterGet();
@@ -48,7 +48,7 @@ describe("preference-get/set browser handlers", () => {
     const unregisterGet = registerPreferenceGetBrowser(intents);
     try {
       localStorage.setItem("workbench:broken", "{not json");
-      const result = await runPreferenceGet(intents, { key: "broken" });
+      const result = await runPreferenceGet(intents, { key: "broken" }).promise;
       expect(result.value).toBeUndefined();
     } finally {
       unregisterGet();

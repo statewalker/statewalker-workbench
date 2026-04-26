@@ -29,7 +29,7 @@ describe("pick-file browser handler — FS Access API path", () => {
       const result = await runPickFile(getIntents(ctx), {
         multiple: true,
         accept: [".txt", ".md"],
-      });
+      }).promise;
       expect(showOpenFilePicker).toHaveBeenCalledOnce();
       expect(result.names).toEqual(["a.txt", "b.md"]);
       expect(result.blobs).toHaveLength(2);
@@ -77,7 +77,7 @@ describe("pick-file browser handler — input element fallback", () => {
     const ctx = {};
     const unregister = registerPickFileBrowser(getIntents(ctx));
     try {
-      const result = await runPickFile(getIntents(ctx), { accept: [".txt"] });
+      const result = await runPickFile(getIntents(ctx), { accept: [".txt"] }).promise;
       expect(result.names).toEqual(["note.txt"]);
       expect(result.blobs).toHaveLength(1);
     } finally {

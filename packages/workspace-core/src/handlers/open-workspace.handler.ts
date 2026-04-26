@@ -6,9 +6,9 @@ import {
   handleOpenWorkspace,
   setWorkspace,
 } from "@statewalker/workspace-api";
-import { buildWorkspace } from "../impl/build-workspace.ts";
-import type { Workspace } from "../impl/workspace.impl.ts";
-import { openRequestFileSystemDialog } from "../views/request-file-system.view.ts";
+import { buildWorkspace } from "../impl/build-workspace.js";
+import type { Workspace } from "../impl/workspace.impl.js";
+import { openRequestFileSystemDialog } from "../views/request-file-system.view.js";
 
 /**
  * Key under which we remember a handle-identifier for the last-opened
@@ -77,7 +77,7 @@ async function tryReadRememberedHandle(intents: Intents): Promise<unknown | unde
   try {
     const result = await runPreferenceGet(intents, {
       key: WORKSPACE_LAST_HANDLE_PREFERENCE_KEY,
-    });
+    }).promise;
     return result.value;
   } catch {
     return undefined;
