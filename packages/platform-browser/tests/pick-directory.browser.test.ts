@@ -27,7 +27,7 @@ describe("pick-directory browser handler", () => {
     const ctx = {};
     const unregister = registerPickDirectoryBrowser(getIntents(ctx));
     try {
-      const result = await runPickDirectory(getIntents(ctx), { title: "pick" });
+      const result = await runPickDirectory(getIntents(ctx), { title: "pick" }).promise;
       expect(showDirectoryPicker).toHaveBeenCalledOnce();
       expect(result.label).toBe("my-workspace");
       // BrowserFilesApi exposes the FilesApi contract — we only check the constructor ran
@@ -42,7 +42,7 @@ describe("pick-directory browser handler", () => {
     const ctx = {};
     const unregister = registerPickDirectoryBrowser(getIntents(ctx));
     try {
-      await expect(runPickDirectory(getIntents(ctx), {})).rejects.toThrow(
+      await expect(runPickDirectory(getIntents(ctx), {}).promise).rejects.toThrow(
         /showDirectoryPicker is not available/,
       );
     } finally {
@@ -56,7 +56,7 @@ describe("pick-directory browser handler", () => {
     const ctx = {};
     const unregister = registerPickDirectoryBrowser(getIntents(ctx));
     try {
-      await expect(runPickDirectory(getIntents(ctx), {})).rejects.toBeInstanceOf(
+      await expect(runPickDirectory(getIntents(ctx), {}).promise).rejects.toBeInstanceOf(
         UserCancelledError,
       );
     } finally {
@@ -71,7 +71,7 @@ describe("pick-directory browser handler", () => {
     const ctx = {};
     const unregister = registerPickDirectoryBrowser(getIntents(ctx));
     try {
-      await expect(runPickDirectory(getIntents(ctx), {})).rejects.toBe(original);
+      await expect(runPickDirectory(getIntents(ctx), {}).promise).rejects.toBe(original);
     } finally {
       unregister();
     }
@@ -83,7 +83,7 @@ describe("pick-directory browser handler", () => {
     const ctx = {};
     const unregister = registerPickDirectoryBrowser(getIntents(ctx));
     try {
-      await expect(runPickDirectory(getIntents(ctx), {})).rejects.toBeInstanceOf(
+      await expect(runPickDirectory(getIntents(ctx), {}).promise).rejects.toBeInstanceOf(
         UserCancelledError,
       );
     } finally {

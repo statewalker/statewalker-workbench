@@ -33,7 +33,7 @@ describe("download-blob browser handler", () => {
     const unregister = registerDownloadBlobBrowser(getIntents(ctx));
     try {
       const blob = new Blob(["payload"], { type: "text/plain" });
-      await runDownloadBlob(getIntents(ctx), { blob, filename: "file.txt" });
+      await runDownloadBlob(getIntents(ctx), { blob, filename: "file.txt" }).promise;
 
       expect(createObjectURL).toHaveBeenCalledWith(blob);
       expect(clickSpy).toHaveBeenCalledOnce();

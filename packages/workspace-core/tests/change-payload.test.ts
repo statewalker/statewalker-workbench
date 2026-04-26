@@ -28,7 +28,8 @@ describe("workspace.core / change-workspace payload override", () => {
     cleanups.push(initWorkspace(ctx, { skipBootstrap: true }));
 
     const memFs = new MemFilesApi();
-    const { workspace } = await runChangeWorkspace(intents, { files: memFs, label: "boot" });
+    const { workspace } = await runChangeWorkspace(intents, { files: memFs, label: "boot" })
+      .promise;
 
     expect(workspace.isOpened).toBe(true);
     expect(workspace.label).toBe("boot");
@@ -43,14 +44,15 @@ describe("workspace.core / change-workspace payload override", () => {
     cleanups.push(initWorkspace(ctx, { skipBootstrap: true }));
 
     const first = new MemFilesApi();
-    const { workspace } = await runChangeWorkspace(intents, { files: first, label: "first" });
+    const { workspace } = await runChangeWorkspace(intents, { files: first, label: "first" })
+      .promise;
     expect(workspace.files).toBe(first);
 
     const second = new MemFilesApi();
     const { workspace: rebinded } = await runChangeWorkspace(intents, {
       files: second,
       label: "second",
-    });
+    }).promise;
 
     expect(rebinded).toBe(workspace); // workspace identity preserved
     expect(rebinded.files).toBe(second);
@@ -66,7 +68,7 @@ describe("workspace.core / change-workspace payload override", () => {
     cleanups.push(initWorkspace(ctx, { skipBootstrap: true }));
 
     const memFs = new MemFilesApi();
-    const { workspace } = await runChangeWorkspace(intents, { files: memFs });
+    const { workspace } = await runChangeWorkspace(intents, { files: memFs }).promise;
     expect(workspace.label).toBe("Workspace");
   });
 });

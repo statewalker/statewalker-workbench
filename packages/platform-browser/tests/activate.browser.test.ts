@@ -43,15 +43,19 @@ describe("platform.browser initPlatformWeb(ctx)", () => {
     expect(cleanup).toBeTypeOf("function");
 
     // Quick sanity: two handler-backed intents resolve after init.
-    await expect(runCopyToClipboard(getIntents(ctx), { text: "x" })).resolves.toBeUndefined();
     await expect(
-      runPreferenceSet(getIntents(ctx), { key: "t", value: 1 }),
+      runCopyToClipboard(getIntents(ctx), { text: "x" }).promise,
+    ).resolves.toBeUndefined();
+    await expect(
+      runPreferenceSet(getIntents(ctx), { key: "t", value: 1 }).promise,
     ).resolves.toBeUndefined();
 
-    // After cleanup, every platform intent rejects as unhandled.
+    // After cleanup, every platform intent stays unsettled (no handler,
+    // no default rejection — the caller can supply a defaultHandler if needed).
     await cleanup();
     for (const key of PLATFORM_INTENT_KEYS) {
-      await expect(getIntents(ctx).run(key, {})).rejects.toThrow(/unhandled intent/i);
+      const intent = getIntents(ctx).run(key, {});
+      expect(intent.settled).toBe(false);
     }
   });
 });

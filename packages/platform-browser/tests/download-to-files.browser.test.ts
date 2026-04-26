@@ -62,7 +62,7 @@ describe("download-to-files browser handler", () => {
         files,
         path: "/data.bin",
         onProgress: (p) => progressEvents.push(p),
-      });
+      }).promise;
 
       expect(result.bytes).toBe(payload.byteLength);
       const written = await collectBytes(files.read("/data.bin"));
@@ -108,7 +108,7 @@ describe("download-to-files browser handler", () => {
         files,
         path: "/data.bin",
         resume: true,
-      });
+      }).promise;
 
       expect(result.bytes).toBe(full.byteLength);
       const written = await collectBytes(files.read("/data.bin"));
@@ -151,7 +151,7 @@ describe("download-to-files browser handler", () => {
       // Give the handler a tick to enter its read loop, then abort.
       await new Promise((r) => setTimeout(r, 0));
       controller.abort();
-      await expect(run).rejects.toThrow();
+      await expect(run.promise).rejects.toThrow();
     } finally {
       unregister();
     }
@@ -176,7 +176,7 @@ describe("download-to-files browser handler", () => {
         files,
         path: "/data.bin",
         resume: true,
-      });
+      }).promise;
       expect(result.bytes).toBe(full.byteLength);
       const written = await collectBytes(files.read("/data.bin"));
       expect(Array.from(written)).toEqual(Array.from(full));

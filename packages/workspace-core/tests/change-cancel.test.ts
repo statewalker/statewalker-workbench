@@ -51,11 +51,13 @@ describe("workspace.core / change-workspace cancel", () => {
     // Pre-build an opened workspace so the change-handler hits the rebind path
     // (which goes through the dialog when no payload is supplied).
     const initialFs = new MemFilesApi();
-    await runChangeWorkspace(intents, { files: initialFs, label: "initial" });
+    await runChangeWorkspace(intents, { files: initialFs, label: "initial" }).promise;
 
     cleanups.push(registerAutoDismissDialog(ctx));
 
-    await expect(runChangeWorkspace(intents, {})).rejects.toBeInstanceOf(UserCancelledError);
+    await expect(runChangeWorkspace(intents, {}).promise).rejects.toBeInstanceOf(
+      UserCancelledError,
+    );
   });
 
   it("does not mutate the workspace when the dialog is dismissed", async () => {
@@ -68,12 +70,14 @@ describe("workspace.core / change-workspace cancel", () => {
     const { workspace } = await runChangeWorkspace(intents, {
       files: initialFs,
       label: "initial",
-    });
+    }).promise;
     expect(workspace.files).toBe(initialFs);
     expect(workspace.isOpened).toBe(true);
 
     cleanups.push(registerAutoDismissDialog(ctx));
-    await expect(runChangeWorkspace(intents, {})).rejects.toBeInstanceOf(UserCancelledError);
+    await expect(runChangeWorkspace(intents, {}).promise).rejects.toBeInstanceOf(
+      UserCancelledError,
+    );
 
     // FilesApi unchanged; workspace still opened against the initial fs.
     expect(workspace.files).toBe(initialFs);
@@ -100,7 +104,9 @@ describe("workspace.core / change-workspace cancel", () => {
     setWorkspace(ctx, built);
 
     cleanups.push(registerAutoDismissDialog(ctx));
-    await expect(runChangeWorkspace(intents, {})).rejects.toBeInstanceOf(UserCancelledError);
+    await expect(runChangeWorkspace(intents, {}).promise).rejects.toBeInstanceOf(
+      UserCancelledError,
+    );
     expect(getDialogStackView(ctx).getAll()).toEqual([]);
   });
 });
