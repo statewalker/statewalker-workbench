@@ -1,6 +1,7 @@
 import type { FilesApi } from "@statewalker/webrun-files";
-import { SystemFiles, type Workspace } from "@statewalker/workspace-api";
-import { buildWorkspaceViews } from "./composite-setup.ts";
+import { CompositeFilesApi } from "@statewalker/webrun-files-composite";
+import { SystemFiles } from "../types/system-files.js";
+import type { Workspace } from "../types/workspace.js";
 
 /**
  * Default `SystemFiles` impl. Produces a `FilesApi` rooted at `systemDir`
@@ -12,7 +13,6 @@ export class FilesBackedSystemFiles extends SystemFiles {
 
   constructor(workspace: Workspace, systemDir: string) {
     super();
-    const { system } = buildWorkspaceViews(workspace.files, systemDir);
-    this.files = system;
+    this.files = new CompositeFilesApi(workspace.files, systemDir);
   }
 }

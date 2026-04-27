@@ -1,7 +1,10 @@
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { Secrets, Settings, SystemFiles } from "@statewalker/workspace-api";
 import { describe, expect, it } from "vitest";
-import { buildWorkspace } from "../src/impl/build-workspace.ts";
+import { initWorkspace } from "../src/impl/init-workspace.ts";
+import { Secrets } from "../src/types/secrets.ts";
+import { Settings } from "../src/types/settings.ts";
+import { SystemFiles } from "../src/types/system-files.ts";
+import { Workspace } from "../src/types/workspace.ts";
 
 const textEncoder = new TextEncoder();
 
@@ -10,20 +13,18 @@ async function flushMicrotasks(): Promise<void> {
   await Promise.resolve();
 }
 
-function config() {
-  return {
-    systemDir: ".settings",
-    secretsDir: "secrets",
-    settingsDir: "settings",
-    sessionsDir: "",
-    modelsDir: "models",
-  };
+function build(root: MemFilesApi, label = "A"): Workspace {
+  return initWorkspace({
+    workspace: new Workspace(),
+    filesApi: root,
+    label,
+  });
 }
 
 describe("FilesBackedSecrets", () => {
   it("round-trips a JSON value via the workspace adapter", async () => {
     const root = new MemFilesApi();
-    const ws = buildWorkspace({}, root, "A", config());
+    const ws = build(root);
     await ws.open();
 
     const secrets = ws.requireAdapter(Secrets);
@@ -36,7 +37,7 @@ describe("FilesBackedSecrets", () => {
 
   it("coalesces rapid writes into a single onUpdate callback", async () => {
     const root = new MemFilesApi();
-    const ws = buildWorkspace({}, root, "A", config());
+    const ws = build(root);
     await ws.open();
     const secrets = ws.requireAdapter(Secrets);
 
@@ -54,7 +55,7 @@ describe("FilesBackedSecrets", () => {
 describe("FilesBackedSettings", () => {
   it("round-trips values into a subtree distinct from Secrets", async () => {
     const root = new MemFilesApi();
-    const ws = buildWorkspace({}, root, "A", config());
+    const ws = build(root);
     await ws.open();
 
     const settings = ws.requireAdapter(Settings);
@@ -66,7 +67,6 @@ describe("FilesBackedSettings", () => {
     expect((await settings.list()).sort()).toEqual(["theme"]);
     expect((await secrets.list()).sort()).toEqual(["api-key"]);
 
-    // Verify on-disk separation: entries must not cross subtrees.
     expect(await root.exists("/.settings/settings/theme.json")).toBe(true);
     expect(await root.exists("/.settings/secrets/api-key.json")).toBe(true);
   });
@@ -76,7 +76,7 @@ describe("FilesBackedSystemFiles", () => {
   it("exposes the systemDir subtree via workspace.requireAdapter(SystemFiles)", async () => {
     const root = new MemFilesApi();
     await root.write("/README.md", [textEncoder.encode("hi")]);
-    const ws = buildWorkspace({}, root, "A", config());
+    const ws = build(root);
     await ws.open();
 
     const systemFiles = ws.requireAdapter(SystemFiles).files;

@@ -32,9 +32,11 @@
     "@statewalker/shared-adapters": "catalog:",
     "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-intents": "catalog:",
-    "@statewalker/webrun-files": "catalog:"
+    "@statewalker/webrun-files": "catalog:",
+    "@statewalker/webrun-files-composite": "catalog:"
   },
   "devDependencies": {
+    "@statewalker/webrun-files-mem": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },

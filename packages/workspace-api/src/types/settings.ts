@@ -1,4 +1,4 @@
-import type { WorkspaceAdapter } from "../types.js";
+import type { WorkspaceAdapter } from "./workspace.js";
 
 /**
  * Abstract adapter token for per-workspace user settings. Shares the

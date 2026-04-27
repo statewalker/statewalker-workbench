@@ -5,11 +5,11 @@ import { getWorkspace, runChangeWorkspace, type Workspace } from "@statewalker/w
 /**
  * Workspace fragment's main controller. Two responsibilities:
  *
- *   1. **Menu item.** Publishes a "Change workspace folder…" `ActionView`
- *      (key `workspace.change`) into the top-menu registry via the
- *      existing `publishMenu` helper. Submitting it re-fires
- *      `workspace:change` with empty payload so the user can rebind at
- *      any time.
+ *   1. **Menu item.** Publishes a top-level "Settings" `ActionView` (key
+ *      `settings`) with a "Change workspace" sub-action (key
+ *      `workspace.change`) into the top-menu registry via `publishMenu`.
+ *      Submitting the sub-action re-fires `workspace:change` with empty
+ *      payload so the user can rebind at any time.
  *   2. **Bootstrap.** If `getWorkspace(ctx).isOpened === false` at startup,
  *      the controller fires `workspace:change` once so the request-
  *      file-system dialog appears immediately. The user gets a workspace
@@ -40,13 +40,20 @@ export function startWorkspace(
   const intents = getIntents(ctx);
 
   const action = new ActionView({
-    key: "workspace.change",
-    label: "Change workspace folder…",
-    execute: () => {
-      void runChangeWorkspace(intents, {}).catch((error: unknown) => {
-        if (!isUserCancelled(error)) console.error(error);
-      });
-    },
+    key: "settings",
+    label: "Settings",
+    icon: "settings",
+    children: [
+      {
+        key: "workspace.change",
+        label: "Change workspace",
+        execute: () => {
+          void runChangeWorkspace(intents, {}).promise.catch((error: unknown) => {
+            if (!isUserCancelled(error)) console.error(error);
+          });
+        },
+      },
+    ],
   });
 
   const unpublishMenu = publishMenu(ctx, action);
@@ -59,7 +66,7 @@ export function startWorkspace(
   // register the workspace via the dialog path.
   const workspace = getWorkspace(ctx, true) as Workspace | undefined;
   if (!workspace?.isOpened) {
-    void runChangeWorkspace(intents, {}).catch((error: unknown) => {
+    void runChangeWorkspace(intents, {}).promise.catch((error: unknown) => {
       if (!isUserCancelled(error)) console.error(error);
     });
   }

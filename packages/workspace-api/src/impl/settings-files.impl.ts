@@ -1,5 +1,7 @@
-import { Settings, SystemFiles, type Workspace } from "@statewalker/workspace-api";
-import { JsonPerKeyStore } from "./json-per-key-store.ts";
+import { Settings } from "../types/settings.js";
+import { SystemFiles } from "../types/system-files.js";
+import type { Workspace } from "../types/workspace.js";
+import { JsonPerKeyStore } from "./json-per-key-store.js";
 
 /**
  * Default `Settings` impl. Same JSON-per-key shape as `FilesBackedSecrets`,

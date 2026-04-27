@@ -1,5 +1,7 @@
-import { Secrets, SystemFiles, type Workspace } from "@statewalker/workspace-api";
-import { JsonPerKeyStore } from "./json-per-key-store.ts";
+import { Secrets } from "../types/secrets.js";
+import { SystemFiles } from "../types/system-files.js";
+import type { Workspace } from "../types/workspace.js";
+import { JsonPerKeyStore } from "./json-per-key-store.js";
 
 /**
  * Default `Secrets` impl. Stores each secret as one JSON file per key under
