@@ -1,12 +1,56 @@
+import { newAdapter } from "@statewalker/shared-adapters";
 import { BaseClass } from "@statewalker/shared-baseclass";
 import type { FilesApi } from "@statewalker/webrun-files";
-import type {
-  AdapterCtor,
-  AdapterFactory,
-  ConcreteAdapterCtor,
-  WorkspaceAdapter,
-  Workspace as WorkspaceInterface,
-} from "@statewalker/workspace-api";
+
+export const [getWorkspace, , resetWorkspace] = newAdapter<Workspace>(
+  "workspace:workspace",
+  () => new Workspace(),
+);
+
+/**
+ * Lifecycle hook an adapter MAY implement. `init` is not currently called by
+ * the workspace (adapters are lazily constructed and do setup in their ctor);
+ * it is reserved for future use. `close` runs during `workspace.close()` in
+ * reverse instantiation order.
+ */
+export interface WorkspaceAdapter {
+  init?(): void | Promise<void>;
+  close?(): void | Promise<void>;
+}
+
+/**
+ * Registry key type. Abstract classes (like the `Secrets` / `Settings` /
+ * `SystemFiles` tokens) MUST be usable as keys — hence `abstract new`.
+ */
+export type AdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> = abstract new (
+  workspace: Workspace,
+  ...args: unknown[]
+) => T;
+
+/**
+ * Concrete implementation shape. Used as the value side of the registry —
+ * callable with `new` to produce an instance.
+ */
+export type ConcreteAdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> = new (
+  workspace: Workspace,
+  ...args: unknown[]
+) => T;
+
+export type AdapterFactory<T extends WorkspaceAdapter = WorkspaceAdapter> = (
+  workspace: Workspace,
+) => T;
+
+/**
+ * Observable workspace the shell app and every fragment share. Holds a single
+ * primary `FilesApi` (the directory the user picked) plus a class-keyed
+ * registry of capability adapters (`SystemFiles`, `Secrets`, `Settings`, etc.).
+ *
+ * Lifecycle: the workspace is constructed in a closed state, adapters and the
+ * file system are installed via chainable `setAdapter` / `setFileSystem`, and
+ * `open()` transitions into the live state. Consumers subscribe via
+ * `onLoad` / `onUnload` to run per-open and per-close work; `BaseClass.onUpdate`
+ * fires on any state transition including `setFileSystem` rebinds.
+ */
 
 /**
  * Concrete `Workspace` implementation. Starts closed, publishes its live state
@@ -20,7 +64,7 @@ type AnyCtor = ConcreteAdapterCtor<any>;
 // biome-ignore lint/suspicious/noExplicitAny: factory matches any adapter
 type AnyFactory = AdapterFactory<any>;
 
-export class Workspace extends BaseClass implements WorkspaceInterface {
+export class Workspace extends BaseClass {
   private _isOpened = false;
   private _files: FilesApi | null = null;
   private _label = "";

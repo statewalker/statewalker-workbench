@@ -1,5 +1,5 @@
-export * from "./adapters/index.js";
-export * from "./adapters.js";
-export * from "./config.js";
+export * from "./impl/init-workspace.js";
+export * from "./init.js";
+export { default } from "./init.js";
 export * from "./intents/index.js";
-export * from "./types.js";
+export * from "./types/index.js";

@@ -25,11 +25,12 @@ Runtime for the workspace fragment.
   shared `Workspace` impl with composite-files setup, secrets, settings,
   and system-files adapters.
 - **`startWorkspace(ctx, options?) → cleanup`** — main controller.
-  Publishes a `"Change workspace folder…"` `ActionView` (key
-  `workspace.change`) via `publishMenu`, and on startup fires
-  `workspace:change` if the workspace is not already opened (or not yet
-  registered). `UserCancelledError` rejections are swallowed silently;
-  other errors are logged via `console.error`.
+  Publishes a top-level `"Settings"` `ActionView` (key `settings`) with a
+  `"Change workspace"` sub-action (key `workspace.change`) via
+  `publishMenu`, and on startup fires `workspace:change` if the workspace
+  is not already opened (or not yet registered). `UserCancelledError`
+  rejections are swallowed silently; other errors are logged via
+  `console.error`.
 - **`buildRequestFileSystemDialog(ctx, options?)`** — toolkit-neutral
   factory that returns `{ view: DialogView, result: Promise<{ files,
   label }> }`. The result rejects with `UserCancelledError` when the user

@@ -1,7 +1,6 @@
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import type { WorkspaceAdapter } from "@statewalker/workspace-api";
 import { describe, expect, it, vi } from "vitest";
-import { Workspace } from "../src/impl/workspace.impl.ts";
+import { Workspace, type WorkspaceAdapter } from "../src/types/workspace.ts";
 
 class FakeAdapter implements WorkspaceAdapter {
   static instances = 0;

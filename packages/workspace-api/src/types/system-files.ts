@@ -1,5 +1,5 @@
 import type { FilesApi } from "@statewalker/webrun-files";
-import type { WorkspaceAdapter } from "../types.js";
+import type { WorkspaceAdapter } from "./workspace.js";
 
 /**
  * Abstract adapter token for the workspace system subtree. The concrete

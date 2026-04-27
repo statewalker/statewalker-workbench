@@ -1,2 +1,2 @@
-export * from "./change-workspace/index.js";
-export * from "./open-workspace/index.js";
+export * from "./change-workspace.handler.js";
+export * from "./intents.js";
