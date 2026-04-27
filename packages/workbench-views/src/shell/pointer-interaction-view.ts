@@ -2,11 +2,14 @@ import { newAdapter } from "@statewalker/shared-adapters";
 import { BaseClass } from "@statewalker/shared-baseclass";
 
 /**
- * Low-level interaction model for pointer (mouse/touch) events.
- * DOM bindings write logical pointer state here.
- * Controllers subscribe and react to pointer interactions.
+ * Pointer token — workspace-scoped low-level interaction model for pointer
+ * (mouse / touch) events. Apps reach the workspace-scoped instance via
+ * `workspace.requireAdapter(Pointer)`; the workspace's adapter system
+ * accepts any plain class, so this token does not need to import or
+ * implement `WorkspaceAdapter`. DOM bindings write logical pointer state
+ * here; controllers subscribe and react to the latest action.
  */
-export class PointerInteractionView extends BaseClass {
+export class Pointer extends BaseClass {
   action: "click" | "dblclick" | "none" = "none";
   x = 0;
   y = 0;
@@ -26,7 +29,9 @@ export class PointerInteractionView extends BaseClass {
   }
 }
 
-export const [getPointerInteractionView] = newAdapter<PointerInteractionView>(
+export { Pointer as PointerInteractionView };
+
+export const [getPointerInteractionView] = newAdapter<Pointer>(
   "model:pointer-interaction",
-  () => new PointerInteractionView(),
+  () => new Pointer(),
 );

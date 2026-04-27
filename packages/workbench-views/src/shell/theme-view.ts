@@ -4,12 +4,15 @@ import { BaseClass } from "@statewalker/shared-baseclass";
 export type ThemeMode = "light" | "dark" | "system";
 
 /**
- * Reactive model for the application theme.
- * Tracks the user's preference (light / dark / system).
- * The resolved theme reflects the actual applied theme,
- * accounting for system preference when mode is "system".
+ * Theme token — workspace-scoped application-theme model. Apps reach the
+ * workspace-scoped instance via `workspace.requireAdapter(Theme)`; the
+ * workspace's adapter system accepts any plain class, so this token does
+ * not need to import or implement `WorkspaceAdapter`. Tracks the user's
+ * preference (light / dark / system) and the resolved theme; the DOM
+ * binding subscribes to `onUpdate` and pushes the resolved theme back via
+ * `setResolved`.
  */
-export class ThemeView extends BaseClass {
+export class Theme extends BaseClass {
   private _mode: ThemeMode = "system";
   private _resolved: "light" | "dark" = "dark";
 
@@ -52,4 +55,6 @@ export class ThemeView extends BaseClass {
   }
 }
 
-export const [getThemeView] = newAdapter<ThemeView>("model:theme", () => new ThemeView());
+export { Theme as ThemeView };
+
+export const [getThemeView] = newAdapter<Theme>("model:theme", () => new Theme());

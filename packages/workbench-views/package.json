@@ -37,6 +37,7 @@
     "@statewalker/shared-baseclass": "catalog:"
   },
   "devDependencies": {
+    "@statewalker/workspace-api": "workspace:*",
     "rimraf": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",

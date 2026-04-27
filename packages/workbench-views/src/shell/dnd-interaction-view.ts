@@ -2,14 +2,16 @@ import { newAdapter } from "@statewalker/shared-adapters";
 import { BaseClass } from "@statewalker/shared-baseclass";
 
 /**
- * Low-level interaction model for drag-and-drop.
- * DOM bindings write drag state here.
- * Controllers subscribe and handle drop logic.
+ * Dnd token — workspace-scoped drag-and-drop interaction state. Apps reach
+ * the workspace-scoped instance via `workspace.requireAdapter(Dnd)`; the
+ * workspace's adapter system accepts any plain class, so this token does
+ * not need to import or implement `WorkspaceAdapter`. DOM bindings write
+ * drag state here; controllers subscribe and handle drop logic.
  *
- * Origin and target are opaque identifiers — interpretation is up to the consumer.
- * Metadata carries arbitrary drag payload (items, types, etc.).
+ * Origin and target are opaque identifiers — interpretation is up to the
+ * consumer. Metadata carries arbitrary drag payload (items, types, etc.).
  */
-export class DndInteractionView extends BaseClass {
+export class Dnd extends BaseClass {
   /** Source zone identifier. */
   origin: string | null = null;
   /** Target zone identifier. */
@@ -67,7 +69,6 @@ export class DndInteractionView extends BaseClass {
   }
 }
 
-export const [getDndInteractionView] = newAdapter<DndInteractionView>(
-  "model:dnd-interaction",
-  () => new DndInteractionView(),
-);
+export { Dnd as DndInteractionView };
+
+export const [getDndInteractionView] = newAdapter<Dnd>("model:dnd-interaction", () => new Dnd());

@@ -1,21 +1,9 @@
 import { newAdapter } from "@statewalker/shared-adapters";
-import { BaseClass } from "@statewalker/shared-baseclass";
+import { Keyboard } from "./keyboard-view.js";
 
-/**
- * Low-level interaction model for keyboard events.
- * DOM bindings write raw key presses here.
- * Controllers subscribe and interpret key presses in context.
- */
-export class KeyboardInteractionView extends BaseClass {
-  key = "";
+export { Keyboard as KeyboardInteractionView };
 
-  pressKey(key: string): void {
-    this.key = key;
-    this.notify();
-  }
-}
-
-export const [getKeyboardInteractionView] = newAdapter<KeyboardInteractionView>(
+export const [getKeyboardInteractionView] = newAdapter<Keyboard>(
   "model:keyboard-interaction",
-  () => new KeyboardInteractionView(),
+  () => new Keyboard(),
 );

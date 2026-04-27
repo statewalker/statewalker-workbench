@@ -74,14 +74,18 @@ function insertAreaPanel(tree: DockNode, area: string, newPanel: DockPanel): Doc
 }
 
 /**
- * PanelManagerView — authoritative view model for the dock layout.
+ * Layout token — workspace-scoped panel management. Owns BOTH the set of
+ * registered panels and the dock tree (splits/panels). All mutations —
+ * add/remove panels, drag-and-drop moves, active tab, focus, resize —
+ * happen here. The UI layer is a pure projection that subscribes via
+ * `onUpdate` and reads `getTree()`.
  *
- * Owns BOTH the set of registered panels and the dock tree (splits/panels).
- * All mutations — add/remove panels, drag-and-drop moves, active tab,
- * focus, resize — happen here. The UI layer is a pure projection that
- * subscribes via `onUpdate` and reads `getTree()`.
+ * Apps reach the workspace-scoped instance via
+ * `workspace.requireAdapter(Layout)`; the workspace's adapter system
+ * accepts any plain class, so this token does not need to import or
+ * implement `WorkspaceAdapter`.
  */
-export class PanelManagerView extends ViewModel {
+export class Layout extends ViewModel {
   readonly #panels = new Map<string, DockPanelView>();
   #tree: DockNode = {
     id: CENTER_AREA_ID,
@@ -109,6 +113,12 @@ export class PanelManagerView extends ViewModel {
     return [...this.#panels.values()];
   }
 
+  /** The panel containing the currently-focused tab, if any. */
+  getActivePanel(): DockPanelView | null {
+    if (!this.#focusedTabKey) return null;
+    return this.#panels.get(this.#focusedTabKey) ?? null;
+  }
+
   /** Find the tree panel that currently contains the given tab. */
   getPanelIdForTab(tabKey: string): string | null {
     return findPanelContainingTab(this.#tree, tabKey)?.id ?? null;
@@ -118,9 +128,10 @@ export class PanelManagerView extends ViewModel {
 
   /**
    * Register a panel and place its tab in the tree. Returns a disposer
-   * that removes the panel again.
+   * that removes the panel again. Spec name for the registration step;
+   * `addPanel` is kept as a back-compat alias.
    */
-  addPanel(panel: DockPanelView): () => void {
+  publishPanel(panel: DockPanelView): () => void {
     if (this.#panels.has(panel.key)) {
       return () => this.removePanel(panel.key);
     }
@@ -158,6 +169,11 @@ export class PanelManagerView extends ViewModel {
     return () => this.removePanel(panel.key);
   }
 
+  /** Back-compat alias for `publishPanel`. */
+  addPanel(panel: DockPanelView): () => void {
+    return this.publishPanel(panel);
+  }
+
   /**
    * Reconcile the registered panels with the given list: add any that are
    * new, remove any that are missing. Used by the shell to bridge the
@@ -167,7 +183,7 @@ export class PanelManagerView extends ViewModel {
     const incomingKeys = new Set(panels.map((p) => p.key));
     for (const p of panels) {
       if (!this.#panels.has(p.key)) {
-        this.addPanel(p);
+        this.publishPanel(p);
       }
     }
     for (const key of [...this.#panels.keys()]) {
@@ -280,7 +296,9 @@ export class PanelManagerView extends ViewModel {
   }
 }
 
-export const [getPanelManagerView, setPanelManagerView] = newAdapter<PanelManagerView>(
+export { Layout as PanelManagerView };
+
+export const [getPanelManagerView, setPanelManagerView] = newAdapter<Layout>(
   "model:panel-manager",
-  () => new PanelManagerView(),
+  () => new Layout(),
 );
