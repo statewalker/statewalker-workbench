@@ -11,41 +11,37 @@ export interface KeyBinding {
 }
 
 /**
- * A registry of keyboard bindings.
- * Apps add bindings when their panels become active and remove them
- * when deactivated. The shared UI layer listens to this model and
- * manages the actual DOM keydown listener.
+ * Keyboard token — collapses today's keyboard registry and the latest-key
+ * interaction state into one class. Apps reach the workspace-scoped instance
+ * via `workspace.requireAdapter(Keyboard)`; the workspace's adapter system
+ * accepts any plain class, so this token does not need to import or implement
+ * `WorkspaceAdapter`. The shared UI layer (or app code) drives `pressKey`
+ * from real DOM events; controllers register handlers via `bind` / `bindAll`.
  */
-export class KeyboardView extends BaseClass {
+export class Keyboard extends BaseClass {
   private _bindings = new Map<string, KeyBinding[]>();
+  /** Latest pressed key — last value passed to `pressKey`. */
+  key = "";
 
-  /**
-   * Register a key binding. Returns a cleanup function that removes it.
-   */
   bind(binding: KeyBinding): () => void {
-    const { key } = binding;
-    let list = this._bindings.get(key);
+    let list = this._bindings.get(binding.key);
     if (!list) {
       list = [];
-      this._bindings.set(key, list);
+      this._bindings.set(binding.key, list);
     }
     list.push(binding);
     this.notify();
 
     return () => {
-      const l = this._bindings.get(key);
-      if (l) {
-        const idx = l.indexOf(binding);
-        if (idx >= 0) l.splice(idx, 1);
-        if (l.length === 0) this._bindings.delete(key);
-      }
+      const l = this._bindings.get(binding.key);
+      if (!l) return;
+      const idx = l.indexOf(binding);
+      if (idx >= 0) l.splice(idx, 1);
+      if (l.length === 0) this._bindings.delete(binding.key);
       this.notify();
     };
   }
 
-  /**
-   * Register multiple bindings at once. Returns a single cleanup function.
-   */
   bindAll(bindings: KeyBinding[]): () => void {
     const cleanups = bindings.map((b) => this.bind(b));
     return () => {
@@ -53,22 +49,30 @@ export class KeyboardView extends BaseClass {
     };
   }
 
-  /**
-   * Get all bindings for a key. Returns empty array if none.
-   */
   getBindings(key: string): KeyBinding[] {
     return this._bindings.get(key) ?? [];
   }
 
-  /**
-   * Whether any bindings are registered.
-   */
   get hasBindings(): boolean {
     return this._bindings.size > 0;
   }
+
+  /** Run every handler registered for `key`. */
+  fire(key: string): void {
+    const list = this._bindings.get(key);
+    if (!list) return;
+    for (const b of list) b.execute();
+  }
+
+  pressKey(key: string): void {
+    this.key = key;
+    this.notify();
+  }
 }
 
-export const [getKeyboardView] = newAdapter<KeyboardView>(
+export { Keyboard as KeyboardView };
+
+export const [getKeyboardView, setKeyboardView] = newAdapter<Keyboard>(
   "model:keyboard",
-  () => new KeyboardView(),
+  () => new Keyboard(),
 );

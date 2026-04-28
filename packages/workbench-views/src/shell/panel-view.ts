@@ -29,6 +29,12 @@ export class DockPanelView extends ViewModel {
   }
 }
 
+/**
+ * Per-ctx registry of panels published into the shell. The init-shell-core
+ * fragment bridges this registry into the `Layout` token via `listenPanel`
+ * + `Layout.syncPanels`. New code SHOULD publish panels by calling
+ * `workspace.requireAdapter(Layout).publishPanel(panel)` directly.
+ */
 const [getPanelRegistry] = newAdapter<UIModelRegistry<DockPanelView>>(
   "aspect:panel-registry",
   () => new UIModelRegistry<DockPanelView>(),

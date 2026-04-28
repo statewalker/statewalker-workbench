@@ -30,10 +30,15 @@ describe("Workspace — registry semantics", () => {
     expect(FakeAdapter.instances).toBe(1);
   });
 
-  it("getAdapter returns null for unregistered types; requireAdapter throws", () => {
+  it("auto-instantiates concrete tokens without explicit setAdapter", () => {
+    FakeAdapter.instances = 0;
     const ws = new Workspace();
-    expect(ws.getAdapter(FakeAdapter)).toBeNull();
-    expect(() => ws.requireAdapter(FakeAdapter)).toThrow(/FakeAdapter/);
+
+    const first = ws.requireAdapter(FakeAdapter);
+    const second = ws.getAdapter(FakeAdapter);
+
+    expect(first).toBe(second);
+    expect(FakeAdapter.instances).toBe(1);
   });
 
   it("setAdapter is lazy — ctor not called until getAdapter/requireAdapter", () => {

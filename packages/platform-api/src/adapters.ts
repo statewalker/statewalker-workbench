@@ -1,12 +1,34 @@
-import { newAdapter } from "@statewalker/shared-adapters";
-import { createIntents, type Intents } from "@statewalker/shared-intents";
+import { Intents } from "@statewalker/shared-intents";
+import { getWorkspace } from "@statewalker/workspace-api";
 
 /**
- * The single `Intents` bus shared by every fragment in a composed app. Declared
- * here (not in `shared-intents`) so every fragment imports it from one place —
- * `@statewalker/platform-api` is the common vocabulary. The factory auto-creates
- * an `Intents` instance on first access, so no explicit bootstrap step is required.
+ * Resolve the workspace-scoped `Intents` bus for the given context bag.
+ * Delegates to `workspace.requireAdapter(Intents)`, which auto-instantiates
+ * a single shared bus on first lookup so every fragment composed under the
+ * same workspace dispatches through the same instance.
  */
-export const [getIntents, setIntents, removeIntents] = newAdapter<Intents>("intents", () =>
-  createIntents(),
-);
+export function getIntents(ctx: Record<string, unknown>): Intents {
+  return getWorkspace(ctx).requireAdapter(Intents);
+}
+
+/**
+ * @deprecated The intents bus is now workspace-scoped and auto-instantiated;
+ * explicit registration is a no-op. Kept for one release so legacy bootstrap
+ * code keeps compiling. Will be removed in a follow-up phase.
+ */
+export function setIntents(_ctx: Record<string, unknown>, _intents: Intents): void {
+  console.warn(
+    "[platform-api] setIntents is deprecated and a no-op: the Intents bus is now workspace-bound and auto-instantiated via workspace.requireAdapter(Intents).",
+  );
+}
+
+/**
+ * @deprecated The intents bus is now workspace-scoped and lifecycle-managed by
+ * the workspace; explicit removal is a no-op. Kept for one release so legacy
+ * teardown code keeps compiling. Will be removed in a follow-up phase.
+ */
+export function removeIntents(_ctx: Record<string, unknown>): void {
+  console.warn(
+    "[platform-api] removeIntents is deprecated and a no-op: the Intents bus lifecycle is owned by workspace.close().",
+  );
+}

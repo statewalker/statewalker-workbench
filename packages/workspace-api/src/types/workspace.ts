@@ -8,10 +8,13 @@ export const [getWorkspace, , resetWorkspace] = newAdapter<Workspace>(
 );
 
 /**
- * Lifecycle hook an adapter MAY implement. `init` is not currently called by
- * the workspace (adapters are lazily constructed and do setup in their ctor);
- * it is reserved for future use. `close` runs during `workspace.close()` in
- * reverse instantiation order.
+ * Optional lifecycle hooks an adapter MAY expose. `init` is not currently
+ * called by the workspace (adapters are lazily constructed and do setup in
+ * their ctor); it is reserved for future use. `close` runs during
+ * `workspace.close()` in reverse instantiation order. Adapters DO NOT need
+ * to implement this interface explicitly — every class structurally matches
+ * because both members are optional. The interface exists purely for
+ * documentation and for the workspace's internal `adapter.close?.()` call.
  */
 export interface WorkspaceAdapter {
   init?(): void | Promise<void>;
@@ -20,25 +23,23 @@ export interface WorkspaceAdapter {
 
 /**
  * Registry key type. Abstract classes (like the `Secrets` / `Settings` /
- * `SystemFiles` tokens) MUST be usable as keys — hence `abstract new`.
+ * `SystemFiles` tokens) MUST be usable as keys — hence `abstract new`. The
+ * constructor signature is left unconstrained so token classes from
+ * `@statewalker/workbench-views` (or anywhere else) — whose constructors take
+ * arbitrary args — can be passed in. The workspace passes `this` as the
+ * first arg; tokens that don't expect it simply ignore it.
  */
-export type AdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> = abstract new (
-  workspace: Workspace,
-  ...args: unknown[]
-) => T;
+// biome-ignore lint/suspicious/noExplicitAny: token constructors are heterogeneous
+export type AdapterCtor<T = unknown> = abstract new (...args: any[]) => T;
 
 /**
  * Concrete implementation shape. Used as the value side of the registry —
  * callable with `new` to produce an instance.
  */
-export type ConcreteAdapterCtor<T extends WorkspaceAdapter = WorkspaceAdapter> = new (
-  workspace: Workspace,
-  ...args: unknown[]
-) => T;
+// biome-ignore lint/suspicious/noExplicitAny: token constructors are heterogeneous
+export type ConcreteAdapterCtor<T = unknown> = new (...args: any[]) => T;
 
-export type AdapterFactory<T extends WorkspaceAdapter = WorkspaceAdapter> = (
-  workspace: Workspace,
-) => T;
+export type AdapterFactory<T = unknown> = (workspace: Workspace) => T;
 
 /**
  * Observable workspace the shell app and every fragment share. Holds a single
@@ -70,8 +71,8 @@ export class Workspace extends BaseClass {
   private _label = "";
 
   private readonly _registrations = new Map<AnyKey, AnyCtor | AnyFactory>();
-  private readonly _instances = new Map<AnyKey, WorkspaceAdapter>();
-  private readonly _instantiatedInOrder: WorkspaceAdapter[] = [];
+  private readonly _instances = new Map<AnyKey, unknown>();
+  private readonly _instantiatedInOrder: unknown[] = [];
   private readonly _instantiating = new Set<AnyKey>();
 
   private readonly _onLoadListeners = new Set<() => void>();
@@ -102,8 +103,8 @@ export class Workspace extends BaseClass {
     return this;
   }
 
-  setAdapter<T extends WorkspaceAdapter>(type: ConcreteAdapterCtor<T>): this;
-  setAdapter<T extends WorkspaceAdapter, C extends T>(
+  setAdapter<T>(type: ConcreteAdapterCtor<T>): this;
+  setAdapter<T, C extends T>(
     type: AdapterCtor<T>,
     impl: ConcreteAdapterCtor<C> | AdapterFactory<C>,
   ): this;
@@ -120,26 +121,32 @@ export class Workspace extends BaseClass {
     return this;
   }
 
-  getAdapter<T extends WorkspaceAdapter>(type: AdapterCtor<T>): T | null {
+  getAdapter<T>(type: AdapterCtor<T>): T | null {
     const cached = this._instances.get(type);
     if (cached) return cached as T;
-    const registered = this._registrations.get(type);
-    if (!registered) return null;
+
+    // Resolve the impl. Prefer an explicit registration; otherwise fall
+    // back to the token itself when it is a class — concrete tokens
+    // (`Intents`, `Toasts`, …) self-host and need no setAdapter call.
+    const ctor = type as unknown as AnyCtor;
+    const impl = this._registrations.get(type) ?? (isClass(ctor) ? ctor : null);
+    if (!impl) return null;
+
     if (this._instantiating.has(type)) {
       throw new Error(`Adapter cycle detected while constructing ${describe(type)}`);
     }
     this._instantiating.add(type);
     try {
-      const instance = isClass(registered) ? new registered(this) : registered(this);
+      const instance = (isClass(impl) ? new impl(this) : impl(this)) as T;
       this._instances.set(type, instance);
       this._instantiatedInOrder.push(instance);
-      return instance as T;
+      return instance;
     } finally {
       this._instantiating.delete(type);
     }
   }
 
-  requireAdapter<T extends WorkspaceAdapter>(type: AdapterCtor<T>): T {
+  requireAdapter<T>(type: AdapterCtor<T>): T {
     const instance = this.getAdapter(type);
     if (!instance) {
       throw new Error(`No adapter registered for ${describe(type)}`);
@@ -196,7 +203,7 @@ export class Workspace extends BaseClass {
     }
     const errors: unknown[] = [];
     for (let i = this._instantiatedInOrder.length - 1; i >= 0; i--) {
-      const adapter = this._instantiatedInOrder[i];
+      const adapter = this._instantiatedInOrder[i] as WorkspaceAdapter | undefined;
       if (!adapter) continue;
       try {
         await adapter.close?.();
@@ -213,9 +220,9 @@ export class Workspace extends BaseClass {
     }
   }
 
-  private async _closeInstance(adapter: WorkspaceAdapter): Promise<void> {
+  private async _closeInstance(adapter: unknown): Promise<void> {
     try {
-      await adapter.close?.();
+      await (adapter as WorkspaceAdapter).close?.();
     } catch (err) {
       logListenerError("adapter.close (re-register)", err);
     }
@@ -228,7 +235,7 @@ function isClass(value: AnyCtor | AnyFactory): value is AnyCtor {
   );
 }
 
-function describe(type: AdapterCtor<WorkspaceAdapter>): string {
+function describe(type: AdapterCtor): string {
   return type.name || "<anonymous adapter>";
 }
 

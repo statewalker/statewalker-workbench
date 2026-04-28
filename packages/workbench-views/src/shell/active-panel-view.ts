@@ -2,7 +2,6 @@ import { newAdapter } from "@statewalker/shared-adapters";
 import { ViewModel } from "../core/view-model.js";
 import { getPanelManagerView } from "./panel-manager-view.js";
 
-/** @deprecated Use PanelManagerView instead. */
 export class ActivePanelView extends ViewModel {
   activePanelKey: string | null = null;
 
@@ -14,17 +13,12 @@ export class ActivePanelView extends ViewModel {
   }
 }
 
-/** @deprecated Use getPanelManagerView instead. */
 export const [getActivePanelView] = newAdapter<ActivePanelView>(
   "model:activePanel",
   () => new ActivePanelView(),
 );
 
-/**
- * Focus a panel tab by key.
- * Delegates to PanelManagerView.focus() which also sets the tab
- * as active in its area.
- */
+/** Focus a panel tab by key. */
 export function activatePanel(context: Record<string, unknown>, panelKey: string): void {
   getPanelManagerView(context).focus(panelKey);
 }
