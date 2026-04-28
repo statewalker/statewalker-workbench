@@ -28,7 +28,6 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/platform-api": "workspace:*",
     "@statewalker/shared-adapters": "catalog:",
     "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-intents": "catalog:",

@@ -1,15 +1,17 @@
-import {
-  getIntents,
-  handlePickDirectory,
-  type PickDirectoryResult,
-  UserCancelledError,
-} from "@statewalker/platform-api";
-import type { Intents } from "@statewalker/shared-intents";
+import { Intents } from "@statewalker/shared-intents";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { afterEach, describe, expect, it } from "vitest";
 import initWorkspaceApi from "../src/init.ts";
 import { runChangeWorkspace } from "../src/intents/intents.ts";
+import {
+  handlePickDirectory,
+  type PickDirectoryResult,
+} from "../src/intents/pick-directory.ts";
 import { getWorkspace } from "../src/types/workspace.ts";
+
+class UserCancelledError extends Error {
+  readonly name = "UserCancelledError";
+}
 
 interface PickStub {
   files: MemFilesApi;
@@ -46,7 +48,7 @@ describe("workspace:change — non-interactive payload", () => {
 
   it("rebinds non-interactively when payload.files is supplied (cold start)", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getIntents(ctx);
+    const intents = getWorkspace(ctx).requireAdapter(Intents);
     cleanups.push(initWorkspaceApi(ctx));
 
     const memFs = new MemFilesApi();
@@ -62,7 +64,7 @@ describe("workspace:change — non-interactive payload", () => {
 
   it("preserves workspace identity across rebinds", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getIntents(ctx);
+    const intents = getWorkspace(ctx).requireAdapter(Intents);
     cleanups.push(initWorkspaceApi(ctx));
 
     const first = new MemFilesApi();
@@ -86,7 +88,7 @@ describe("workspace:change — non-interactive payload", () => {
 
   it("defaults the label to 'Workspace' when payload.label is omitted", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getIntents(ctx);
+    const intents = getWorkspace(ctx).requireAdapter(Intents);
     cleanups.push(initWorkspaceApi(ctx));
 
     const memFs = new MemFilesApi();
@@ -105,7 +107,7 @@ describe("workspace:change — interactive (pick-directory)", () => {
 
   it("opens the workspace against the user-picked files when no payload supplied", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getIntents(ctx);
+    const intents = getWorkspace(ctx).requireAdapter(Intents);
     const picked = new MemFilesApi();
     cleanups.push(registerPickStub(intents, [{ files: picked, label: "P" }]));
     cleanups.push(initWorkspaceApi(ctx));
@@ -118,7 +120,7 @@ describe("workspace:change — interactive (pick-directory)", () => {
 
   it("propagates UserCancelledError when the picker rejects", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getIntents(ctx);
+    const intents = getWorkspace(ctx).requireAdapter(Intents);
     cleanups.push(registerPickStub(intents, { error: new UserCancelledError("nope") }));
     cleanups.push(initWorkspaceApi(ctx));
 

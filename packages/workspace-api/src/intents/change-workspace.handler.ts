@@ -1,8 +1,9 @@
-import { type getIntents, runPickDirectory } from "@statewalker/platform-api";
+import type { Intents } from "@statewalker/shared-intents";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { initWorkspace } from "../impl/init-workspace.js";
 import type { Workspace } from "../types/workspace.js";
 import { handleChangeWorkspace } from "./intents.js";
+import { runPickDirectory } from "./pick-directory.js";
 
 /**
  * Register the `workspace:change` handler.
@@ -25,7 +26,7 @@ export function registerChangeWorkspaceHandler({
   intents,
   workspace,
 }: {
-  intents: ReturnType<typeof getIntents>;
+  intents: Intents;
   workspace: Workspace;
 }): () => void {
   return handleChangeWorkspace(intents, (intent) => {
