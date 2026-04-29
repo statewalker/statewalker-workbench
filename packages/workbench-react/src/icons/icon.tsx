@@ -1,4 +1,4 @@
-import { useIconRegistry } from "./icon-registry.js";
+import { DynamicIcon, type IconName } from "lucide-react/dynamic";
 
 interface IconProps {
   name: string;
@@ -6,14 +6,11 @@ interface IconProps {
 }
 
 /**
- * Renders a named icon from the IconRegistry.
- * Icon names follow lucide kebab-case convention (e.g. "file-text", "check-circle").
- * Returns null if the icon is not registered.
+ * Renders a Lucide icon by kebab-case name (e.g. "file-text",
+ * "check-circle"). Backed by `lucide-react/dynamic`'s `DynamicIcon`
+ * which lazy-loads the icon, so any name from the Lucide set works
+ * without prior registration.
  */
 export function Icon({ name, className }: IconProps): React.ReactElement | null {
-  const registry = useIconRegistry();
-  if (!registry) return null;
-  const Component = registry.resolve(name);
-  if (!Component) return null;
-  return <Component className={className} />;
+  return <DynamicIcon name={name as IconName} className={className} />;
 }
