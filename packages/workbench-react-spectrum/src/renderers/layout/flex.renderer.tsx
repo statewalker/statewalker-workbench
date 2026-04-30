@@ -10,6 +10,7 @@ export function FlexRenderer({ model }: { model: FlexView }) {
       direction={model.direction}
       gap={model.gap}
       wrap={model.wrap}
+      UNSAFE_style={model.padding ? { padding: model.padding } : undefined}
       alignItems={
         model.alignItems as
           | "start"

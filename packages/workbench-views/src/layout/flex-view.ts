@@ -6,6 +6,7 @@ export class FlexView extends ContainerView {
   #gap: string;
   #alignItems: string;
   #justifyContent: string;
+  #padding: string;
 
   constructor(options?: {
     key?: string;
@@ -15,6 +16,7 @@ export class FlexView extends ContainerView {
     gap?: string;
     alignItems?: string;
     justifyContent?: string;
+    padding?: string;
   }) {
     super({ key: options?.key, children: options?.children });
     this.#direction = options?.direction ?? "row";
@@ -22,6 +24,7 @@ export class FlexView extends ContainerView {
     this.#gap = options?.gap ?? "0";
     this.#alignItems = options?.alignItems ?? "stretch";
     this.#justifyContent = options?.justifyContent ?? "start";
+    this.#padding = options?.padding ?? "0";
   }
 
   get direction(): "row" | "column" | "row-reverse" | "column-reverse" {
@@ -61,6 +64,14 @@ export class FlexView extends ContainerView {
   }
   set justifyContent(value: string) {
     this.#justifyContent = value;
+    this.notify();
+  }
+
+  get padding(): string {
+    return this.#padding;
+  }
+  set padding(value: string) {
+    this.#padding = value;
     this.notify();
   }
 }

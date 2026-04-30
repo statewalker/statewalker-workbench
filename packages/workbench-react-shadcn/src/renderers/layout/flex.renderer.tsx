@@ -25,7 +25,7 @@ export function FlexRenderer({ model }: { model: FlexView }) {
     .join(" ");
 
   return (
-    <div className={classes} style={{ gap: model.gap }}>
+    <div className={classes} style={{ gap: model.gap, padding: model.padding }}>
       {model.children.map((item) => (
         <RenderModel key={item.key} model={item} />
       ))}
