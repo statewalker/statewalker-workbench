@@ -12,7 +12,10 @@ export class Toolbar extends UIModelRegistry<ActionView> {}
 
 export { Toolbar as ToolbarView };
 
-export const [getToolbarView] = newAdapter<Toolbar>("aspect:toolbar", () => new Toolbar());
+export const [getToolbarView, setToolbarView] = newAdapter<Toolbar>(
+  "aspect:toolbar",
+  () => new Toolbar(),
+);
 
 export const [publishToolbarAction, listenToolbarAction] =
   createModelPoint<ActionView>(getToolbarView);

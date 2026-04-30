@@ -1,6 +1,15 @@
-import { BaseClass, onChange } from "@statewalker/shared-baseclass";
+import {
+  BaseClass,
+  onChange,
+  onChangeNotifier,
+} from "@statewalker/shared-baseclass";
 
-export type ActionViewVariant = "primary" | "secondary" | "neutral" | "danger" | "info";
+export type ActionViewVariant =
+  | "primary"
+  | "secondary"
+  | "neutral"
+  | "danger"
+  | "info";
 
 export interface ActionViewConfig {
   key: string;
@@ -74,7 +83,9 @@ export class ActionView<T = unknown> extends BaseClass {
     this.#tooltip = config.tooltip;
     this.#disabled = config.disabled ?? false;
     this.#variant = config.variant ?? "neutral";
-    this.children = (config.children ?? []).map((child) => new ActionView(child));
+    this.children = (config.children ?? []).map(
+      (child) => new ActionView(child),
+    );
     if (config.execute) {
       this.onSubmit(config.execute);
     }
@@ -93,13 +104,7 @@ export class ActionView<T = unknown> extends BaseClass {
     this.notify();
   };
 
-  onSubmit = (cb: () => void): (() => void) => {
-    return onChange(
-      (cb) => this.onUpdate(cb),
-      cb,
-      () => this.#submitCounter,
-    );
-  };
+  onSubmit = onChangeNotifier(this.onUpdate, () => this.#submitCounter);
 
   getChild(key: string): ActionView | undefined {
     return this.children.find((c) => c.actionKey === key);
