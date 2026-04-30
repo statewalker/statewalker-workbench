@@ -150,46 +150,54 @@ function ThemeToggle() {
 function AppMenuBar({ menus }: { menus: ActionView[] }) {
   return (
     <Menubar className="border-0 border-b border-border rounded-none shadow-none bg-card">
-      {menus.map((menu) =>
-        menu.children.length === 0 ? (
-          // Leaf action — render as a plain button. radix `MenubarTrigger`
-          // always toggles its (empty) menu on click and swallows the
-          // `onClick` payload, so a top-level action without children would
-          // appear unresponsive. A Button inside the Menubar styles the
-          // same way and fires `submit()` cleanly.
-          <Button
-            key={menu.actionKey}
-            variant="ghost"
-            size="sm"
-            disabled={menu.disabled}
-            onClick={() => menu.submit()}
-            className="h-8 px-3 text-sm font-medium"
-          >
-            {menu.icon && <Icon name={menu.icon} className="size-4 mr-1.5" />}
-            {menu.label ?? menu.actionKey}
-          </Button>
-        ) : (
-          <MenubarMenu key={menu.actionKey}>
-            <MenubarTrigger>
-              {menu.icon && <Icon name={menu.icon} className="size-4 mr-1.5" />}
-              {menu.label ?? menu.actionKey}
-            </MenubarTrigger>
-            <MenubarContent>
-              {menu.children.map((item) => (
-                <MenubarItem
-                  key={item.actionKey}
-                  disabled={item.disabled}
-                  onClick={() => item.submit()}
-                >
-                  {item.label ?? item.actionKey}
-                </MenubarItem>
-              ))}
-            </MenubarContent>
-          </MenubarMenu>
-        ),
-      )}
+      {menus.map((menu) => (
+        <MenuEntry key={menu.actionKey} menu={menu} />
+      ))}
       <ThemeToggle />
     </Menubar>
+  );
+}
+
+function MenuEntry({ menu }: { menu: ActionView }) {
+  // Subscribe so changes to this menu (label, disabled, children added/removed)
+  // re-render the entry.
+  useUpdates(menu.onUpdate);
+
+  if (menu.children.length === 0) {
+    // Leaf action — render as a plain button. radix `MenubarTrigger`
+    // always toggles its (empty) menu on click and swallows the
+    // `onClick` payload, so a top-level action without children would
+    // appear unresponsive. A Button inside the Menubar styles the
+    // same way and fires `submit()` cleanly.
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled={menu.disabled}
+        onClick={() => menu.submit()}
+        className="h-8 px-3 text-sm font-medium"
+      >
+        {menu.icon && <Icon name={menu.icon} className="size-4 mr-1.5" />}
+        {menu.label ?? menu.actionKey}
+      </Button>
+    );
+  }
+
+  return (
+    <MenubarMenu>
+      <MenubarTrigger>
+        {menu.icon && <Icon name={menu.icon} className="size-4 mr-1.5" />}
+        {menu.label ?? menu.actionKey}
+      </MenubarTrigger>
+      <MenubarContent>
+        {menu.children.map((item) => (
+          <MenubarItem key={item.actionKey} disabled={item.disabled} onClick={() => item.submit()}>
+            {item.icon && <Icon name={item.icon} className="size-4 mr-1.5" />}
+            {item.label ?? item.actionKey}
+          </MenubarItem>
+        ))}
+      </MenubarContent>
+    </MenubarMenu>
   );
 }
 

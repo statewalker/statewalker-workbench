@@ -16,6 +16,7 @@ import {
   ComponentRegistryContext,
   ReactComponentRegistry,
 } from "@statewalker/workbench-react/component-registry";
+import { useUpdates } from "@statewalker/workbench-react/hooks";
 import type { ActionView, DialogView, ToastView } from "@statewalker/workbench-views";
 import {
   getDialogStackView,
@@ -151,27 +152,36 @@ function SpectrumMenuBar({ menus }: { menus: ActionView[] }) {
       }}
     >
       {menus.map((menu) => (
-        <MenuTrigger key={menu.actionKey}>
-          <ActionButton isQuiet>
-            <Text>{menu.label ?? menu.actionKey}</Text>
-          </ActionButton>
-          <Menu
-            onAction={(key) => {
-              const item = menu.children.find((c) => c.actionKey === key);
-              item?.submit();
-            }}
-          >
-            {menu.children.map((item) => (
-              <Item key={item.actionKey}>{item.label ?? item.actionKey}</Item>
-            ))}
-          </Menu>
-        </MenuTrigger>
+        <SpectrumMenuEntry key={menu.actionKey} menu={menu} />
       ))}
       <View flex />
       <ActionButton isQuiet onPress={toggle} aria-label="Toggle theme">
         <Text>{colorScheme === "dark" ? "☀" : "🌙"}</Text>
       </ActionButton>
     </Flex>
+  );
+}
+
+function SpectrumMenuEntry({ menu }: { menu: ActionView }) {
+  // Subscribe so changes to this menu (label, disabled, children added/removed)
+  // re-render the entry.
+  useUpdates(menu.onUpdate);
+  return (
+    <MenuTrigger>
+      <ActionButton isQuiet>
+        <Text>{menu.label ?? menu.actionKey}</Text>
+      </ActionButton>
+      <Menu
+        onAction={(key) => {
+          const item = menu.children.find((c) => c.actionKey === key);
+          item?.submit();
+        }}
+      >
+        {menu.children.map((item) => (
+          <Item key={item.actionKey}>{item.label ?? item.actionKey}</Item>
+        ))}
+      </Menu>
+    </MenuTrigger>
   );
 }
 
