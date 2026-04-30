@@ -12,6 +12,9 @@ export class MainMenu extends UIModelRegistry<MenuModel> {}
 
 export { MainMenu as TopMenuView };
 
-export const [getTopMenuView] = newAdapter<MainMenu>("aspect:top-menu", () => new MainMenu());
+export const [getTopMenuView, setTopMenuView] = newAdapter<MainMenu>(
+  "aspect:top-menu",
+  () => new MainMenu(),
+);
 
 export const [publishMenu, listenMenu] = createModelPoint<MenuModel>(getTopMenuView);

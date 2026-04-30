@@ -2,11 +2,15 @@ import {
   Dialogs,
   Keyboard,
   Layout,
+  MainMenu,
   setDialogStackView,
   setKeyboardView,
   setPanelManagerView,
   setToastStackView,
+  setToolbarView,
+  setTopMenuView,
   Toasts,
+  Toolbar,
 } from "@statewalker/workbench-views";
 import { getWorkspace } from "@statewalker/workspace-api";
 
@@ -34,4 +38,6 @@ export function bridgeShellAdapters(ctx: Record<string, unknown>): void {
   setKeyboardView(ctx, ws.requireAdapter(Keyboard));
   setDialogStackView(ctx, ws.requireAdapter(Dialogs));
   setToastStackView(ctx, ws.requireAdapter(Toasts));
+  setTopMenuView(ctx, ws.requireAdapter(MainMenu));
+  setToolbarView(ctx, ws.requireAdapter(Toolbar));
 }
