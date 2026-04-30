@@ -6,6 +6,19 @@ export interface ColumnDescriptor<T = Record<string, unknown>> {
   label: string;
   sortable?: boolean;
   width?: string;
+  /**
+   * Row property whose value the renderer should display as a leading
+   * icon for this cell. The value is an icon name resolved by the
+   * UI layer's IconRegistry. Data-only — views never reference the
+   * Icon component.
+   */
+  iconKey?: keyof T & string;
+  /**
+   * Row property whose value the renderer should apply as a CSS
+   * class on the leading icon (e.g. tailwind text-color utilities).
+   * Ignored when `iconKey` is unset.
+   */
+  iconColorKey?: keyof T & string;
   render?: (value: unknown, row: T) => unknown;
 }
 

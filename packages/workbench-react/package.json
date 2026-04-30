@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@statewalker/shared-adapters": "catalog:",
+    "lucide-react": "catalog:",
     "react": "catalog:"
   },
   "devDependencies": {

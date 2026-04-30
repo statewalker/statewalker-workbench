@@ -1,5 +1,6 @@
 import { Checkbox, Flex, Text } from "@adobe/react-spectrum";
 import { useUpdates } from "@statewalker/workbench-react/hooks";
+import { Icon } from "@statewalker/workbench-react/icons";
 import type { TableView } from "@statewalker/workbench-views";
 
 /**
@@ -74,15 +75,23 @@ export function TableRenderer({ model }: { model: TableView }) {
                     />
                   </td>
                 )}
-                {model.columns.map((col) => (
-                  <td key={col.key} style={{ padding: "4px 12px" }}>
-                    <Text>
-                      {col.render
-                        ? String(col.render((row as Record<string, unknown>)[col.key], row) ?? "")
-                        : String((row as Record<string, unknown>)[col.key] ?? "")}
-                    </Text>
-                  </td>
-                ))}
+                {model.columns.map((col) => {
+                  const record = row as Record<string, unknown>;
+                  const iconName = col.iconKey ? String(record[col.iconKey] ?? "") : "";
+                  const iconColor = col.iconColorKey ? String(record[col.iconColorKey] ?? "") : "";
+                  return (
+                    <td key={col.key} style={{ padding: "4px 12px" }}>
+                      <Flex direction="row" alignItems="center" gap="size-100">
+                        {iconName && <Icon name={iconName} className={iconColor} />}
+                        <Text>
+                          {col.render
+                            ? String(col.render(record[col.key], row) ?? "")
+                            : String(record[col.key] ?? "")}
+                        </Text>
+                      </Flex>
+                    </td>
+                  );
+                })}
               </tr>
             );
           })}

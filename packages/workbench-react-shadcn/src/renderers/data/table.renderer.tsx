@@ -1,4 +1,5 @@
 import { useUpdates } from "@statewalker/workbench-react/hooks";
+import { Icon } from "@statewalker/workbench-react/icons";
 import type { TableView as TableViewType } from "@statewalker/workbench-views";
 
 export function TableRenderer({ model }: { model: TableViewType }) {
@@ -84,13 +85,24 @@ export function TableRenderer({ model }: { model: TableViewType }) {
                     />
                   </td>
                 )}
-                {model.columns.map((col) => (
-                  <td key={col.key} className="px-2 py-2 align-middle">
-                    {col.render
-                      ? (col.render(record[col.key], row) as React.ReactNode)
-                      : String(record[col.key] ?? "")}
-                  </td>
-                ))}
+                {model.columns.map((col) => {
+                  const iconName = col.iconKey ? String(record[col.iconKey] ?? "") : "";
+                  const iconColor = col.iconColorKey ? String(record[col.iconColorKey] ?? "") : "";
+                  return (
+                    <td key={col.key} className="px-2 py-2 align-middle">
+                      <span className="flex items-center gap-2">
+                        {iconName && (
+                          <Icon name={iconName} className={`size-4 shrink-0 ${iconColor}`} />
+                        )}
+                        <span className="truncate">
+                          {col.render
+                            ? (col.render(record[col.key], row) as React.ReactNode)
+                            : String(record[col.key] ?? "")}
+                        </span>
+                      </span>
+                    </td>
+                  );
+                })}
               </tr>
             );
           })}
