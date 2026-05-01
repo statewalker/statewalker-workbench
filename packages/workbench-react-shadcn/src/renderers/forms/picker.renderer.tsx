@@ -1,8 +1,35 @@
 import { useUpdates } from "@statewalker/workbench-react/hooks";
-import type { PickerView } from "@statewalker/workbench-views";
+import type { PickerItem, PickerView } from "@statewalker/workbench-views";
+
+function optionLabel(item: PickerItem): string {
+  let label = item.label;
+  if (item.badge) label += ` [${item.badge.label}]`;
+  if (item.description) label += ` · ${item.description}`;
+  return label;
+}
+
+function renderOption(item: PickerItem) {
+  return (
+    <option key={item.key} value={item.key}>
+      {optionLabel(item)}
+    </option>
+  );
+}
 
 export function PickerRenderer({ model }: { model: PickerView }) {
   useUpdates(model.onUpdate);
+
+  const ungrouped: PickerItem[] = [];
+  const sections = new Map<string, PickerItem[]>();
+  for (const item of model.items) {
+    if (item.section) {
+      const list = sections.get(item.section) ?? [];
+      list.push(item);
+      sections.set(item.section, list);
+    } else {
+      ungrouped.push(item);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -26,10 +53,11 @@ export function PickerRenderer({ model }: { model: PickerView }) {
             {model.placeholder}
           </option>
         )}
-        {model.items.map((item) => (
-          <option key={item.key} value={item.key}>
-            {item.label}
-          </option>
+        {ungrouped.map(renderOption)}
+        {[...sections.entries()].map(([section, items]) => (
+          <optgroup key={section} label={section}>
+            {items.map(renderOption)}
+          </optgroup>
         ))}
       </select>
       {model.errorMessage && <p className="text-xs text-destructive">{model.errorMessage}</p>}

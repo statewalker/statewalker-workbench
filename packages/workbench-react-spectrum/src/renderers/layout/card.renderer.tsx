@@ -5,8 +5,9 @@ import { RenderModel, RenderSlot } from "../_shared/render-slot.js";
 
 export function CardRenderer({ model }: { model: CardView }) {
   useUpdates(model.onUpdate);
+  const borderColor = model.variant === "highlight" ? "blue-500" : "dark";
   return (
-    <View borderWidth="thin" borderColor="dark" borderRadius="medium" padding="size-200">
+    <View borderWidth="thin" borderColor={borderColor} borderRadius="medium" padding="size-200">
       {model.preview && (
         <View marginBottom="size-200">
           <RenderModel model={model.preview} />

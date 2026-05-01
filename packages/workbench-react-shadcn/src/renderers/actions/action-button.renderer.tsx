@@ -1,4 +1,5 @@
 import { useUpdates } from "@statewalker/workbench-react/hooks";
+import { Icon } from "@statewalker/workbench-react/icons";
 import type { ActionButtonView, ActionView, ActionViewVariant } from "@statewalker/workbench-views";
 import { Button, type ButtonProps } from "../../components/index.js";
 
@@ -25,6 +26,7 @@ export function ActionButton({ action, tooltip }: { action: ActionView; tooltip?
       disabled={action.disabled}
       title={tooltip}
     >
+      {action.icon && <Icon name={action.icon} className="size-4" />}
       {action.label ?? action.actionKey}
     </Button>
   );
@@ -55,6 +57,7 @@ export function ActionButtonRenderer({ model }: { model: ActionButtonView }) {
       disabled={action.disabled}
       onClick={() => action.submit()}
     >
+      {action.icon && <Icon name={action.icon} className="size-4" />}
       {action.label ?? action.actionKey}
     </Button>
   );

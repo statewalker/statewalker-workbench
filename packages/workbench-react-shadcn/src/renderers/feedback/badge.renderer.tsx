@@ -1,4 +1,5 @@
 import { useUpdates } from "@statewalker/workbench-react/hooks";
+import { Icon } from "@statewalker/workbench-react/icons";
 import type { BadgeView } from "@statewalker/workbench-views";
 
 const variantClasses: Record<string, string> = {
@@ -14,16 +15,24 @@ const sizeClasses: Record<string, string> = {
   L: "text-sm px-3 py-1",
 };
 
+const iconSizeClasses: Record<string, string> = {
+  S: "size-3 mr-0.5",
+  M: "size-3.5 mr-1",
+  L: "size-4 mr-1",
+};
+
 export function BadgeRenderer({ model }: { model: BadgeView }) {
   useUpdates(model.onUpdate);
 
   const variantClass = variantClasses[model.variant] ?? variantClasses.neutral;
   const sizeClass = sizeClasses[model.size] ?? sizeClasses.M;
+  const iconSizeClass = iconSizeClasses[model.size] ?? iconSizeClasses.M;
 
   return (
     <span
       className={`inline-flex items-center rounded-full font-medium ${variantClass} ${sizeClass}`}
     >
+      {model.icon && <Icon name={model.icon} className={iconSizeClass} />}
       {model.label}
     </span>
   );

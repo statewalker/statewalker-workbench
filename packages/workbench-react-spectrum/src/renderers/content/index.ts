@@ -1,5 +1,6 @@
 export * from "./avatar.renderer.js";
 export * from "./heading.renderer.js";
+export * from "./icon.renderer.js";
 export * from "./image.renderer.js";
 export * from "./keyboard.renderer.js";
 export * from "./labeled-value.renderer.js";

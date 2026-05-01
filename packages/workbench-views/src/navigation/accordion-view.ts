@@ -3,7 +3,7 @@ import { ContainerView } from "../core/index.js";
 
 export interface AccordionItem {
   key: string;
-  title: string;
+  title: string | ViewModel;
   content: ViewModel;
   disabled?: boolean;
 }

@@ -8,9 +8,10 @@ export function CardRenderer({ model }: { model: CardViewType }) {
   useUpdates(model.onUpdate);
 
   const hasFooter = model.footer !== undefined || model.actions.length > 0;
+  const variantClass = model.variant === "highlight" ? "border-primary ring-1 ring-primary/40" : "";
 
   return (
-    <Card>
+    <Card className={variantClass}>
       {model.header && (
         <CardHeader>
           <CardTitle>
