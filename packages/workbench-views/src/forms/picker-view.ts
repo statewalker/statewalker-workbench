@@ -1,10 +1,18 @@
 import { ViewModel } from "../core/index.js";
 
+export type PickerItemBadge = {
+  label: string;
+  variant?: "positive" | "negative" | "neutral" | "informative";
+  icon?: string;
+};
+
 export type PickerItem = {
   key: string;
   label: string;
   icon?: string;
   section?: string;
+  description?: string;
+  badge?: PickerItemBadge;
 };
 
 export class PickerView extends ViewModel {

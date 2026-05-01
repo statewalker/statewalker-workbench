@@ -1,9 +1,12 @@
 import { ContentPanelView } from "../core/content-panel-view.js";
 import type { ActionView, ViewModel } from "../core/index.js";
 
+export type CardVariant = "normal" | "highlight";
+
 export class CardView extends ContentPanelView {
   #actions: ActionView[];
   #preview: ViewModel | undefined;
+  #variant: CardVariant;
 
   constructor(options?: {
     key?: string;
@@ -12,10 +15,12 @@ export class CardView extends ContentPanelView {
     footer?: string | ViewModel;
     actions?: ActionView[];
     preview?: ViewModel;
+    variant?: CardVariant;
   }) {
     super(options);
     this.#actions = options?.actions ?? [];
     this.#preview = options?.preview;
+    this.#variant = options?.variant ?? "normal";
   }
 
   get actions(): ActionView[] {
@@ -31,6 +36,14 @@ export class CardView extends ContentPanelView {
   }
   set preview(value: ViewModel | undefined) {
     this.#preview = value;
+    this.notify();
+  }
+
+  get variant(): CardVariant {
+    return this.#variant;
+  }
+  set variant(value: CardVariant) {
+    this.#variant = value;
     this.notify();
   }
 }

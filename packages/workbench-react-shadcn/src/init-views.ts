@@ -16,7 +16,6 @@ import {
   CardView,
   CheckboxGroupView,
   CheckboxView,
-  CollapsibleView,
   ColorAreaView,
   ColorFieldView,
   ColorPickerView,
@@ -39,6 +38,7 @@ import {
   FormView,
   GridView,
   HeadingView,
+  IconView,
   ImageView,
   InlineAlertView,
   JsonView,
@@ -79,6 +79,7 @@ import {
   TimeFieldView,
   ToastView,
   ToggleButtonView,
+  ToggleGroupView,
   TooltipView,
   TreeView,
   WellView,
@@ -107,6 +108,7 @@ import { ColorWheelRenderer } from "./renderers/color/color-wheel.renderer.js";
 // Content
 import { AvatarRenderer } from "./renderers/content/avatar.renderer.js";
 import { HeadingRenderer } from "./renderers/content/heading.renderer.js";
+import { IconRenderer } from "./renderers/content/icon.renderer.js";
 import { ImageRenderer } from "./renderers/content/image.renderer.js";
 import { KbdRenderer } from "./renderers/content/keyboard.renderer.js";
 import { LabeledValueRenderer } from "./renderers/content/labeled-value.renderer.js";
@@ -148,9 +150,9 @@ import { SliderRenderer } from "./renderers/forms/slider.renderer.js";
 import { SwitchRenderer } from "./renderers/forms/switch.renderer.js";
 import { TextAreaRenderer } from "./renderers/forms/text-area.renderer.js";
 import { TextFieldRenderer } from "./renderers/forms/text-field.renderer.js";
+import { ToggleGroupRenderer } from "./renderers/forms/toggle-group.renderer.js";
 // Layout
 import { CardRenderer } from "./renderers/layout/card.renderer.js";
-import { CollapsibleRenderer } from "./renderers/layout/collapsible.renderer.js";
 import { ContentPanelRenderer } from "./renderers/layout/content-panel.renderer.js";
 import { DividerRenderer } from "./renderers/layout/divider.renderer.js";
 import { FlexRenderer } from "./renderers/layout/flex.renderer.js";
@@ -203,6 +205,7 @@ export function initViews(ctx: Record<string, unknown>): () => void {
     // Content
     registry.register(AvatarView, AvatarRenderer),
     registry.register(HeadingView, HeadingRenderer),
+    registry.register(IconView, IconRenderer),
     registry.register(ImageView, ImageRenderer),
     registry.register(KbdView, KbdRenderer),
     registry.register(LabeledValueView, LabeledValueRenderer),
@@ -244,9 +247,9 @@ export function initViews(ctx: Record<string, unknown>): () => void {
     registry.register(SwitchView, SwitchRenderer),
     registry.register(TextAreaView, TextAreaRenderer),
     registry.register(TextFieldView, TextFieldRenderer),
+    registry.register(ToggleGroupView, ToggleGroupRenderer),
     // Layout
     registry.register(CardView, CardRenderer),
-    registry.register(CollapsibleView, CollapsibleRenderer),
     registry.register(ContentPanelView, ContentPanelRenderer),
     registry.register(DividerView, DividerRenderer),
     registry.register(FlexView, FlexRenderer),

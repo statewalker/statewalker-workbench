@@ -45,11 +45,7 @@ function makeTab(panel: DockPanelView): DockTab {
  * tree — never replaces it — so earlier panels are not lost when
  * panels arrive out of order (e.g. a "left" panel before "center").
  */
-function insertAreaPanel(
-  tree: DockNode,
-  area: string,
-  newPanel: DockPanel,
-): DockNode {
+function insertAreaPanel(tree: DockNode, area: string, newPanel: DockPanel): DockNode {
   const split = (
     direction: "horizontal" | "vertical",
     first: DockNode,
@@ -225,11 +221,7 @@ export class Layout extends ViewModel {
    * accept a drop and show the drop confirmation. All tree inspection
    * happens here so the UI never reaches into the tree itself.
    */
-  canMoveTab(
-    sourcePanelId: string,
-    targetPanelId: string,
-    position: DropPosition,
-  ): boolean {
+  canMoveTab(sourcePanelId: string, targetPanelId: string, position: DropPosition): boolean {
     // Dropping into the same panel at center is a no-op, not a real move
     if (sourcePanelId === targetPanelId && position === "center") {
       return false;
@@ -258,11 +250,7 @@ export class Layout extends ViewModel {
   ): void {
     if (!this.canMoveTab(sourcePanelId, targetPanelId, position)) return;
 
-    const { node: afterRemoval, tab } = findAndRemoveTab(
-      this.#tree,
-      sourcePanelId,
-      tabId,
-    );
+    const { node: afterRemoval, tab } = findAndRemoveTab(this.#tree, sourcePanelId, tabId);
     if (!tab || !afterRemoval) return;
 
     this.#tree = addTabToPanel(afterRemoval, targetPanelId, tab, position);

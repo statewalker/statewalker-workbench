@@ -1,5 +1,4 @@
 export * from "./card-view.js";
-export * from "./collapsible-view.js";
 export * from "./divider-view.js";
 export * from "./flex-view.js";
 export * from "./grid-view.js";

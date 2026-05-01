@@ -32,15 +32,26 @@ export class BadgeView extends ViewModel {
     return this.#size;
   }
 
+  #icon: string | undefined = undefined;
+  set icon(value: string | undefined) {
+    this.#icon = value;
+    this.notify();
+  }
+  get icon(): string | undefined {
+    return this.#icon;
+  }
+
   constructor(options: {
     label: string;
     variant?: BadgeVariant;
     size?: BadgeSize;
+    icon?: string;
     key?: string;
   }) {
     super({ key: options.key });
     this.#label = options.label;
     this.#variant = options.variant ?? "neutral";
     this.#size = options.size ?? "M";
+    this.#icon = options.icon;
   }
 }

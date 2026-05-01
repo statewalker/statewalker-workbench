@@ -14,7 +14,9 @@ export function AccordionRenderer({ model }: { model: AccordionView }) {
           isDisabled={item.disabled}
           onExpandedChange={() => model.toggle(item.key)}
         >
-          <DisclosureTitle>{item.title}</DisclosureTitle>
+          <DisclosureTitle>
+            {typeof item.title === "string" ? item.title : <RenderModel model={item.title} />}
+          </DisclosureTitle>
           <DisclosurePanel>
             <RenderModel model={item.content} />
           </DisclosurePanel>

@@ -1,5 +1,6 @@
 import { Button } from "@adobe/react-spectrum";
 import { useUpdates } from "@statewalker/workbench-react/hooks";
+import { Icon } from "@statewalker/workbench-react/icons";
 import type { ButtonView } from "@statewalker/workbench-views";
 
 export function ButtonRenderer({ model }: { model: ButtonView }) {
@@ -18,6 +19,7 @@ export function ButtonRenderer({ model }: { model: ButtonView }) {
       staticColor={model.staticColor}
       onPress={() => model.action.submit()}
     >
+      {model.action.icon && <Icon name={model.action.icon} className="w-[16px] h-[16px] mr-1" />}
       {model.action.label}
     </Button>
   );

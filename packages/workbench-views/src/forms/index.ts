@@ -11,3 +11,4 @@ export * from "./slider-view.js";
 export * from "./switch-view.js";
 export * from "./text-area-view.js";
 export * from "./text-field-view.js";
+export * from "./toggle-group-view.js";
