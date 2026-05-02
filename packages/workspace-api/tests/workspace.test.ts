@@ -91,7 +91,7 @@ describe("Workspace — lifecycle invariants", () => {
     expect(cb).toHaveBeenCalledTimes(1);
   });
 
-  it("double close() runs cascade once", async () => {
+  it("close() does not tear down adapter instances", async () => {
     const ws = new Workspace();
     ws.setFileSystem(new MemFilesApi(), "A");
     ws.setAdapter(FakeAdapter);
@@ -100,48 +100,47 @@ describe("Workspace — lifecycle invariants", () => {
 
     await ws.close();
     await ws.close();
-    expect(adapter.closed).toHaveBeenCalledTimes(1);
+    expect(adapter.closed).not.toHaveBeenCalled();
   });
 });
 
-describe("Workspace — close cascade order", () => {
-  it("closes adapters in reverse instantiation order; onUnload fires first", async () => {
+describe("Workspace — adapter persistence across cycles", () => {
+  it("requireAdapter returns the same instance after close + open", async () => {
+    const ws = new Workspace();
+    ws.setFileSystem(new MemFilesApi(), "A");
+    ws.setAdapter(FakeAdapter);
+    await ws.open();
+    const before = ws.requireAdapter(FakeAdapter);
+
+    await ws.close();
+    await ws.open();
+    const after = ws.requireAdapter(FakeAdapter);
+
+    expect(after).toBe(before);
+    expect(before.closed).not.toHaveBeenCalled();
+  });
+
+  it("close() fires onUnload but does not call adapter.close()", async () => {
     class A implements WorkspaceAdapter {
       closed = vi.fn();
       async close() {
         this.closed();
       }
     }
-    class B implements WorkspaceAdapter {
-      closed = vi.fn();
-      async close() {
-        this.closed();
-      }
-    }
-    class C implements WorkspaceAdapter {
-      closed = vi.fn();
-      async close() {
-        this.closed();
-      }
-    }
 
-    const callOrder: string[] = [];
+    const events: string[] = [];
     const ws = new Workspace();
     ws.setFileSystem(new MemFilesApi(), "X");
-    ws.setAdapter(A).setAdapter(B).setAdapter(C);
+    ws.setAdapter(A);
     await ws.open();
 
     const a = ws.requireAdapter(A);
-    const b = ws.requireAdapter(B);
-    const c = ws.requireAdapter(C);
-    a.closed.mockImplementation(() => callOrder.push("A"));
-    b.closed.mockImplementation(() => callOrder.push("B"));
-    c.closed.mockImplementation(() => callOrder.push("C"));
+    a.closed.mockImplementation(() => events.push("adapter.close"));
+    ws.onUnload(() => events.push("unload"));
 
-    ws.onUnload(() => callOrder.push("unload"));
     await ws.close();
 
-    expect(callOrder).toEqual(["unload", "C", "B", "A"]);
+    expect(events).toEqual(["unload"]);
   });
 });
 

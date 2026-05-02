@@ -8,16 +8,15 @@ export const [getWorkspace, , resetWorkspace] = newAdapter<Workspace>(
 );
 
 /**
- * Optional lifecycle hooks an adapter MAY expose. `init` is not currently
- * called by the workspace (adapters are lazily constructed and do setup in
- * their ctor); it is reserved for future use. `close` runs during
- * `workspace.close()` in reverse instantiation order. Adapters DO NOT need
- * to implement this interface explicitly — every class structurally matches
- * because both members are optional. The interface exists purely for
- * documentation and for the workspace's internal `adapter.close?.()` call.
+ * Optional teardown hook an adapter MAY expose. Called by `setAdapter` when
+ * an existing instance is being explicitly replaced (e.g. `initWorkspace`
+ * swapping a file-system-backed adapter to a new `FilesApi`). Adapter
+ * instances themselves are stable across `workspace.open()` / `close()`
+ * cycles — adapters that need to react to those state transitions
+ * subscribe via `workspace.onLoad` / `onUnload` rather than relying on
+ * being torn down and rebuilt.
  */
 export interface WorkspaceAdapter {
-  init?(): void | Promise<void>;
   close?(): void | Promise<void>;
 }
 
@@ -55,8 +54,14 @@ export type AdapterFactory<T = unknown> = (workspace: Workspace) => T;
 
 /**
  * Concrete `Workspace` implementation. Starts closed, publishes its live state
- * only after `open()` resolves, and cascades `close()` across instantiated
- * adapters in reverse instantiation order.
+ * only after `open()` resolves. `close()` flips the state and fires onUnload
+ * listeners but does NOT tear down adapter instances — the adapter registry
+ * is stable across `open()` / `close()` cycles, so consumers that captured
+ * a `requireAdapter(X)` reference keep talking to the same instance after
+ * the workspace re-opens. Adapters that need per-cycle behavior subscribe
+ * to `onLoad` / `onUnload` themselves; adapters that need to be replaced
+ * outright (e.g. file-system-backed ones bound to a specific `FilesApi`)
+ * are swapped via `setAdapter`, which still honours `adapter.close?.()`.
  */
 // biome-ignore lint/suspicious/noExplicitAny: registry keys are heterogeneous
 type AnyKey = AdapterCtor<any>;
@@ -194,6 +199,7 @@ export class Workspace extends BaseClass {
 
   async close(): Promise<void> {
     if (!this._isOpened) return;
+    this._isOpened = false;
     for (const listener of this._onUnloadListeners) {
       try {
         listener();
@@ -201,23 +207,7 @@ export class Workspace extends BaseClass {
         logListenerError("onUnload", err);
       }
     }
-    const errors: unknown[] = [];
-    for (let i = this._instantiatedInOrder.length - 1; i >= 0; i--) {
-      const adapter = this._instantiatedInOrder[i] as WorkspaceAdapter | undefined;
-      if (!adapter) continue;
-      try {
-        await adapter.close?.();
-      } catch (err) {
-        errors.push(err);
-      }
-    }
-    this._instances.clear();
-    this._instantiatedInOrder.length = 0;
-    this._isOpened = false;
     this.notify();
-    if (errors.length > 0) {
-      throw new AggregateError(errors, "One or more workspace adapters threw during close()");
-    }
   }
 
   private async _closeInstance(adapter: unknown): Promise<void> {
