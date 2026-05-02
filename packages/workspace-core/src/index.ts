@@ -1,3 +1,4 @@
+export * from "./add-top-menu.js";
 export * from "./bridge-shell-adapters.js";
 export * from "./init.js";
 export { default } from "./init.js";
