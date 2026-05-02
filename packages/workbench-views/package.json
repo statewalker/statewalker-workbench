@@ -34,7 +34,8 @@
   },
   "dependencies": {
     "@statewalker/shared-adapters": "catalog:",
-    "@statewalker/shared-baseclass": "catalog:"
+    "@statewalker/shared-baseclass": "catalog:",
+    "@statewalker/shared-registry": "catalog:"
   },
   "devDependencies": {
     "@statewalker/workspace-api": "workspace:*",

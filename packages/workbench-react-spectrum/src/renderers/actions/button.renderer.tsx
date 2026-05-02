@@ -1,19 +1,21 @@
-import { Button } from "@adobe/react-spectrum";
+import { Button, type SpectrumButtonProps } from "@adobe/react-spectrum";
 import { useUpdates } from "@statewalker/workbench-react/hooks";
 import { Icon } from "@statewalker/workbench-react/icons";
-import type { ButtonView } from "@statewalker/workbench-views";
+import type { ButtonVariant, ButtonView } from "@statewalker/workbench-views";
+
+const variantMap: Record<ButtonVariant, SpectrumButtonProps["variant"]> = {
+  primary: "accent",
+  secondary: "secondary",
+  tertiary: "primary",
+  danger: "negative",
+};
 
 export function ButtonRenderer({ model }: { model: ButtonView }) {
   useUpdates(model.onUpdate);
+  useUpdates(model.action.onUpdate);
   return (
     <Button
-      variant={
-        model.action.variant === "danger"
-          ? "negative"
-          : model.action.variant === "primary"
-            ? "accent"
-            : "secondary"
-      }
+      variant={variantMap[model.variant]}
       isPending={model.isPending}
       isDisabled={model.action.disabled}
       staticColor={model.staticColor}

@@ -3,6 +3,7 @@ import { type ActionView, ViewModel } from "../core/index.js";
 export type ButtonSize = "S" | "M" | "L" | "XL";
 export type ButtonType = "button" | "submit" | "reset";
 export type StaticColor = "white" | "black" | undefined;
+export type ButtonVariant = "primary" | "secondary" | "tertiary" | "danger";
 
 export class ButtonView extends ViewModel {
   readonly action: ActionView;
@@ -43,12 +44,22 @@ export class ButtonView extends ViewModel {
     return this.#isPending;
   }
 
+  #variant: ButtonVariant = "primary";
+  set variant(value: ButtonVariant) {
+    this.#variant = value;
+    this.notify();
+  }
+  get variant(): ButtonVariant {
+    return this.#variant;
+  }
+
   constructor(options: {
     action: ActionView;
     size?: ButtonSize;
     staticColor?: StaticColor;
     type?: ButtonType;
     isPending?: boolean;
+    variant?: ButtonVariant;
     key?: string;
   }) {
     super({ key: options.key });
@@ -57,5 +68,6 @@ export class ButtonView extends ViewModel {
     this.#staticColor = options.staticColor;
     this.#type = options.type ?? "button";
     this.#isPending = options.isPending ?? false;
+    this.#variant = options.variant ?? "primary";
   }
 }
