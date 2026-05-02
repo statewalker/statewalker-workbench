@@ -17,7 +17,7 @@ import {
   updatePanelActiveTab,
   updateSplitSizes,
 } from "../dock/index.js";
-import type { DockPanelView } from "./panel-view.js";
+import { DockPanelView, type DockPanelViewOptions } from "./panel-view.js";
 
 /**
  * Default id for the center area container panel. Used when the dock tree
@@ -45,7 +45,11 @@ function makeTab(panel: DockPanelView): DockTab {
  * tree — never replaces it — so earlier panels are not lost when
  * panels arrive out of order (e.g. a "left" panel before "center").
  */
-function insertAreaPanel(tree: DockNode, area: string, newPanel: DockPanel): DockNode {
+function insertAreaPanel(
+  tree: DockNode,
+  area: string,
+  newPanel: DockPanel,
+): DockNode {
   const split = (
     direction: "horizontal" | "vertical",
     first: DockNode,
@@ -72,6 +76,10 @@ function insertAreaPanel(tree: DockNode, area: string, newPanel: DockPanel): Doc
     default:
       return split("horizontal", tree, newPanel, [70, 30]);
   }
+}
+
+function toPanelView(p: DockPanelView | DockPanelViewOptions): DockPanelView {
+  return p instanceof DockPanelView ? p : new DockPanelView(p);
 }
 
 /**
@@ -134,15 +142,16 @@ export class Layout extends ViewModel {
    * that removes the panel again. Spec name for the registration step;
    * `addPanel` is kept as a back-compat alias.
    */
-  publishPanel(panel: DockPanelView): () => void {
-    if (this.#panels.has(panel.key)) {
-      return () => this.removePanel(panel.key);
+  publishPanel(panel: DockPanelView | DockPanelViewOptions): () => void {
+    const pnl = toPanelView(panel);
+    if (this.#panels.has(pnl.key)) {
+      return () => this.removePanel(pnl.key);
     }
 
-    this.#panels.set(panel.key, panel);
+    this.#panels.set(pnl.key, pnl);
 
-    const tab = makeTab(panel);
-    const area = panel.area || "center";
+    const tab = makeTab(pnl);
+    const area = pnl.area || "center";
     const targetId = areaPanelId(area);
     const existing = findPanel(this.#tree, targetId);
 
@@ -169,11 +178,11 @@ export class Layout extends ViewModel {
     }
 
     this.notify();
-    return () => this.removePanel(panel.key);
+    return () => this.removePanel(pnl.key);
   }
 
   /** Back-compat alias for `publishPanel`. */
-  addPanel(panel: DockPanelView): () => void {
+  addPanel(panel: DockPanelView | DockPanelViewOptions): () => void {
     return this.publishPanel(panel);
   }
 
@@ -182,9 +191,10 @@ export class Layout extends ViewModel {
    * new, remove any that are missing. Used by the shell to bridge the
    * `publishPanel` extension point to the dock layout.
    */
-  syncPanels(panels: DockPanelView[]): void {
-    const incomingKeys = new Set(panels.map((p) => p.key));
-    for (const p of panels) {
+  syncPanels(panels: (DockPanelView | DockPanelViewOptions)[]): void {
+    const panelsList = panels.map((p) => toPanelView(p));
+    const incomingKeys = new Set(panelsList.map((p) => p.key));
+    for (const p of panelsList) {
       if (!this.#panels.has(p.key)) {
         this.publishPanel(p);
       }
@@ -221,7 +231,11 @@ export class Layout extends ViewModel {
    * accept a drop and show the drop confirmation. All tree inspection
    * happens here so the UI never reaches into the tree itself.
    */
-  canMoveTab(sourcePanelId: string, targetPanelId: string, position: DropPosition): boolean {
+  canMoveTab(
+    sourcePanelId: string,
+    targetPanelId: string,
+    position: DropPosition,
+  ): boolean {
     // Dropping into the same panel at center is a no-op, not a real move
     if (sourcePanelId === targetPanelId && position === "center") {
       return false;
@@ -250,7 +264,11 @@ export class Layout extends ViewModel {
   ): void {
     if (!this.canMoveTab(sourcePanelId, targetPanelId, position)) return;
 
-    const { node: afterRemoval, tab } = findAndRemoveTab(this.#tree, sourcePanelId, tabId);
+    const { node: afterRemoval, tab } = findAndRemoveTab(
+      this.#tree,
+      sourcePanelId,
+      tabId,
+    );
     if (!tab || !afterRemoval) return;
 
     this.#tree = addTabToPanel(afterRemoval, targetPanelId, tab, position);

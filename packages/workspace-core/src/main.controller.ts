@@ -1,7 +1,8 @@
 import { isUserCancelled } from "@statewalker/platform-api";
 import { Intents } from "@statewalker/shared-intents";
-import { ActionView, publishMenu } from "@statewalker/workbench-views";
+import { MainMenu } from "@statewalker/workbench-views";
 import { getWorkspace, runChangeWorkspace } from "@statewalker/workspace-api";
+import { addSettingsMenuItem } from "./add-top-menu";
 
 /**
  * Workspace fragment's main controller. Publishes a top-level "Settings"
@@ -25,23 +26,15 @@ import { getWorkspace, runChangeWorkspace } from "@statewalker/workspace-api";
 export function startWorkspace(ctx: Record<string, unknown>): () => void {
   const workspace = getWorkspace(ctx);
   const intents = workspace.requireAdapter(Intents);
-
-  const action = new ActionView({
-    key: "settings",
-    label: "Settings",
-    icon: "settings",
-    children: [
-      {
-        key: "workspace.change",
-        label: "Change workspace",
-        execute: () => {
-          void runChangeWorkspace(intents, {}).promise.catch((error: unknown) => {
-            if (!isUserCancelled(error)) console.error(error);
-          });
-        },
-      },
-    ],
+  const topMenu = workspace.requireAdapter(MainMenu);
+  return addSettingsMenuItem(topMenu, {
+    key: "workspace.change",
+    label: "Change workspace",
+    icon: "folder-key",
+    execute: () => {
+      void runChangeWorkspace(intents, {}).promise.catch((error: unknown) => {
+        if (!isUserCancelled(error)) console.error(error);
+      });
+    },
   });
-
-  return publishMenu(ctx, action);
 }

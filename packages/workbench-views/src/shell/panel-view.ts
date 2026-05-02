@@ -1,6 +1,19 @@
 import { newAdapter } from "@statewalker/shared-adapters";
-import { createModelPoint, UIModelRegistry } from "../core/ui-model-registry.js";
+import {
+  createModelPoint,
+  UIModelRegistry,
+} from "../core/ui-model-registry.js";
 import { ViewModel } from "../core/view-model.js";
+
+export type DockPanelViewOptions = {
+  label: string;
+  icon?: string;
+  content: ViewModel;
+  key?: string;
+  area?: string;
+  closable?: boolean;
+  onClose?: () => void;
+};
 
 export class DockPanelView extends ViewModel {
   label: string;
@@ -10,15 +23,7 @@ export class DockPanelView extends ViewModel {
   closable: boolean;
   onClose?: () => void;
 
-  constructor(options: {
-    label: string;
-    icon?: string;
-    content: ViewModel;
-    key?: string;
-    area?: string;
-    closable?: boolean;
-    onClose?: () => void;
-  }) {
+  constructor(options: DockPanelViewOptions) {
     super({ key: options.key });
     this.label = options.label;
     this.icon = options.icon;
@@ -40,4 +45,5 @@ const [getPanelRegistry] = newAdapter<UIModelRegistry<DockPanelView>>(
   () => new UIModelRegistry<DockPanelView>(),
 );
 
-export const [publishPanel, listenPanel] = createModelPoint<DockPanelView>(getPanelRegistry);
+export const [publishPanel, listenPanel] =
+  createModelPoint<DockPanelView>(getPanelRegistry);
