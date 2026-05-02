@@ -1,21 +1,31 @@
 import { ContainerView } from "../core/index.js";
 
+export type FlexDirection = "row" | "column" | "row-reverse" | "column-reverse";
+export type JustifyContent =
+  | "start"
+  | "end"
+  | "center"
+  | "space-between"
+  | "space-around"
+  | "space-evenly";
+export type AlignItems = "stretch" | "start" | "end" | "center" | "baseline";
+export type Wrap = boolean | "wrap" | "nowrap" | "wrap-reverse";
 export class FlexView extends ContainerView {
-  #direction: "row" | "column" | "row-reverse" | "column-reverse";
-  #wrap: boolean | "wrap" | "nowrap" | "wrap-reverse";
+  #direction: FlexDirection;
+  #wrap: Wrap;
   #gap: string;
-  #alignItems: string;
-  #justifyContent: string;
+  #alignItems: AlignItems;
+  #justifyContent: JustifyContent;
   #padding: string;
 
   constructor(options?: {
     key?: string;
     children?: import("../core/index.js").ViewModel[];
     direction?: "row" | "column" | "row-reverse" | "column-reverse";
-    wrap?: boolean | "wrap" | "nowrap" | "wrap-reverse";
+    wrap?: Wrap;
     gap?: string;
-    alignItems?: string;
-    justifyContent?: string;
+    alignItems?: AlignItems;
+    justifyContent?: JustifyContent;
     padding?: string;
   }) {
     super({ key: options?.key, children: options?.children });
@@ -27,18 +37,18 @@ export class FlexView extends ContainerView {
     this.#padding = options?.padding ?? "0";
   }
 
-  get direction(): "row" | "column" | "row-reverse" | "column-reverse" {
+  get direction(): FlexDirection {
     return this.#direction;
   }
-  set direction(value: "row" | "column" | "row-reverse" | "column-reverse") {
+  set direction(value: FlexDirection) {
     this.#direction = value;
     this.notify();
   }
 
-  get wrap(): boolean | "wrap" | "nowrap" | "wrap-reverse" {
+  get wrap(): Wrap {
     return this.#wrap;
   }
-  set wrap(value: boolean | "wrap" | "nowrap" | "wrap-reverse") {
+  set wrap(value: Wrap) {
     this.#wrap = value;
     this.notify();
   }
@@ -51,18 +61,18 @@ export class FlexView extends ContainerView {
     this.notify();
   }
 
-  get alignItems(): string {
+  get alignItems(): AlignItems {
     return this.#alignItems;
   }
-  set alignItems(value: string) {
+  set alignItems(value: AlignItems) {
     this.#alignItems = value;
     this.notify();
   }
 
-  get justifyContent(): string {
+  get justifyContent(): JustifyContent {
     return this.#justifyContent;
   }
-  set justifyContent(value: string) {
+  set justifyContent(value: JustifyContent) {
     this.#justifyContent = value;
     this.notify();
   }

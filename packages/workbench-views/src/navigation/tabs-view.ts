@@ -9,8 +9,7 @@ export interface TabDescriptor {
   disabled?: boolean;
 }
 
-export class TabsView extends ContainerView {
-  #tabs: TabDescriptor[];
+export class TabsView extends ContainerView<TabDescriptor> {
   #selectedKey: string;
   #orientation: "horizontal" | "vertical";
   #density: "compact" | "regular";
@@ -27,8 +26,8 @@ export class TabsView extends ContainerView {
     isQuiet?: boolean;
     isEmphasized?: boolean;
   }) {
-    super({ key: options?.key, children: options?.children });
-    this.#tabs = options?.tabs ?? [];
+    super({ key: options?.key });
+    this.children = options?.tabs ?? [];
     this.#selectedKey = options?.selectedKey ?? "";
     this.#orientation = options?.orientation ?? "horizontal";
     this.#density = options?.density ?? "regular";
@@ -37,11 +36,10 @@ export class TabsView extends ContainerView {
   }
 
   get tabs(): TabDescriptor[] {
-    return this.#tabs;
+    return this.children;
   }
   set tabs(value: TabDescriptor[]) {
-    this.#tabs = value;
-    this.notify();
+    this.children = value;
   }
 
   get selectedKey(): string {
@@ -85,7 +83,7 @@ export class TabsView extends ContainerView {
   }
 
   setSelectedKey(key: string): void {
-    const tab = this.#tabs.find((t) => t.key === key);
+    const tab = this.children.find((t) => t.key === key);
     if (tab && !tab.disabled) {
       this.#selectedKey = key;
       this.notify();
@@ -93,16 +91,16 @@ export class TabsView extends ContainerView {
   }
 
   getActiveTab(): TabDescriptor | undefined {
-    return this.#tabs.find((t) => t.key === this.#selectedKey);
+    return this.children.find((t) => t.key === this.#selectedKey);
   }
 
   addTab(tab: TabDescriptor): void {
-    this.#tabs = [...this.#tabs, tab];
+    this.children = [...this.children, tab];
     this.notify();
   }
 
   removeTab(key: string): void {
-    this.#tabs = this.#tabs.filter((t) => t.key !== key);
+    this.children = this.children.filter((t) => t.key !== key);
     this.notify();
   }
 }

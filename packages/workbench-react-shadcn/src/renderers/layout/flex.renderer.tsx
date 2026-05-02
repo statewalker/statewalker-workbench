@@ -18,7 +18,9 @@ export function FlexRenderer({ model }: { model: FlexView }) {
     "flex",
     dirClass,
     model.alignItems ? `items-${model.alignItems}` : "",
-    model.justifyContent ? `justify-${model.justifyContent}` : "",
+    model.justifyContent
+      ? `justify-${model.justifyContent.replace("space-", "")}`
+      : "",
     model.wrap ? "flex-wrap" : "",
   ]
     .filter(Boolean)
