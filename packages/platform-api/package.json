@@ -36,7 +36,6 @@
     "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/webrun-files": "catalog:",
-    "@statewalker/workbench-views": "workspace:*",
     "@statewalker/workspace-api": "workspace:*"
   },
   "devDependencies": {
