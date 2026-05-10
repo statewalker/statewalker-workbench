@@ -63,3 +63,20 @@ export interface VisualizeFilePayload {
 export const [runVisualizeFile, handleVisualizeFile] = newIntent<VisualizeFilePayload, void>(
   "files:visualize",
 );
+
+export interface OpenPayload {
+  /** `file://` URI or workspace-relative path of a file or directory. */
+  uri: string;
+  /**
+   * Originating file-explorer panel id. When the URI resolves to a
+   * directory, the handler routes the navigation to this panel; the
+   * field is informational for files (which always open in a dock tab).
+   */
+  panelId?: string;
+}
+/**
+ * Smart open: probes the URI's kind (file vs directory) and dispatches
+ * — directories navigate the panel identified by `panelId`, files
+ * delegate to `files:visualize`.
+ */
+export const [runOpen, handleOpen] = newIntent<OpenPayload, void>("files:open");

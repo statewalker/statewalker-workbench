@@ -24,6 +24,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
+    "@json-render/react": "0.18.0",
     "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
@@ -32,6 +33,7 @@
     "@statewalker/dock-react": "workspace:*",
     "@statewalker/file-explorer": "workspace:*",
     "@statewalker/files": "workspace:*",
+    "@statewalker/json-render": "workspace:*",
     "@statewalker/shadcn-react": "workspace:*",
     "@statewalker/shared-slots": "workspace:*",
     "@statewalker/webrun-files": "workspace:*",

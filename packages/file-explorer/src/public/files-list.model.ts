@@ -8,11 +8,11 @@ import { ViewModel } from "./view-model.js";
  *  - entries returned from `files.list(path)`
  *  - cursor/selection
  *  - sort field, filter pattern, hidden-file toggle
- *  - high-level pending events (`pendingNavigation`, `pendingViewFile`)
- *    consumed by the panel orchestrator.
  *
  * Pure data — no side effects. The panel orchestrator does I/O and
- * pushes results in via `startLoading`.
+ * pushes results in via `startLoading`. Activation (folder
+ * navigation, file open) is dispatched by the view through the
+ * `files:open` intent and never flows through model state.
  */
 export class FilesListModel extends ViewModel {
   path = "/";
@@ -26,12 +26,6 @@ export class FilesListModel extends ViewModel {
   sortAscending = true;
   filter = "";
   showHidden = false;
-
-  /** High-level navigation request. Set by views, consumed by controllers. */
-  pendingNavigation: string | null = null;
-
-  /** High-level view-file request. Set by views/keyboard, consumed by panel orchestrator. */
-  pendingViewFile: string | null = null;
 
   startLoading(params: {
     path: string;
@@ -128,9 +122,7 @@ export class FilesListModel extends ViewModel {
 
     if (this.filter) {
       const lower = this.filter.toLowerCase();
-      visible = visible.filter(
-        (e) => e.name === ".." || e.name.toLowerCase().includes(lower),
-      );
+      visible = visible.filter((e) => e.name === ".." || e.name.toLowerCase().includes(lower));
     }
 
     const dotdot = visible.find((e) => e.name === "..");
@@ -161,47 +153,6 @@ export class FilesListModel extends ViewModel {
 
   getDisplayEntries(): FileDisplayEntry[] {
     return this.getVisibleEntries().map((e) => toDisplayEntry(e));
-  }
-
-  /** High-level event: request navigation to the given path. */
-  requestNavigation(path: string): void {
-    this.pendingNavigation = path;
-    this.notify();
-  }
-
-  /** High-level event: activate the entry at the current cursor. */
-  requestActivateEntry(): void {
-    const entry = this.getCursorEntry();
-    if (entry?.kind === "directory") {
-      this.requestNavigation(entry.path);
-    } else if (entry?.kind === "file") {
-      this.requestViewFile(entry.path);
-    }
-  }
-
-  requestViewFile(path: string): void {
-    this.pendingViewFile = path;
-    this.notify();
-  }
-
-  consumeViewFile(): string | null {
-    const path = this.pendingViewFile;
-    this.pendingViewFile = null;
-    return path;
-  }
-
-  requestNavigateToParent(): void {
-    if (this.path === "/") return;
-    const dotdot = this.getVisibleEntries().find((e) => e.name === "..");
-    if (dotdot) {
-      this.requestNavigation(dotdot.path);
-    }
-  }
-
-  consumeNavigation(): string | null {
-    const path = this.pendingNavigation;
-    this.pendingNavigation = null;
-    return path;
   }
 
   getSelectedOrCursor(): string[] {

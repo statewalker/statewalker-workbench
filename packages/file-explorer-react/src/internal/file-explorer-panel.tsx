@@ -1,7 +1,12 @@
-import { useAppWorkspace } from "@statewalker/core-react";
-import { createPanelController, type PanelController } from "@statewalker/file-explorer";
-import { runVisualizeFile } from "@statewalker/files";
+import { useAdapter, useAppWorkspace } from "@statewalker/core-react";
+import {
+  activeFileExplorerPanels,
+  createPanelController,
+  type PanelController,
+} from "@statewalker/file-explorer";
+import { runOpen } from "@statewalker/files";
 import { Intents } from "@statewalker/shared-intents";
+import { Slots } from "@statewalker/shared-slots";
 import { type ReactElement, useEffect, useMemo } from "react";
 import { FilesListView } from "./files-list-view.js";
 
@@ -15,9 +20,11 @@ export interface FileExplorerPanelProps {
 }
 
 /**
- * One file-explorer panel. Constructs a `PanelController` over the
- * workspace's primary `FilesApi`, wires file-activation to the
- * `files:visualize` intent, and renders the list view.
+ * One file-explorer panel. The panel owns its `PanelController`
+ * (model + I/O glue) but stays decoupled from activation routing —
+ * every click/keypress dispatches `files:open` with this panel's id,
+ * and the workspace-level intent handler routes folders back to this
+ * panel via the `file-explorer:active-panels` registry.
  *
  * Two-pane preset (explorer.app): the renderer mounts two of these,
  * one with `panelId="left"` and one with `panelId="right"`.
@@ -28,25 +35,31 @@ export function FileExplorerPanel({
   label,
 }: FileExplorerPanelProps): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Intents);
+  const intents = useAdapter(Intents);
+  const slots = useAdapter(Slots);
 
-  const panel: PanelController = useMemo(() => {
-    const controller = createPanelController({
-      files: workspace.files,
-      title: label ?? panelId,
-      onOpenFile: (path) => {
-        runVisualizeFile(intents, { uri: path }).promise.catch((err) => {
-          console.error("[file-explorer] visualize failed:", err);
-        });
-      },
+  const panel: PanelController = useMemo(
+    () =>
+      createPanelController({
+        files: workspace.files,
+        title: label ?? panelId,
+        initialPath,
+      }),
+    [workspace, panelId, label, initialPath],
+  );
+
+  useEffect(() => {
+    const panels = activeFileExplorerPanels(slots);
+    return panels.register(panelId, {
+      navigate: (path) => panel.navigate(path),
     });
-    if (initialPath && initialPath !== "/") {
-      controller.navigate(initialPath);
-    }
-    return controller;
-  }, [workspace, intents, panelId, label, initialPath]);
+  }, [panel, panelId, slots]);
 
-  useEffect(() => panel.cleanup, [panel]);
+  function handleOpen(uri: string): void {
+    runOpen(intents, { uri, panelId }).promise.catch((err) => {
+      console.error("[file-explorer] files:open failed:", err);
+    });
+  }
 
-  return <FilesListView model={panel.model} panelId={panelId} />;
+  return <FilesListView model={panel.model} panelId={panelId} onOpen={handleOpen} />;
 }

@@ -6,18 +6,14 @@ import {
   useViewRegistry,
   type ViewComponent,
 } from "@statewalker/core-react";
-import type { KeyedSlot } from "@statewalker/shared-slots";
 import {
   type DockOverlay,
   type DockSidePanel,
   observeDockOverlays,
   observeDockSidePanels,
 } from "@statewalker/dock";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@statewalker/shadcn-react";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@statewalker/shadcn-react";
+import type { KeyedSlot } from "@statewalker/shared-slots";
 import { Slots } from "@statewalker/shared-slots";
 import { type ReactElement, useMemo } from "react";
 import { DockViewHost } from "../public/dock-view-host.js";
@@ -61,7 +57,7 @@ export function MainShell(): ReactElement {
         {left.map((panel) => (
           <PanelChunk key={panel.id} registry={registry} panel={panel} />
         ))}
-        <ResizablePanel minSize="40%">
+        <ResizablePanel>
           <DockViewHost workspace={workspace} />
         </ResizablePanel>
         {right.map((panel) => (
@@ -88,8 +84,8 @@ function PanelChunk({
     <>
       <ResizablePanel
         defaultSize={panel.defaultSize}
-        minSize="180px"
-        maxSize="40%"
+        minSize={panel.minSize ?? "180px"}
+        maxSize={panel.maxSize}
       >
         <Component />
       </ResizablePanel>

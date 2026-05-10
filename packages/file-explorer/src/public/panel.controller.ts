@@ -1,4 +1,3 @@
-import { newRegistry } from "@statewalker/shared-registry";
 import type { FileInfo, FilesApi } from "@statewalker/webrun-files";
 import { FilesListModel } from "./files-list.model.js";
 
@@ -61,25 +60,27 @@ export interface PanelController {
   readonly model: FilesListModel;
   readonly files: FilesApi;
   navigate(path: string): void;
-  activateEntry(): void;
   setFiles(newFiles: FilesApi, label: string): void;
   refresh(): void;
-  cleanup(): void;
 }
 
 /**
- * Constructs one panel orchestrator over a `FilesApi`. Wires
- * keyboard-driven `pendingNavigation`/`pendingViewFile` events from
- * the model to disk reads.
+ * Constructs one panel orchestrator over a `FilesApi`. The controller
+ * owns the panel's `FilesListModel` and the I/O glue that loads
+ * directories into it. It does NOT subscribe to model events —
+ * activation routing is the caller's responsibility (typically via
+ * the `files:open` intent), so the controller stays free of
+ * lifecycle/StrictMode coupling.
+ *
+ * The first `navigate("/")` (or to `initialPath`, when provided) is
+ * dispatched synchronously so the panel shows entries on first paint.
  */
 export function createPanelController(params: {
   files: FilesApi;
   title: string;
-  onOpenFile?: (path: string) => void;
+  initialPath?: string;
 }): PanelController {
-  const [register, cleanup] = newRegistry();
   let currentFiles = params.files;
-  const { onOpenFile } = params;
 
   const model = new FilesListModel();
   model.setTitle(params.title);
@@ -89,16 +90,6 @@ export function createPanelController(params: {
     const isGoingUp = currentPath.startsWith(path) && currentPath !== path;
     const focusName = isGoingUp ? basename(currentPath) : undefined;
     void loadDirectory(currentFiles, model, path, focusName);
-  }
-
-  function activateEntry(): void {
-    const entry = model.getCursorEntry();
-    if (!entry) return;
-    if (entry.kind === "directory") {
-      navigate(entry.path);
-    } else if (onOpenFile) {
-      onOpenFile(entry.path);
-    }
   }
 
   function setFiles(newFiles: FilesApi, label: string): void {
@@ -111,20 +102,7 @@ export function createPanelController(params: {
     navigate(model.path);
   }
 
-  // Reactive bridge: when the renderer pushes pendingNavigation /
-  // pendingViewFile, run them on the underlying FilesApi.
-  register(
-    model.onUpdate(() => {
-      const navTo = model.consumeNavigation();
-      if (navTo !== null) navigate(navTo);
-      if (onOpenFile) {
-        const viewPath = model.consumeViewFile();
-        if (viewPath !== null) onOpenFile(viewPath);
-      }
-    }),
-  );
-
-  navigate("/");
+  navigate(params.initialPath ?? "/");
 
   return {
     model,
@@ -132,9 +110,7 @@ export function createPanelController(params: {
       return currentFiles;
     },
     navigate,
-    activateEntry,
     setFiles,
     refresh,
-    cleanup,
   };
 }
