@@ -14,7 +14,9 @@
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts"
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
@@ -25,6 +27,7 @@
   "dependencies": {
     "@json-render/core": "0.18.0",
     "@json-render/react": "0.18.0",
+    "@statewalker/dock": "workspace:*",
     "@statewalker/files": "workspace:*",
     "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-intents": "catalog:",
@@ -40,5 +43,7 @@
     "vitest": "catalog:"
   },
   "sideEffects": false,
-  "publishConfig": {"access": "public"}
+  "publishConfig": {
+    "access": "public"
+  }
 }

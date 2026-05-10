@@ -10,7 +10,9 @@
     "./fragment": "./src/fragment.ts",
     "./styles": "./src/styles.css"
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
@@ -31,7 +33,10 @@
     "dockview-react": "6.0.3",
     "lucide-react": "catalog:"
   },
-  "peerDependencies": {"react": ">=18", "react-dom": ">=18"},
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
   "devDependencies": {
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -40,6 +45,10 @@
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
-  "sideEffects": ["**/*.css"],
-  "publishConfig": {"access": "public"}
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

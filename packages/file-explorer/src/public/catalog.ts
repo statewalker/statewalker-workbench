@@ -22,6 +22,8 @@ export const fileExplorerCatalog = defineCatalog(schema, {
         panelId: z.string(),
         label: z.string().optional(),
         initialPath: z.string().optional(),
+        mainViewerHost: z.boolean().optional(),
+        folderNavigationHost: z.boolean().optional(),
       }),
     },
   },
@@ -30,13 +32,20 @@ export const fileExplorerCatalog = defineCatalog(schema, {
 
 export const FILE_EXPLORER_CATALOG_ID = "file-explorer";
 
-export function makeFileExplorerSpec(panelId: string, label?: string, initialPath?: string): Spec {
+export interface FileExplorerSpecOptions {
+  label?: string;
+  initialPath?: string;
+  mainViewerHost?: boolean;
+  folderNavigationHost?: boolean;
+}
+
+export function makeFileExplorerSpec(panelId: string, options: FileExplorerSpecOptions = {}): Spec {
   return {
     root: "panel",
     elements: {
       panel: {
         type: "FileExplorerView",
-        props: { panelId, label, initialPath },
+        props: { panelId, ...options },
         children: [],
       },
     },

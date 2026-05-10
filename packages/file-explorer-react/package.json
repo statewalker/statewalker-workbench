@@ -15,7 +15,9 @@
     "./fragment": "./src/fragment.ts",
     "./styles": "./src/styles.css"
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
@@ -55,6 +57,10 @@
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
-  "sideEffects": ["**/*.css"],
-  "publishConfig": {"access": "public"}
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

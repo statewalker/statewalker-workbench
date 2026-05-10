@@ -17,6 +17,10 @@ export interface FileExplorerPanelProps {
   initialPath?: string;
   /** Tab/panel label propagated to the model's `title`. */
   label?: string;
+  /** Forwarded to the active-panels registry (see preset's `mainViewerHost`). */
+  mainViewerHost?: boolean;
+  /** Forwarded to the active-panels registry (see preset's `folderNavigationHost`). */
+  folderNavigationHost?: boolean;
 }
 
 /**
@@ -33,6 +37,8 @@ export function FileExplorerPanel({
   panelId,
   initialPath,
   label,
+  mainViewerHost = false,
+  folderNavigationHost = false,
 }: FileExplorerPanelProps): ReactElement {
   const workspace = useAppWorkspace();
   const intents = useAdapter(Intents);
@@ -52,8 +58,10 @@ export function FileExplorerPanel({
     const panels = activeFileExplorerPanels(slots);
     return panels.register(panelId, {
       navigate: (path) => panel.navigate(path),
+      isMainViewerHost: mainViewerHost,
+      isFolderNavigationHost: folderNavigationHost,
     });
-  }, [panel, panelId, slots]);
+  }, [panel, panelId, slots, mainViewerHost, folderNavigationHost]);
 
   function handleOpen(uri: string): void {
     runOpen(intents, { uri, panelId }).promise.catch((err) => {

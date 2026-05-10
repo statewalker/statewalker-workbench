@@ -59,6 +59,14 @@ export interface VisualizeFilePayload {
    * `files:mime-renderers` slot, and opens a DockView panel.
    */
   uri: string;
+  /**
+   * When set, the resulting dock panel is anchored to the panel with
+   * this id (added `"within"` its group) so all file viewers land in
+   * a known target — typically the main file-explorer panel — rather
+   * than wherever the active group happens to be. Falls back silently
+   * to default placement if no panel with this id is open.
+   */
+  referencePanelId?: string;
 }
 export const [runVisualizeFile, handleVisualizeFile] = newIntent<VisualizeFilePayload, void>(
   "files:visualize",

@@ -23,9 +23,7 @@ interface JsonPanelParams {
  * through React.createPortal, so React context propagates from
  * the parent tree (the MainShell that hosts `<DockviewReact>`).
  */
-export function JsonPanel(
-  props: IDockviewPanelProps<JsonPanelParams>,
-): ReactElement {
+export function JsonPanel(props: IDockviewPanelProps<JsonPanelParams>): ReactElement {
   const { specId } = props.params;
   const workspace = useAppWorkspace();
   const store = workspace.requireAdapter(SpecStore);
@@ -73,13 +71,7 @@ export function JsonPanel(
   );
 }
 
-function PanelMissing({
-  specId,
-  onClose,
-}: {
-  specId: string;
-  onClose: () => void;
-}): ReactElement {
+function PanelMissing({ specId, onClose }: { specId: string; onClose: () => void }): ReactElement {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center">
       <p className="text-sm text-muted-foreground">
@@ -106,8 +98,7 @@ function CatalogMissing({
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center">
       <p className="text-sm text-muted-foreground">
-        Catalog <code className="font-mono text-xs">{catalogId}</code> is not
-        registered.
+        Catalog <code className="font-mono text-xs">{catalogId}</code> is not registered.
       </p>
       <button
         type="button"

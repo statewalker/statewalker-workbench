@@ -7,7 +7,6 @@ import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { extname, readFile, writeText } from "@statewalker/webrun-files";
 import type { Workspace } from "@statewalker/workspace-api";
-import { pickMimeRenderer } from "../public/pick-mime-renderer.js";
 import {
   handleDeleteFile,
   handleLoadDirectory,
@@ -18,6 +17,7 @@ import {
   handleVisualizeFile,
   handleWriteFile,
 } from "../public/intents.js";
+import { pickMimeRenderer } from "../public/pick-mime-renderer.js";
 import type { DirectoryEntry, LoadedFile, MimeRenderer } from "../public/types.js";
 
 export interface FilesManagerOptions {
@@ -122,14 +122,14 @@ export class FilesManager {
     );
     register(
       handleVisualizeFile(this.intents, (intent) => {
-        const { uri } = intent.payload;
+        const { uri, referencePanelId } = intent.payload;
         const mime = guessMimeType(uri);
         const renderer = pickMimeRenderer(this.slots, mime);
         if (!renderer) {
           intent.reject(new Error(`No mime-renderer registered for "${mime}"`));
           return true;
         }
-        void this._openVisualizePanel(renderer, uri)
+        void this._openVisualizePanel(renderer, uri, referencePanelId)
           .then(() => intent.resolve())
           .catch((error) => intent.reject(error));
         return true;
@@ -228,7 +228,11 @@ export class FilesManager {
     }
   }
 
-  private async _openVisualizePanel(renderer: MimeRenderer, uri: string): Promise<void> {
+  private async _openVisualizePanel(
+    renderer: MimeRenderer,
+    uri: string,
+    referencePanelId: string | undefined,
+  ): Promise<void> {
     const plan = renderer.buildPanel(uri);
     if (!this.store.get(plan.specId)) {
       this.store.create({
@@ -241,6 +245,8 @@ export class FilesManager {
     await runShowDockPanel(this.intents, {
       panelId: plan.panelId,
       specId: plan.specId,
+      title: filenameFromUri(uri),
+      referencePanelId,
     }).promise;
   }
 }
@@ -274,6 +280,13 @@ const MIME_TYPES: Readonly<Record<string, string>> = {
 export function guessMimeType(pathOrUri: string): string {
   const ext = extname(pathOrUri.replace(/^file:\/\//, "")).toLowerCase();
   return MIME_TYPES[ext] ?? "application/octet-stream";
+}
+
+/** Last path segment of a file URI/path, with the `file://` scheme stripped. */
+export function filenameFromUri(uriOrPath: string): string {
+  const cleaned = uriOrPath.replace(/^file:\/\//, "").replace(/\/+$/, "");
+  const lastSlash = cleaned.lastIndexOf("/");
+  return lastSlash >= 0 ? cleaned.slice(lastSlash + 1) : cleaned;
 }
 
 export function pickRenderer(

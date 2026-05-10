@@ -26,6 +26,20 @@ export interface FileExplorerPanelPreset {
   side?: "left" | "right" | "main";
   /** Lower wins; defaults to 100. */
   order?: number;
+  /**
+   * Mark this panel as the host for **file** activations: clicking a
+   * file in any panel routes the resulting viewer tab into THIS
+   * panel's group (via `runVisualizeFile`'s `referencePanelId`). The
+   * canonical layout flags the main panel.
+   */
+  mainViewerHost?: boolean;
+  /**
+   * Mark this panel as the host for **folder** activations: clicking
+   * a folder in any panel re-targets navigation to THIS panel and
+   * focuses it. The canonical layout flags the left panel so the
+   * main panel can stay locked on the user's working directory.
+   */
+  folderNavigationHost?: boolean;
 }
 
 export const [provideFileExplorerPanelPreset, observeFileExplorerPanelPresets] =
@@ -40,6 +54,10 @@ export const [provideFileExplorerPanelPreset, observeFileExplorerPanelPresets] =
 export interface ActiveFileExplorerPanel {
   /** Navigate this panel to `path`, loading it through the panel's `FilesApi`. */
   navigate(path: string): void;
+  /** Whether file activations should route here (see preset's `mainViewerHost`). */
+  isMainViewerHost: boolean;
+  /** Whether folder activations should route here (see preset's `folderNavigationHost`). */
+  isFolderNavigationHost: boolean;
 }
 
 export const FILE_EXPLORER_ACTIVE_PANELS = "file-explorer:active-panels";

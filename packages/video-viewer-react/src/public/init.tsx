@@ -1,4 +1,5 @@
 import { defineRegistry } from "@json-render/react";
+import { provideDockTabIcon } from "@statewalker/dock-react";
 import { provideMimeRenderer } from "@statewalker/files";
 import {
   DOCK_LAYOUT_STORAGE_KEY,
@@ -9,6 +10,7 @@ import {
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace-api";
+import { FileVideo } from "lucide-react";
 import { VideoView } from "../internal/video-view.js";
 import {
   makeVideoSpec,
@@ -56,6 +58,8 @@ export default function initVideoViewerReact(ctx: Record<string, unknown>): () =
       },
     }),
   );
+
+  register(provideDockTabIcon(slots, { panelIdPrefix: "video-viewer:", Icon: FileVideo }));
 
   return cleanup;
 }
