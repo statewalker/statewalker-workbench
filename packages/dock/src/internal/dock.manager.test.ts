@@ -1,15 +1,11 @@
+import initSpecStore, { SpecStore } from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
 import { getWorkspace } from "@statewalker/workspace-api";
 import type { DockviewApi, IDockviewPanel } from "dockview-react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import initSpecStore, { SpecStore } from "@statewalker/json-render";
 import { DockHost } from "../public/dock-host.js";
 import initDock from "../public/init.js";
-import {
-  runClosePanel,
-  runFocusPanel,
-  runShowDockPanel,
-} from "../public/intents.js";
+import { runClosePanel, runFocusPanel, runShowDockPanel } from "../public/intents.js";
 
 interface FakePanel {
   id: string;
@@ -23,23 +19,19 @@ function makeFakeApi(): {
 } {
   const panels = new Map<string, FakePanel>();
   const fake = {
-    addPanel: vi.fn(
-      (opts: { id: string; params?: Record<string, unknown> }) => {
-        const panel: FakePanel = {
-          id: opts.id,
-          params: opts.params ?? {},
-          focus: vi.fn(),
-        };
-        panels.set(opts.id, panel);
-        return panel as unknown as IDockviewPanel;
-      },
-    ),
+    addPanel: vi.fn((opts: { id: string; params?: Record<string, unknown> }) => {
+      const panel: FakePanel = {
+        id: opts.id,
+        params: opts.params ?? {},
+        focus: vi.fn(),
+      };
+      panels.set(opts.id, panel);
+      return panel as unknown as IDockviewPanel;
+    }),
     removePanel: vi.fn((p: { id: string }) => {
       panels.delete(p.id);
     }),
-    getPanel: vi.fn(
-      (id: string) => panels.get(id) as unknown as IDockviewPanel | undefined,
-    ),
+    getPanel: vi.fn((id: string) => panels.get(id) as unknown as IDockviewPanel | undefined),
     get panels() {
       return Array.from(panels.values()) as unknown as IDockviewPanel[];
     },
@@ -234,9 +226,7 @@ describe("dock:* intent handlers (DockManager)", () => {
       const dockHost = ws.requireAdapter(DockHost);
       const { api } = makeFakeApi();
       dockHost.setApi(api);
-      await expect(
-        runFocusPanel(intents, { panelId: "missing" }).promise,
-      ).resolves.toBeUndefined();
+      await expect(runFocusPanel(intents, { panelId: "missing" }).promise).resolves.toBeUndefined();
     } finally {
       await cleanupDock();
       await cleanupSpec();

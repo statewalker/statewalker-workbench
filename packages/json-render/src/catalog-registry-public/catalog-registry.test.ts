@@ -28,9 +28,7 @@ describe("CatalogRegistry", () => {
   it("registering a duplicate id with a different entry throws", () => {
     const reg = new CatalogRegistry();
     reg.register("k", makeEntry("first"));
-    expect(() => reg.register("k", makeEntry("second"))).toThrowError(
-      RangeError,
-    );
+    expect(() => reg.register("k", makeEntry("second"))).toThrowError(RangeError);
   });
 
   it("re-registering the same entry reference is a no-op", () => {

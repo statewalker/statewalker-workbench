@@ -26,9 +26,7 @@
  */
 export class IdentifiableRegistry<T> {
   private readonly _entries = new Map<string, T>();
-  private readonly _watchers = new Set<
-    (entries: ReadonlyMap<string, T>) => void
-  >();
+  private readonly _watchers = new Set<(entries: ReadonlyMap<string, T>) => void>();
   private _version = 0;
 
   declare init?: () => void | Promise<void>;

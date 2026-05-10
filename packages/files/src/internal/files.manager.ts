@@ -1,12 +1,12 @@
 import { createFileTools } from "@statewalker/ai-agent/tools";
+import { provideAgentTool } from "@statewalker/ai-agent-runtime";
+import { runShowDockPanel } from "@statewalker/dock";
+import { SpecStore } from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { extname, readFile, writeText } from "@statewalker/webrun-files";
 import type { Workspace } from "@statewalker/workspace-api";
-import { provideAgentTool } from "@statewalker/ai-agent-runtime";
-import { runShowDockPanel } from "@statewalker/dock";
-import { SpecStore } from "@statewalker/json-render";
 import {
   handleDeleteFile,
   handleLoadDirectory,
@@ -15,11 +15,7 @@ import {
   handleVisualizeFile,
   handleWriteFile,
 } from "../public/intents.js";
-import type {
-  DirectoryEntry,
-  LoadedFile,
-  MimeRenderer,
-} from "../public/types.js";
+import type { DirectoryEntry, LoadedFile, MimeRenderer } from "../public/types.js";
 
 export interface FilesManagerOptions {
   workspace: Workspace;
@@ -144,9 +140,7 @@ export class FilesManager {
     // view. AgentRuntime calls the factory during build, passing
     // its own filtered files-tools view (system path hidden).
     this._cycleCleanup.push(
-      provideAgentTool(this.slots, (ctx) =>
-        createFileTools(ctx.files, { excludedPrefixes: [] }),
-      ),
+      provideAgentTool(this.slots, (ctx) => createFileTools(ctx.files, { excludedPrefixes: [] })),
     );
     // Hold a reference so the closure target stays in scope; the
     // factory itself ignores `files` from this scope (uses
@@ -187,10 +181,7 @@ export class FilesManager {
     return { path, bytes, stats, mimeType: guessMimeType(path) };
   }
 
-  private async _writeFile(
-    path: string,
-    content: Uint8Array | string,
-  ): Promise<void> {
+  private async _writeFile(path: string, content: Uint8Array | string): Promise<void> {
     this._requireOpen();
     if (typeof content === "string") {
       await writeText(this.workspace.files, path, content);
@@ -212,16 +203,11 @@ export class FilesManager {
 
   private _requireOpen(): void {
     if (!this.workspace.isOpened) {
-      throw new Error(
-        "files:* intents require an open workspace — call runChangeWorkspace first",
-      );
+      throw new Error("files:* intents require an open workspace — call runChangeWorkspace first");
     }
   }
 
-  private async _openVisualizePanel(
-    renderer: MimeRenderer,
-    uri: string,
-  ): Promise<void> {
+  private async _openVisualizePanel(renderer: MimeRenderer, uri: string): Promise<void> {
     const plan = renderer.buildPanel(uri);
     if (!this.store.get(plan.specId)) {
       this.store.create({
@@ -273,9 +259,7 @@ export function pickRenderer(
   renderers: readonly MimeRenderer[],
   mimeType: string,
 ): MimeRenderer | undefined {
-  const matches = renderers.filter((r) =>
-    matchMime(r.mimeTypePattern, mimeType),
-  );
+  const matches = renderers.filter((r) => matchMime(r.mimeTypePattern, mimeType));
   if (matches.length === 0) return undefined;
   matches.sort((a, b) => (a.order ?? 100) - (b.order ?? 100));
   return matches[0];

@@ -33,9 +33,7 @@ describe("ViewRegistry", () => {
   it("registering a duplicate viewKey with a different component throws", () => {
     const reg = new ViewRegistry();
     reg.register("ui:thing", FakeView);
-    expect(() => reg.register("ui:thing", OtherFakeView)).toThrowError(
-      RangeError,
-    );
+    expect(() => reg.register("ui:thing", OtherFakeView)).toThrowError(RangeError);
   });
 
   it("re-registering the same component reference is a no-op", () => {

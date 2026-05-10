@@ -24,11 +24,7 @@ export function AppWorkspaceProvider({
   workspace,
   children,
 }: AppWorkspaceProviderProps): ReactNode {
-  return (
-    <AppWorkspaceContext.Provider value={workspace}>
-      {children}
-    </AppWorkspaceContext.Provider>
-  );
+  return <AppWorkspaceContext.Provider value={workspace}>{children}</AppWorkspaceContext.Provider>;
 }
 
 /**
@@ -38,9 +34,7 @@ export function AppWorkspaceProvider({
 export function useAppWorkspace(): Workspace {
   const ws = useContext(AppWorkspaceContext);
   if (!ws) {
-    throw new Error(
-      "useAppWorkspace must be used inside <AppWorkspaceProvider>.",
-    );
+    throw new Error("useAppWorkspace must be used inside <AppWorkspaceProvider>.");
   }
   return ws;
 }

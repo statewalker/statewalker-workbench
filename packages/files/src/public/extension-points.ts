@@ -1,10 +1,5 @@
 import { newSlot } from "@statewalker/shared-slots";
-import type {
-  EditorFactory,
-  Indexer,
-  MimeIcon,
-  MimeRenderer,
-} from "./types.js";
+import type { EditorFactory, Indexer, MimeIcon, MimeRenderer } from "./types.js";
 
 /**
  * `files:mime-renderers` — `MimeRenderer` contributions. The
@@ -19,8 +14,7 @@ export const [provideMimeRenderer, observeMimeRenderers] =
  * `files:mime-icons` — file-explorer iconography. Resolved client-side
  * by the breadcrumb / list views. Wave 5.1 declares only.
  */
-export const [provideMimeIcon, observeMimeIcons] =
-  newSlot<MimeIcon>("files:mime-icons");
+export const [provideMimeIcon, observeMimeIcons] = newSlot<MimeIcon>("files:mime-icons");
 
 /**
  * `files:editor-factories` — editing surface bindings. Wave 5.1
@@ -34,5 +28,4 @@ export const [provideEditorFactory, observeEditorFactories] =
  * embeddings, etc.). Wave 5.1 declares only; the indexer runner
  * lands with the search wave.
  */
-export const [provideIndexer, observeIndexers] =
-  newSlot<Indexer>("files:indexers");
+export const [provideIndexer, observeIndexers] = newSlot<Indexer>("files:indexers");

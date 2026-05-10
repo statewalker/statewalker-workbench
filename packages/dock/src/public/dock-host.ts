@@ -120,9 +120,7 @@ export class DockHost {
 
   closePanel(panelId: string): void {
     if (!this._api) {
-      this._pending = this._pending.filter(
-        (p) => p.options.panelId !== panelId,
-      );
+      this._pending = this._pending.filter((p) => p.options.panelId !== panelId);
       return;
     }
     const panel = this._api.getPanel(panelId);

@@ -11,17 +11,13 @@ export interface CreateSpecResult {
   specId: string;
 }
 
-export const [runCreateSpec, handleCreateSpec] = newIntent<
-  CreateSpecPayload,
-  CreateSpecResult
->("spec:create");
+export const [runCreateSpec, handleCreateSpec] = newIntent<CreateSpecPayload, CreateSpecResult>(
+  "spec:create",
+);
 
 export interface PatchSpecPayload {
   specId: string;
   patch: SpecPatch;
 }
 
-export const [runPatchSpec, handlePatchSpec] = newIntent<
-  PatchSpecPayload,
-  void
->("spec:patch");
+export const [runPatchSpec, handlePatchSpec] = newIntent<PatchSpecPayload, void>("spec:patch");

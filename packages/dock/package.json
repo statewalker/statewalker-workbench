@@ -9,7 +9,9 @@
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts"
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
@@ -24,7 +26,12 @@
     "@statewalker/workspace-api": "workspace:*",
     "dockview-react": "6.0.3"
   },
-  "devDependencies": {"typescript": "catalog:", "vitest": "catalog:"},
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
   "sideEffects": false,
-  "publishConfig": {"access": "public"}
+  "publishConfig": {
+    "access": "public"
+  }
 }
