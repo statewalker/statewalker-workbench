@@ -1,5 +1,5 @@
 import { newViewRegistry } from "@statewalker/core-react";
-import { provideDockHeaderItem, provideDockOverlay } from "@statewalker/dock";
+import { provideDockOverlay } from "@statewalker/dock";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace-api";
@@ -11,8 +11,11 @@ const VIEW_KEY_DIALOG = "settings:dialog";
 
 /**
  * Renderer-fragment init for `settings-react`. Registers the settings
- * button and dialog into the `core:views` slot and contributes them to
- * `dock:header-items` and `dock:overlays` respectively.
+ * button and dialog views into `core:views` and contributes the dialog
+ * to `dock:overlays`. The button view is registered for callers that
+ * still want a standalone trigger; the canonical app shell composes
+ * Settings into the System menu instead of pinning a top-level button,
+ * so this fragment no longer contributes to `dock:header-items`.
  */
 export default function initSettingsReact(
   ctx: Record<string, unknown>,
@@ -33,14 +36,6 @@ export default function initSettingsReact(
       VIEW_KEY_DIALOG,
       SettingsDialog as unknown as Parameters<typeof views.register>[1],
     ),
-  );
-  register(
-    provideDockHeaderItem(slots, {
-      id: "settings:button",
-      slot: "trailing",
-      order: 50,
-      viewKey: VIEW_KEY_BUTTON,
-    }),
   );
   register(
     provideDockOverlay(slots, {
