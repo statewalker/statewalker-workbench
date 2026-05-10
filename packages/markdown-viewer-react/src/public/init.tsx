@@ -1,29 +1,32 @@
 import { defineRegistry } from "@json-render/react";
-import { newRegistry } from "@statewalker/shared-registry";
-import { getWorkspace } from "@statewalker/workspace-api";
+import { provideMimeRenderer } from "@statewalker/files";
 import { CatalogRegistry } from "@statewalker/json-render";
+import { newRegistry } from "@statewalker/shared-registry";
+import { Slots } from "@statewalker/shared-slots";
+import { getWorkspace } from "@statewalker/workspace-api";
+import { MarkdownView } from "../internal/markdown-view.js";
 import {
   MARKDOWN_VIEWER_CATALOG_ID,
+  makeMarkdownSpec,
   markdownViewerCatalog,
+  markdownViewerPanelId,
+  markdownViewerSpecId,
 } from "./catalog.js";
-import { MarkdownView } from "../internal/markdown-view.js";
 
 /**
- * Renderer-fragment init for `markdown-viewer-views` (per ADR 0002).
- * Builds the json-render registry binding the React `MarkdownView`
- * to the `MarkdownView` component type in `markdownViewerCatalog`,
- * then registers the resolved entry into `CatalogRegistry` under
- * `MARKDOWN_VIEWER_CATALOG_ID`.
+ * Renderer-only fragment for the markdown MIME viewer (per task 4.11 — the
+ * paired logic fragment was dropped; its inert MIME-pattern data lives
+ * inline here, registered alongside the catalog binding).
  *
- * Boot order: register AFTER the logic-fragment block (so the
- * catalog declaration exists), alongside the other renderer
- * fragments, BEFORE the dock host mounts.
+ * Contributes one entry to `files:mime-renderers` for `text/markdown`
+ * and one entry to `CatalogRegistry` for `MARKDOWN_VIEWER_CATALOG_ID`.
  */
-export default function initMarkdownViewerViews(
+export default function initMarkdownViewerReact(
   ctx: Record<string, unknown>,
 ): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
+  const slots = workspace.requireAdapter(Slots);
   const catalogs = workspace.requireAdapter(CatalogRegistry);
 
   const { registry } = defineRegistry(markdownViewerCatalog, {
@@ -32,8 +35,21 @@ export default function initMarkdownViewerViews(
     },
     actions: {},
   });
-
   register(catalogs.register(MARKDOWN_VIEWER_CATALOG_ID, registry));
+
+  register(
+    provideMimeRenderer(slots, {
+      mimeTypePattern: "text/markdown",
+      buildPanel(uri) {
+        return {
+          catalogId: MARKDOWN_VIEWER_CATALOG_ID,
+          spec: makeMarkdownSpec(uri),
+          panelId: markdownViewerPanelId(uri),
+          specId: markdownViewerSpecId(uri),
+        };
+      },
+    }),
+  );
 
   return cleanup;
 }
