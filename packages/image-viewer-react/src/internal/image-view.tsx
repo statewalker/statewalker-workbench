@@ -1,7 +1,7 @@
+import { useAppWorkspace } from "@statewalker/core-react";
+import { runLoadFile } from "@statewalker/files";
 import { Intents } from "@statewalker/shared-intents";
 import { type ReactElement, useEffect, useState } from "react";
-import { runLoadFile } from "@statewalker/files";
-import { useAppWorkspace } from "@statewalker/core-react";
 
 interface ImageViewProps {
   uri: string;
@@ -19,9 +19,7 @@ export function ImageView({ uri }: ImageViewProps): ReactElement {
   const intents = workspace.requireAdapter(Intents);
 
   const [state, setState] = useState<
-    | { kind: "loading" }
-    | { kind: "ready"; url: string }
-    | { kind: "error"; message: string }
+    { kind: "loading" } | { kind: "ready"; url: string } | { kind: "error"; message: string }
   >({ kind: "loading" });
 
   useEffect(() => {

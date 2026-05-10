@@ -1,8 +1,8 @@
+import { Markdown } from "@repo/chat-mini.chat-react";
+import { useAppWorkspace } from "@statewalker/core-react";
+import { runLoadFile } from "@statewalker/files";
 import { Intents } from "@statewalker/shared-intents";
 import { type ReactElement, useEffect, useState } from "react";
-import { Markdown } from "@repo/chat-mini.chat-react";
-import { runLoadFile } from "@statewalker/files";
-import { useAppWorkspace } from "@statewalker/core-react";
 
 interface MarkdownViewProps {
   uri: string;
@@ -18,9 +18,7 @@ export function MarkdownView({ uri }: MarkdownViewProps): ReactElement {
   const intents = workspace.requireAdapter(Intents);
 
   const [state, setState] = useState<
-    | { kind: "loading" }
-    | { kind: "ready"; text: string }
-    | { kind: "error"; message: string }
+    { kind: "loading" } | { kind: "ready"; text: string } | { kind: "error"; message: string }
   >({ kind: "loading" });
 
   useEffect(() => {

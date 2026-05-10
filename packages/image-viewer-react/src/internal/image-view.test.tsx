@@ -1,9 +1,9 @@
+import { AppWorkspaceProvider } from "@statewalker/core-react";
+import { handleLoadFile } from "@statewalker/files";
 import { Intents } from "@statewalker/shared-intents";
 import { Workspace } from "@statewalker/workspace-api";
 import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { handleLoadFile } from "@statewalker/files";
-import { AppWorkspaceProvider } from "@statewalker/core-react";
 import { ImageView } from "./image-view.js";
 
 if (typeof URL.createObjectURL === "undefined") {
