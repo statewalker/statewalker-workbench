@@ -7,8 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import { handleLoadDirectory, handleVisualizeFile } from "@statewalker/files";
 import {
   type InlineComponentDescriptor,
-  InlineContentRegistry,
-  observeInlineComponents,
+    observeInlineComponents,
 } from "@statewalker/inline-content";
 import { AppWorkspaceProvider } from "@statewalker/core-react";
 import initInlineContentViews from "../public/init.js";
@@ -26,7 +25,7 @@ describe("inline-content-views built-ins", () => {
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentViews(ctx);
 
-    const registry = ws.requireAdapter(InlineContentRegistry);
+    const registry = ws.requireAdapter();
     expect(registry.get("metric-card")).not.toBeNull();
     expect(registry.get("line-chart")).not.toBeNull();
     expect(registry.get("file-card")).not.toBeNull();
@@ -254,7 +253,7 @@ describe("inline-content-views built-ins", () => {
     // Plug-in path: register a custom component into the same
     // registry. Renders via InlineContent without any built-in
     // glue knowing about it.
-    const registry = ws.requireAdapter(InlineContentRegistry);
+    const registry = ws.requireAdapter();
     const disposeCustom = registry.register("plugin:badge", ({ props }) => (
       <span data-testid="plugin-badge">{(props as { text: string }).text}</span>
     ));

@@ -9,7 +9,7 @@ import {
 } from "@statewalker/workspace-api";
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import initCoreViews, { ViewRegistry } from "@statewalker/core-react";
+import initCoreReact, { newViewRegistry } from "@statewalker/core-react";
 import initSettings, {
   provideSettingsTab,
   runOpenSettings,
@@ -27,7 +27,7 @@ function bootHarness(): Harness {
   const ws = new Workspace();
   const ctx: Record<string, unknown> = { "workspace:workspace": ws };
   const cleanups: Array<() => void | Promise<void>> = [];
-  cleanups.push(initCoreViews(ctx));
+  cleanups.push(initCoreReact(ctx));
   cleanups.push(initSettings(ctx));
   return {
     ws: getWorkspace(ctx),
@@ -58,7 +58,7 @@ describe("SettingsDialog", () => {
     active = bootHarness();
     const { ws } = active;
     const slots = ws.requireAdapter(Slots);
-    const registry = ws.requireAdapter(ViewRegistry);
+    const registry = newViewRegistry(ws);
     const intents = ws.requireAdapter(Intents);
     void ws.requireAdapter(Settings);
 

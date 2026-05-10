@@ -1,10 +1,10 @@
-import { Slots } from "@statewalker/shared-slots";
-import { useSlot } from "@statewalker/core-react";
-import { type ReactElement, useMemo } from "react";
 import {
   compareByOrderAndId,
+  useAdapter,
   useAdapterValue,
-  ViewRegistry,
+  useSlot,
+  useViewRegistry,
+  type ViewComponent,
 } from "@statewalker/core-react";
 import {
   observeSettingsTabs,
@@ -19,7 +19,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@statewalker/shadcn-react";
-import { useAdapter } from "@statewalker/core-react";
+import type { KeyedSlot } from "@statewalker/shared-slots";
+import { Slots } from "@statewalker/shared-slots";
+import { type ReactElement, useMemo } from "react";
 
 /**
  * Top-level settings dialog. Mounted once per app. Reads:
@@ -33,7 +35,7 @@ import { useAdapter } from "@statewalker/core-react";
  */
 export function SettingsDialog(): ReactElement | null {
   const settings = useAdapter(Settings);
-  const registry = useAdapter(ViewRegistry);
+  const registry = useViewRegistry();
   const slots = useAdapter(Slots);
 
   // Read each primitive separately so getSnapshot returns stable
@@ -101,7 +103,7 @@ function TabContent({
   registry,
 }: {
   tab: SettingsTab;
-  registry: ViewRegistry;
+  registry: KeyedSlot<ViewComponent>;
 }): ReactElement {
   const Component = registry.get(tab.viewKey);
   if (!Component) {

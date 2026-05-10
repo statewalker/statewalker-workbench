@@ -1,6 +1,6 @@
 import { defineRegistry } from "@json-render/react";
 import { provideMimeRenderer } from "@statewalker/files";
-import { CatalogRegistry } from "@statewalker/json-render";
+import { newCatalogRegistry } from "@statewalker/json-render";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace-api";
@@ -19,7 +19,7 @@ export default function initImageViewerReact(
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
   const slots = workspace.requireAdapter(Slots);
-  const catalogs = workspace.requireAdapter(CatalogRegistry);
+  const catalogs = newCatalogRegistry(workspace);
 
   const { registry } = defineRegistry(imageViewerCatalog, {
     components: {

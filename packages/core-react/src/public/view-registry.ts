@@ -1,29 +1,46 @@
+import { KeyedSlot, Slots } from "@statewalker/shared-slots";
+import type { Workspace } from "@statewalker/workspace-api";
 import type { ComponentType } from "react";
-import { IdentifiableRegistry } from "../internal/identifiable-registry.js";
+import { useAdapter } from "../internal/use-adapter.js";
+import { useKeyedSlot } from "../internal/use-slot.js";
 
 /**
- * Generic shape of a view component registered in `ViewRegistry`.
- * Concrete components may take richer prop types; the registry
+ * Slot key declared by `core-react` carrying React components by
+ * stable `viewKey`. Replaces the retired `ViewRegistry` adapter (per
+ * ADR 0006 + the `late-binding-primitives` capability spec).
+ *
+ * ViewKey naming convention: `<owning-logic-fragment-id>:<purpose>` —
+ * e.g. `chat:turn-block:tool-call`, `providers:model-picker`.
+ */
+export const CORE_VIEWS_SLOT_KEY = "core:views";
+
+/**
+ * Generic shape of a view component registered in the `core:views`
+ * slot. Concrete components may take richer prop types; the slot
  * holds them opaquely (consumers cast at usage time, the same way
- * `CatalogRegistry` holds json-render registries opaquely).
+ * the `json:catalogs` slot holds json-render registries opaquely).
  */
 export type ViewComponent = ComponentType<unknown>;
 
 /**
- * Workspace adapter holding React components by string viewKey.
- * The registration surface for slot pattern C (per ADR 0002 §6.4):
- * logic fragments contribute `{ id, viewKey }` slot values; the
- * paired renderer fragments register the React component for that
- * viewKey here. The slot consumer (e.g. composer, turn-view)
- * resolves a viewKey via `ViewRegistry.get` and renders the
- * returned component.
+ * Construct a `KeyedSlot<ViewComponent>` over the workspace's `Slots`
+ * adapter under `core:views`. Use from logic-side init code that
+ * registers React components by viewKey.
  *
- * ViewKey naming: `<owning-logic-fragment-id>:<purpose>` —
- * e.g. `chat:turn-block:tool-call`, `providers:model-picker`.
- *
- * The id-keyed semantics (throws on duplicate id with different
- * component, primary access pattern is `get(id)`) come from the
- * shared `IdentifiableRegistry` primitive — same shape as
- * `CatalogRegistry` and `InlineContentRegistry`.
+ * Semantics are identical to the retired `ViewRegistry`:
+ * collision-throw on duplicate ids with different components, no-op on
+ * same-reference re-registration, O(1) `get(id)`.
  */
-export class ViewRegistry extends IdentifiableRegistry<ViewComponent> {}
+export function newViewRegistry(workspace: Workspace): KeyedSlot<ViewComponent> {
+  return new KeyedSlot<ViewComponent>(workspace.requireAdapter(Slots), CORE_VIEWS_SLOT_KEY);
+}
+
+/**
+ * React hook returning a `KeyedSlot<ViewComponent>` bound to the
+ * application's `Slots` adapter under `core:views`. Re-renders on
+ * every contribution change.
+ */
+export function useViewRegistry(): KeyedSlot<ViewComponent> {
+  const slots = useAdapter(Slots);
+  return useKeyedSlot<ViewComponent>(slots, CORE_VIEWS_SLOT_KEY);
+}

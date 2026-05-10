@@ -1,11 +1,10 @@
 import { JSONUIProvider, Renderer } from "@json-render/react";
+import { useAppWorkspace } from "@statewalker/core-react";
+import { runClosePanel } from "@statewalker/dock";
+import { type SpecRecord, SpecStore, useCatalogRegistry } from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
 import type { IDockviewPanelProps } from "dockview-react";
 import { type ReactElement, useSyncExternalStore } from "react";
-import { useAppWorkspace } from "@statewalker/core-react";
-import { CatalogRegistry } from "@statewalker/json-render";
-import { runClosePanel } from "@statewalker/dock";
-import { type SpecRecord, SpecStore } from "@statewalker/json-render";
 
 interface JsonPanelParams {
   specId: string;
@@ -30,7 +29,7 @@ export function JsonPanel(
   const { specId } = props.params;
   const workspace = useAppWorkspace();
   const store = workspace.requireAdapter(SpecStore);
-  const catalogs = workspace.requireAdapter(CatalogRegistry);
+  const catalogs = useCatalogRegistry();
   const intents = workspace.requireAdapter(Intents);
 
   const record = useSyncExternalStore<SpecRecord | null>(

@@ -1,8 +1,8 @@
+import { newViewRegistry } from "@statewalker/core-react";
+import { provideDockHeaderItem, provideDockOverlay } from "@statewalker/dock";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace-api";
-import { ViewRegistry } from "@statewalker/core-react";
-import { provideDockHeaderItem, provideDockOverlay } from "@statewalker/dock";
 import { SettingsButton } from "../internal/settings-button.js";
 import { SettingsDialog } from "../internal/settings-dialog.js";
 
@@ -10,17 +10,16 @@ const VIEW_KEY_BUTTON = "settings:button";
 const VIEW_KEY_DIALOG = "settings:dialog";
 
 /**
- * Renderer-fragment init for `settings-views`. Registers the
- * settings button into `ViewRegistry` and contributes it to
- * `dock:header-items` (`trailing` slot); registers the settings
- * dialog into `ViewRegistry` and contributes it to `dock:overlays`.
+ * Renderer-fragment init for `settings-react`. Registers the settings
+ * button and dialog into the `core:views` slot and contributes them to
+ * `dock:header-items` and `dock:overlays` respectively.
  */
-export default function initSettingsViews(
+export default function initSettingsReact(
   ctx: Record<string, unknown>,
 ): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
-  const views = workspace.requireAdapter(ViewRegistry);
+  const views = newViewRegistry(workspace);
   const slots = workspace.requireAdapter(Slots);
 
   register(

@@ -1,11 +1,12 @@
+import {
+  type InlineComponentDescriptor,
+  type InlineContentComponent,
+  newInlineContentRegistry,
+  provideInlineComponent,
+} from "@statewalker/inline-content";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace-api";
-import {
-  type InlineComponentDescriptor,
-  InlineContentRegistry,
-  provideInlineComponent,
-} from "@statewalker/inline-content";
 import { ActionButton } from "../internal/components/action-button.js";
 import { DirectoryCard } from "../internal/components/directory-card.js";
 import { FileCard } from "../internal/components/file-card.js";
@@ -14,7 +15,7 @@ import { MetricCard } from "../internal/components/metric-card.js";
 
 const BUILTINS: ReadonlyArray<{
   descriptor: InlineComponentDescriptor;
-  component: Parameters<InlineContentRegistry["register"]>[1];
+  component: InlineContentComponent;
 }> = [
   {
     descriptor: {
@@ -22,7 +23,7 @@ const BUILTINS: ReadonlyArray<{
       label: "Metric Card",
       description: "Single-value KPI card with optional delta and trend.",
     },
-    component: MetricCard,
+    component: MetricCard as unknown as InlineContentComponent,
   },
   {
     descriptor: {
@@ -30,7 +31,7 @@ const BUILTINS: ReadonlyArray<{
       label: "Line Chart",
       description: "Compact SVG line chart for a numeric series.",
     },
-    component: LineChart,
+    component: LineChart as unknown as InlineContentComponent,
   },
   {
     descriptor: {
@@ -38,7 +39,7 @@ const BUILTINS: ReadonlyArray<{
       label: "File Card",
       description: "File reference; clicking fires files:visualize.",
     },
-    component: FileCard,
+    component: FileCard as unknown as InlineContentComponent,
   },
   {
     descriptor: {
@@ -47,7 +48,7 @@ const BUILTINS: ReadonlyArray<{
       description:
         "Directory reference; clicking children fires files:visualize.",
     },
-    component: DirectoryCard,
+    component: DirectoryCard as unknown as InlineContentComponent,
   },
   {
     descriptor: {
@@ -55,26 +56,26 @@ const BUILTINS: ReadonlyArray<{
       label: "Action Button",
       description: "Fires an arbitrary intent on click.",
     },
-    component: ActionButton,
+    component: ActionButton as unknown as InlineContentComponent,
   },
 ];
 
 /**
- * Renderer-fragment init for `inline-content-views`. Pairs with
+ * Renderer-fragment init for `inline-content-react`. Pairs with
  * `@statewalker/inline-content` (logic).
  *
- * Registers each built-in inline component under its id in
- * `InlineContentRegistry` (rendering lookup) AND contributes a
- * descriptor to `inline-content:components` (discoverability).
+ * Registers each built-in inline component under its id in the
+ * `inline-content:renderers` slot (rendering lookup) AND contributes
+ * a descriptor to `inline-content:components` (discoverability).
  * Plug-in fragments register the same way — the chat surface
  * sees them indistinguishably from built-ins.
  */
-export default function initInlineContentViews(
+export default function initInlineContentReact(
   ctx: Record<string, unknown>,
 ): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
-  const registry = workspace.requireAdapter(InlineContentRegistry);
+  const registry = newInlineContentRegistry(workspace);
   const slots = workspace.requireAdapter(Slots);
 
   for (const { descriptor, component } of BUILTINS) {

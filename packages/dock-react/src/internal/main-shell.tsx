@@ -1,11 +1,12 @@
-import { Slots } from "@statewalker/shared-slots";
-import { useSlot } from "@statewalker/core-react";
-import { type ReactElement, useMemo } from "react";
 import {
   compareByOrderAndId,
-  useRegistry,
-  ViewRegistry,
+  useAdapter,
+  useAppWorkspace,
+  useSlot,
+  useViewRegistry,
+  type ViewComponent,
 } from "@statewalker/core-react";
+import type { KeyedSlot } from "@statewalker/shared-slots";
 import {
   type DockOverlay,
   type DockSidePanel,
@@ -17,7 +18,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@statewalker/shadcn-react";
-import { useAdapter, useAppWorkspace } from "@statewalker/core-react";
+import { Slots } from "@statewalker/shared-slots";
+import { type ReactElement, useMemo } from "react";
 import { DockViewHost } from "../public/dock-view-host.js";
 import { ShellHeader } from "./shell-header.js";
 
@@ -37,7 +39,7 @@ import { ShellHeader } from "./shell-header.js";
 export function MainShell(): ReactElement {
   const workspace = useAppWorkspace();
   const slots = useAdapter(Slots);
-  const registry = useRegistry(ViewRegistry);
+  const registry = useViewRegistry();
   const sidePanels = useSlot(slots, observeDockSidePanels);
   const overlays = useSlot(slots, observeDockOverlays);
 
@@ -77,7 +79,7 @@ function PanelChunk({
   registry,
   panel,
 }: {
-  registry: ViewRegistry;
+  registry: KeyedSlot<ViewComponent>;
   panel: DockSidePanel;
 }): ReactElement | null {
   const Component = registry.get(panel.viewKey);
@@ -100,7 +102,7 @@ function OverlayMount({
   registry,
   overlay,
 }: {
-  registry: ViewRegistry;
+  registry: KeyedSlot<ViewComponent>;
   overlay: DockOverlay;
 }): ReactElement | null {
   const Component = registry.get(overlay.viewKey);
