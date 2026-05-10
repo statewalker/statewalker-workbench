@@ -12,8 +12,7 @@ function isMetricCardProps(value: unknown): value is MetricCardProps {
   if (!value || typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
   return (
-    typeof v.label === "string" &&
-    (typeof v.value === "string" || typeof v.value === "number")
+    typeof v.label === "string" && (typeof v.value === "string" || typeof v.value === "number")
   );
 }
 
@@ -32,9 +31,7 @@ export function MetricCard({ props }: { props: unknown }): ReactElement {
     <div className="inline-flex flex-col rounded-md border border-border bg-card px-4 py-2">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <span className="text-2xl font-semibold tabular-nums">{value}</span>
-      {delta ? (
-        <span className={`text-xs font-medium ${trendClass}`}>{delta}</span>
-      ) : null}
+      {delta ? <span className={`text-xs font-medium ${trendClass}`}>{delta}</span> : null}
     </div>
   );
 }

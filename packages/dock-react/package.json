@@ -22,13 +22,14 @@
   "dependencies": {
     "@json-render/react": "0.18.0",
     "@statewalker/core-react": "workspace:*",
+    "@statewalker/catalog-registry-react": "workspace:*",
     "@statewalker/dock": "workspace:*",
-    "@statewalker/json-render": "workspace:*",
     "@statewalker/shadcn-react": "workspace:*",
+    "@statewalker/spec-store": "workspace:*",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/workspace-api": "workspace:*",
+    "@statewalker/workspace": "workspace:*",
     "@statewalker/workspace-bridge-react": "workspace:*",
     "dockview-react": "6.0.3",
     "lucide-react": "catalog:"

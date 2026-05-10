@@ -1,7 +1,7 @@
 import { AppWorkspaceProvider } from "@statewalker/core-react";
 import { handleLoadFile } from "@statewalker/files";
 import { Intents } from "@statewalker/shared-intents";
-import { Workspace } from "@statewalker/workspace-api";
+import { Workspace } from "@statewalker/workspace";
 import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { VideoView } from "./video-view.js";

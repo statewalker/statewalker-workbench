@@ -2,12 +2,8 @@ import type { FilesApi } from "@statewalker/webrun-files";
 import { BrowserFilesApi } from "@statewalker/webrun-files-browser";
 
 interface FileSystemHandleWithPermissions {
-  queryPermission(descriptor?: {
-    mode?: "read" | "readwrite";
-  }): Promise<PermissionState>;
-  requestPermission(descriptor?: {
-    mode?: "read" | "readwrite";
-  }): Promise<PermissionState>;
+  queryPermission(descriptor?: { mode?: "read" | "readwrite" }): Promise<PermissionState>;
+  requestPermission(descriptor?: { mode?: "read" | "readwrite" }): Promise<PermissionState>;
 }
 
 declare global {
@@ -19,10 +15,7 @@ declare global {
 }
 
 export function isFileSystemAccessSupported(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    typeof window.showDirectoryPicker === "function"
-  );
+  return typeof window !== "undefined" && typeof window.showDirectoryPicker === "function";
 }
 
 /**
@@ -31,9 +24,7 @@ export function isFileSystemAccessSupported(): boolean {
  */
 export async function pickDirectory(): Promise<FileSystemDirectoryHandle> {
   if (!window.showDirectoryPicker) {
-    throw new Error(
-      "Your browser does not support the File System Access API.",
-    );
+    throw new Error("Your browser does not support the File System Access API.");
   }
   return await window.showDirectoryPicker({ mode: "readwrite" });
 }
@@ -55,8 +46,6 @@ export async function requestHandlePermission(
 }
 
 /** Wrap a directory handle as a `FilesApi`. */
-export function createBrowserFilesApi(
-  handle: FileSystemDirectoryHandle,
-): FilesApi {
+export function createBrowserFilesApi(handle: FileSystemDirectoryHandle): FilesApi {
   return new BrowserFilesApi({ rootHandle: handle });
 }

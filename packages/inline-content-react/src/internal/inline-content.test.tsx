@@ -1,23 +1,21 @@
-import { Intents } from "@statewalker/shared-intents";
-import { Slots } from "@statewalker/shared-slots";
-import { Workspace } from "@statewalker/workspace-api";
-import { fireEvent, render } from "@testing-library/react";
-import type { ReactElement } from "react";
-import { describe, expect, it, vi } from "vitest";
 import { AppWorkspaceProvider } from "@statewalker/core-react";
 import { handleLoadDirectory, handleVisualizeFile } from "@statewalker/files";
 import {
   type InlineComponentDescriptor,
-  newInlineContentRegistry,
   observeInlineComponents,
 } from "@statewalker/inline-content";
+import { Intents } from "@statewalker/shared-intents";
+import { Slots } from "@statewalker/shared-slots";
+import { Workspace } from "@statewalker/workspace";
+import { fireEvent, render } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { describe, expect, it, vi } from "vitest";
 import initInlineContentReact from "../public/init.js";
 import { InlineContent } from "../public/inline-content.js";
+import { newInlineContentRegistry } from "../public/inline-content-registry.js";
 
 function mount(ws: Workspace, ui: ReactElement) {
-  return render(
-    <AppWorkspaceProvider workspace={ws}>{ui}</AppWorkspaceProvider>,
-  );
+  return render(<AppWorkspaceProvider workspace={ws}>{ui}</AppWorkspaceProvider>);
 }
 
 describe("inline-content-views built-ins", () => {
@@ -117,10 +115,7 @@ describe("inline-content-views built-ins", () => {
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentReact(ctx);
 
-    const utils = mount(
-      ws,
-      <InlineContent spec={{ componentId: "no-such-thing", props: {} }} />,
-    );
+    const utils = mount(ws, <InlineContent spec={{ componentId: "no-such-thing", props: {} }} />);
     expect(utils.getByText(/Unknown inline component/i)).toBeTruthy();
 
     utils.unmount();
@@ -261,9 +256,7 @@ describe("inline-content-views built-ins", () => {
 
     const utils = mount(
       ws,
-      <InlineContent
-        spec={{ componentId: "plugin:badge", props: { text: "BETA" } }}
-      />,
+      <InlineContent spec={{ componentId: "plugin:badge", props: { text: "BETA" } }} />,
     );
     expect(utils.getByTestId("plugin-badge").textContent).toBe("BETA");
 

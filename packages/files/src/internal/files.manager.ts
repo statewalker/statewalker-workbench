@@ -1,12 +1,12 @@
 import { createFileTools } from "@statewalker/ai-agent/tools";
 import { provideAgentTool } from "@statewalker/ai-agent-runtime";
 import { runShowDockPanel } from "@statewalker/dock";
-import { SpecStore } from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
+import { SpecStore } from "@statewalker/spec-store";
 import { extname, readFile, writeText } from "@statewalker/webrun-files";
-import type { Workspace } from "@statewalker/workspace-api";
+import type { Workspace } from "@statewalker/workspace";
 import {
   handleDeleteFile,
   handleLoadDirectory,

@@ -1,13 +1,9 @@
+import { useAdapter, useAdapterValue } from "@statewalker/core-react";
+import { Button } from "@statewalker/shadcn-react";
 import { Intents } from "@statewalker/shared-intents";
+import { runWorkspaceReconnect, WorkspaceShellAdapter } from "@statewalker/workspace-bridge";
 import { RefreshCw } from "lucide-react";
 import type { ReactElement } from "react";
-import { useAdapterValue } from "@statewalker/core-react";
-import { Button } from "@statewalker/shadcn-react";
-import {
-  runWorkspaceReconnect,
-  WorkspaceShellAdapter,
-} from "@statewalker/workspace-bridge";
-import { useAdapter } from "@statewalker/core-react";
 
 /**
  * Compact banner used by the empty-state view when the
@@ -22,13 +18,9 @@ export function ReconnectBanner(): ReactElement | null {
   return (
     <div className="flex items-center gap-3 border-b bg-muted px-4 py-2 text-sm">
       <span className="flex-1">
-        Reconnect to workspace{" "}
-        <span className="font-medium text-foreground">{state.label}</span>?
+        Reconnect to workspace <span className="font-medium text-foreground">{state.label}</span>?
       </span>
-      <Button
-        size="sm"
-        onClick={() => void runWorkspaceReconnect(intents, {}).promise}
-      >
+      <Button size="sm" onClick={() => void runWorkspaceReconnect(intents, {}).promise}>
         <RefreshCw /> Reconnect
       </Button>
     </div>

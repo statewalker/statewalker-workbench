@@ -1,11 +1,8 @@
 import { Intents } from "@statewalker/shared-intents";
-import { getWorkspace, runChangeWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace, runChangeWorkspace } from "@statewalker/workspace";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import initWorkspaceBridge from "../public/init.js";
-import {
-  runWorkspaceDisconnect,
-  runWorkspaceReconnect,
-} from "../public/intents.js";
+import { runWorkspaceDisconnect, runWorkspaceReconnect } from "../public/intents.js";
 import { WorkspaceShellAdapter } from "./workspace-shell-adapter.js";
 
 vi.mock("idb-keyval", () => {

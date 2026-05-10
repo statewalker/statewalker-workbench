@@ -1,5 +1,5 @@
 import { KeyedSlot, Slots } from "@statewalker/shared-slots";
-import type { Workspace } from "@statewalker/workspace-api";
+import type { Workspace } from "@statewalker/workspace";
 import type { ComponentType } from "react";
 import { useAdapter } from "../internal/use-adapter.js";
 import { useKeyedSlot } from "../internal/use-slot.js";

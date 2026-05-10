@@ -19,11 +19,11 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/json-render": "workspace:*",
     "@statewalker/shared-intents": "catalog:",
+    "@statewalker/spec-store": "workspace:*",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/workspace-api": "workspace:*",
+    "@statewalker/workspace": "workspace:*",
     "dockview-react": "6.0.3"
   },
   "devDependencies": {

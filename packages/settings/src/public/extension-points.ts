@@ -8,5 +8,4 @@ import type { SettingsTab } from "./types.js";
  * fragments contribute additional tabs without editing the
  * settings core.
  */
-export const [provideSettingsTab, observeSettingsTabs] =
-  newSlot<SettingsTab>("settings:tabs");
+export const [provideSettingsTab, observeSettingsTabs] = newSlot<SettingsTab>("settings:tabs");

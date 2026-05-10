@@ -1,5 +1,5 @@
 import { AppWorkspaceProvider } from "@statewalker/core-react";
-import type { Workspace } from "@statewalker/workspace-api";
+import type { Workspace } from "@statewalker/workspace";
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { ReactElement } from "react";

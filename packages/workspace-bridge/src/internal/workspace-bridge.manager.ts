@@ -1,15 +1,8 @@
 import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
 import type { FilesApi } from "@statewalker/webrun-files";
-import {
-  handleChangeWorkspace,
-  initWorkspace,
-  type Workspace,
-} from "@statewalker/workspace-api";
-import {
-  handleWorkspaceDisconnect,
-  handleWorkspaceReconnect,
-} from "../public/intents.js";
+import { handleChangeWorkspace, initWorkspace, type Workspace } from "@statewalker/workspace";
+import { handleWorkspaceDisconnect, handleWorkspaceReconnect } from "../public/intents.js";
 import {
   createBrowserFilesApi,
   isFileSystemAccessSupported,
@@ -17,11 +10,7 @@ import {
   queryHandlePermission,
   requestHandlePermission,
 } from "./files-api-factory.js";
-import {
-  clearStoredHandle,
-  getStoredHandle,
-  setStoredHandle,
-} from "./handle-store.js";
+import { clearStoredHandle, getStoredHandle, setStoredHandle } from "./handle-store.js";
 import { WorkspaceShellAdapter } from "./workspace-shell-adapter.js";
 
 export interface WorkspaceBridgeManagerOptions {
@@ -171,9 +160,7 @@ export class WorkspaceBridgeManager {
     }
   }
 
-  private async _adoptStoredHandle(
-    handle: FileSystemDirectoryHandle,
-  ): Promise<void> {
+  private async _adoptStoredHandle(handle: FileSystemDirectoryHandle): Promise<void> {
     this._currentHandle = handle;
     const filesApi = createBrowserFilesApi(handle);
     // Drive workspace lifecycle directly. The `onLoad` listener

@@ -1,4 +1,4 @@
-import type { Workspace } from "@statewalker/workspace-api";
+import type { Workspace } from "@statewalker/workspace";
 import { DockviewReact, type DockviewReadyEvent } from "dockview-react";
 import "dockview-react/dist/styles/dockview.css";
 import "../internal/dock-view-host.css";

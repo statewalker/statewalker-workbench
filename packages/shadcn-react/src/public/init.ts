@@ -6,9 +6,7 @@
  * substrate as a fragment rather than a free-floating `src/components`
  * directory (per ADR 0002).
  */
-export default function initShadcnViews(
-  _ctx: Record<string, unknown>,
-): () => void {
+export default function initShadcnViews(_ctx: Record<string, unknown>): () => void {
   return () => {
     /* no-op */
   };

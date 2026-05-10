@@ -1,6 +1,6 @@
-import type { ReactElement } from "react";
 import { useAdapterValue } from "@statewalker/core-react";
 import { WorkspaceShellAdapter } from "@statewalker/workspace-bridge";
+import type { ReactElement } from "react";
 
 /**
  * Leading header item that renders the active workspace label, e.g.
@@ -10,10 +10,7 @@ import { WorkspaceShellAdapter } from "@statewalker/workspace-bridge";
  */
 export function WorkspaceLabelHeader(): ReactElement {
   const state = useAdapterValue(WorkspaceShellAdapter, (a) => a.getState());
-  const label =
-    state.status === "ready" || state.status === "needs-permission"
-      ? state.label
-      : "";
+  const label = state.status === "ready" || state.status === "needs-permission" ? state.label : "";
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm font-semibold">Chat Mini</span>

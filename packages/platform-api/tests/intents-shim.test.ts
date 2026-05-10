@@ -1,5 +1,5 @@
 import { Intents } from "@statewalker/shared-intents";
-import { getWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace } from "@statewalker/workspace";
 import { describe, expect, it, vi } from "vitest";
 import { getIntents, removeIntents, setIntents } from "../src/adapters.ts";
 

@@ -1,9 +1,9 @@
+import { useAdapter } from "@statewalker/core-react";
+import { runOpenSettings } from "@statewalker/settings";
+import { Button } from "@statewalker/shadcn-react";
 import { Intents } from "@statewalker/shared-intents";
 import { Settings as SettingsIcon } from "lucide-react";
 import type { ReactElement } from "react";
-import { runOpenSettings } from "@statewalker/settings";
-import { Button } from "@statewalker/shadcn-react";
-import { useAdapter } from "@statewalker/core-react";
 
 export interface SettingsButtonProps {
   /** Optional initial tab id to open (e.g. "providers"). */

@@ -1,5 +1,5 @@
 import { newRegistry } from "@statewalker/shared-registry";
-import { getWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace } from "@statewalker/workspace";
 import { SettingsManager } from "../internal/settings.manager.js";
 import { Settings } from "./settings.adapter.js";
 
@@ -13,9 +13,7 @@ import { Settings } from "./settings.adapter.js";
  * any fragment that contributes to `settings:tabs` (e.g.
  * `providers/`).
  */
-export default function initSettings(
-  ctx: Record<string, unknown>,
-): () => Promise<void> {
+export default function initSettings(ctx: Record<string, unknown>): () => Promise<void> {
   const workspace = getWorkspace(ctx);
   workspace.setAdapter(Settings);
 

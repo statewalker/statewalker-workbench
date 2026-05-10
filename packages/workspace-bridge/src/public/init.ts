@@ -1,4 +1,4 @@
-import { getWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace } from "@statewalker/workspace";
 import { WorkspaceBridgeManager } from "../internal/workspace-bridge.manager.js";
 import { WorkspaceShellAdapter } from "../internal/workspace-shell-adapter.js";
 
@@ -7,7 +7,7 @@ import { WorkspaceShellAdapter } from "../internal/workspace-shell-adapter.js";
  *   - the `WorkspaceShellAdapter` (single source of truth for the
  *     FS-Access shell state machine, per ADR 0004),
  *   - the canonical `workspace:change` handler from
- *     `@statewalker/workspace-api` (close → setFileSystem → open),
+ *     `@statewalker/workspace` (close → setFileSystem → open),
  *   - `workspace:reconnect` and `workspace:disconnect` handlers
  *     wired to the adapter, the IndexedDB handle store, and the
  *     `requestPermission` flow.
@@ -25,9 +25,7 @@ import { WorkspaceShellAdapter } from "../internal/workspace-shell-adapter.js";
  * would orphan any React subscribers that captured the previous
  * instance.
  */
-export default function initWorkspaceBridge(
-  ctx: Record<string, unknown>,
-): () => Promise<void> {
+export default function initWorkspaceBridge(ctx: Record<string, unknown>): () => Promise<void> {
   const workspace = getWorkspace(ctx);
   workspace.requireAdapter(WorkspaceShellAdapter);
   const manager = new WorkspaceBridgeManager({ workspace });

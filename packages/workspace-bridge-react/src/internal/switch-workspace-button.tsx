@@ -1,12 +1,9 @@
+import { useAdapter } from "@statewalker/core-react";
+import { Button } from "@statewalker/shadcn-react";
 import { Intents } from "@statewalker/shared-intents";
+import { runChangeWorkspace, runWorkspaceDisconnect } from "@statewalker/workspace-bridge";
 import { LogOut } from "lucide-react";
 import type { ReactElement } from "react";
-import { Button } from "@statewalker/shadcn-react";
-import {
-  runChangeWorkspace,
-  runWorkspaceDisconnect,
-} from "@statewalker/workspace-bridge";
-import { useAdapter } from "@statewalker/core-react";
 
 /**
  * Trailing header item. Tears down the active workspace

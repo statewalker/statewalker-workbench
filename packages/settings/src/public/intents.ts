@@ -11,12 +11,9 @@ export interface OpenSettingsPayload {
  * `SettingsManager`; consumers fire the intent without importing
  * the adapter directly.
  */
-export const [runOpenSettings, handleOpenSettings] = newIntent<
-  OpenSettingsPayload,
-  void
->("settings:open");
+export const [runOpenSettings, handleOpenSettings] = newIntent<OpenSettingsPayload, void>(
+  "settings:open",
+);
 
 /** Close the settings dialog. */
-export const [runCloseSettings, handleCloseSettings] = newIntent<void, void>(
-  "settings:close",
-);
+export const [runCloseSettings, handleCloseSettings] = newIntent<void, void>("settings:close");

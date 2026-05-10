@@ -6,11 +6,7 @@ import {
   useViewRegistry,
   type ViewComponent,
 } from "@statewalker/core-react";
-import {
-  observeSettingsTabs,
-  Settings,
-  type SettingsTab,
-} from "@statewalker/settings";
+import { observeSettingsTabs, Settings, type SettingsTab } from "@statewalker/settings";
 import {
   cn,
   Dialog,
@@ -48,8 +44,7 @@ export function SettingsDialog(): ReactElement | null {
 
   if (!isOpen) return null;
 
-  const activeTab =
-    sortedTabs.find((t) => t.id === activeTabId) ?? sortedTabs[0];
+  const activeTab = sortedTabs.find((t) => t.id === activeTabId) ?? sortedTabs[0];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => settings._setOpen(open)}>
@@ -88,9 +83,7 @@ export function SettingsDialog(): ReactElement | null {
             )}
           </nav>
           <div className="flex-1 overflow-y-auto">
-            {activeTab ? (
-              <TabContent tab={activeTab} registry={registry} />
-            ) : null}
+            {activeTab ? <TabContent tab={activeTab} registry={registry} /> : null}
           </div>
         </div>
       </DialogContent>
@@ -109,8 +102,7 @@ function TabContent({
   if (!Component) {
     return (
       <div className="p-6 text-sm text-muted-foreground">
-        Tab "{tab.title}" registered but no component is bound to viewKey "
-        {tab.viewKey}".
+        Tab "{tab.title}" registered but no component is bound to viewKey "{tab.viewKey}".
       </div>
     );
   }

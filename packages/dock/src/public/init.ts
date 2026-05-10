@@ -1,4 +1,4 @@
-import { getWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace } from "@statewalker/workspace";
 import { DockManager } from "../internal/dock.manager.js";
 
 /**

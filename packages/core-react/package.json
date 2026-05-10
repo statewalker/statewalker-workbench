@@ -25,7 +25,7 @@
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/workspace-api": "workspace:*",
+    "@statewalker/workspace": "workspace:*",
     "@statewalker/workspace-bridge": "workspace:*",
     "@statewalker/workspace-bridge-react": "workspace:*",
     "@tanstack/react-query": "^5.66.10"

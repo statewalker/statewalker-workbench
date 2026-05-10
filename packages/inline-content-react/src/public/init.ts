@@ -1,17 +1,19 @@
 import {
   type InlineComponentDescriptor,
-  type InlineContentComponent,
-  newInlineContentRegistry,
   provideInlineComponent,
 } from "@statewalker/inline-content";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
-import { getWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace } from "@statewalker/workspace";
 import { ActionButton } from "../internal/components/action-button.js";
 import { DirectoryCard } from "../internal/components/directory-card.js";
 import { FileCard } from "../internal/components/file-card.js";
 import { LineChart } from "../internal/components/line-chart.js";
 import { MetricCard } from "../internal/components/metric-card.js";
+import {
+  type InlineContentComponent,
+  newInlineContentRegistry,
+} from "./inline-content-registry.js";
 
 const BUILTINS: ReadonlyArray<{
   descriptor: InlineComponentDescriptor;
@@ -45,8 +47,7 @@ const BUILTINS: ReadonlyArray<{
     descriptor: {
       id: "directory-card",
       label: "Directory Card",
-      description:
-        "Directory reference; clicking children fires files:visualize.",
+      description: "Directory reference; clicking children fires files:visualize.",
     },
     component: DirectoryCard as unknown as InlineContentComponent,
   },
@@ -70,9 +71,7 @@ const BUILTINS: ReadonlyArray<{
  * Plug-in fragments register the same way — the chat surface
  * sees them indistinguishably from built-ins.
  */
-export default function initInlineContentReact(
-  ctx: Record<string, unknown>,
-): () => Promise<void> {
+export default function initInlineContentReact(ctx: Record<string, unknown>): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
   const registry = newInlineContentRegistry(workspace);

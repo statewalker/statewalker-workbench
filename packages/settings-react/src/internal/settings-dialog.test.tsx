@@ -1,23 +1,14 @@
 /// <reference types="@testing-library/jest-dom" />
 import "@testing-library/jest-dom/vitest";
+import { AppWorkspaceProvider, newViewRegistry } from "@statewalker/core-react";
+import initCoreReact from "@statewalker/core-react/fragment";
+import { provideSettingsTab, runOpenSettings, Settings } from "@statewalker/settings";
+import initSettings from "@statewalker/settings/fragment";
 import { Intents } from "@statewalker/shared-intents";
 import { Slots } from "@statewalker/shared-slots";
-import {
-  getWorkspace,
-  Workspace,
-  type Workspace as WorkspaceType,
-} from "@statewalker/workspace-api";
+import { getWorkspace, Workspace, type Workspace as WorkspaceType } from "@statewalker/workspace";
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import initCoreReact from "@statewalker/core-react/fragment";
-import { newViewRegistry } from "@statewalker/core-react";
-import initSettings from "@statewalker/settings/fragment";
-import {
-  provideSettingsTab,
-  runOpenSettings,
-  Settings,
-} from "@statewalker/settings";
-import { AppWorkspaceProvider } from "@statewalker/core-react";
 import { SettingsDialog } from "./settings-dialog.js";
 
 interface Harness {

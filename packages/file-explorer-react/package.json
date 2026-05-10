@@ -34,12 +34,13 @@
     "@statewalker/dock": "workspace:*",
     "@statewalker/dock-react": "workspace:*",
     "@statewalker/file-explorer": "workspace:*",
+    "@statewalker/catalog-registry": "workspace:*",
     "@statewalker/files": "workspace:*",
-    "@statewalker/json-render": "workspace:*",
     "@statewalker/shadcn-react": "workspace:*",
+    "@statewalker/spec-store": "workspace:*",
     "@statewalker/shared-slots": "workspace:*",
     "@statewalker/webrun-files": "workspace:*",
-    "@statewalker/workspace-api": "workspace:*",
+    "@statewalker/workspace": "workspace:*",
     "lucide-react": "catalog:"
   },
   "peerDependencies": {

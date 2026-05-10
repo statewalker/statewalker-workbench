@@ -1,4 +1,4 @@
-import type { Workspace } from "@statewalker/workspace-api";
+import type { Workspace } from "@statewalker/workspace";
 import { createContext, type ReactNode, useContext } from "react";
 
 const AppWorkspaceContext = createContext<Workspace | null>(null);
@@ -10,7 +10,7 @@ interface AppWorkspaceProviderProps {
 
 /**
  * Provides the application-wide `Workspace` instance from
- * `@statewalker/workspace-api` to React consumers. Per ADR 0002,
+ * `@statewalker/workspace` to React consumers. Per ADR 0002,
  * this React-tree glue lives in the renderer fragment
  * `workspace-bridge-views` (not in any logic fragment) — React
  * hooks routing typed contracts are contract surface in renderer

@@ -1,15 +1,15 @@
 import { defineRegistry } from "@json-render/react";
+import { newCatalogRegistry } from "@statewalker/catalog-registry";
 import { provideDockTabIcon } from "@statewalker/dock-react";
 import { provideMimeRenderer } from "@statewalker/files";
-import {
-  DOCK_LAYOUT_STORAGE_KEY,
-  newCatalogRegistry,
-  restorePanelSpecsFromLayout,
-  SpecStore,
-} from "@statewalker/json-render";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
-import { getWorkspace } from "@statewalker/workspace-api";
+import {
+  DOCK_LAYOUT_STORAGE_KEY,
+  restorePanelSpecsFromLayout,
+  SpecStore,
+} from "@statewalker/spec-store";
+import { getWorkspace } from "@statewalker/workspace";
 import { FileImage } from "lucide-react";
 import { ImageView } from "../internal/image-view.js";
 import {
