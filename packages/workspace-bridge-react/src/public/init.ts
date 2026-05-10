@@ -48,14 +48,9 @@ export default function initWorkspaceBridgeReact(
       viewKey: VIEW_KEY_LABEL,
     }),
   );
-  register(
-    provideDockHeaderItem(slots, {
-      id: "workspace:switch",
-      slot: "trailing",
-      order: 100,
-      viewKey: VIEW_KEY_SWITCH,
-    }),
-  );
+  // The Switch-workspace button view is registered above so callers
+  // can mount it standalone, but the canonical shell composes it into
+  // the System menu — no `dock:header-items` contribution from here.
 
   return cleanup;
 }
