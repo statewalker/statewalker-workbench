@@ -1,7 +1,7 @@
+import { useAppWorkspace } from "@statewalker/core-react";
+import { runLoadFile } from "@statewalker/files";
 import { Intents } from "@statewalker/shared-intents";
 import { type ReactElement, useEffect, useState } from "react";
-import { runLoadFile } from "@statewalker/files";
-import { useAppWorkspace } from "@statewalker/core-react";
 
 interface PdfViewProps {
   uri: string;
@@ -21,9 +21,7 @@ export function PdfView({ uri }: PdfViewProps): ReactElement {
   const intents = workspace.requireAdapter(Intents);
 
   const [state, setState] = useState<
-    | { kind: "loading" }
-    | { kind: "ready"; url: string }
-    | { kind: "error"; message: string }
+    { kind: "loading" } | { kind: "ready"; url: string } | { kind: "error"; message: string }
   >({ kind: "loading" });
 
   useEffect(() => {
@@ -68,7 +66,5 @@ export function PdfView({ uri }: PdfViewProps): ReactElement {
       </div>
     );
   }
-  return (
-    <embed type="application/pdf" src={state.url} className="h-full w-full" />
-  );
+  return <embed type="application/pdf" src={state.url} className="h-full w-full" />;
 }

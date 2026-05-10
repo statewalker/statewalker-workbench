@@ -10,15 +10,17 @@ import {
   makeFileExplorerSpec,
   observeFileExplorerPanelPresets,
 } from "@statewalker/file-explorer";
-import { newCatalogRegistry, SpecStore } from "@statewalker/json-render";
+import {
+  DOCK_LAYOUT_STORAGE_KEY,
+  newCatalogRegistry,
+  restorePanelSpecsFromLayout,
+  SpecStore,
+} from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace-api";
 import { FileExplorerPanel } from "../internal/file-explorer-panel.js";
-import { restoreFileExplorerSpecsFromLayout } from "../internal/layout-restore.js";
-
-const LAYOUT_KEY = "chat-mini:dock-layout";
 
 /**
  * Renderer-fragment init for `@statewalker/file-explorer-react`.
@@ -55,7 +57,15 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
   // (called once the React tree mounts and `DockHost.setApi` runs)
   // finds a spec for every persisted file-explorer panel id, instead
   // of flashing the `PanelMissing` placeholder.
-  restoreFileExplorerSpecsFromLayout(store, globalThis.localStorage, LAYOUT_KEY);
+  restorePanelSpecsFromLayout({
+    store,
+    storage: globalThis.localStorage,
+    layoutKey: DOCK_LAYOUT_STORAGE_KEY,
+    panelIdPrefix: "file-explorer:",
+    catalogId: FILE_EXPLORER_CATALOG_ID,
+    buildSpec: (id) => makeFileExplorerSpec(id),
+    buildSpecId: (id) => fileExplorerSpecId(id),
+  });
 
   // ── Catalog binding ───────────────────────────────────────────
   const { registry } = defineRegistry(fileExplorerCatalog, {
