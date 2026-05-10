@@ -1,6 +1,6 @@
 import { useAppWorkspace } from "@statewalker/core-react";
-import { runVisualizeFile } from "@statewalker/files";
-import { Intents } from "@statewalker/shared-intents";
+import { VisualizeFileCommand } from "@statewalker/files";
+import { Commands } from "@statewalker/shared-commands";
 import { type ReactElement, useCallback } from "react";
 
 interface FileCardProps {
@@ -29,11 +29,11 @@ function tail(uri: string): string {
  */
 export function FileCard({ props }: { props: unknown }): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Intents);
+  const intents = workspace.requireAdapter(Commands);
 
   const onClick = useCallback(() => {
     if (!isFileCardProps(props)) return;
-    void runVisualizeFile(intents, { uri: props.uri }).promise.catch((error: unknown) => {
+    void intents.call(VisualizeFileCommand, { uri: props.uri }).promise.catch((error: unknown) => {
       console.warn("[inline-content] FileCard visualize failed:", error);
     });
   }, [intents, props]);

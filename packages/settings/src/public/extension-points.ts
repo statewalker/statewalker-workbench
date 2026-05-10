@@ -1,4 +1,4 @@
-import { newSlot } from "@statewalker/shared-slots";
+import { defineSlot } from "@statewalker/shared-slots";
 import type { SettingsTab } from "./types.js";
 
 /**
@@ -8,4 +8,4 @@ import type { SettingsTab } from "./types.js";
  * fragments contribute additional tabs without editing the
  * settings core.
  */
-export const [provideSettingsTab, observeSettingsTabs] = newSlot<SettingsTab>("settings:tabs");
+export const settingsTabSlot = defineSlot<SettingsTab>("settings:tabs");

@@ -1,6 +1,5 @@
 import {
-  type InlineComponentDescriptor,
-  provideInlineComponent,
+  inlineComponentSlot, type InlineComponentDescriptor
 } from "@statewalker/inline-content";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
@@ -11,8 +10,7 @@ import { FileCard } from "../internal/components/file-card.js";
 import { LineChart } from "../internal/components/line-chart.js";
 import { MetricCard } from "../internal/components/metric-card.js";
 import {
-  type InlineContentComponent,
-  newInlineContentRegistry,
+  newInlineContentRegistry, type InlineContentComponent
 } from "./inline-content-registry.js";
 
 const BUILTINS: ReadonlyArray<{
@@ -79,7 +77,7 @@ export default function initInlineContentReact(ctx: Record<string, unknown>): ()
 
   for (const { descriptor, component } of BUILTINS) {
     register(registry.register(descriptor.id, component));
-    register(provideInlineComponent(slots, descriptor));
+    register(slots.provide(inlineComponentSlot, descriptor));
   }
 
   return cleanup;

@@ -1,4 +1,4 @@
-import { getIntents, runDownloadBlob } from "@statewalker/platform-api";
+import { DownloadBlobCommand, getIntents } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerDownloadBlobBrowser } from "../src/handlers/download-blob.browser.js";
 
@@ -33,7 +33,7 @@ describe("download-blob browser handler", () => {
     const unregister = registerDownloadBlobBrowser(getIntents(ctx));
     try {
       const blob = new Blob(["payload"], { type: "text/plain" });
-      await runDownloadBlob(getIntents(ctx), { blob, filename: "file.txt" }).promise;
+      await getIntents(ctx).call(DownloadBlobCommand, { blob, filename: "file.txt" }).promise;
 
       expect(createObjectURL).toHaveBeenCalledWith(blob);
       expect(clickSpy).toHaveBeenCalledOnce();

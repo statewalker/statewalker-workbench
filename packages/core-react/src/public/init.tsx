@@ -4,9 +4,8 @@ import { AppRoot } from "../internal/app-root.js";
 import { getQueryClient } from "../internal/query-client-ctx.js";
 
 /**
- * Renderer-fragment init for `core-react` (per ADR 0002 + ADR 0003).
- * Owns the React mount path: calls
- * `createRoot(document.getElementById('app')!).render(<AppRoot/>)`
+ * Renderer-fragment init for `core-react`. Owns the React mount path:
+ * calls `createRoot(document.getElementById('app')!).render(<AppRoot/>)`
  * exactly once per fragment activation. The mount happens
  * synchronously; by the time the React tree commits, every other
  * fragment registered after `core-react` has finished its own `init`
@@ -16,9 +15,9 @@ import { getQueryClient } from "../internal/query-client-ctx.js";
  * Cleanup unmounts the React root so re-entrant `onLoad` /
  * `onUnload` cycles do not leak DOM.
  *
- * The `core:views` slot key is declared by `view-registry.ts`;
- * consumers reach it via `newViewRegistry(workspace)` /
- * `useViewRegistry()` and don't need eager adapter instantiation.
+ * The `core:views` keyed slot is declared in `extension-points.ts`;
+ * consumers reach it via the `coreViewsSlot` declaration plus the
+ * workspace's `Slots` adapter — no eager adapter instantiation here.
  */
 export default function initCoreReact(ctx: Record<string, unknown>): () => void {
   const workspace = getWorkspace(ctx);

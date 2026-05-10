@@ -1,13 +1,13 @@
-import { handleDownloadBlob } from "@statewalker/platform-api";
-import type { Intents } from "@statewalker/shared-intents";
+import { DownloadBlobCommand } from "@statewalker/platform-api";
+import type { Commands } from "@statewalker/shared-commands";
 
 /**
  * Browser default for `platform:download-blob`. Creates a temporary `<a>` with
  * an object URL and synthesises a click. The object URL is revoked after the
  * click fires to avoid leaking the blob reference.
  */
-export function registerDownloadBlobBrowser(intents: Intents): () => void {
-  return handleDownloadBlob(intents, (intent) => {
+export function registerDownloadBlobBrowser(intents: Commands): () => void {
+  return intents.listen(DownloadBlobCommand, (intent) => {
     try {
       const { blob, filename } = intent.payload;
       const url = URL.createObjectURL(blob);

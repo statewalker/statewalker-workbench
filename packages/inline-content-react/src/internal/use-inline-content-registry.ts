@@ -1,16 +1,17 @@
-import { useAdapter, useKeyedSlot } from "@statewalker/core-react";
-import type { KeyedSlot } from "@statewalker/shared-slots";
+import { type KeyedSlotView, useAdapter, useKeyedSlot } from "@statewalker/core-react";
 import { Slots } from "@statewalker/shared-slots";
 import {
-  INLINE_CONTENT_RENDERERS_SLOT_KEY,
   type InlineContentComponent,
+  inlineContentRenderersSlot,
 } from "../public/inline-content-registry.js";
 
 /**
- * React hook returning the `KeyedSlot<InlineContentComponent>` bound to
- * the application's `Slots` adapter under `inline-content:renderers`.
+ * React hook returning a reactive view of `inlineContentRenderersSlot`
+ * bound to the application's `Slots` adapter. Read-only; logic-side
+ * registration goes through
+ * `slots.register(inlineContentRenderersSlot, name, component)`.
  */
-export function useInlineContentRegistry(): KeyedSlot<InlineContentComponent> {
+export function useInlineContentRegistry(): KeyedSlotView<InlineContentComponent> {
   const slots = useAdapter(Slots);
-  return useKeyedSlot<InlineContentComponent>(slots, INLINE_CONTENT_RENDERERS_SLOT_KEY);
+  return useKeyedSlot(slots, inlineContentRenderersSlot);
 }

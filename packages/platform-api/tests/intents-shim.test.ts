@@ -1,13 +1,13 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { getWorkspace } from "@statewalker/workspace";
 import { describe, expect, it, vi } from "vitest";
 import { getIntents, removeIntents, setIntents } from "../src/adapters.ts";
 
 describe("getIntents shim", () => {
-  it("returns the same instance as workspace.requireAdapter(Intents) for the same ctx", () => {
+  it("returns the same instance as workspace.requireAdapter(Commands) for the same ctx", () => {
     const ctx: Record<string, unknown> = {};
     const fromShim = getIntents(ctx);
-    const fromWorkspace = getWorkspace(ctx).requireAdapter(Intents);
+    const fromWorkspace = getWorkspace(ctx).requireAdapter(Commands);
     expect(fromShim).toBe(fromWorkspace);
   });
 
@@ -18,9 +18,9 @@ describe("getIntents shim", () => {
     expect(a).toBe(b);
   });
 
-  it("returns an Intents instance", () => {
+  it("returns an Commands instance", () => {
     const ctx: Record<string, unknown> = {};
-    expect(getIntents(ctx)).toBeInstanceOf(Intents);
+    expect(getIntents(ctx)).toBeInstanceOf(Commands);
   });
 
   it("returns distinct instances for distinct ctx (each ctx gets its own workspace)", () => {
@@ -36,7 +36,7 @@ describe("setIntents / removeIntents — deprecation no-op semantics", () => {
     try {
       const ctx: Record<string, unknown> = {};
       const original = getIntents(ctx);
-      const mock = new Intents();
+      const mock = new Commands();
       setIntents(ctx, mock);
       const after = getIntents(ctx);
       expect(after).toBe(original);
@@ -55,7 +55,7 @@ describe("setIntents / removeIntents — deprecation no-op semantics", () => {
       removeIntents(ctx);
       const after = getIntents(ctx);
       expect(after).toBe(original);
-      expect(getWorkspace(ctx).requireAdapter(Intents)).toBe(original);
+      expect(getWorkspace(ctx).requireAdapter(Commands)).toBe(original);
       expect(warn).toHaveBeenCalled();
     } finally {
       warn.mockRestore();

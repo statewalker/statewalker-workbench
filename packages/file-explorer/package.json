@@ -30,7 +30,7 @@
     "@statewalker/dock": "workspace:*",
     "@statewalker/files": "workspace:*",
     "@statewalker/shared-baseclass": "catalog:",
-    "@statewalker/shared-intents": "catalog:",
+    "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
     "@statewalker/webrun-files": "workspace:*",

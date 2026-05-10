@@ -1,7 +1,7 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { getWorkspace } from "@statewalker/workspace";
-import { handleCreateSpec, handlePatchSpec } from "./intents.js";
+import { CreateSpecCommand, PatchSpecCommand } from "./intents.js";
 import { SpecStore } from "./spec-store.js";
 
 /**
@@ -9,7 +9,7 @@ import { SpecStore } from "./spec-store.js";
  * `spec:create` / `spec:patch` intent handlers. After this fragment
  * runs, every other fragment can:
  *   - resolve the store via `workspace.requireAdapter(SpecStore)`
- *   - invoke `runCreateSpec(intents, ...)` / `runPatchSpec(intents, ...)`
+ *   - invoke `intents.call(CreateSpecCommand, ...)` / `intents.call(PatchSpecCommand, ...)`
  *
  * Returns the cleanup; LIFO via shared-registry releases the
  * adapter binding and intent handlers on shutdown.
@@ -18,10 +18,10 @@ export default function initSpecStore(ctx: Record<string, unknown>): () => Promi
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
   const store = workspace.requireAdapter(SpecStore);
-  const intents = workspace.requireAdapter(Intents);
+  const intents = workspace.requireAdapter(Commands);
 
   register(
-    handleCreateSpec(intents, (intent) => {
+    intents.listen(CreateSpecCommand, (intent) => {
       const { catalogId, spec, meta } = intent.payload;
       const specId = store.create({ catalogId, spec, meta });
       intent.resolve({ specId });
@@ -30,7 +30,7 @@ export default function initSpecStore(ctx: Record<string, unknown>): () => Promi
   );
 
   register(
-    handlePatchSpec(intents, (intent) => {
+    intents.listen(PatchSpecCommand, (intent) => {
       const { specId, patch } = intent.payload;
       store.patch(specId, patch);
       intent.resolve();

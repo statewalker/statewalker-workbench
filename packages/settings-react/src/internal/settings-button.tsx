@@ -1,7 +1,7 @@
 import { useAdapter } from "@statewalker/core-react";
-import { runOpenSettings } from "@statewalker/settings";
+import { OpenSettingsCommand } from "@statewalker/settings";
 import { Button } from "@statewalker/shadcn-react";
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { Settings as SettingsIcon } from "lucide-react";
 import type { ReactElement } from "react";
 
@@ -16,13 +16,13 @@ export interface SettingsButtonProps {
  * mounted once at the top of the React tree.
  */
 export function SettingsButton({ tabId }: SettingsButtonProps): ReactElement {
-  const intents = useAdapter(Intents);
+  const intents = useAdapter(Commands);
   return (
     <Button
       size="sm"
       variant="ghost"
       aria-label="Settings"
-      onClick={() => runOpenSettings(intents, { tabId })}
+      onClick={() => intents.call(OpenSettingsCommand, { tabId })}
     >
       <SettingsIcon className="h-3.5 w-3.5" /> Settings
     </Button>

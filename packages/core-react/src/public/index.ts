@@ -11,5 +11,5 @@ export {
   type ObservableAdapter,
   useAdapterValue,
 } from "../internal/use-adapter-value.js";
-export { useKeyedSlot, useSlot } from "../internal/use-slot.js";
-export * from "./view-registry.js";
+export { type KeyedSlotView, useKeyedSlot, useSlot } from "../internal/use-slot.js";
+export * from "./extension-points.js";

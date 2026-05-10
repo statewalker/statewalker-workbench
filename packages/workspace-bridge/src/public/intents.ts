@@ -1,21 +1,20 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 
 /**
  * Re-export the canonical `workspace:change` intent from
  * `@statewalker/workspace`. Callers that want to switch /
  * connect / set the workspace folder fire
- * `runChangeWorkspace(intents, { files? })`.
+ * `intents.call(ChangeWorkspaceCommand, { files? })`.
  *
- * `runChangeWorkspace(intents, {})` opens the picker dialog
- * interactively (defers to platform-api's runPickDirectory);
- * `runChangeWorkspace(intents, { files })` rebinds non-interactively
+ * `intents.call(ChangeWorkspaceCommand, {})` opens the picker dialog
+ * interactively (defers to platform-api's PickDirectoryCommand);
+ * `intents.call(ChangeWorkspaceCommand, { files })` rebinds non-interactively
  * (used by tests, integration harness, future CLI / MCP entry points).
  */
 export {
+  ChangeWorkspaceCommand,
   type ChangeWorkspacePayload,
   type ChangeWorkspaceResult,
-  handleChangeWorkspace,
-  runChangeWorkspace,
 } from "@statewalker/workspace";
 
 /**
@@ -33,10 +32,8 @@ export type WorkspaceVoidResult = Record<string, never>;
  * `requestPermission()` call is allowed by the browser.
  */
 export const WORKSPACE_RECONNECT_INTENT_KEY = "workspace:reconnect";
-export const [runWorkspaceReconnect, handleWorkspaceReconnect] = newIntent<
-  WorkspaceVoidPayload,
-  WorkspaceVoidResult
->(WORKSPACE_RECONNECT_INTENT_KEY);
+export const WorkspaceReconnectCommand = defineCommand<WorkspaceVoidPayload,
+  WorkspaceVoidResult>(WORKSPACE_RECONNECT_INTENT_KEY, () => {});
 
 /**
  * `workspace:disconnect` — `await workspace.close()`, clear the
@@ -46,7 +43,5 @@ export const [runWorkspaceReconnect, handleWorkspaceReconnect] = newIntent<
  * runtime is fully torn down before the next pick lands.
  */
 export const WORKSPACE_DISCONNECT_INTENT_KEY = "workspace:disconnect";
-export const [runWorkspaceDisconnect, handleWorkspaceDisconnect] = newIntent<
-  WorkspaceVoidPayload,
-  WorkspaceVoidResult
->(WORKSPACE_DISCONNECT_INTENT_KEY);
+export const WorkspaceDisconnectCommand = defineCommand<WorkspaceVoidPayload,
+  WorkspaceVoidResult>(WORKSPACE_DISCONNECT_INTENT_KEY, () => {});

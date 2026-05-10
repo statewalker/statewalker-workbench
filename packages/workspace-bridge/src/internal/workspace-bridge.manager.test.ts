@@ -1,8 +1,8 @@
-import { Intents } from "@statewalker/shared-intents";
-import { getWorkspace, runChangeWorkspace } from "@statewalker/workspace";
+import { Commands } from "@statewalker/shared-commands";
+import { ChangeWorkspaceCommand, getWorkspace } from "@statewalker/workspace";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import initWorkspaceBridge from "../public/init.js";
-import { runWorkspaceDisconnect, runWorkspaceReconnect } from "../public/intents.js";
+import { WorkspaceDisconnectCommand, WorkspaceReconnectCommand } from "../public/intents.js";
 import { WorkspaceShellAdapter } from "./workspace-shell-adapter.js";
 
 vi.mock("idb-keyval", () => {
@@ -138,7 +138,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     const cleanup = initWorkspaceBridge(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const shell = ws.requireAdapter(WorkspaceShellAdapter);
 
       await settle(); // silent-restore → empty
@@ -151,7 +151,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
         showDirectoryPicker,
       });
 
-      await runChangeWorkspace(intents, {}).promise;
+      await intents.call(ChangeWorkspaceCommand, {}).promise;
       await settle();
 
       expect(showDirectoryPicker).toHaveBeenCalledOnce();
@@ -194,7 +194,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     const cleanup = initWorkspaceBridge(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const shell = ws.requireAdapter(WorkspaceShellAdapter);
 
       await settle();
@@ -202,7 +202,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
       expect(shell.getState().status).toBe("ready");
       expect(ws.isOpened).toBe(true);
 
-      await runWorkspaceDisconnect(intents, {}).promise;
+      await intents.call(WorkspaceDisconnectCommand, {}).promise;
 
       expect(shell.getState()).toEqual({ status: "empty" });
       expect(ws.isOpened).toBe(false);
@@ -222,13 +222,13 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     const cleanup = initWorkspaceBridge(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const shell = ws.requireAdapter(WorkspaceShellAdapter);
 
       await settle();
       expect(shell.getState().status).toBe("needs-permission");
 
-      const reconnect = runWorkspaceReconnect(intents, {});
+      const reconnect = intents.call(WorkspaceReconnectCommand, {});
       await reconnect.promise;
       // _adoptHandle internally awaits runChangeWorkspace which is
       // itself awaited inside the handler — but the resolve happens
@@ -254,7 +254,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     // ── Cycle 1 ──
     const cleanup1 = initWorkspaceBridge(ctx);
     const ws = getWorkspace(ctx);
-    const intents = ws.requireAdapter(Intents);
+    const intents = ws.requireAdapter(Commands);
     const shell = ws.requireAdapter(WorkspaceShellAdapter);
 
     await settle();
@@ -262,7 +262,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     expect(shell.getState().status).toBe("ready");
 
     // Disconnect the handlers + workspace.
-    await runWorkspaceDisconnect(intents, {}).promise;
+    await intents.call(WorkspaceDisconnectCommand, {}).promise;
     expect(shell.getState().status).toBe("empty");
 
     await cleanup1();
@@ -284,7 +284,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
       // active intent handlers — firing disconnect once should
       // transition cleanly to `empty` rather than throwing or
       // double-handling.
-      await runWorkspaceDisconnect(intents, {}).promise;
+      await intents.call(WorkspaceDisconnectCommand, {}).promise;
       expect(shell.getState()).toEqual({ status: "empty" });
     } finally {
       await cleanup2();

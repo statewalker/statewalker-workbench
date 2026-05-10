@@ -1,5 +1,5 @@
-import { handlePreferenceGet } from "@statewalker/platform-api";
-import type { Intents } from "@statewalker/shared-intents";
+import { PreferenceGetCommand } from "@statewalker/platform-api";
+import type { Commands } from "@statewalker/shared-commands";
 
 const PREFIX = "workbench:";
 
@@ -9,8 +9,8 @@ const PREFIX = "workbench:";
  * key is absent or parsing fails (the latter is logged but not thrown — the
  * caller gets the "missing value" signal and can re-seed).
  */
-export function registerPreferenceGetBrowser(intents: Intents): () => void {
-  return handlePreferenceGet(intents, (intent) => {
+export function registerPreferenceGetBrowser(intents: Commands): () => void {
+  return intents.listen(PreferenceGetCommand, (intent) => {
     try {
       const raw = localStorage.getItem(PREFIX + intent.payload.key);
       if (raw === null) {

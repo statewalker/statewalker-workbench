@@ -1,6 +1,6 @@
 import type { DownloadProgress } from "@statewalker/platform-api";
-import { handleDownloadToFiles } from "@statewalker/platform-api";
-import type { Intents } from "@statewalker/shared-intents";
+import { DownloadToFilesCommand } from "@statewalker/platform-api";
+import type { Commands } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 
 /**
@@ -11,8 +11,8 @@ import type { FilesApi } from "@statewalker/webrun-files";
  * new stream so the final on-disk file is the full object. Respects
  * `AbortSignal` on the payload; an abort throws and the intent rejects.
  */
-export function registerDownloadToFilesBrowser(intents: Intents): () => void {
-  return handleDownloadToFiles(intents, (intent) => {
+export function registerDownloadToFilesBrowser(intents: Commands): () => void {
+  return intents.listen(DownloadToFilesCommand, (intent) => {
     void performDownload(intent.payload)
       .then((result) => {
         intent.resolve(result);

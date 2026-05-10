@@ -1,10 +1,10 @@
 import { useAppWorkspace } from "@statewalker/core-react";
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { type ReactElement, useCallback } from "react";
 
 interface ActionButtonProps {
   label: string;
-  /** Intent key fired when the button is clicked. */
+  /** Command key fired when the button is clicked. */
   intent: string;
   /** Payload passed to the intent. Optional. */
   payload?: unknown;
@@ -25,11 +25,13 @@ function isActionButtonProps(value: unknown): value is ActionButtonProps {
  */
 export function ActionButton({ props }: { props: unknown }): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Intents);
+  const intents = workspace.requireAdapter(Commands);
 
   const onClick = useCallback(() => {
     if (!isActionButtonProps(props)) return;
-    intents.run(props.intent, props.payload, () => true);
+    // Dynamic dispatch by string key. The action key is configured per
+    // declarative spec; the bus accepts any CommandDeclaration shape.
+    intents.call({ key: props.intent }, props.payload);
   }, [intents, props]);
 
   if (!isActionButtonProps(props)) {

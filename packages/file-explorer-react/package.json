@@ -28,7 +28,7 @@
   "dependencies": {
     "@json-render/react": "0.18.0",
     "@statewalker/shared-baseclass": "catalog:",
-    "@statewalker/shared-intents": "catalog:",
+    "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/core-react": "workspace:*",
     "@statewalker/dock": "workspace:*",

@@ -1,4 +1,4 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 
 export const DOWNLOAD_TO_FILES_INTENT_KEY = "platform:download-to-files";
@@ -21,7 +21,5 @@ export interface DownloadToFilesResult {
   bytes: number;
 }
 
-export const [runDownloadToFiles, handleDownloadToFiles] = newIntent<
-  DownloadToFilesPayload,
-  DownloadToFilesResult
->(DOWNLOAD_TO_FILES_INTENT_KEY);
+export const DownloadToFilesCommand = defineCommand<DownloadToFilesPayload,
+  DownloadToFilesResult>(DOWNLOAD_TO_FILES_INTENT_KEY, () => {});

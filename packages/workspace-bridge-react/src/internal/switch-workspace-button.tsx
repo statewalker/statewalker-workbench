@@ -1,7 +1,7 @@
 import { useAdapter } from "@statewalker/core-react";
 import { Button } from "@statewalker/shadcn-react";
-import { Intents } from "@statewalker/shared-intents";
-import { runChangeWorkspace, runWorkspaceDisconnect } from "@statewalker/workspace-bridge";
+import { Commands } from "@statewalker/shared-commands";
+import { ChangeWorkspaceCommand, WorkspaceDisconnectCommand } from "@statewalker/workspace-bridge";
 import { LogOut } from "lucide-react";
 import type { ReactElement } from "react";
 
@@ -14,11 +14,11 @@ import type { ReactElement } from "react";
  * `onUnload` listeners (per ADR 0001).
  */
 export function SwitchWorkspaceButton(): ReactElement {
-  const intents = useAdapter(Intents);
+  const intents = useAdapter(Commands);
   const onClick = async (): Promise<void> => {
-    await runWorkspaceDisconnect(intents, {}).promise;
+    await intents.call(WorkspaceDisconnectCommand, {}).promise;
     try {
-      await runChangeWorkspace(intents, {}).promise;
+      await intents.call(ChangeWorkspaceCommand, {}).promise;
     } catch (e) {
       // User cancellation throws AbortError; user already in `empty`.
       if (e instanceof DOMException && e.name === "AbortError") return;

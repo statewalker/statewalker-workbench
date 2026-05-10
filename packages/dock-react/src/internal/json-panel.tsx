@@ -1,9 +1,9 @@
 import { JSONUIProvider, Renderer } from "@json-render/react";
 import { useCatalogRegistry } from "@statewalker/catalog-registry-react";
 import { useAppWorkspace } from "@statewalker/core-react";
-import { runClosePanel } from "@statewalker/dock";
-import { Intents } from "@statewalker/shared-intents";
-import { type SpecRecord, SpecStore } from "@statewalker/spec-store";
+import { ClosePanelCommand } from "@statewalker/dock";
+import { Commands } from "@statewalker/shared-commands";
+import { SpecStore, type SpecRecord } from "@statewalker/spec-store";
 import type { IDockviewPanelProps } from "dockview-react";
 import { type ReactElement, useSyncExternalStore } from "react";
 
@@ -29,7 +29,7 @@ export function JsonPanel(props: IDockviewPanelProps<JsonPanelParams>): ReactEle
   const workspace = useAppWorkspace();
   const store = workspace.requireAdapter(SpecStore);
   const catalogs = useCatalogRegistry();
-  const intents = workspace.requireAdapter(Intents);
+  const intents = workspace.requireAdapter(Commands);
 
   const record = useSyncExternalStore<SpecRecord | null>(
     (notify) => store.observe(specId, notify),
@@ -40,7 +40,7 @@ export function JsonPanel(props: IDockviewPanelProps<JsonPanelParams>): ReactEle
     return (
       <PanelMissing
         specId={specId}
-        onClose={() => runClosePanel(intents, { panelId: props.api.id })}
+        onClose={() => intents.call(ClosePanelCommand, { panelId: props.api.id })}
       />
     );
   }
@@ -50,7 +50,7 @@ export function JsonPanel(props: IDockviewPanelProps<JsonPanelParams>): ReactEle
     return (
       <CatalogMissing
         catalogId={record.catalogId}
-        onClose={() => runClosePanel(intents, { panelId: props.api.id })}
+        onClose={() => intents.call(ClosePanelCommand, { panelId: props.api.id })}
       />
     );
   }

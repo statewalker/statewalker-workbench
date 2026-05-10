@@ -1,5 +1,5 @@
-import { handlePickDirectory, UserCancelledError } from "@statewalker/platform-api";
-import type { Intents } from "@statewalker/shared-intents";
+import { PickDirectoryCommand, UserCancelledError } from "@statewalker/platform-api";
+import type { Commands } from "@statewalker/shared-commands";
 import { BrowserFilesApi } from "@statewalker/webrun-files-browser";
 
 /** Minimal shape of the File System Access API we rely on. Chrome/Edge only. */
@@ -16,8 +16,8 @@ interface DirectoryPickerGlobal {
  * is explicitly NOT done here — callers that want to remember a workspace
  * use the `platform:preference-*` intents with a serialisable identifier.
  */
-export function registerPickDirectoryBrowser(intents: Intents): () => void {
-  return handlePickDirectory(intents, (intent) => {
+export function registerPickDirectoryBrowser(intents: Commands): () => void {
+  return intents.listen(PickDirectoryCommand, (intent) => {
     const api = globalThis as unknown as DirectoryPickerGlobal;
     const picker = api.showDirectoryPicker;
     if (typeof picker !== "function") {

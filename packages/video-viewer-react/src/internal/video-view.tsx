@@ -1,6 +1,6 @@
 import { useAppWorkspace } from "@statewalker/core-react";
-import { runLoadFile } from "@statewalker/files";
-import { Intents } from "@statewalker/shared-intents";
+import { LoadFileCommand } from "@statewalker/files";
+import { Commands } from "@statewalker/shared-commands";
 import { type ReactElement, useEffect, useState } from "react";
 
 interface VideoViewProps {
@@ -16,7 +16,7 @@ interface VideoViewProps {
  */
 export function VideoView({ uri }: VideoViewProps): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Intents);
+  const intents = workspace.requireAdapter(Commands);
 
   const [state, setState] = useState<
     { kind: "loading" } | { kind: "ready"; url: string } | { kind: "error"; message: string }
@@ -27,7 +27,7 @@ export function VideoView({ uri }: VideoViewProps): ReactElement {
     let cancelled = false;
     setState({ kind: "loading" });
     const path = uri.replace(/^file:\/\//, "");
-    runLoadFile(intents, { path })
+    intents.call(LoadFileCommand, { path })
       .promise.then((loaded) => {
         if (cancelled) return;
         const url = URL.createObjectURL(

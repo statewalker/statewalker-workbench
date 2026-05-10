@@ -1,37 +1,42 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { describe, expect, it } from "vitest";
 import { Workspace } from "../public/types/workspace.js";
 
-describe("Intents as a workspace adapter", () => {
-  it("requireAdapter(Intents) auto-instantiates without explicit setAdapter", () => {
+describe("Commands as a workspace adapter", () => {
+  it("requireAdapter(Commands) auto-instantiates without explicit setAdapter", () => {
     const ws = new Workspace();
-    const bus = ws.requireAdapter(Intents);
-    expect(bus).toBeInstanceOf(Intents);
+    const bus = ws.requireAdapter(Commands);
+    expect(bus).toBeInstanceOf(Commands);
   });
 
-  it("two consecutive requireAdapter(Intents) calls return the same identity", () => {
+  it("two consecutive requireAdapter(Commands) calls return the same identity", () => {
     const ws = new Workspace();
-    const a = ws.requireAdapter(Intents);
-    const b = ws.requireAdapter(Intents);
+    const a = ws.requireAdapter(Commands);
+    const b = ws.requireAdapter(Commands);
     expect(a).toBe(b);
   });
 
-  it("auto-instantiation cycle-detection allows Intents (constructor does no recursive requireAdapter)", () => {
+  it("auto-instantiation cycle-detection allows Commands (constructor does no recursive requireAdapter)", () => {
     const ws = new Workspace();
-    expect(() => ws.requireAdapter(Intents)).not.toThrow();
+    expect(() => ws.requireAdapter(Commands)).not.toThrow();
   });
 
-  it("dispatch through the workspace-bound bus reaches handlers registered through it", () => {
+  it("dispatch through the workspace-bound bus reaches listeners registered through it", async () => {
     const ws = new Workspace();
-    const bus = ws.requireAdapter(Intents);
+    const bus = ws.requireAdapter(Commands);
+
+    const HelloCommand = (await import("@statewalker/shared-commands")).defineCommand<
+      { msg: string },
+      void
+    >("hello", () => {});
 
     let received: string | null = null;
-    bus.addHandler<{ msg: string }, void>("hello", (intent) => {
-      received = intent.payload.msg;
+    bus.listen(HelloCommand, (cmd) => {
+      received = cmd.payload.msg;
       return true;
     });
 
-    bus.run("hello", { msg: "hi" });
+    bus.call(HelloCommand, { msg: "hi" });
     expect(received).toBe("hi");
   });
 });

@@ -1,12 +1,13 @@
 import {
   compareByOrderAndId,
+  type KeyedSlotView,
   useAdapter,
   useAdapterValue,
   useSlot,
   useViewRegistry,
   type ViewComponent,
 } from "@statewalker/core-react";
-import { observeSettingsTabs, Settings, type SettingsTab } from "@statewalker/settings";
+import { settingsTabSlot, Settings, type SettingsTab } from "@statewalker/settings";
 import {
   cn,
   Dialog,
@@ -15,7 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@statewalker/shadcn-react";
-import type { KeyedSlot } from "@statewalker/shared-slots";
 import { Slots } from "@statewalker/shared-slots";
 import { type ReactElement, useMemo } from "react";
 
@@ -39,7 +39,7 @@ export function SettingsDialog(): ReactElement | null {
   const isOpen = useAdapterValue(Settings, (s) => s.isOpen);
   const activeTabId = useAdapterValue(Settings, (s) => s.activeTabId);
 
-  const tabs = useSlot(slots, observeSettingsTabs);
+  const tabs = useSlot(slots, settingsTabSlot);
   const sortedTabs = useMemo(() => [...tabs].sort(compareByOrderAndId), [tabs]);
 
   if (!isOpen) return null;
@@ -96,7 +96,7 @@ function TabContent({
   registry,
 }: {
   tab: SettingsTab;
-  registry: KeyedSlot<ViewComponent>;
+  registry: KeyedSlotView<ViewComponent>;
 }): ReactElement {
   const Component = registry.get(tab.viewKey);
   if (!Component) {

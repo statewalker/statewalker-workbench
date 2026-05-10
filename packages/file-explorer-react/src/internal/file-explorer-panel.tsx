@@ -1,11 +1,9 @@
 import { useAdapter, useAppWorkspace } from "@statewalker/core-react";
 import {
-  activeFileExplorerPanels,
-  createPanelController,
-  type PanelController,
+  activeFileExplorerPanelsSlot, createPanelController, type PanelController
 } from "@statewalker/file-explorer";
-import { runOpen } from "@statewalker/files";
-import { Intents } from "@statewalker/shared-intents";
+import { OpenCommand } from "@statewalker/files";
+import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import { type ReactElement, useEffect, useMemo } from "react";
 import { FilesListView } from "./files-list-view.js";
@@ -41,7 +39,7 @@ export function FileExplorerPanel({
   folderNavigationHost = false,
 }: FileExplorerPanelProps): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = useAdapter(Intents);
+  const intents = useAdapter(Commands);
   const slots = useAdapter(Slots);
 
   const panel: PanelController = useMemo(
@@ -55,16 +53,15 @@ export function FileExplorerPanel({
   );
 
   useEffect(() => {
-    const panels = activeFileExplorerPanels(slots);
-    return panels.register(panelId, {
-      navigate: (path) => panel.navigate(path),
+    return slots.register(activeFileExplorerPanelsSlot, panelId, {
+      navigate: (path: string) => panel.navigate(path),
       isMainViewerHost: mainViewerHost,
       isFolderNavigationHost: folderNavigationHost,
     });
   }, [panel, panelId, slots, mainViewerHost, folderNavigationHost]);
 
   function handleOpen(uri: string): void {
-    runOpen(intents, { uri, panelId }).promise.catch((err) => {
+    intents.call(OpenCommand, { uri, panelId }).promise.catch((err) => {
       console.error("[file-explorer] files:open failed:", err);
     });
   }

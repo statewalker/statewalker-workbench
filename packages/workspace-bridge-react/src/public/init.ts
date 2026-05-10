@@ -1,5 +1,5 @@
 import { newViewRegistry } from "@statewalker/core-react";
-import { provideDockHeaderItem } from "@statewalker/dock";
+import { dockHeaderItemsSlot } from "@statewalker/dock";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace";
@@ -41,7 +41,7 @@ export default function initWorkspaceBridgeReact(
     ),
   );
   register(
-    provideDockHeaderItem(slots, {
+    slots.provide(dockHeaderItemsSlot, {
       id: "workspace:label",
       slot: "leading",
       order: 0,

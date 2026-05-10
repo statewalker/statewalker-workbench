@@ -1,23 +1,17 @@
 import { defineRegistry } from "@json-render/react";
 import { newCatalogRegistry } from "@statewalker/catalog-registry";
-import { provideDockTabIcon } from "@statewalker/dock-react";
-import { provideMimeRenderer } from "@statewalker/files";
+import { dockTabIconSlot } from "@statewalker/dock-react";
+import { mimeRenderersSlot } from "@statewalker/files";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import {
-  DOCK_LAYOUT_STORAGE_KEY,
-  restorePanelSpecsFromLayout,
-  SpecStore,
+  DOCK_LAYOUT_STORAGE_KEY, SpecStore, restorePanelSpecsFromLayout
 } from "@statewalker/spec-store";
 import { getWorkspace } from "@statewalker/workspace";
 import { FileText } from "lucide-react";
 import { MarkdownView } from "../internal/markdown-view.js";
 import {
-  MARKDOWN_VIEWER_CATALOG_ID,
-  makeMarkdownSpec,
-  markdownViewerCatalog,
-  markdownViewerPanelId,
-  markdownViewerSpecId,
+  MARKDOWN_VIEWER_CATALOG_ID, makeMarkdownSpec, markdownViewerCatalog, markdownViewerPanelId, markdownViewerSpecId
 } from "./catalog.js";
 
 /**
@@ -54,7 +48,7 @@ export default function initMarkdownViewerReact(ctx: Record<string, unknown>): (
   register(catalogs.register(MARKDOWN_VIEWER_CATALOG_ID, registry));
 
   register(
-    provideMimeRenderer(slots, {
+    slots.provide(mimeRenderersSlot, {
       mimeTypePattern: "text/markdown",
       buildPanel(uri) {
         return {
@@ -67,7 +61,7 @@ export default function initMarkdownViewerReact(ctx: Record<string, unknown>): (
     }),
   );
 
-  register(provideDockTabIcon(slots, { panelIdPrefix: "markdown-viewer:", Icon: FileText }));
+  register(slots.provide(dockTabIconSlot, { panelIdPrefix: "markdown-viewer:", Icon: FileText }));
 
   return cleanup;
 }

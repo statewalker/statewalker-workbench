@@ -1,10 +1,9 @@
 import { AppWorkspaceProvider } from "@statewalker/core-react";
-import { handleLoadDirectory, handleVisualizeFile } from "@statewalker/files";
+import { LoadDirectoryCommand, VisualizeFileCommand } from "@statewalker/files";
 import {
-  type InlineComponentDescriptor,
-  observeInlineComponents,
+  inlineComponentSlot, type InlineComponentDescriptor
 } from "@statewalker/inline-content";
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import { Workspace } from "@statewalker/workspace";
 import { fireEvent, render } from "@testing-library/react";
@@ -41,8 +40,8 @@ describe("inline-content-views built-ins", () => {
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentReact(ctx);
 
-    let descriptors: InlineComponentDescriptor[] = [];
-    const dispose = observeInlineComponents(slots, (vs) => {
+    let descriptors: readonly InlineComponentDescriptor[] = [];
+    const dispose = slots.observe(inlineComponentSlot, (vs) => {
       descriptors = vs;
     });
     expect(descriptors.map((d) => d.id).sort()).toEqual([
@@ -126,10 +125,10 @@ describe("inline-content-views built-ins", () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentReact(ctx);
-    const intents = ws.requireAdapter(Intents);
+    const intents = ws.requireAdapter(Commands);
 
     const loadDir = vi.fn();
-    const disposeLoad = handleLoadDirectory(intents, (intent) => {
+    const disposeLoad = intents.listen(LoadDirectoryCommand, (intent) => {
       loadDir(intent.payload);
       intent.resolve([]);
       return true;
@@ -166,10 +165,10 @@ describe("inline-content-views built-ins", () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentReact(ctx);
-    const intents = ws.requireAdapter(Intents);
+    const intents = ws.requireAdapter(Commands);
 
     const loadDir = vi.fn();
-    const disposeLoad = handleLoadDirectory(intents, (intent) => {
+    const disposeLoad = intents.listen(LoadDirectoryCommand, (intent) => {
       loadDir(intent.payload);
       intent.resolve([
         { name: "a.md", path: "/docs/a.md", kind: "file" },
@@ -204,10 +203,10 @@ describe("inline-content-views built-ins", () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentReact(ctx);
-    const intents = ws.requireAdapter(Intents);
+    const intents = ws.requireAdapter(Commands);
 
     const visualize = vi.fn();
-    const disposeVisualize = handleVisualizeFile(intents, (intent) => {
+    const disposeVisualize = intents.listen(VisualizeFileCommand, (intent) => {
       visualize(intent.payload);
       intent.resolve();
       return true;

@@ -1,4 +1,4 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 
 export const DOWNLOAD_BLOB_INTENT_KEY = "platform:download-blob";
 
@@ -7,6 +7,4 @@ export interface DownloadBlobPayload {
   filename: string;
 }
 
-export const [runDownloadBlob, handleDownloadBlob] = newIntent<DownloadBlobPayload, void>(
-  DOWNLOAD_BLOB_INTENT_KEY,
-);
+export const DownloadBlobCommand = defineCommand<DownloadBlobPayload, void>(DOWNLOAD_BLOB_INTENT_KEY, () => {});

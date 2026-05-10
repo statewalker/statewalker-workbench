@@ -1,4 +1,4 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 import type { DirectoryEntry, LoadedFile } from "./types.js";
 
 export interface LoadDirectoryPayload {
@@ -7,50 +7,42 @@ export interface LoadDirectoryPayload {
   /** Recursive listing (descends into subdirectories). */
   recursive?: boolean;
 }
-export const [runLoadDirectory, handleLoadDirectory] = newIntent<
-  LoadDirectoryPayload,
-  readonly DirectoryEntry[]
->("files:load-directory");
+export const LoadDirectoryCommand = defineCommand<LoadDirectoryPayload,
+  readonly DirectoryEntry[]>("files:load-directory", () => {});
 
 export interface LoadFilePayload {
   path: string;
 }
-export const [runLoadFile, handleLoadFile] = newIntent<LoadFilePayload, LoadedFile>(
-  "files:load-file",
-);
+export const LoadFileCommand = defineCommand<LoadFilePayload, LoadedFile>("files:load-file", () => {});
 
 export interface WriteFilePayload {
   path: string;
   content: Uint8Array | string;
 }
-export const [runWriteFile, handleWriteFile] = newIntent<WriteFilePayload, void>(
-  "files:write-file",
-);
+export const WriteFileCommand = defineCommand<WriteFilePayload, void>("files:write-file", () => {});
 
 export interface MoveFilePayload {
   fromPath: string;
   toPath: string;
 }
-export const [runMoveFile, handleMoveFile] = newIntent<MoveFilePayload, void>("files:move-file");
+export const MoveFileCommand = defineCommand<MoveFilePayload, void>("files:move-file", () => {});
 
 export interface DeleteFilePayload {
   path: string;
 }
-export const [runDeleteFile, handleDeleteFile] = newIntent<DeleteFilePayload, void>(
-  "files:delete-file",
-);
+export const DeleteFileCommand = defineCommand<DeleteFilePayload, void>("files:delete-file", () => {});
 
 export interface MkdirPayload {
   /** Workspace-relative path of the directory to create. */
   path: string;
 }
-export const [runMkdir, handleMkdir] = newIntent<MkdirPayload, void>("files:mkdir");
+export const MkdirCommand = defineCommand<MkdirPayload, void>("files:mkdir", () => {});
 
 export interface RenamePayload {
   fromPath: string;
   toPath: string;
 }
-export const [runRename, handleRename] = newIntent<RenamePayload, void>("files:rename");
+export const RenameCommand = defineCommand<RenamePayload, void>("files:rename", () => {});
 
 export interface VisualizeFilePayload {
   /**
@@ -68,9 +60,7 @@ export interface VisualizeFilePayload {
    */
   referencePanelId?: string;
 }
-export const [runVisualizeFile, handleVisualizeFile] = newIntent<VisualizeFilePayload, void>(
-  "files:visualize",
-);
+export const VisualizeFileCommand = defineCommand<VisualizeFilePayload, void>("files:visualize", () => {});
 
 export interface OpenPayload {
   /** `file://` URI or workspace-relative path of a file or directory. */
@@ -87,4 +77,4 @@ export interface OpenPayload {
  * — directories navigate the panel identified by `panelId`, files
  * delegate to `files:visualize`.
  */
-export const [runOpen, handleOpen] = newIntent<OpenPayload, void>("files:open");
+export const OpenCommand = defineCommand<OpenPayload, void>("files:open", () => {});

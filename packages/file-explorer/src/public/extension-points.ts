@@ -1,4 +1,4 @@
-import { KeyedSlot, newSlot, type Slots } from "@statewalker/shared-slots";
+import { defineKeyedSlot, defineSlot } from "@statewalker/shared-slots";
 
 /**
  * `file-explorer:panels` — declarative two-pane preset contributions.
@@ -42,8 +42,9 @@ export interface FileExplorerPanelPreset {
   folderNavigationHost?: boolean;
 }
 
-export const [provideFileExplorerPanelPreset, observeFileExplorerPanelPresets] =
-  newSlot<FileExplorerPanelPreset>("file-explorer:panels");
+export const fileExplorerPanelPresetsSlot = defineSlot<FileExplorerPanelPreset>(
+  "file-explorer:panels",
+);
 
 /**
  * Runtime handle exposed by an active file-explorer panel. Mounted
@@ -60,9 +61,6 @@ export interface ActiveFileExplorerPanel {
   isFolderNavigationHost: boolean;
 }
 
-export const FILE_EXPLORER_ACTIVE_PANELS = "file-explorer:active-panels";
-
-/** Open a `KeyedSlot` over the active-panels registry. */
-export function activeFileExplorerPanels(slots: Slots): KeyedSlot<ActiveFileExplorerPanel> {
-  return new KeyedSlot<ActiveFileExplorerPanel>(slots, FILE_EXPLORER_ACTIVE_PANELS);
-}
+export const activeFileExplorerPanelsSlot = defineKeyedSlot<ActiveFileExplorerPanel>(
+  "file-explorer:active-panels",
+);

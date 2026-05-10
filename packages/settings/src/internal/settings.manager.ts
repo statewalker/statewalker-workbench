@@ -1,7 +1,7 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import type { Workspace } from "@statewalker/workspace";
-import { handleCloseSettings, handleOpenSettings } from "../public/intents.js";
+import { CloseSettingsCommand, OpenSettingsCommand } from "../public/intents.js";
 import { Settings } from "../public/settings.adapter.js";
 
 export interface SettingsManagerOptions {
@@ -25,21 +25,21 @@ export class SettingsManager {
   private readonly _cleanup: () => Promise<void>;
 
   constructor({ workspace }: SettingsManagerOptions) {
-    const intents = workspace.requireAdapter(Intents);
+    const intents = workspace.requireAdapter(Commands);
     const settings = workspace.requireAdapter(Settings);
 
     const [register, cleanup] = newRegistry();
     this._cleanup = cleanup;
 
     register(
-      handleOpenSettings(intents, (intent) => {
+      intents.listen(OpenSettingsCommand, (intent) => {
         settings._setOpen(true, intent.payload?.tabId);
         intent.resolve();
         return true;
       }),
     );
     register(
-      handleCloseSettings(intents, (intent) => {
+      intents.listen(CloseSettingsCommand, (intent) => {
         settings._setOpen(false);
         intent.resolve();
         return true;

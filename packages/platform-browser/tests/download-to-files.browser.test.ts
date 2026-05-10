@@ -1,5 +1,5 @@
 import type { DownloadProgress } from "@statewalker/platform-api";
-import { getIntents, runDownloadToFiles } from "@statewalker/platform-api";
+import { DownloadToFilesCommand, getIntents } from "@statewalker/platform-api";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerDownloadToFilesBrowser } from "../src/handlers/download-to-files.browser.js";
@@ -57,7 +57,7 @@ describe("download-to-files browser handler", () => {
     const unregister = registerDownloadToFilesBrowser(getIntents(ctx));
     try {
       const progressEvents: DownloadProgress[] = [];
-      const result = await runDownloadToFiles(getIntents(ctx), {
+      const result = await getIntents(ctx).call(DownloadToFilesCommand, {
         url: "https://example.test/data.bin",
         files,
         path: "/data.bin",
@@ -103,7 +103,7 @@ describe("download-to-files browser handler", () => {
     const ctx = {};
     const unregister = registerDownloadToFilesBrowser(getIntents(ctx));
     try {
-      const result = await runDownloadToFiles(getIntents(ctx), {
+      const result = await getIntents(ctx).call(DownloadToFilesCommand, {
         url: "https://example.test/data.bin",
         files,
         path: "/data.bin",
@@ -142,7 +142,7 @@ describe("download-to-files browser handler", () => {
     const ctx = {};
     const unregister = registerDownloadToFilesBrowser(getIntents(ctx));
     try {
-      const run = runDownloadToFiles(getIntents(ctx), {
+      const run = getIntents(ctx).call(DownloadToFilesCommand, {
         url: "https://example.test/data.bin",
         files,
         path: "/data.bin",
@@ -171,7 +171,7 @@ describe("download-to-files browser handler", () => {
     const ctx = {};
     const unregister = registerDownloadToFilesBrowser(getIntents(ctx));
     try {
-      const result = await runDownloadToFiles(getIntents(ctx), {
+      const result = await getIntents(ctx).call(DownloadToFilesCommand, {
         url: "https://example.test/data.bin",
         files,
         path: "/data.bin",

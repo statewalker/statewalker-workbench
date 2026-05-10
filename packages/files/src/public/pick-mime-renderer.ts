@@ -1,5 +1,6 @@
 import type { Slots } from "@statewalker/shared-slots";
 import { pickRenderer } from "../internal/files.manager.js";
+import { mimeRenderersSlot } from "./extension-points.js";
 import type { MimeRenderer } from "./types.js";
 
 /**
@@ -17,6 +18,6 @@ import type { MimeRenderer } from "./types.js";
  * re-implement the policy.
  */
 export function pickMimeRenderer(slots: Slots, mime: string): MimeRenderer | undefined {
-  const snapshot = slots.getSnapshot<MimeRenderer>("files:mime-renderers");
+  const snapshot = slots.getSnapshot(mimeRenderersSlot);
   return pickRenderer(snapshot, mime);
 }
