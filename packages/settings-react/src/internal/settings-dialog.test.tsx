@@ -9,8 +9,10 @@ import {
 } from "@statewalker/workspace-api";
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import initCoreReact, { newViewRegistry } from "@statewalker/core-react";
-import initSettings, {
+import initCoreReact from "@statewalker/core-react/fragment";
+import { newViewRegistry } from "@statewalker/core-react";
+import initSettings from "@statewalker/settings/fragment";
+import {
   provideSettingsTab,
   runOpenSettings,
   Settings,

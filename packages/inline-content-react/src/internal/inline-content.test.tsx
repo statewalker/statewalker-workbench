@@ -4,13 +4,14 @@ import { Workspace } from "@statewalker/workspace-api";
 import { fireEvent, render } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { AppWorkspaceProvider } from "@statewalker/core-react";
 import { handleLoadDirectory, handleVisualizeFile } from "@statewalker/files";
 import {
   type InlineComponentDescriptor,
-    observeInlineComponents,
+  newInlineContentRegistry,
+  observeInlineComponents,
 } from "@statewalker/inline-content";
-import { AppWorkspaceProvider } from "@statewalker/core-react";
-import initInlineContentViews from "../public/init.js";
+import initInlineContentReact from "../public/init.js";
 import { InlineContent } from "../public/inline-content.js";
 
 function mount(ws: Workspace, ui: ReactElement) {
@@ -23,9 +24,9 @@ describe("inline-content-views built-ins", () => {
   it("registers all five built-ins under stable ids", async () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
-    const cleanup = initInlineContentViews(ctx);
+    const cleanup = initInlineContentReact(ctx);
 
-    const registry = ws.requireAdapter();
+    const registry = newInlineContentRegistry(ws);
     expect(registry.get("metric-card")).not.toBeNull();
     expect(registry.get("line-chart")).not.toBeNull();
     expect(registry.get("file-card")).not.toBeNull();
@@ -40,7 +41,7 @@ describe("inline-content-views built-ins", () => {
     const ws = new Workspace();
     const slots = ws.requireAdapter(Slots);
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
-    const cleanup = initInlineContentViews(ctx);
+    const cleanup = initInlineContentReact(ctx);
 
     let descriptors: InlineComponentDescriptor[] = [];
     const dispose = observeInlineComponents(slots, (vs) => {
@@ -60,7 +61,7 @@ describe("inline-content-views built-ins", () => {
   it("renders MetricCard via InlineContent", async () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
-    const cleanup = initInlineContentViews(ctx);
+    const cleanup = initInlineContentReact(ctx);
 
     const utils = mount(
       ws,
@@ -87,7 +88,7 @@ describe("inline-content-views built-ins", () => {
   it("renders LineChart via InlineContent", async () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
-    const cleanup = initInlineContentViews(ctx);
+    const cleanup = initInlineContentReact(ctx);
 
     const utils = mount(
       ws,
@@ -114,7 +115,7 @@ describe("inline-content-views built-ins", () => {
   it("falls back to an inline error chip for unknown component ids", async () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
-    const cleanup = initInlineContentViews(ctx);
+    const cleanup = initInlineContentReact(ctx);
 
     const utils = mount(
       ws,
@@ -129,7 +130,7 @@ describe("inline-content-views built-ins", () => {
   it("DirectoryCard renders explicit entries without firing runLoadDirectory", async () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
-    const cleanup = initInlineContentViews(ctx);
+    const cleanup = initInlineContentReact(ctx);
     const intents = ws.requireAdapter(Intents);
 
     const loadDir = vi.fn();
@@ -169,7 +170,7 @@ describe("inline-content-views built-ins", () => {
   it("DirectoryCard lazy-loads entries via runLoadDirectory when entries are omitted", async () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
-    const cleanup = initInlineContentViews(ctx);
+    const cleanup = initInlineContentReact(ctx);
     const intents = ws.requireAdapter(Intents);
 
     const loadDir = vi.fn();
@@ -207,7 +208,7 @@ describe("inline-content-views built-ins", () => {
   it("DirectoryCard fires runVisualizeFile when an entry is clicked", async () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
-    const cleanup = initInlineContentViews(ctx);
+    const cleanup = initInlineContentReact(ctx);
     const intents = ws.requireAdapter(Intents);
 
     const visualize = vi.fn();
@@ -248,12 +249,12 @@ describe("inline-content-views built-ins", () => {
   it("plug-in: a custom component registered later renders alongside built-ins", async () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
-    const cleanupBuiltins = initInlineContentViews(ctx);
+    const cleanupBuiltins = initInlineContentReact(ctx);
 
     // Plug-in path: register a custom component into the same
     // registry. Renders via InlineContent without any built-in
     // glue knowing about it.
-    const registry = ws.requireAdapter();
+    const registry = newInlineContentRegistry(ws);
     const disposeCustom = registry.register("plugin:badge", ({ props }) => (
       <span data-testid="plugin-badge">{(props as { text: string }).text}</span>
     ));

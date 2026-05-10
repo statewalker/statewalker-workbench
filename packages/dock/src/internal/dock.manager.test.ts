@@ -1,4 +1,5 @@
-import initSpecStore, { SpecStore } from "@statewalker/json-render";
+import initSpecStore from "@statewalker/json-render/fragment";
+import { SpecStore } from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
 import { getWorkspace } from "@statewalker/workspace-api";
 import type { DockviewApi, IDockviewPanel } from "dockview-react";
