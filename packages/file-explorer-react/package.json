@@ -27,7 +27,8 @@
     "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
-    "@statewalker/shared-slots": "catalog:",
+    "@statewalker/core-react": "workspace:*",
+    "@statewalker/shared-slots": "workspace:*",
     "@statewalker/workspace-api": "workspace:*"
   },
   "peerDependencies": {

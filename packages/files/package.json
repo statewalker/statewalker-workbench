@@ -3,13 +3,8 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Files logic fragment: file-op intents, files:* slots, MimeRenderer type, pickMimeRenderer selector, FilesManager.",
-  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "description": "Files logic fragment: file-op intents, files:* slots, MimeRenderer + pickMimeRenderer, FilesManager.",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
-  },
   "exports": {
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts"
@@ -17,22 +12,23 @@
   "files": ["src"],
   "scripts": {
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest --passWithNoTests",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write .",
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/shared-baseclass": "catalog:",
+    "@statewalker/ai-agent": "catalog:",
+    "@statewalker/ai-agent-runtime": "workspace:*",
+    "@statewalker/dock": "workspace:*",
+    "@statewalker/json-render": "workspace:*",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
-    "@statewalker/shared-slots": "catalog:",
+    "@statewalker/shared-slots": "workspace:*",
+    "@statewalker/webrun-files": "catalog:",
+    "@statewalker/webrun-files-mem": "catalog:",
     "@statewalker/workspace-api": "workspace:*"
   },
-  "devDependencies": {
-    "typescript": "catalog:",
-    "vitest": "catalog:"
-  },
+  "devDependencies": {"typescript": "catalog:", "vitest": "catalog:"},
   "sideEffects": false,
   "publishConfig": {"access": "public"}
 }

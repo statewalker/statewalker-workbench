@@ -3,13 +3,8 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Image MIME viewer: contributes a MimeRenderer for image/* to files:mime-renderers.",
-  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "description": "Per-MIME viewer renderer fragment: contributes a MimeRenderer to files:mime-renderers.",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
-  },
   "exports": {
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts",
@@ -18,23 +13,25 @@
   "files": ["src"],
   "scripts": {
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest --passWithNoTests",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write .",
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/shared-baseclass": "catalog:",
+    "@json-render/core": "0.18.0",
+    "@json-render/react": "0.18.0",
+    "@statewalker/core-react": "workspace:*",
+    "@statewalker/files": "workspace:*",
+    "@statewalker/json-render": "workspace:*",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
-    "@statewalker/shared-slots": "catalog:",
-    "@statewalker/workspace-api": "workspace:*"
+    "@statewalker/workspace-api": "workspace:*",
+    "@statewalker/workspace-bridge-react": "workspace:*",
+    "zod": "catalog:"
   },
-  "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
-  },
+  "peerDependencies": {"react": ">=18", "react-dom": ">=18"},
   "devDependencies": {
+    "@testing-library/react": "^16.3.2",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "react": "catalog:",
