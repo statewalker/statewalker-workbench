@@ -1,16 +1,12 @@
+import type { InlineContentSpec } from "@statewalker/inline-content";
 import type { ReactElement } from "react";
-import { useRegistry } from "@statewalker/core-react";
-import {
-  InlineContentRegistry,
-  type InlineContentSpec,
-} from "@statewalker/inline-content";
+import { useInlineContentRegistry } from "../internal/use-inline-content-registry.js";
 
 /**
- * Resolves `spec.componentId` against the workspace's
- * `InlineContentRegistry` and renders the resulting component
- * with the spec's props. Subscribes to the registry so a
- * late-registered component (plug-in path) renders without a
- * remount.
+ * Resolves `spec.componentId` against the application's
+ * `inline-content:renderers` slot and renders the resulting component
+ * with the spec's props. Subscribes via `useKeyedSlot` so a
+ * late-registered component (plug-in path) renders without a remount.
  *
  * Unknown component ids render a small inline error chip — the
  * agent's structured output is the trust boundary here, so an
@@ -21,7 +17,7 @@ export function InlineContent({
 }: {
   spec: InlineContentSpec;
 }): ReactElement {
-  const registry = useRegistry(InlineContentRegistry);
+  const registry = useInlineContentRegistry();
   const Component = registry.get(spec.componentId);
 
   if (!Component) {
