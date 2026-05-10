@@ -3,13 +3,8 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "JSON-render fragment: SpecStore adapter, json:catalogs slot key, useCatalogRegistry helper.",
-  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "description": "JSON-render fragment: SpecStore adapter + json:catalogs slot key.",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
-  },
   "exports": {
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts"
@@ -17,22 +12,18 @@
   "files": ["src"],
   "scripts": {
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest --passWithNoTests",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write .",
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/shared-baseclass": "catalog:",
+    "@statewalker/core-react": "workspace:*",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
-    "@statewalker/shared-slots": "catalog:",
+    "@statewalker/shared-slots": "workspace:*",
     "@statewalker/workspace-api": "workspace:*"
   },
-  "devDependencies": {
-    "typescript": "catalog:",
-    "vitest": "catalog:"
-  },
+  "devDependencies": {"typescript": "catalog:", "vitest": "catalog:"},
   "sideEffects": false,
   "publishConfig": {"access": "public"}
 }

@@ -3,13 +3,8 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Dock logic fragment: dock:* slot keys, dock state, dock:show-panel/close-panel/focus-panel intents.",
-  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "description": "Dock logic fragment: dock:* slot keys, dock:show-panel/close-panel/focus-panel intents, dock state.",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
-  },
   "exports": {
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts"
@@ -17,22 +12,19 @@
   "files": ["src"],
   "scripts": {
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest --passWithNoTests",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write .",
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/shared-baseclass": "catalog:",
+    "@statewalker/json-render": "workspace:*",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
-    "@statewalker/shared-slots": "catalog:",
-    "@statewalker/workspace-api": "workspace:*"
+    "@statewalker/shared-slots": "workspace:*",
+    "@statewalker/workspace-api": "workspace:*",
+    "dockview-react": "6.0.3"
   },
-  "devDependencies": {
-    "typescript": "catalog:",
-    "vitest": "catalog:"
-  },
+  "devDependencies": {"typescript": "catalog:", "vitest": "catalog:"},
   "sideEffects": false,
   "publishConfig": {"access": "public"}
 }

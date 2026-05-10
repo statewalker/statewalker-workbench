@@ -3,13 +3,8 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Substrate React fragment: shadcn primitives (Button, Card, Dialog, ResizablePanelGroup, Tabs, ...) plus the cn() helper.",
-  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "description": "Shadcn primitives + cn() helper for the workbench substrate.",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
-  },
   "exports": {
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts",
@@ -18,22 +13,27 @@
   "files": ["src"],
   "scripts": {
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest --passWithNoTests",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write .",
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/shared-baseclass": "catalog:",
-    "@statewalker/shared-intents": "catalog:",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-scroll-area": "^1.2.10",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@statewalker/shared-registry": "catalog:",
-    "@statewalker/shared-slots": "catalog:",
-    "@statewalker/workspace-api": "workspace:*"
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "lucide-react": "catalog:",
+    "radix-ui": "catalog:",
+    "react-resizable-panels": "catalog:",
+    "tailwind-merge": "catalog:"
   },
-  "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
-  },
+  "peerDependencies": {"react": ">=18", "react-dom": ">=18"},
   "devDependencies": {
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
