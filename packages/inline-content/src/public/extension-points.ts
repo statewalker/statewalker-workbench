@@ -9,5 +9,6 @@ import type { InlineComponentDescriptor } from "./types.js";
  * lookup table). Slot pattern C — paired with a dedicated registry
  * class.
  */
-export const [provideInlineComponent, observeInlineComponents] =
-  newSlot<InlineComponentDescriptor>("inline-content:components");
+export const [provideInlineComponent, observeInlineComponents] = newSlot<InlineComponentDescriptor>(
+  "inline-content:components",
+);

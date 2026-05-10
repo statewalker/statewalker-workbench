@@ -1,8 +1,9 @@
 import { JSONUIProvider, Renderer } from "@json-render/react";
+import { useCatalogRegistry } from "@statewalker/catalog-registry-react";
 import { useAppWorkspace } from "@statewalker/core-react";
 import { runClosePanel } from "@statewalker/dock";
-import { type SpecRecord, SpecStore, useCatalogRegistry } from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
+import { type SpecRecord, SpecStore } from "@statewalker/spec-store";
 import type { IDockviewPanelProps } from "dockview-react";
 import { type ReactElement, useSyncExternalStore } from "react";
 

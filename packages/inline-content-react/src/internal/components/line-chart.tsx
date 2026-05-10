@@ -53,12 +53,7 @@ export function LineChart({ props }: { props: unknown }): ReactElement {
         role="img"
         aria-label={`Line chart with ${values.length} points`}
       >
-        <polyline
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          points={points}
-        />
+        <polyline fill="none" stroke="currentColor" strokeWidth="1.5" points={points} />
       </svg>
       {startLabel || endLabel ? (
         <div className="flex justify-between text-xs text-muted-foreground">

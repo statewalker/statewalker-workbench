@@ -1,6 +1,6 @@
+import { useAppWorkspace } from "@statewalker/core-react";
 import { Intents } from "@statewalker/shared-intents";
 import { type ReactElement, useCallback } from "react";
-import { useAppWorkspace } from "@statewalker/core-react";
 
 interface ActionButtonProps {
   label: string;

@@ -36,7 +36,7 @@
     "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/webrun-files": "catalog:",
-    "@statewalker/workspace-api": "workspace:*"
+    "@statewalker/workspace": "workspace:*"
   },
   "devDependencies": {
     "rimraf": "catalog:",

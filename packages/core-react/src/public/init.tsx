@@ -1,4 +1,4 @@
-import { getWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace } from "@statewalker/workspace";
 import { createRoot, type Root } from "react-dom/client";
 import { AppRoot } from "../internal/app-root.js";
 import { getQueryClient } from "../internal/query-client-ctx.js";

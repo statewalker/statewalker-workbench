@@ -1,0 +1,43 @@
+{
+  "name": "@statewalker/catalog-registry-react",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Catalog-registry renderer fragment: useCatalogRegistry() React hook.",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fragment": "./src/fragment.ts",
+    "./styles": "./src/styles.css"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@statewalker/catalog-registry": "workspace:*",
+    "@statewalker/core-react": "workspace:*",
+    "@statewalker/shared-registry": "catalog:",
+    "@statewalker/shared-slots": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

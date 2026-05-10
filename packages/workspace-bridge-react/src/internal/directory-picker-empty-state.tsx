@@ -1,7 +1,4 @@
-import { Intents } from "@statewalker/shared-intents";
-import { FolderOpen } from "lucide-react";
-import { type ReactElement, useState } from "react";
-import { useAdapterValue } from "@statewalker/core-react";
+import { useAdapter, useAdapterValue } from "@statewalker/core-react";
 import {
   Button,
   Card,
@@ -10,12 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@statewalker/shadcn-react";
+import { Intents } from "@statewalker/shared-intents";
 import {
   runChangeWorkspace,
   runWorkspaceReconnect,
   WorkspaceShellAdapter,
 } from "@statewalker/workspace-bridge";
-import { useAdapter } from "@statewalker/core-react";
+import { FolderOpen } from "lucide-react";
+import { type ReactElement, useState } from "react";
 
 /**
  * Full-screen empty/onboarding view rendered by `<App/>` whenever
@@ -62,23 +61,17 @@ export function DirectoryPickerEmptyState(): ReactElement {
         <CardHeader>
           <CardTitle>Pick a workspace folder</CardTitle>
           <CardDescription>
-            Chat Mini stores its sessions and provider configuration inside a
-            folder you choose on disk. Pick any folder — files outside the
-            system subdirectory stay untouched.
+            Chat Mini stores its sessions and provider configuration inside a folder you choose on
+            disk. Pick any folder — files outside the system subdirectory stay untouched.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          {isUnsupported ? (
-            <p className="text-sm text-destructive">{state.reason}</p>
-          ) : null}
+          {isUnsupported ? <p className="text-sm text-destructive">{state.reason}</p> : null}
           {needsPermission ? (
             <>
               <p className="text-sm text-muted-foreground">
                 Reconnect to your previous workspace{" "}
-                <span className="font-medium text-foreground">
-                  {state.label}
-                </span>
-                ?
+                <span className="font-medium text-foreground">{state.label}</span>?
               </p>
               <Button onClick={onReconnect}>
                 <FolderOpen /> Reconnect "{state.label}"

@@ -9,7 +9,9 @@
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts"
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
@@ -17,18 +19,15 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/core-react": "workspace:*",
     "@statewalker/shared-registry": "catalog:",
-    "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/workspace-api": "workspace:*"
+    "@statewalker/shared-slots": "workspace:*"
   },
-  "peerDependencies": {"react": ">=18"},
   "devDependencies": {
-    "@types/react": "catalog:",
-    "react": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "sideEffects": false,
-  "publishConfig": {"access": "public"}
+  "publishConfig": {
+    "access": "public"
+  }
 }

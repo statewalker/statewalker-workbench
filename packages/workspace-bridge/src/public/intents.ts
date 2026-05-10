@@ -2,7 +2,7 @@ import { newIntent } from "@statewalker/shared-intents";
 
 /**
  * Re-export the canonical `workspace:change` intent from
- * `@statewalker/workspace-api`. Callers that want to switch /
+ * `@statewalker/workspace`. Callers that want to switch /
  * connect / set the workspace folder fire
  * `runChangeWorkspace(intents, { files? })`.
  *
@@ -16,7 +16,7 @@ export {
   type ChangeWorkspaceResult,
   handleChangeWorkspace,
   runChangeWorkspace,
-} from "@statewalker/workspace-api";
+} from "@statewalker/workspace";
 
 /**
  * Empty payload type used by both reconnect/disconnect — neither

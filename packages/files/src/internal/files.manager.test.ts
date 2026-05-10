@@ -5,12 +5,12 @@ import {
   observeAgentTools,
 } from "@statewalker/ai-agent-runtime";
 import { handleShowDockPanel } from "@statewalker/dock";
-import { SpecStore } from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
 import { Slots } from "@statewalker/shared-slots";
+import { SpecStore } from "@statewalker/spec-store";
 import { readText, writeText } from "@statewalker/webrun-files";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { Workspace } from "@statewalker/workspace-api";
+import { Workspace } from "@statewalker/workspace";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   provideMimeRenderer,

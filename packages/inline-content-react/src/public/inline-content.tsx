@@ -12,11 +12,7 @@ import { useInlineContentRegistry } from "../internal/use-inline-content-registr
  * agent's structured output is the trust boundary here, so an
  * unknown id should be visible (not silently swallowed).
  */
-export function InlineContent({
-  spec,
-}: {
-  spec: InlineContentSpec;
-}): ReactElement {
+export function InlineContent({ spec }: { spec: InlineContentSpec }): ReactElement {
   const registry = useInlineContentRegistry();
   const Component = registry.get(spec.componentId);
 

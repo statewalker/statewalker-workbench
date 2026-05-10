@@ -1,6 +1,6 @@
 import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
-import type { Workspace } from "@statewalker/workspace-api";
+import type { Workspace } from "@statewalker/workspace";
 import { handleCloseSettings, handleOpenSettings } from "../public/intents.js";
 import { Settings } from "../public/settings.adapter.js";
 

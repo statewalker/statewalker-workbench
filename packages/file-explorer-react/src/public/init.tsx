@@ -1,4 +1,5 @@
 import { defineRegistry } from "@json-render/react";
+import { newCatalogRegistry } from "@statewalker/catalog-registry";
 import { compareByOrderAndId } from "@statewalker/core-react";
 import { type PanelPosition, runShowDockPanel } from "@statewalker/dock";
 import { provideDockTabIcon } from "@statewalker/dock-react";
@@ -12,16 +13,15 @@ import {
   makeFileExplorerSpec,
   observeFileExplorerPanelPresets,
 } from "@statewalker/file-explorer";
-import {
-  DOCK_LAYOUT_STORAGE_KEY,
-  newCatalogRegistry,
-  restorePanelSpecsFromLayout,
-  SpecStore,
-} from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
-import { getWorkspace } from "@statewalker/workspace-api";
+import {
+  DOCK_LAYOUT_STORAGE_KEY,
+  restorePanelSpecsFromLayout,
+  SpecStore,
+} from "@statewalker/spec-store";
+import { getWorkspace } from "@statewalker/workspace";
 import { FolderOpen } from "lucide-react";
 import { FileExplorerPanel } from "../internal/file-explorer-panel.js";
 

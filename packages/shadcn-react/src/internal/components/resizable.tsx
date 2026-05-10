@@ -7,10 +7,7 @@ export function ResizablePanelGroup({
 }: React.ComponentProps<typeof Resizable.Group>): React.ReactElement {
   return (
     <Resizable.Group
-      className={cn(
-        "flex h-full w-full data-[orientation=vertical]:flex-col",
-        className,
-      )}
+      className={cn("flex h-full w-full data-[orientation=vertical]:flex-col", className)}
       {...props}
     />
   );

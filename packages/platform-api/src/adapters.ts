@@ -1,5 +1,5 @@
 import { Intents } from "@statewalker/shared-intents";
-import { getWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace } from "@statewalker/workspace";
 
 /**
  * Resolve the workspace-scoped `Intents` bus for the given context bag.

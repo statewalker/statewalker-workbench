@@ -2,7 +2,7 @@ import { newViewRegistry } from "@statewalker/core-react";
 import { provideDockOverlay } from "@statewalker/dock";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
-import { getWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace } from "@statewalker/workspace";
 import { SettingsButton } from "../internal/settings-button.js";
 import { SettingsDialog } from "../internal/settings-dialog.js";
 
@@ -17,9 +17,7 @@ const VIEW_KEY_DIALOG = "settings:dialog";
  * Settings into the System menu instead of pinning a top-level button,
  * so this fragment no longer contributes to `dock:header-items`.
  */
-export default function initSettingsReact(
-  ctx: Record<string, unknown>,
-): () => Promise<void> {
+export default function initSettingsReact(ctx: Record<string, unknown>): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
   const views = newViewRegistry(workspace);

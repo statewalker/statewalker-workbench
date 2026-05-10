@@ -9,7 +9,9 @@
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts"
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
@@ -21,9 +23,14 @@
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/workspace-api": "workspace:*"
+    "@statewalker/workspace": "workspace:*"
   },
-  "devDependencies": {"typescript": "catalog:", "vitest": "catalog:"},
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
   "sideEffects": false,
-  "publishConfig": {"access": "public"}
+  "publishConfig": {
+    "access": "public"
+  }
 }

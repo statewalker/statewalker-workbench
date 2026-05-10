@@ -1,7 +1,7 @@
+import { useAppWorkspace } from "@statewalker/core-react";
+import { runVisualizeFile } from "@statewalker/files";
 import { Intents } from "@statewalker/shared-intents";
 import { type ReactElement, useCallback } from "react";
-import { runVisualizeFile } from "@statewalker/files";
-import { useAppWorkspace } from "@statewalker/core-react";
 
 interface FileCardProps {
   uri: string;
@@ -33,11 +33,9 @@ export function FileCard({ props }: { props: unknown }): ReactElement {
 
   const onClick = useCallback(() => {
     if (!isFileCardProps(props)) return;
-    void runVisualizeFile(intents, { uri: props.uri }).promise.catch(
-      (error: unknown) => {
-        console.warn("[inline-content] FileCard visualize failed:", error);
-      },
-    );
+    void runVisualizeFile(intents, { uri: props.uri }).promise.catch((error: unknown) => {
+      console.warn("[inline-content] FileCard visualize failed:", error);
+    });
   }, [intents, props]);
 
   if (!isFileCardProps(props)) {
@@ -55,9 +53,7 @@ export function FileCard({ props }: { props: unknown }): ReactElement {
       onClick={onClick}
     >
       <span className="font-medium">{name ?? tail(uri)}</span>
-      {description ? (
-        <span className="text-xs text-muted-foreground">{description}</span>
-      ) : null}
+      {description ? <span className="text-xs text-muted-foreground">{description}</span> : null}
       <span className="font-mono text-[10px] text-muted-foreground">{uri}</span>
     </button>
   );

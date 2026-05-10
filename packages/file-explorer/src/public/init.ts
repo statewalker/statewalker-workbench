@@ -3,7 +3,7 @@ import { handleOpen, runVisualizeFile } from "@statewalker/files";
 import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
-import { getWorkspace } from "@statewalker/workspace-api";
+import { getWorkspace } from "@statewalker/workspace";
 import { fileExplorerPanelId } from "./catalog.js";
 import { type ActiveFileExplorerPanel, activeFileExplorerPanels } from "./extension-points.js";
 

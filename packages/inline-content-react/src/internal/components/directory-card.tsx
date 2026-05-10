@@ -1,11 +1,7 @@
+import { useAppWorkspace } from "@statewalker/core-react";
+import { type DirectoryEntry, runLoadDirectory, runVisualizeFile } from "@statewalker/files";
 import { Intents } from "@statewalker/shared-intents";
 import { type ReactElement, useCallback, useEffect, useState } from "react";
-import {
-  type DirectoryEntry,
-  runLoadDirectory,
-  runVisualizeFile,
-} from "@statewalker/files";
-import { useAppWorkspace } from "@statewalker/core-react";
 
 interface DirectoryCardEntry {
   name: string;
@@ -82,12 +78,10 @@ export function DirectoryCard({ props }: { props: unknown }): ReactElement {
     runLoadDirectory(intents, { path, recursive: false })
       .promise.then((loaded) => {
         if (cancelled) return;
-        const mapped: DirectoryCardEntry[] = loaded.map(
-          (e: DirectoryEntry) => ({
-            name: e.name,
-            kind: e.kind,
-          }),
-        );
+        const mapped: DirectoryCardEntry[] = loaded.map((e: DirectoryEntry) => ({
+          name: e.name,
+          kind: e.kind,
+        }));
         setState({ kind: "ready", entries: mapped });
       })
       .catch((error: unknown) => {
@@ -106,14 +100,9 @@ export function DirectoryCard({ props }: { props: unknown }): ReactElement {
     (entryName: string) => {
       if (!valid) return;
       const childUri = joinChildUri(uri, entryName);
-      void runVisualizeFile(intents, { uri: childUri }).promise.catch(
-        (error: unknown) => {
-          console.warn(
-            "[inline-content] DirectoryCard visualize failed:",
-            error,
-          );
-        },
-      );
+      void runVisualizeFile(intents, { uri: childUri }).promise.catch((error: unknown) => {
+        console.warn("[inline-content] DirectoryCard visualize failed:", error);
+      });
     },
     [intents, uri, valid],
   );

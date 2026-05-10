@@ -9,7 +9,9 @@
     ".": "./src/index.ts",
     "./fragment": "./src/fragment.ts"
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
@@ -22,7 +24,7 @@
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/webrun-files": "catalog:",
     "@statewalker/webrun-files-browser": "catalog:",
-    "@statewalker/workspace-api": "workspace:*",
+    "@statewalker/workspace": "workspace:*",
     "idb-keyval": "catalog:"
   },
   "devDependencies": {
@@ -31,5 +33,7 @@
     "vitest": "catalog:"
   },
   "sideEffects": false,
-  "publishConfig": {"access": "public"}
+  "publishConfig": {
+    "access": "public"
+  }
 }

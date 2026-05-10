@@ -1,6 +1,6 @@
 import { Intents } from "@statewalker/shared-intents";
 import { Slots } from "@statewalker/shared-slots";
-import { Workspace } from "@statewalker/workspace-api";
+import { Workspace } from "@statewalker/workspace";
 import { describe, expect, it } from "vitest";
 import {
   observeSettingsTabs,
