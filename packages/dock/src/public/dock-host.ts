@@ -34,6 +34,13 @@ export class DockHost {
   private _activeListeners = new Set<(panelId: string | undefined) => void>();
   private _activePanelId: string | undefined = undefined;
   private _layoutListeners = new Set<() => void>();
+  /**
+   * Snapshot of the previous api's layout, captured synchronously in
+   * `detach()`. Used by the next `setApi()` so panels added between
+   * the previous mount and the persist-microtask are not lost when
+   * React.StrictMode / HMR remounts `<DockviewReact>`.
+   */
+  private _inMemoryLayout: object | null = null;
 
   declare init?: () => void | Promise<void>;
   declare close?: () => void | Promise<void>;
@@ -42,24 +49,31 @@ export class DockHost {
     if (this._api === api) return;
     this._disposeApiListeners?.();
     this._api = api;
-    // Restore persisted layout once on first attachment.
-    this._restoreLayout();
-    // Drain queued panels.
+    // Restoration order: prefer the in-memory snapshot from a recent
+    // detach (covers StrictMode / HMR remount where the persisted
+    // layout is older than what was on the previous api). Fall back
+    // to localStorage on cold start.
+    if (this._inMemoryLayout) {
+      try {
+        api.fromJSON(this._inMemoryLayout);
+      } catch (error) {
+        console.warn("[chat-mini:dock] failed to restore in-memory layout", error);
+        this._restoreLayout();
+      }
+      this._inMemoryLayout = null;
+    } else {
+      this._restoreLayout();
+    }
     const queue = this._pending;
     this._pending = [];
     for (const item of queue) {
       this._addOrFocus(item.options);
       item.resolve();
     }
-    // Persist layout on every change AND notify listeners so
-    // consumers (e.g. SessionsPanel "open tab" highlight) can
-    // re-read `getPanelIds()`.
     const onLayoutChange = api.onDidLayoutChange(() => {
       this._scheduleLayoutSave();
       for (const cb of this._layoutListeners) cb();
     });
-    // Track the active panel so consumers (e.g. SessionsPanel
-    // highlight) can subscribe via `onActivePanelChange`.
     this._setActivePanelId(api.activePanel?.id);
     const onActivePanel = api.onDidActivePanelChange((panel) => {
       this._setActivePanelId(panel?.id);
@@ -71,6 +85,14 @@ export class DockHost {
   }
 
   detach(): void {
+    if (this._api) {
+      try {
+        this._inMemoryLayout = this._api.toJSON();
+      } catch (error) {
+        console.warn("[chat-mini:dock] failed to snapshot layout on detach", error);
+        this._inMemoryLayout = null;
+      }
+    }
     this._disposeApiListeners?.();
     this._disposeApiListeners = null;
     this._api = null;
@@ -187,6 +209,7 @@ export class DockHost {
       inactive: options.activate === false,
     });
   }
+
 
   private _scheduleLayoutSave(): void {
     if (this._layoutSaveScheduled) return;
