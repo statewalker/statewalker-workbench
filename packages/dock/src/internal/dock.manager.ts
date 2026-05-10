@@ -1,8 +1,8 @@
+import { SpecStore } from "@statewalker/json-render";
 import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import type { Workspace } from "@statewalker/workspace-api";
-import { SpecStore } from "@statewalker/json-render";
 import { DockHost } from "../public/dock-host.js";
 import {
   handleClosePanel,
@@ -61,16 +61,13 @@ export class DockManager {
         const { panelId } = intent.payload;
         const api = this.dockHost._getApi();
         const panel = api?.getPanel(panelId);
-        const specId = (panel?.params as { specId?: string } | undefined)
-          ?.specId;
+        const specId = (panel?.params as { specId?: string } | undefined)?.specId;
         this.dockHost.closePanel(panelId);
         if (specId) {
           const record = this.store.get(specId);
           const stillReferenced =
             api?.panels.some(
-              (p) =>
-                p.id !== panelId &&
-                (p.params as { specId?: string })?.specId === specId,
+              (p) => p.id !== panelId && (p.params as { specId?: string })?.specId === specId,
             ) ?? false;
           if (record && record.meta.persistent !== true && !stillReferenced) {
             this.store.delete(specId);
@@ -91,10 +88,7 @@ export class DockManager {
 
     this._register(
       handleSetPanelTitle(this.intents, (intent) => {
-        this.dockHost.setPanelTitle(
-          intent.payload.panelId,
-          intent.payload.title,
-        );
+        this.dockHost.setPanelTitle(intent.payload.panelId, intent.payload.title);
         intent.resolve();
         return true;
       }),

@@ -1,7 +1,7 @@
-import type { ReactElement } from "react";
 import { MainShell } from "@statewalker/dock-react";
 import { WorkspaceShellAdapter } from "@statewalker/workspace-bridge";
 import { DirectoryPickerEmptyState } from "@statewalker/workspace-bridge-react";
+import type { ReactElement } from "react";
 import { useAdapterValue } from "./use-adapter-value.js";
 
 /**

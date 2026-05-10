@@ -1,9 +1,4 @@
-import type {
-  Spec,
-  SpecCreateInput,
-  SpecPatch,
-  SpecRecord,
-} from "./types.js";
+import type { Spec, SpecCreateInput, SpecPatch, SpecRecord } from "./types.js";
 
 /**
  * Workspace adapter holding json-render specs by id. Layout JSON

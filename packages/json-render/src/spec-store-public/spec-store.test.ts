@@ -23,9 +23,7 @@ describe("SpecStore", () => {
   it("create with duplicate caller-supplied id throws", () => {
     const store = new SpecStore();
     store.create({ id: "spec:dup", catalogId: "c", spec: 1 });
-    expect(() =>
-      store.create({ id: "spec:dup", catalogId: "c2", spec: 2 }),
-    ).toThrow();
+    expect(() => store.create({ id: "spec:dup", catalogId: "c2", spec: 2 })).toThrow();
   });
 
   it("create without id generates a `spec:` id", () => {

@@ -21,9 +21,7 @@ import { ViewRegistry } from "./view-registry.js";
  * Cleanup unmounts the React root so re-entrant `onLoad` /
  * `onUnload` cycles do not leak DOM.
  */
-export default function initCoreViews(
-  ctx: Record<string, unknown>,
-): () => void {
+export default function initCoreViews(ctx: Record<string, unknown>): () => void {
   const workspace = getWorkspace(ctx);
   workspace.requireAdapter(ViewRegistry);
 

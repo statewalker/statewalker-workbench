@@ -15,35 +15,30 @@ export const [runLoadDirectory, handleLoadDirectory] = newIntent<
 export interface LoadFilePayload {
   path: string;
 }
-export const [runLoadFile, handleLoadFile] = newIntent<
-  LoadFilePayload,
-  LoadedFile
->("files:load-file");
+export const [runLoadFile, handleLoadFile] = newIntent<LoadFilePayload, LoadedFile>(
+  "files:load-file",
+);
 
 export interface WriteFilePayload {
   path: string;
   content: Uint8Array | string;
 }
-export const [runWriteFile, handleWriteFile] = newIntent<
-  WriteFilePayload,
-  void
->("files:write-file");
+export const [runWriteFile, handleWriteFile] = newIntent<WriteFilePayload, void>(
+  "files:write-file",
+);
 
 export interface MoveFilePayload {
   fromPath: string;
   toPath: string;
 }
-export const [runMoveFile, handleMoveFile] = newIntent<MoveFilePayload, void>(
-  "files:move-file",
-);
+export const [runMoveFile, handleMoveFile] = newIntent<MoveFilePayload, void>("files:move-file");
 
 export interface DeleteFilePayload {
   path: string;
 }
-export const [runDeleteFile, handleDeleteFile] = newIntent<
-  DeleteFilePayload,
-  void
->("files:delete-file");
+export const [runDeleteFile, handleDeleteFile] = newIntent<DeleteFilePayload, void>(
+  "files:delete-file",
+);
 
 export interface VisualizeFilePayload {
   /**
@@ -53,7 +48,6 @@ export interface VisualizeFilePayload {
    */
   uri: string;
 }
-export const [runVisualizeFile, handleVisualizeFile] = newIntent<
-  VisualizeFilePayload,
-  void
->("files:visualize");
+export const [runVisualizeFile, handleVisualizeFile] = newIntent<VisualizeFilePayload, void>(
+  "files:visualize",
+);

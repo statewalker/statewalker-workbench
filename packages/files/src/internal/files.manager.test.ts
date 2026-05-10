@@ -1,9 +1,3 @@
-import { Intents } from "@statewalker/shared-intents";
-import { Slots } from "@statewalker/shared-slots";
-import { readText, writeText } from "@statewalker/webrun-files";
-import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { Workspace } from "@statewalker/workspace-api";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ActiveModel,
   AgentRuntimeAdapter,
@@ -12,6 +6,12 @@ import {
 } from "@statewalker/ai-agent-runtime";
 import { handleShowDockPanel } from "@statewalker/dock";
 import { SpecStore } from "@statewalker/json-render";
+import { Intents } from "@statewalker/shared-intents";
+import { Slots } from "@statewalker/shared-slots";
+import { readText, writeText } from "@statewalker/webrun-files";
+import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { Workspace } from "@statewalker/workspace-api";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   provideMimeRenderer,
   runDeleteFile,
@@ -54,16 +54,9 @@ describe("FilesManager", () => {
     const intents = ws.requireAdapter(Intents);
 
     const entries = await runLoadDirectory(intents, { path: "/notes" }).promise;
-    expect(entries.map((e) => e.name).sort()).toEqual([
-      "data.json",
-      "hello.md",
-    ]);
-    expect(entries.find((e) => e.name === "hello.md")?.mimeType).toBe(
-      "text/markdown",
-    );
-    expect(entries.find((e) => e.name === "data.json")?.mimeType).toBe(
-      "application/json",
-    );
+    expect(entries.map((e) => e.name).sort()).toEqual(["data.json", "hello.md"]);
+    expect(entries.find((e) => e.name === "hello.md")?.mimeType).toBe("text/markdown");
+    expect(entries.find((e) => e.name === "data.json")?.mimeType).toBe("application/json");
 
     await manager.close();
   });
@@ -104,9 +97,7 @@ describe("FilesManager", () => {
     const { ws, manager } = bootWorkspace(files);
     // ws not opened — intents must reject.
     const intents = ws.requireAdapter(Intents);
-    await expect(runLoadDirectory(intents, {}).promise).rejects.toThrow(
-      /open workspace/,
-    );
+    await expect(runLoadDirectory(intents, {}).promise).rejects.toThrow(/open workspace/);
     await manager.close();
     void ws;
   });
@@ -157,12 +148,8 @@ describe("pickRenderer", () => {
       { mimeTypePattern: "image/*", buildPanel },
       { mimeTypePattern: "text/*", buildPanel, order: 50 },
     ];
-    expect(pickRenderer(renderers, "image/png")?.mimeTypePattern).toBe(
-      "image/*",
-    );
-    expect(pickRenderer(renderers, "text/markdown")?.mimeTypePattern).toBe(
-      "text/*",
-    );
+    expect(pickRenderer(renderers, "image/png")?.mimeTypePattern).toBe("image/*");
+    expect(pickRenderer(renderers, "text/markdown")?.mimeTypePattern).toBe("text/*");
   });
 
   it("returns undefined when nothing matches", () => {
@@ -181,12 +168,8 @@ describe("pickRenderer", () => {
       { mimeTypePattern: "video/*", buildPanel },
       { mimeTypePattern: "image/*", buildPanel },
     ];
-    expect(
-      pickRenderer(renderers, guessMimeType("/x/y.mp4"))?.mimeTypePattern,
-    ).toBe("video/*");
-    expect(
-      pickRenderer(renderers, guessMimeType("/x/y.webm"))?.mimeTypePattern,
-    ).toBe("video/*");
+    expect(pickRenderer(renderers, guessMimeType("/x/y.mp4"))?.mimeTypePattern).toBe("video/*");
+    expect(pickRenderer(renderers, guessMimeType("/x/y.webm"))?.mimeTypePattern).toBe("video/*");
   });
 });
 
@@ -197,9 +180,9 @@ describe("runVisualizeFile", () => {
     await ws.open();
     const intents = ws.requireAdapter(Intents);
 
-    await expect(
-      runVisualizeFile(intents, { uri: "/note.md" }).promise,
-    ).rejects.toThrow(/mime-renderer/);
+    await expect(runVisualizeFile(intents, { uri: "/note.md" }).promise).rejects.toThrow(
+      /mime-renderer/,
+    );
 
     await manager.close();
   });
@@ -252,9 +235,7 @@ describe("runVisualizeFile", () => {
       },
     ]);
     expect(store.get("spec:markdown-viewer:/note.md")).not.toBeNull();
-    expect(store.get("spec:markdown-viewer:/note.md")?.catalogId).toBe(
-      "markdown-viewer",
-    );
+    expect(store.get("spec:markdown-viewer:/note.md")?.catalogId).toBe("markdown-viewer");
 
     // Reopen: same spec id, no duplicate create — dock is asked
     // again (it focuses internally), but SpecStore.create is NOT

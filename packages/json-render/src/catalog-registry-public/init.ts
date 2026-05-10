@@ -9,9 +9,7 @@ import { CatalogRegistry } from "./catalog-registry.js";
  * to it. Returns the cleanup; LIFO via shared-registry releases the
  * adapter binding on shutdown.
  */
-export default function initCatalogRegistry(
-  ctx: Record<string, unknown>,
-): () => Promise<void> {
+export default function initCatalogRegistry(ctx: Record<string, unknown>): () => Promise<void> {
   const [, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
   // Eagerly instantiate so consumers don't race the lazy adapter creation.

@@ -16,9 +16,7 @@ import { FilesManager } from "../internal/files.manager.js";
  * slot must be observable when this fragment contributes). Per
  * ADR 0002 (logic-only): no React imports.
  */
-export default function initFiles(
-  ctx: Record<string, unknown>,
-): () => Promise<void> {
+export default function initFiles(ctx: Record<string, unknown>): () => Promise<void> {
   const workspace = getWorkspace(ctx);
 
   const [register, cleanup] = newRegistry();

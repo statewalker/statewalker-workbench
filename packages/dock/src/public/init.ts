@@ -15,9 +15,7 @@ import { DockManager } from "../internal/dock.manager.js";
  * DockView and deletes the spec from `SpecStore` UNLESS
  * `meta.persistent === true`. Per the §3.1 / §5.5 contract.
  */
-export default function initDock(
-  ctx: Record<string, unknown>,
-): () => Promise<void> {
+export default function initDock(ctx: Record<string, unknown>): () => Promise<void> {
   const workspace = getWorkspace(ctx);
   const manager = new DockManager({ workspace });
   return () => manager.close();

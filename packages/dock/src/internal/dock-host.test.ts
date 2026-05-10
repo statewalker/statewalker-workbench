@@ -28,23 +28,19 @@ function makeFakeApi(): {
   const panels = new Map<string, FakePanel>();
   const layoutListeners = new Set<() => void>();
   const api: FakeDockviewApi = {
-    addPanel: vi.fn(
-      (opts: { id: string; params?: Record<string, unknown> }) => {
-        const panel: FakePanel = {
-          id: opts.id,
-          params: opts.params ?? {},
-          focus: vi.fn(),
-        };
-        panels.set(opts.id, panel);
-        return panel as unknown as IDockviewPanel;
-      },
-    ),
+    addPanel: vi.fn((opts: { id: string; params?: Record<string, unknown> }) => {
+      const panel: FakePanel = {
+        id: opts.id,
+        params: opts.params ?? {},
+        focus: vi.fn(),
+      };
+      panels.set(opts.id, panel);
+      return panel as unknown as IDockviewPanel;
+    }),
     removePanel: vi.fn((p: { id: string }) => {
       panels.delete(p.id);
     }),
-    getPanel: vi.fn(
-      (id: string) => panels.get(id) as unknown as IDockviewPanel | undefined,
-    ),
+    getPanel: vi.fn((id: string) => panels.get(id) as unknown as IDockviewPanel | undefined),
     get panels() {
       return Array.from(panels.values()) as unknown as IDockviewPanel[];
     },

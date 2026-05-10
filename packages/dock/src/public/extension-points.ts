@@ -43,5 +43,4 @@ export const [provideDockSidePanel, observeDockSidePanels] =
   newSlot<DockSidePanel>("dock:side-panels");
 export const [provideDockHeaderItem, observeDockHeaderItems] =
   newSlot<DockHeaderItem>("dock:header-items");
-export const [provideDockOverlay, observeDockOverlays] =
-  newSlot<DockOverlay>("dock:overlays");
+export const [provideDockOverlay, observeDockOverlays] = newSlot<DockOverlay>("dock:overlays");

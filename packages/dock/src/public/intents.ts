@@ -13,26 +13,23 @@ export interface ShowDockPanelPayload {
  * (vision audit C7 / proposal §5.5) — the dock fragment is the only
  * place that knows the panel kind is `"json"`.
  */
-export const [runShowDockPanel, handleShowDockPanel] = newIntent<
-  ShowDockPanelPayload,
-  void
->("dock:show-panel");
+export const [runShowDockPanel, handleShowDockPanel] = newIntent<ShowDockPanelPayload, void>(
+  "dock:show-panel",
+);
 
 export interface ClosePanelPayload {
   panelId: string;
 }
-export const [runClosePanel, handleClosePanel] = newIntent<
-  ClosePanelPayload,
-  void
->("dock:close-panel");
+export const [runClosePanel, handleClosePanel] = newIntent<ClosePanelPayload, void>(
+  "dock:close-panel",
+);
 
 export interface FocusPanelPayload {
   panelId: string;
 }
-export const [runFocusPanel, handleFocusPanel] = newIntent<
-  FocusPanelPayload,
-  void
->("dock:focus-panel");
+export const [runFocusPanel, handleFocusPanel] = newIntent<FocusPanelPayload, void>(
+  "dock:focus-panel",
+);
 
 export interface SetPanelTitlePayload {
   panelId: string;
@@ -44,7 +41,6 @@ export interface SetPanelTitlePayload {
  * file tabs, etc. — so the dock fragment owns the mechanism rather
  * than each catalog reinventing it.
  */
-export const [runSetPanelTitle, handleSetPanelTitle] = newIntent<
-  SetPanelTitlePayload,
-  void
->("dock:set-panel-title");
+export const [runSetPanelTitle, handleSetPanelTitle] = newIntent<SetPanelTitlePayload, void>(
+  "dock:set-panel-title",
+);

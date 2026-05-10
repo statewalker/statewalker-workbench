@@ -1,6 +1,6 @@
+import { useAdapter } from "@statewalker/core-react";
 import type { AdapterCtor, WorkspaceAdapter } from "@statewalker/workspace-api";
 import { useSyncExternalStore } from "react";
-import { useAdapter } from "@statewalker/core-react";
 
 /**
  * Structural shape of `IdentifiableRegistry<T>` that `useRegistry`
@@ -29,9 +29,7 @@ interface SubscribableRegistry extends WorkspaceAdapter {
  * reference itself as the snapshot would never change with
  * `Object.is`, so React would bail.
  */
-export function useRegistry<R extends SubscribableRegistry>(
-  adapterCtor: AdapterCtor<R>,
-): R {
+export function useRegistry<R extends SubscribableRegistry>(adapterCtor: AdapterCtor<R>): R {
   const registry = useAdapter(adapterCtor);
   useSyncExternalStore(
     (cb) => registry.observe(() => cb()),

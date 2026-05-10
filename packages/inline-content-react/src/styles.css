@@ -5,4 +5,5 @@
  * v4 then walks the `@source` glob and picks up class usage inside this
  * package's source so utility classes are emitted into the host's CSS bundle.
  */
-@source "./**/*.{ts,tsx}";
+@source "./**/*.tsx";
+@source "./**/*.ts";

@@ -1,6 +1,6 @@
+import { useAdapter } from "@statewalker/core-react";
 import type { AdapterCtor, WorkspaceAdapter } from "@statewalker/workspace-api";
 import { useSyncExternalStore } from "react";
-import { useAdapter } from "@statewalker/core-react";
 
 /**
  * The minimal shape an adapter must expose to participate in
@@ -28,10 +28,10 @@ export interface ObservableAdapter {
  * correctly. Selectors that materialise a fresh array/object every
  * call will trigger spurious re-renders.
  */
-export function useAdapterValue<
-  A extends WorkspaceAdapter & ObservableAdapter,
-  T,
->(adapterCtor: AdapterCtor<A>, selector: (adapter: A) => T): T {
+export function useAdapterValue<A extends WorkspaceAdapter & ObservableAdapter, T>(
+  adapterCtor: AdapterCtor<A>,
+  selector: (adapter: A) => T,
+): T {
   const adapter = useAdapter(adapterCtor);
   return useSyncExternalStore(
     (cb) => adapter.onUpdate(cb),

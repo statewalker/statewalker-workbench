@@ -1,8 +1,8 @@
 import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
 import { getWorkspace } from "@statewalker/workspace-api";
-import { SpecStore } from "./spec-store.js";
 import { handleCreateSpec, handlePatchSpec } from "./intents.js";
+import { SpecStore } from "./spec-store.js";
 
 /**
  * Attach a `SpecStore` to the workspace and register the default
@@ -14,9 +14,7 @@ import { handleCreateSpec, handlePatchSpec } from "./intents.js";
  * Returns the cleanup; LIFO via shared-registry releases the
  * adapter binding and intent handlers on shutdown.
  */
-export default function initSpecStore(
-  ctx: Record<string, unknown>,
-): () => Promise<void> {
+export default function initSpecStore(ctx: Record<string, unknown>): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
   const store = workspace.requireAdapter(SpecStore);
