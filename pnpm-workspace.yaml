@@ -11,7 +11,6 @@ catalog:
   "@spectrum-icons/workflow": ^4.3.0
   "@statewalker/shared-adapters": ^0.1.0
   "@statewalker/shared-baseclass": ^0.1.0
-  "@statewalker/shared-intents": ^0.1.0
   "@statewalker/shared-registry": ^0.1.0
   "@statewalker/webrun-files": ^0.7.0
   "@statewalker/webrun-files-browser": ^0.7.1

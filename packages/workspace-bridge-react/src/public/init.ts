@@ -1,4 +1,4 @@
-import { newViewRegistry } from "@statewalker/core-react";
+import { coreViewsSlot, type ViewComponent } from "@statewalker/core-react";
 import { dockHeaderItemsSlot } from "@statewalker/dock";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
@@ -25,19 +25,20 @@ export default function initWorkspaceBridgeReact(
 ): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
-  const views = newViewRegistry(workspace);
   const slots = workspace.requireAdapter(Slots);
 
   register(
-    views.register(
+    slots.register(
+      coreViewsSlot,
       VIEW_KEY_LABEL,
-      WorkspaceLabelHeader as unknown as Parameters<typeof views.register>[1],
+      WorkspaceLabelHeader as unknown as ViewComponent,
     ),
   );
   register(
-    views.register(
+    slots.register(
+      coreViewsSlot,
       VIEW_KEY_SWITCH,
-      SwitchWorkspaceButton as unknown as Parameters<typeof views.register>[1],
+      SwitchWorkspaceButton as unknown as ViewComponent,
     ),
   );
   register(

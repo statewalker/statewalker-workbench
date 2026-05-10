@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Catalog-registry renderer fragment: useCatalogRegistry() React hook.",
+  "description": "Catalog-registry renderer fragment: thin React peer over the catalogsSlot from @statewalker/catalog-registry.",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",

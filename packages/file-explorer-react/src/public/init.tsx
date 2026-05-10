@@ -1,5 +1,5 @@
 import { defineRegistry } from "@json-render/react";
-import { newCatalogRegistry } from "@statewalker/catalog-registry";
+import { catalogsSlot } from "@statewalker/catalog-registry";
 import { compareByOrderAndId } from "@statewalker/core-react";
 import { ShowDockPanelCommand, type PanelPosition } from "@statewalker/dock";
 import { dockTabIconSlot } from "@statewalker/dock-react";
@@ -42,7 +42,6 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
   const intents = workspace.requireAdapter(Commands);
   const store = workspace.requireAdapter(SpecStore);
   const slots = workspace.requireAdapter(Slots);
-  const catalogs = newCatalogRegistry(workspace);
 
   const [register, cleanup] = newRegistry();
 
@@ -76,7 +75,7 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
     },
     actions: {},
   });
-  register(catalogs.register(FILE_EXPLORER_CATALOG_ID, registry));
+  register(slots.register(catalogsSlot, FILE_EXPLORER_CATALOG_ID, registry));
 
   register(slots.provide(dockTabIconSlot, { panelIdPrefix: "file-explorer:", Icon: FolderOpen }));
 
