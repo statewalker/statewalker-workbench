@@ -23,10 +23,10 @@ export interface WorkspaceAdapter {
 /**
  * Registry key type. Abstract classes (like the `Secrets` / `Settings` /
  * `SystemFiles` tokens) MUST be usable as keys — hence `abstract new`. The
- * constructor signature is left unconstrained so token classes from
- * `@statewalker/workbench-views` (or anywhere else) — whose constructors take
- * arbitrary args — can be passed in. The workspace passes `this` as the
- * first arg; tokens that don't expect it simply ignore it.
+ * constructor signature is left unconstrained so token classes from any
+ * substrate package — whose constructors take arbitrary args — can be
+ * passed in. The workspace passes `this` as the first arg; tokens that
+ * don't expect it simply ignore it.
  */
 // biome-ignore lint/suspicious/noExplicitAny: token constructors are heterogeneous
 export type AdapterCtor<T = unknown> = abstract new (...args: any[]) => T;
