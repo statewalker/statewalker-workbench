@@ -10,7 +10,9 @@
     "./fragment": "./src/fragment.ts",
     "./styles": "./src/styles.css"
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
@@ -22,15 +24,20 @@
     "@json-render/react": "0.18.0",
     "@repo/chat-mini.chat-react": "workspace:*",
     "@statewalker/core-react": "workspace:*",
+    "@statewalker/dock-react": "workspace:*",
     "@statewalker/files": "workspace:*",
     "@statewalker/json-render": "workspace:*",
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/workspace-api": "workspace:*",
     "@statewalker/workspace-bridge-react": "workspace:*",
+    "lucide-react": "catalog:",
     "zod": "catalog:"
   },
-  "peerDependencies": {"react": ">=18", "react-dom": ">=18"},
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
   "devDependencies": {
     "@testing-library/react": "^16.3.2",
     "@types/react": "catalog:",
@@ -40,6 +47,10 @@
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
-  "sideEffects": ["**/*.css"],
-  "publishConfig": {"access": "public"}
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

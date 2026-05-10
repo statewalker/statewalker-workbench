@@ -1,4 +1,5 @@
 import { defineRegistry } from "@json-render/react";
+import { provideDockTabIcon } from "@statewalker/dock-react";
 import { provideMimeRenderer } from "@statewalker/files";
 import {
   DOCK_LAYOUT_STORAGE_KEY,
@@ -9,6 +10,7 @@ import {
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace-api";
+import { FileText } from "lucide-react";
 import { PdfView } from "../internal/pdf-view.js";
 import {
   makePdfSpec,
@@ -59,6 +61,8 @@ export default function initPdfViewerReact(ctx: Record<string, unknown>): () => 
       },
     }),
   );
+
+  register(provideDockTabIcon(slots, { panelIdPrefix: "pdf-viewer:", Icon: FileText }));
 
   return cleanup;
 }

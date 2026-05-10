@@ -2,8 +2,8 @@ import type { Workspace } from "@statewalker/workspace-api";
 import { DockviewReact, type DockviewReadyEvent } from "dockview-react";
 import "dockview-react/dist/styles/dockview.css";
 import "../internal/dock-view-host.css";
-import { type ReactElement, useCallback, useEffect } from "react";
 import { DockHost } from "@statewalker/dock";
+import { type ReactElement, useCallback, useEffect } from "react";
 import { JsonPanel } from "../internal/json-panel.js";
 import { LineTab } from "../internal/line-tab.js";
 

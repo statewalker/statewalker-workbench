@@ -5,6 +5,17 @@ export interface ShowDockPanelPayload {
   panelId: string;
   specId: string;
   position?: PanelPosition;
+  /**
+   * Panel id to open relative to. When set together with `position`,
+   * the new panel docks `position` of THIS panel rather than the
+   * currently-active group. Without `position`, the panel is added
+   * `"within"` the reference's group as an additional tab. Falls
+   * back silently to the default placement if no panel with this id
+   * is currently open.
+   */
+  referencePanelId?: string;
+  /** Optional initial tab title; defaults to `panelId` if omitted. */
+  title?: string;
   activate?: boolean;
 }
 

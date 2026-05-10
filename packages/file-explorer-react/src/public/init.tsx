@@ -1,12 +1,14 @@
 import { defineRegistry } from "@json-render/react";
 import { compareByOrderAndId } from "@statewalker/core-react";
 import { type PanelPosition, runShowDockPanel } from "@statewalker/dock";
+import { provideDockTabIcon } from "@statewalker/dock-react";
 import {
   FILE_EXPLORER_CATALOG_ID,
   type FileExplorerPanelPreset,
   fileExplorerCatalog,
   fileExplorerPanelId,
   fileExplorerSpecId,
+  handleNewFileExplorerPanel,
   makeFileExplorerSpec,
   observeFileExplorerPanelPresets,
 } from "@statewalker/file-explorer";
@@ -20,6 +22,7 @@ import { Intents } from "@statewalker/shared-intents";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace-api";
+import { FolderOpen } from "lucide-react";
 import { FileExplorerPanel } from "../internal/file-explorer-panel.js";
 
 /**
@@ -75,12 +78,16 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
           panelId={props.panelId}
           label={props.label}
           initialPath={props.initialPath}
+          mainViewerHost={props.mainViewerHost}
+          folderNavigationHost={props.folderNavigationHost}
         />
       ),
     },
     actions: {},
   });
   register(catalogs.register(FILE_EXPLORER_CATALOG_ID, registry));
+
+  register(provideDockTabIcon(slots, { panelIdPrefix: "file-explorer:", Icon: FolderOpen }));
 
   // ── Two-pane preset application ───────────────────────────────
   const opened = new Set<string>();
@@ -92,13 +99,26 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
       if (!preset || opened.has(preset.id)) continue;
 
       const specId = fileExplorerSpecId(preset.id);
+      const presetSpec = makeFileExplorerSpec(preset.id, {
+        label: preset.label,
+        initialPath: preset.initialPath,
+        mainViewerHost: preset.mainViewerHost,
+        folderNavigationHost: preset.folderNavigationHost,
+      });
       if (!store.get(specId)) {
         store.create({
           id: specId,
           catalogId: FILE_EXPLORER_CATALOG_ID,
-          spec: makeFileExplorerSpec(preset.id, preset.label, preset.initialPath),
+          spec: presetSpec,
           meta: { persistent: true },
         });
+      } else {
+        // A spec may already exist when `restorePanelSpecsFromLayout`
+        // pre-allocated a default for a persisted layout. Upgrade it
+        // with the full preset (label, host flags, …) so the rendered
+        // panel matches the canonical layout instead of running with
+        // the layout-restore defaults.
+        store.patch(specId, { spec: presetSpec });
       }
 
       const position = i === 0 ? undefined : sidePosition(preset.side);
@@ -107,6 +127,7 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
           panelId: fileExplorerPanelId(preset.id),
           specId,
           position,
+          title: preset.label,
         }).promise;
         opened.add(preset.id);
       } catch (err) {
@@ -133,6 +154,36 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
   );
 
   register(workspace.onUnload(() => opened.clear()));
+
+  // ── New-panel intent ──────────────────────────────────────────
+  // Lets users (via the toolbar button or any caller) spin up a
+  // fresh file-explorer tab on demand. Each invocation produces a
+  // new id so the tab is independent of any existing panel.
+  register(
+    handleNewFileExplorerPanel(intents, (intent) => {
+      const id = `panel-${crypto.randomUUID().slice(0, 8)}`;
+      const specId = fileExplorerSpecId(id);
+      const label = intent.payload.label ?? "Files";
+      store.create({
+        id: specId,
+        catalogId: FILE_EXPLORER_CATALOG_ID,
+        spec: makeFileExplorerSpec(id, {
+          label,
+          initialPath: intent.payload.initialPath,
+        }),
+        meta: { persistent: true },
+      });
+      runShowDockPanel(intents, {
+        panelId: fileExplorerPanelId(id),
+        specId,
+        title: label,
+        position: intent.payload.position ?? "within",
+      })
+        .promise.then(() => intent.resolve({ panelId: id }))
+        .catch((err) => intent.reject(err));
+      return true;
+    }),
+  );
 
   return cleanup;
 }

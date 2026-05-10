@@ -11,8 +11,6 @@
  * e.g. registering custom DockView component kinds for
  * per-fragment renderer extensions, or hooking the bus-trace UI.
  */
-export default function initDockViews(
-  _ctx: Record<string, unknown>,
-): () => void {
+export default function initDockViews(_ctx: Record<string, unknown>): () => void {
   return () => {};
 }

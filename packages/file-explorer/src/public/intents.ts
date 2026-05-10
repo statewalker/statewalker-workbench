@@ -56,3 +56,25 @@ export interface ConfirmCopyMovePayload {
 export const [runConfirmCopyMove, handleConfirmCopyMove] = newIntent<ConfirmCopyMovePayload, void>(
   "file-explorer:confirm-copy-move",
 );
+
+export interface NewFileExplorerPanelPayload {
+  /** Initial directory; defaults to `"/"`. */
+  initialPath?: string;
+  /** Tab/panel label; defaults to `"Files"`. */
+  label?: string;
+  /**
+   * Where to dock relative to the active group. Defaults to `"within"`
+   * (open as a tab in the current group); `"left"` / `"right"` create
+   * a split.
+   */
+  position?: "left" | "right" | "within";
+}
+/**
+ * Open a fresh file-explorer panel. Resolves with the new panel id
+ * (the suffix after `file-explorer:`) so callers can compose with
+ * `dock:focus-panel` etc.
+ */
+export const [runNewFileExplorerPanel, handleNewFileExplorerPanel] = newIntent<
+  NewFileExplorerPanelPayload,
+  { panelId: string }
+>("file-explorer:new-panel");

@@ -201,15 +201,29 @@ export class DockHost {
       if (options.activate ?? true) existing.focus();
       return;
     }
+    // Reference-panel resolution: if a referencePanelId is supplied
+    // AND that panel is currently open, anchor the new panel to it
+    // (using `position` as the direction, default `"within"` when no
+    // direction was given). This is what lets file viewers always
+    // open in the main file-explorer's group regardless of which
+    // panel had focus when the user clicked.
+    const referencePanel = options.referencePanelId
+      ? (this._api.getPanel(options.referencePanelId) ?? undefined)
+      : undefined;
+    const direction = options.position ?? (referencePanel ? "within" : undefined);
     this._api.addPanel({
       id: options.panelId,
       component: "json",
+      title: options.title ?? options.panelId,
       params: { specId: options.specId },
-      position: options.position ? { direction: options.position } : undefined,
+      position: direction
+        ? referencePanel
+          ? { direction, referencePanel }
+          : { direction }
+        : undefined,
       inactive: options.activate === false,
     });
   }
-
 
   private _scheduleLayoutSave(): void {
     if (this._layoutSaveScheduled) return;

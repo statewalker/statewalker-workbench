@@ -1,13 +1,12 @@
-import { Intents } from "@statewalker/shared-intents";
-import type {
-  DockviewPanelApi,
-  IDockviewPanelHeaderProps,
-} from "dockview-react";
-import { X } from "lucide-react";
-import { type ReactElement, useCallback, useSyncExternalStore } from "react";
-import { cn } from "@statewalker/shadcn-react";
-import { useAppWorkspace } from "@statewalker/core-react";
+import { useAdapter, useAppWorkspace, useSlot } from "@statewalker/core-react";
 import { runClosePanel } from "@statewalker/dock";
+import { cn } from "@statewalker/shadcn-react";
+import { Intents } from "@statewalker/shared-intents";
+import { Slots } from "@statewalker/shared-slots";
+import type { DockviewPanelApi, IDockviewPanelHeaderProps } from "dockview-react";
+import { X } from "lucide-react";
+import { type ReactElement, useCallback, useMemo, useSyncExternalStore } from "react";
+import { observeDockTabIcons } from "../public/extension-points.js";
 
 /**
  * Shadcn standard tab styling — see https://ui.shadcn.com/docs/components/radix/tabs.
@@ -31,6 +30,22 @@ export function LineTab({ api }: IDockviewPanelHeaderProps): ReactElement {
   const isActive = useTabActive(api);
   const workspace = useAppWorkspace();
   const intents = workspace.requireAdapter(Intents);
+  const slots = useAdapter(Slots);
+  const icons = useSlot(slots, observeDockTabIcons);
+  const Icon = useMemo(() => {
+    // Longest matching prefix wins so a more-specific contribution
+    // (e.g. `"chat:agent:"`) can override a broad one (`"chat:"`).
+    let best: { prefixLen: number; Icon: (typeof icons)[number]["Icon"] } | null = null;
+    for (const entry of icons) {
+      if (
+        api.id.startsWith(entry.panelIdPrefix) &&
+        (!best || entry.panelIdPrefix.length > best.prefixLen)
+      ) {
+        best = { prefixLen: entry.panelIdPrefix.length, Icon: entry.Icon };
+      }
+    }
+    return best?.Icon ?? null;
+  }, [icons, api.id]);
 
   const onClose = useCallback(
     (e: React.MouseEvent): void => {
@@ -57,6 +72,7 @@ export function LineTab({ api }: IDockviewPanelHeaderProps): ReactElement {
           : "text-muted-foreground hover:text-foreground",
       )}
     >
+      {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
       <span className="truncate">{title || "Untitled"}</span>
       <button
         type="button"
