@@ -1,25 +1,24 @@
 import { defineRegistry } from "@json-render/react";
-import { newRegistry } from "@statewalker/shared-registry";
-import { getWorkspace } from "@statewalker/workspace-api";
+import { provideMimeRenderer } from "@statewalker/files";
 import { CatalogRegistry } from "@statewalker/json-render";
+import { newRegistry } from "@statewalker/shared-registry";
+import { Slots } from "@statewalker/shared-slots";
+import { getWorkspace } from "@statewalker/workspace-api";
+import { ImageView } from "../internal/image-view.js";
 import {
   IMAGE_VIEWER_CATALOG_ID,
   imageViewerCatalog,
+  imageViewerPanelId,
+  imageViewerSpecId,
+  makeImageSpec,
 } from "./catalog.js";
-import { ImageView } from "../internal/image-view.js";
 
-/**
- * Renderer-fragment init for `image-viewer-views` (per ADR 0002).
- * Builds the json-render registry binding the React `ImageView` to
- * the `ImageView` component type in `imageViewerCatalog`, then
- * registers the resolved entry into `CatalogRegistry` under
- * `IMAGE_VIEWER_CATALOG_ID`.
- */
-export default function initImageViewerViews(
+export default function initImageViewerReact(
   ctx: Record<string, unknown>,
 ): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
+  const slots = workspace.requireAdapter(Slots);
   const catalogs = workspace.requireAdapter(CatalogRegistry);
 
   const { registry } = defineRegistry(imageViewerCatalog, {
@@ -28,8 +27,21 @@ export default function initImageViewerViews(
     },
     actions: {},
   });
-
   register(catalogs.register(IMAGE_VIEWER_CATALOG_ID, registry));
+
+  register(
+    provideMimeRenderer(slots, {
+      mimeTypePattern: "image/*",
+      buildPanel(uri) {
+        return {
+          catalogId: IMAGE_VIEWER_CATALOG_ID,
+          spec: makeImageSpec(uri),
+          panelId: imageViewerPanelId(uri),
+          specId: imageViewerSpecId(uri),
+        };
+      },
+    }),
+  );
 
   return cleanup;
 }
