@@ -1,5 +1,5 @@
-import type { Intent, Intents } from "@statewalker/shared-intents";
-import type { Slots } from "@statewalker/shared-slots";
+import type { Command, CommandDeclaration, Commands } from "@statewalker/shared-commands";
+import type { SlotDeclaration, Slots } from "@statewalker/shared-slots";
 
 const TRACE_KEY = "chat-mini:bus-trace";
 
@@ -13,58 +13,53 @@ function isTraceEnabled(): boolean {
 
 /**
  * Install development-only trace logging on the workspace's
- * `Intents` and `Slots` buses. Off by default; enable via
+ * `Commands` and `Slots` buses. Off by default; enable via
  * `localStorage.setItem("chat-mini:bus-trace", "1")` in the
  * browser console. When disabled, `installBusTrace` returns a
- * no-op disposer and adds NO per-call overhead — the
- * `_handlers` Map's iteration is unaffected, the only change
- * is one extra wrapper in front of the dispatcher methods.
+ * no-op disposer and adds NO per-call overhead.
+ *
+ * Implemented by wrapping `Commands.listen` and `Slots.provide` on
+ * the instances passed in. The wrappers log on registration and on
+ * claim/dispatch.
  */
-export function installBusTrace(intents: Intents, slots: Slots): () => void {
+export function installBusTrace(intents: Commands, slots: Slots): () => void {
   if (!isTraceEnabled()) return () => {};
 
-  // ── Intents trace ────────────────────────────────────────────
-  // Wrap the addHandler method so we can record the registration
-  // order. (The Intents class doesn't expose a hook for "claimed
-  // by which handler" directly, so we instrument addHandler to
-  // wrap each handler with a logger that fires on claim.)
-  const originalAddHandler = intents.addHandler.bind(intents);
+  // ── Commands trace ────────────────────────────────────────────
+  const originalListen = intents.listen.bind(intents);
   let registerOrder = 0;
-  intents.addHandler = function tracedAddHandler<P, R>(
-    key: string,
-    handler: (intent: Intent<P, R>) => boolean,
+  intents.listen = function tracedListen<P, R>(
+    decl: CommandDeclaration<P, R>,
+    fn: (cmd: Command<P, R>) => true | Promise<R> | void,
   ): () => void {
     const order = registerOrder++;
-    const wrapped = (intent: Intent<P, R>): boolean => {
-      const claimed = handler(intent);
-      if (claimed) {
-        console.debug("[chat-mini:bus-trace] intent claimed", {
-          key: intent.key,
-          payload: intent.payload,
-          handlerOrder: order,
+    const wrapped = (cmd: Command<P, R>): true | Promise<R> | void => {
+      const result = fn(cmd);
+      if (result !== undefined) {
+        console.debug("[chat-mini:bus-trace] command claimed", {
+          key: cmd.key,
+          payload: cmd.payload,
+          listenerOrder: order,
         });
       }
-      return claimed;
+      return result;
     };
-    return originalAddHandler(key, wrapped);
+    return originalListen(decl, wrapped);
   };
 
   // ── Slots trace ──────────────────────────────────────────────
   const originalProvide = slots.provide.bind(slots);
-  slots.provide = function tracedProvide<T>(key: string, value: T): () => void {
-    console.debug("[chat-mini:bus-trace] slot provide", { key, value });
-    const undo = originalProvide(key, value);
+  slots.provide = function tracedProvide<T>(decl: SlotDeclaration<T>, value: T): () => void {
+    console.debug("[chat-mini:bus-trace] slot provide", { key: decl.key, value });
+    const undo = originalProvide(decl, value);
     return () => {
-      console.debug("[chat-mini:bus-trace] slot dispose", { key, value });
+      console.debug("[chat-mini:bus-trace] slot dispose", { key: decl.key, value });
       undo();
     };
   };
 
   return () => {
-    // Restore prototypes — the wrappers reference closures over
-    // `originalAddHandler` / `originalProvide`, so removing the
-    // own-property restores the prototype methods.
-    delete (intents as unknown as { addHandler?: unknown }).addHandler;
+    delete (intents as unknown as { listen?: unknown }).listen;
     delete (slots as unknown as { provide?: unknown }).provide;
   };
 }

@@ -1,23 +1,17 @@
 import { defineRegistry } from "@json-render/react";
 import { newCatalogRegistry } from "@statewalker/catalog-registry";
-import { provideDockTabIcon } from "@statewalker/dock-react";
-import { provideMimeRenderer } from "@statewalker/files";
+import { dockTabIconSlot } from "@statewalker/dock-react";
+import { mimeRenderersSlot } from "@statewalker/files";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import {
-  DOCK_LAYOUT_STORAGE_KEY,
-  restorePanelSpecsFromLayout,
-  SpecStore,
+  DOCK_LAYOUT_STORAGE_KEY, SpecStore, restorePanelSpecsFromLayout
 } from "@statewalker/spec-store";
 import { getWorkspace } from "@statewalker/workspace";
 import { FileVideo } from "lucide-react";
 import { VideoView } from "../internal/video-view.js";
 import {
-  makeVideoSpec,
-  VIDEO_VIEWER_CATALOG_ID,
-  videoViewerCatalog,
-  videoViewerPanelId,
-  videoViewerSpecId,
+  VIDEO_VIEWER_CATALOG_ID, makeVideoSpec, videoViewerCatalog, videoViewerPanelId, videoViewerSpecId
 } from "./catalog.js";
 
 export default function initVideoViewerReact(ctx: Record<string, unknown>): () => Promise<void> {
@@ -46,7 +40,7 @@ export default function initVideoViewerReact(ctx: Record<string, unknown>): () =
   register(catalogs.register(VIDEO_VIEWER_CATALOG_ID, registry));
 
   register(
-    provideMimeRenderer(slots, {
+    slots.provide(mimeRenderersSlot, {
       mimeTypePattern: "video/*",
       buildPanel(uri) {
         return {
@@ -59,7 +53,7 @@ export default function initVideoViewerReact(ctx: Record<string, unknown>): () =
     }),
   );
 
-  register(provideDockTabIcon(slots, { panelIdPrefix: "video-viewer:", Icon: FileVideo }));
+  register(slots.provide(dockTabIconSlot, { panelIdPrefix: "video-viewer:", Icon: FileVideo }));
 
   return cleanup;
 }

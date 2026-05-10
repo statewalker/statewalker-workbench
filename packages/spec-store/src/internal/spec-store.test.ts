@@ -1,8 +1,8 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { getWorkspace } from "@statewalker/workspace";
 import { describe, expect, it, vi } from "vitest";
 import initSpecStore from "../public/init.js";
-import { runCreateSpec, runPatchSpec } from "../public/intents.js";
+import { CreateSpecCommand, PatchSpecCommand } from "../public/intents.js";
 import { SpecStore } from "../public/spec-store.js";
 
 describe("SpecStore", () => {
@@ -112,9 +112,9 @@ describe("spec:create / spec:patch intents", () => {
     const cleanup = await initSpecStore(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
-      const intent = runCreateSpec(intents, {
+      const intent = intents.call(CreateSpecCommand, {
         catalogId: "c",
         spec: { hello: "world" },
       });
@@ -131,12 +131,12 @@ describe("spec:create / spec:patch intents", () => {
     const cleanup = await initSpecStore(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
       const specId = store.create({ id: "spec:s", catalogId: "c", spec: 1 });
       const cb = vi.fn();
       store.observe(specId, cb);
-      const intent = runPatchSpec(intents, { specId, patch: { spec: 2 } });
+      const intent = intents.call(PatchSpecCommand, { specId, patch: { spec: 2 } });
       await intent.promise;
       expect(store.get(specId)?.spec).toBe(2);
       expect(cb).toHaveBeenCalledTimes(1);
@@ -149,14 +149,14 @@ describe("spec:create / spec:patch intents", () => {
     const ctx: Record<string, unknown> = {};
     const cleanup = await initSpecStore(ctx);
     const ws = getWorkspace(ctx);
-    const intents = ws.requireAdapter(Intents);
+    const intents = ws.requireAdapter(Commands);
     const store = ws.requireAdapter(SpecStore);
     const sizeBefore = countSpecs(store);
     await cleanup();
     // After cleanup, runCreateSpec falls through to newIntent's default
     // handler (() => true) which claims and resolves with no payload —
     // critically, no SpecStore.create is called anymore.
-    runCreateSpec(intents, { catalogId: "c", spec: 1 });
+    intents.call(CreateSpecCommand, { catalogId: "c", spec: 1 });
     expect(countSpecs(store)).toBe(sizeBefore);
   });
 });

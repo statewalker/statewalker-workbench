@@ -1,13 +1,9 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import { Workspace } from "@statewalker/workspace";
 import { describe, expect, it } from "vitest";
 import {
-  observeSettingsTabs,
-  provideSettingsTab,
-  runCloseSettings,
-  runOpenSettings,
-  Settings,
+  CloseSettingsCommand, OpenSettingsCommand, Settings, settingsTabSlot
 } from "../index.js";
 import { SettingsManager } from "./settings.manager.js";
 
@@ -21,11 +17,11 @@ function makeWorkspace(): { ws: Workspace; manager: SettingsManager } {
 describe("SettingsManager", () => {
   it("runOpenSettings flips Settings.isOpen and writes activeTabId", async () => {
     const { ws, manager } = makeWorkspace();
-    const intents = ws.requireAdapter(Intents);
+    const intents = ws.requireAdapter(Commands);
     const settings = ws.requireAdapter(Settings);
 
     expect(settings.isOpen).toBe(false);
-    await runOpenSettings(intents, { tabId: "providers" }).promise;
+    await intents.call(OpenSettingsCommand, { tabId: "providers" }).promise;
     expect(settings.isOpen).toBe(true);
     expect(settings.activeTabId).toBe("providers");
 
@@ -34,12 +30,12 @@ describe("SettingsManager", () => {
 
   it("runCloseSettings flips Settings.isOpen back", async () => {
     const { ws, manager } = makeWorkspace();
-    const intents = ws.requireAdapter(Intents);
+    const intents = ws.requireAdapter(Commands);
     const settings = ws.requireAdapter(Settings);
 
-    await runOpenSettings(intents, {}).promise;
+    await intents.call(OpenSettingsCommand, {}).promise;
     expect(settings.isOpen).toBe(true);
-    await runCloseSettings(intents).promise;
+    await intents.call(CloseSettingsCommand, undefined).promise;
     expect(settings.isOpen).toBe(false);
 
     await manager.close();
@@ -70,11 +66,11 @@ describe("SettingsManager", () => {
     const slots = ws.requireAdapter(Slots);
 
     let observed: ReadonlyArray<{ id: string }> = [];
-    const stop = observeSettingsTabs(slots, (vs) => {
+    const stop = slots.observe(settingsTabSlot, (vs) => {
       observed = vs;
     });
 
-    const dispose = provideSettingsTab(slots, {
+    const dispose = slots.provide(settingsTabSlot, {
       id: "test-tab",
       title: "Test",
       viewKey: "test:view",

@@ -1,50 +1,54 @@
-import { getSlotKey, KeyedSlot, type SlotObserve, type Slots } from "@statewalker/shared-slots";
+import type { KeyedSlotDeclaration, SlotDeclaration, Slots } from "@statewalker/shared-slots";
 import { useMemo, useSyncExternalStore } from "react";
 
 /**
- * React hook: subscribe to a slot's contributions on the given `Slots` bus.
+ * React hook: subscribe to a plain slot's contributions on the given
+ * `Slots` bus.
  *
- * Pass the typed `observe` function returned by `newSlot`; the hook reads
- * the slot key off the function so callers do not have to pass it twice.
- * Returns a referentially-stable readonly array — the same reference is
- * returned across renders unless the slot mutated, so
- * `useSyncExternalStore` does not loop.
- *
- * Migrated from `@statewalker/shared-slots/react` per ADR 0007 (substrate
- * stays framework-free).
+ * Pass the typed declaration returned by `defineSlot(key)`. The hook
+ * reads `decl.key` directly. Returns a referentially-stable readonly
+ * array — the same reference is returned across renders unless the
+ * slot mutated, so `useSyncExternalStore` does not loop.
  */
-export function useSlot<T>(slots: Slots, observe: SlotObserve<T>): readonly T[] {
-  const key = getSlotKey(observe);
-  if (!key) {
-    throw new Error(
-      "useSlot: the observe function was not produced by newSlot(...). " +
-        "useSlot only works with typed slot observers because it needs the " +
-        "slot key to read a stable getSnapshot() reference.",
-    );
-  }
+export function useSlot<T>(slots: Slots, decl: SlotDeclaration<T>): readonly T[] {
   return useSyncExternalStore(
-    (notify) => observe(slots, () => notify()),
-    () => slots.getSnapshot<T>(key),
+    (notify) => slots.observe(decl, () => notify()),
+    () => slots.getSnapshot(decl),
   );
 }
 
 /**
- * React hook: subscribe to a `KeyedSlot<T>` over a given slot key.
+ * Reactive view of a keyed slot. Returned by `useKeyedSlot`.
  *
- * Returns the wrapper itself; consumers call `.get(id)` to look up
- * contributions in O(1). Re-renders whenever the underlying slot's
- * contributions for that key change (the wrapper's `version` counter
- * drives `useSyncExternalStore`).
- *
- * The wrapper instance is memoised per `(slots, slotKey)` pair so consumers
- * can rely on referential stability across renders.
+ * `entries` is a reference-stable `ReadonlyMap<string, T>` (suitable
+ * for memoised iteration). `get(id)` is O(1).
  */
-export function useKeyedSlot<T>(slots: Slots, slotKey: string): KeyedSlot<T> {
-  const wrapper = useMemo(() => new KeyedSlot<T>(slots, slotKey), [slots, slotKey]);
-  useSyncExternalStore(
-    (notify) => wrapper.observe(() => notify()),
-    () => wrapper.version,
-    () => wrapper.version,
+export interface KeyedSlotView<T> {
+  get(id: string): T | null;
+  readonly entries: ReadonlyMap<string, T>;
+}
+
+/**
+ * React hook: subscribe to a keyed slot.
+ *
+ * Returns a `KeyedSlotView<T>`. Re-renders whenever the underlying
+ * slot's contributions for the declaration change.
+ */
+export function useKeyedSlot<T>(
+  slots: Slots,
+  decl: KeyedSlotDeclaration<T>,
+): KeyedSlotView<T> {
+  const entries = useSyncExternalStore(
+    (notify) => slots.observe(decl, () => notify()),
+    () => slots.getSnapshot(decl),
   );
-  return wrapper;
+  return useMemo<KeyedSlotView<T>>(
+    () => ({
+      entries,
+      get(id: string): T | null {
+        return slots.get(decl, id);
+      },
+    }),
+    [slots, decl, entries],
+  );
 }

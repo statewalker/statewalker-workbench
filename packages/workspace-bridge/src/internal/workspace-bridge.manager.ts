@@ -1,14 +1,10 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import type { FilesApi } from "@statewalker/webrun-files";
-import { handleChangeWorkspace, initWorkspace, type Workspace } from "@statewalker/workspace";
-import { handleWorkspaceDisconnect, handleWorkspaceReconnect } from "../public/intents.js";
+import { ChangeWorkspaceCommand, initWorkspace, type Workspace } from "@statewalker/workspace";
+import { WorkspaceDisconnectCommand, WorkspaceReconnectCommand } from "../public/intents.js";
 import {
-  createBrowserFilesApi,
-  isFileSystemAccessSupported,
-  pickDirectory,
-  queryHandlePermission,
-  requestHandlePermission,
+  createBrowserFilesApi, isFileSystemAccessSupported, pickDirectory, queryHandlePermission, requestHandlePermission
 } from "./files-api-factory.js";
 import { clearStoredHandle, getStoredHandle, setStoredHandle } from "./handle-store.js";
 import { WorkspaceShellAdapter } from "./workspace-shell-adapter.js";
@@ -39,23 +35,23 @@ export interface WorkspaceBridgeManagerOptions {
  */
 export class WorkspaceBridgeManager {
   private readonly _workspace: Workspace;
-  private readonly _intents: Intents;
+  private readonly _intents: Commands;
   private readonly _shell: WorkspaceShellAdapter;
   private readonly _cleanup: () => Promise<void>;
   private _currentHandle: FileSystemDirectoryHandle | null = null;
 
   constructor({ workspace }: WorkspaceBridgeManagerOptions) {
     this._workspace = workspace;
-    this._intents = workspace.requireAdapter(Intents);
+    this._intents = workspace.requireAdapter(Commands);
     this._shell = workspace.requireAdapter(WorkspaceShellAdapter);
 
     const [register, cleanup] = newRegistry();
     this._cleanup = cleanup;
 
     // Whenever the workspace opens (silent-restore, interactive pick,
-    // or a non-interactive `runChangeWorkspace({ files })` call from
-    // a test / integration harness), reflect that as "ready" in the
-    // shell adapter.
+    // or a non-interactive `intents.call(ChangeWorkspaceCommand, { files })`
+    // call from a test / integration harness), reflect that as "ready"
+    // in the shell adapter.
     register(
       workspace.onLoad(() => {
         this._shell._setState({
@@ -66,28 +62,28 @@ export class WorkspaceBridgeManager {
     );
 
     register(
-      handleChangeWorkspace(this._intents, (intent) => {
-        void this._handleChangeWorkspace(intent.payload)
-          .then((result) => intent.resolve(result))
-          .catch((error) => intent.reject(error));
+      this._intents.listen(ChangeWorkspaceCommand, (cmd) => {
+        void this._handleChangeWorkspace(cmd.payload)
+          .then((result) => cmd.resolve(result))
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
 
     register(
-      handleWorkspaceReconnect(this._intents, (intent) => {
+      this._intents.listen(WorkspaceReconnectCommand, (cmd) => {
         void this._reconnect()
-          .then(() => intent.resolve({}))
-          .catch((error) => intent.reject(error));
+          .then(() => cmd.resolve({}))
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
 
     register(
-      handleWorkspaceDisconnect(this._intents, (intent) => {
+      this._intents.listen(WorkspaceDisconnectCommand, (cmd) => {
         void this._disconnect()
-          .then(() => intent.resolve({}))
-          .catch((error) => intent.reject(error));
+          .then(() => cmd.resolve({}))
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );

@@ -1,4 +1,4 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 
 export const PICK_FILE_INTENT_KEY = "platform:pick-file";
 
@@ -13,6 +13,4 @@ export interface PickFileResult {
   names: string[];
 }
 
-export const [runPickFile, handlePickFile] = newIntent<PickFilePayload, PickFileResult>(
-  PICK_FILE_INTENT_KEY,
-);
+export const PickFileCommand = defineCommand<PickFilePayload, PickFileResult>(PICK_FILE_INTENT_KEY, () => {});

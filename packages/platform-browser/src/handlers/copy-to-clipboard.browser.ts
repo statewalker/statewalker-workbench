@@ -1,5 +1,5 @@
-import { handleCopyToClipboard } from "@statewalker/platform-api";
-import type { Intents } from "@statewalker/shared-intents";
+import { CopyToClipboardCommand } from "@statewalker/platform-api";
+import type { Commands } from "@statewalker/shared-commands";
 
 /**
  * Browser default for `platform:copy-to-clipboard`. Uses
@@ -7,8 +7,8 @@ import type { Intents } from "@statewalker/shared-intents";
  * fail if the user has not granted clipboard permission — failures reject the
  * intent with the underlying error for the caller to surface.
  */
-export function registerCopyToClipboardBrowser(intents: Intents): () => void {
-  return handleCopyToClipboard(intents, (intent) => {
+export function registerCopyToClipboardBrowser(intents: Commands): () => void {
+  return intents.listen(CopyToClipboardCommand, (intent) => {
     void navigator.clipboard
       .writeText(intent.payload.text)
       .then(() => {

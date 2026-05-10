@@ -1,15 +1,6 @@
-import { KeyedSlot, Slots } from "@statewalker/shared-slots";
+import { defineKeyedSlot, Slots } from "@statewalker/shared-slots";
 import type { Workspace } from "@statewalker/workspace";
 import type { ComponentType } from "react";
-
-/**
- * Slot key carrying React components for inline-content rendering, keyed
- * by component name. Owned by the renderer-side fragment because the
- * slot value is React-typed; the logic-side `@statewalker/inline-content`
- * fragment owns only the framework-neutral `inline-content:components`
- * descriptor slot.
- */
-export const INLINE_CONTENT_RENDERERS_SLOT_KEY = "inline-content:renderers";
 
 /**
  * Generic shape of an inline-content component. Concrete components
@@ -19,12 +10,34 @@ export const INLINE_CONTENT_RENDERERS_SLOT_KEY = "inline-content:renderers";
 export type InlineContentComponent = ComponentType<{ props: unknown }>;
 
 /**
- * Construct a `KeyedSlot<InlineContentComponent>` over the workspace's
- * `Slots` adapter under `inline-content:renderers`.
+ * Keyed slot carrying React components for inline-content rendering,
+ * keyed by component name. Owned by the renderer-side fragment
+ * because the slot value is React-typed; the logic-side
+ * `@statewalker/inline-content` fragment owns only the
+ * framework-neutral `inline-content:components` descriptor slot.
+ *
+ * Use the workspace's `Slots` adapter to register / look up:
+ *
+ *   slots.register(inlineContentRenderersSlot, "MyInline", MyInline);
+ *   const View = slots.get(inlineContentRenderersSlot, "MyInline");
  */
-export function newInlineContentRegistry(workspace: Workspace): KeyedSlot<InlineContentComponent> {
-  return new KeyedSlot<InlineContentComponent>(
-    workspace.requireAdapter(Slots),
-    INLINE_CONTENT_RENDERERS_SLOT_KEY,
-  );
+export const inlineContentRenderersSlot = defineKeyedSlot<InlineContentComponent>(
+  "inline-content:renderers",
+);
+
+/**
+ * Convenience: returns a write-capable view of
+ * `inlineContentRenderersSlot` bound to the workspace's `Slots`
+ * adapter. Use from renderer-fragment init code that registers
+ * inline-content components by name.
+ */
+export function newInlineContentRegistry(workspace: Workspace): {
+  register(id: string, component: InlineContentComponent): () => void;
+  get(id: string): InlineContentComponent | null;
+} {
+  const slots = workspace.requireAdapter(Slots);
+  return {
+    register: (id, component) => slots.register(inlineContentRenderersSlot, id, component),
+    get: (id) => slots.get(inlineContentRenderersSlot, id),
+  };
 }

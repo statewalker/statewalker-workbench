@@ -1,23 +1,17 @@
 import { defineRegistry } from "@json-render/react";
 import { newCatalogRegistry } from "@statewalker/catalog-registry";
-import { provideDockTabIcon } from "@statewalker/dock-react";
-import { provideMimeRenderer } from "@statewalker/files";
+import { dockTabIconSlot } from "@statewalker/dock-react";
+import { mimeRenderersSlot } from "@statewalker/files";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import {
-  DOCK_LAYOUT_STORAGE_KEY,
-  restorePanelSpecsFromLayout,
-  SpecStore,
+  DOCK_LAYOUT_STORAGE_KEY, SpecStore, restorePanelSpecsFromLayout
 } from "@statewalker/spec-store";
 import { getWorkspace } from "@statewalker/workspace";
 import { FileImage } from "lucide-react";
 import { ImageView } from "../internal/image-view.js";
 import {
-  IMAGE_VIEWER_CATALOG_ID,
-  imageViewerCatalog,
-  imageViewerPanelId,
-  imageViewerSpecId,
-  makeImageSpec,
+  IMAGE_VIEWER_CATALOG_ID, imageViewerCatalog, imageViewerPanelId, imageViewerSpecId, makeImageSpec
 } from "./catalog.js";
 
 export default function initImageViewerReact(ctx: Record<string, unknown>): () => Promise<void> {
@@ -46,7 +40,7 @@ export default function initImageViewerReact(ctx: Record<string, unknown>): () =
   register(catalogs.register(IMAGE_VIEWER_CATALOG_ID, registry));
 
   register(
-    provideMimeRenderer(slots, {
+    slots.provide(mimeRenderersSlot, {
       mimeTypePattern: "image/*",
       buildPanel(uri) {
         return {
@@ -59,7 +53,7 @@ export default function initImageViewerReact(ctx: Record<string, unknown>): () =
     }),
   );
 
-  register(provideDockTabIcon(slots, { panelIdPrefix: "image-viewer:", Icon: FileImage }));
+  register(slots.provide(dockTabIconSlot, { panelIdPrefix: "image-viewer:", Icon: FileImage }));
 
   return cleanup;
 }

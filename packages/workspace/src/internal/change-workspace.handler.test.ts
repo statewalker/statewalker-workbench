@@ -1,9 +1,9 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { afterEach, describe, expect, it } from "vitest";
 import initWorkspaceApi from "../public/init.js";
-import { runChangeWorkspace } from "../public/intents.js";
-import { handlePickDirectory, type PickDirectoryResult } from "../public/pick-directory.js";
+import { ChangeWorkspaceCommand } from "../public/intents.js";
+import { PickDirectoryCommand, type PickDirectoryResult } from "../public/pick-directory.js";
 import { getWorkspace } from "../public/types/workspace.js";
 
 class UserCancelledError extends Error {
@@ -15,9 +15,9 @@ interface PickStub {
   label: string;
 }
 
-function registerPickStub(intents: Intents, picks: PickStub[] | { error: Error }): () => void {
+function registerPickStub(intents: Commands, picks: PickStub[] | { error: Error }): () => void {
   const queue = Array.isArray(picks) ? [...picks] : null;
-  return handlePickDirectory(intents, (intent) => {
+  return intents.listen(PickDirectoryCommand, (intent) => {
     if (!Array.isArray(picks)) {
       intent.reject(picks.error);
       return true;
@@ -45,11 +45,11 @@ describe("workspace:change — non-interactive payload", () => {
 
   it("rebinds non-interactively when payload.files is supplied (cold start)", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getWorkspace(ctx).requireAdapter(Intents);
+    const intents = getWorkspace(ctx).requireAdapter(Commands);
     cleanups.push(initWorkspaceApi(ctx));
 
     const memFs = new MemFilesApi();
-    const { workspace } = await runChangeWorkspace(intents, {
+    const { workspace } = await intents.call(ChangeWorkspaceCommand, {
       files: memFs,
       label: "boot",
     }).promise;
@@ -61,18 +61,18 @@ describe("workspace:change — non-interactive payload", () => {
 
   it("preserves workspace identity across rebinds", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getWorkspace(ctx).requireAdapter(Intents);
+    const intents = getWorkspace(ctx).requireAdapter(Commands);
     cleanups.push(initWorkspaceApi(ctx));
 
     const first = new MemFilesApi();
-    const { workspace } = await runChangeWorkspace(intents, {
+    const { workspace } = await intents.call(ChangeWorkspaceCommand, {
       files: first,
       label: "first",
     }).promise;
     expect(workspace.files).toBe(first);
 
     const second = new MemFilesApi();
-    const { workspace: rebinded } = await runChangeWorkspace(intents, {
+    const { workspace: rebinded } = await intents.call(ChangeWorkspaceCommand, {
       files: second,
       label: "second",
     }).promise;
@@ -85,11 +85,11 @@ describe("workspace:change — non-interactive payload", () => {
 
   it("defaults the label to 'Workspace' when payload.label is omitted", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getWorkspace(ctx).requireAdapter(Intents);
+    const intents = getWorkspace(ctx).requireAdapter(Commands);
     cleanups.push(initWorkspaceApi(ctx));
 
     const memFs = new MemFilesApi();
-    const { workspace } = await runChangeWorkspace(intents, { files: memFs }).promise;
+    const { workspace } = await intents.call(ChangeWorkspaceCommand, { files: memFs }).promise;
     expect(workspace.label).toBe("Workspace");
   });
 });
@@ -104,12 +104,12 @@ describe("workspace:change — interactive (pick-directory)", () => {
 
   it("opens the workspace against the user-picked files when no payload supplied", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getWorkspace(ctx).requireAdapter(Intents);
+    const intents = getWorkspace(ctx).requireAdapter(Commands);
     const picked = new MemFilesApi();
     cleanups.push(registerPickStub(intents, [{ files: picked, label: "P" }]));
     cleanups.push(initWorkspaceApi(ctx));
 
-    const { workspace } = await runChangeWorkspace(intents, {}).promise;
+    const { workspace } = await intents.call(ChangeWorkspaceCommand, {}).promise;
     expect(workspace.isOpened).toBe(true);
     expect(workspace.label).toBe("P");
     expect(workspace.files).toBe(picked);
@@ -117,11 +117,11 @@ describe("workspace:change — interactive (pick-directory)", () => {
 
   it("propagates UserCancelledError when the picker rejects", async () => {
     const ctx: Record<string, unknown> = {};
-    const intents = getWorkspace(ctx).requireAdapter(Intents);
+    const intents = getWorkspace(ctx).requireAdapter(Commands);
     cleanups.push(registerPickStub(intents, { error: new UserCancelledError("nope") }));
     cleanups.push(initWorkspaceApi(ctx));
 
-    await expect(runChangeWorkspace(intents, {}).promise).rejects.toBeInstanceOf(
+    await expect(intents.call(ChangeWorkspaceCommand, {}).promise).rejects.toBeInstanceOf(
       UserCancelledError,
     );
     expect(getWorkspace(ctx).isOpened).toBe(false);

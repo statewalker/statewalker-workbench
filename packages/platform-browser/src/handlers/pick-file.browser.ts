@@ -1,6 +1,6 @@
 import type { PickFilePayload, PickFileResult } from "@statewalker/platform-api";
-import { handlePickFile } from "@statewalker/platform-api";
-import type { Intents } from "@statewalker/shared-intents";
+import { PickFileCommand } from "@statewalker/platform-api";
+import type { Commands } from "@statewalker/shared-commands";
 
 /** Minimal shape of the File System Access API file-picker. */
 interface OpenFilePickerGlobal {
@@ -15,8 +15,8 @@ interface OpenFilePickerGlobal {
  * (File System Access API) when available, falls back to a synthesised
  * `<input type="file">` click otherwise (covers Safari / Firefox).
  */
-export function registerPickFileBrowser(intents: Intents): () => void {
-  return handlePickFile(intents, (intent) => {
+export function registerPickFileBrowser(intents: Commands): () => void {
+  return intents.listen(PickFileCommand, (intent) => {
     const api = globalThis as unknown as OpenFilePickerGlobal;
     const picker = api.showOpenFilePicker;
 

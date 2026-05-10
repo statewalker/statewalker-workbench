@@ -1,4 +1,4 @@
-import { getIntents, runCopyToClipboard } from "@statewalker/platform-api";
+import { CopyToClipboardCommand, getIntents } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerCopyToClipboardBrowser } from "../src/handlers/copy-to-clipboard.browser.js";
 
@@ -21,7 +21,7 @@ describe("copy-to-clipboard browser handler", () => {
     const ctx = {};
     const unregister = registerCopyToClipboardBrowser(getIntents(ctx));
     try {
-      await runCopyToClipboard(getIntents(ctx), { text: "hello" }).promise;
+      await getIntents(ctx).call(CopyToClipboardCommand, { text: "hello" }).promise;
       expect(writeText).toHaveBeenCalledWith("hello");
     } finally {
       unregister();
@@ -33,7 +33,7 @@ describe("copy-to-clipboard browser handler", () => {
     writeText.mockRejectedValueOnce(new Error("permission denied"));
     const unregister = registerCopyToClipboardBrowser(getIntents(ctx));
     try {
-      await expect(runCopyToClipboard(getIntents(ctx), { text: "x" }).promise).rejects.toThrow(
+      await expect(getIntents(ctx).call(CopyToClipboardCommand, { text: "x" }).promise).rejects.toThrow(
         "permission denied",
       );
     } finally {
@@ -45,7 +45,7 @@ describe("copy-to-clipboard browser handler", () => {
     const ctx = {};
     const unregister = registerCopyToClipboardBrowser(getIntents(ctx));
     unregister();
-    const intent = runCopyToClipboard(getIntents(ctx), { text: "x" });
+    const intent = getIntents(ctx).call(CopyToClipboardCommand, { text: "x" });
     expect(intent.settled).toBe(false);
   });
 });

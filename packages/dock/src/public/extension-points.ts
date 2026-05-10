@@ -1,4 +1,4 @@
-import { newSlot } from "@statewalker/shared-slots";
+import { defineSlot } from "@statewalker/shared-slots";
 
 /**
  * Slot value for `dock:side-panels`. Each contribution renders one
@@ -42,8 +42,6 @@ export interface DockOverlay {
   viewKey: string;
 }
 
-export const [provideDockSidePanel, observeDockSidePanels] =
-  newSlot<DockSidePanel>("dock:side-panels");
-export const [provideDockHeaderItem, observeDockHeaderItems] =
-  newSlot<DockHeaderItem>("dock:header-items");
-export const [provideDockOverlay, observeDockOverlays] = newSlot<DockOverlay>("dock:overlays");
+export const dockSidePanelsSlot = defineSlot<DockSidePanel>("dock:side-panels");
+export const dockHeaderItemsSlot = defineSlot<DockHeaderItem>("dock:header-items");
+export const dockOverlaysSlot = defineSlot<DockOverlay>("dock:overlays");

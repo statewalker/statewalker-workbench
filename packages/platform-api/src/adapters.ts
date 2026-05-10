@@ -1,14 +1,14 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { getWorkspace } from "@statewalker/workspace";
 
 /**
- * Resolve the workspace-scoped `Intents` bus for the given context bag.
- * Delegates to `workspace.requireAdapter(Intents)`, which auto-instantiates
+ * Resolve the workspace-scoped `Commands` bus for the given context bag.
+ * Delegates to `workspace.requireAdapter(Commands)`, which auto-instantiates
  * a single shared bus on first lookup so every fragment composed under the
  * same workspace dispatches through the same instance.
  */
-export function getIntents(ctx: Record<string, unknown>): Intents {
-  return getWorkspace(ctx).requireAdapter(Intents);
+export function getIntents(ctx: Record<string, unknown>): Commands {
+  return getWorkspace(ctx).requireAdapter(Commands);
 }
 
 /**
@@ -16,9 +16,9 @@ export function getIntents(ctx: Record<string, unknown>): Intents {
  * explicit registration is a no-op. Kept for one release so legacy bootstrap
  * code keeps compiling. Will be removed in a follow-up phase.
  */
-export function setIntents(_ctx: Record<string, unknown>, _intents: Intents): void {
+export function setIntents(_ctx: Record<string, unknown>, _intents: Commands): void {
   console.warn(
-    "[platform-api] setIntents is deprecated and a no-op: the Intents bus is now workspace-bound and auto-instantiated via workspace.requireAdapter(Intents).",
+    "[platform-api] setIntents is deprecated and a no-op: the Commands bus is now workspace-bound and auto-instantiated via workspace.requireAdapter(Commands).",
   );
 }
 
@@ -29,6 +29,6 @@ export function setIntents(_ctx: Record<string, unknown>, _intents: Intents): vo
  */
 export function removeIntents(_ctx: Record<string, unknown>): void {
   console.warn(
-    "[platform-api] removeIntents is deprecated and a no-op: the Intents bus lifecycle is owned by workspace.close().",
+    "[platform-api] removeIntents is deprecated and a no-op: the Commands bus lifecycle is owned by workspace.close().",
   );
 }

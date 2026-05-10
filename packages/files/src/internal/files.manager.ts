@@ -1,21 +1,14 @@
 import { createFileTools } from "@statewalker/ai-agent/tools";
-import { provideAgentTool } from "@statewalker/ai-agent-runtime";
-import { runShowDockPanel } from "@statewalker/dock";
-import { Intents } from "@statewalker/shared-intents";
+import { agentToolsSlot } from "@statewalker/ai-agent-runtime";
+import { ShowDockPanelCommand } from "@statewalker/dock";
+import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { SpecStore } from "@statewalker/spec-store";
 import { extname, readFile, writeText } from "@statewalker/webrun-files";
 import type { Workspace } from "@statewalker/workspace";
 import {
-  handleDeleteFile,
-  handleLoadDirectory,
-  handleLoadFile,
-  handleMkdir,
-  handleMoveFile,
-  handleRename,
-  handleVisualizeFile,
-  handleWriteFile,
+  DeleteFileCommand, LoadDirectoryCommand, LoadFileCommand, MkdirCommand, MoveFileCommand, RenameCommand, VisualizeFileCommand, WriteFileCommand
 } from "../public/intents.js";
 import { pickMimeRenderer } from "../public/pick-mime-renderer.js";
 import type { DirectoryEntry, LoadedFile, MimeRenderer } from "../public/types.js";
@@ -46,7 +39,7 @@ export interface FilesManagerOptions {
  */
 export class FilesManager {
   private readonly workspace: Workspace;
-  private readonly intents: Intents;
+  private readonly intents: Commands;
   private readonly slots: Slots;
   private readonly store: SpecStore;
   private readonly _cleanup: () => Promise<void>;
@@ -54,84 +47,84 @@ export class FilesManager {
 
   constructor({ workspace }: FilesManagerOptions) {
     this.workspace = workspace;
-    this.intents = workspace.requireAdapter(Intents);
+    this.intents = workspace.requireAdapter(Commands);
     this.slots = workspace.requireAdapter(Slots);
     this.store = workspace.requireAdapter(SpecStore);
 
     const [register, cleanup] = newRegistry();
     this._cleanup = cleanup;
 
-    // ── Intent handlers (lifetime-scoped) ───────────────────────
+    // ── Command handlers (lifetime-scoped) ───────────────────────
     register(
-      handleLoadDirectory(this.intents, (intent) => {
-        const path = intent.payload?.path ?? "/";
-        const recursive = intent.payload?.recursive ?? false;
+      this.intents.listen(LoadDirectoryCommand, (cmd) => {
+        const path = cmd.payload?.path ?? "/";
+        const recursive = cmd.payload?.recursive ?? false;
         void this._loadDirectory(path, recursive)
-          .then((entries) => intent.resolve(entries))
-          .catch((error) => intent.reject(error));
+          .then((entries) => cmd.resolve(entries))
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
     register(
-      handleLoadFile(this.intents, (intent) => {
-        void this._loadFile(intent.payload.path)
-          .then((file) => intent.resolve(file))
-          .catch((error) => intent.reject(error));
+      this.intents.listen(LoadFileCommand, (cmd) => {
+        void this._loadFile(cmd.payload.path)
+          .then((file) => cmd.resolve(file))
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
     register(
-      handleWriteFile(this.intents, (intent) => {
-        void this._writeFile(intent.payload.path, intent.payload.content)
-          .then(() => intent.resolve())
-          .catch((error) => intent.reject(error));
+      this.intents.listen(WriteFileCommand, (cmd) => {
+        void this._writeFile(cmd.payload.path, cmd.payload.content)
+          .then(() => cmd.resolve())
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
     register(
-      handleMoveFile(this.intents, (intent) => {
-        void this._moveFile(intent.payload.fromPath, intent.payload.toPath)
-          .then(() => intent.resolve())
-          .catch((error) => intent.reject(error));
+      this.intents.listen(MoveFileCommand, (cmd) => {
+        void this._moveFile(cmd.payload.fromPath, cmd.payload.toPath)
+          .then(() => cmd.resolve())
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
     register(
-      handleDeleteFile(this.intents, (intent) => {
-        void this._deleteFile(intent.payload.path)
-          .then(() => intent.resolve())
-          .catch((error) => intent.reject(error));
+      this.intents.listen(DeleteFileCommand, (cmd) => {
+        void this._deleteFile(cmd.payload.path)
+          .then(() => cmd.resolve())
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
     register(
-      handleMkdir(this.intents, (intent) => {
-        void this._mkdir(intent.payload.path)
-          .then(() => intent.resolve())
-          .catch((error) => intent.reject(error));
+      this.intents.listen(MkdirCommand, (cmd) => {
+        void this._mkdir(cmd.payload.path)
+          .then(() => cmd.resolve())
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
     register(
-      handleRename(this.intents, (intent) => {
-        void this._moveFile(intent.payload.fromPath, intent.payload.toPath)
-          .then(() => intent.resolve())
-          .catch((error) => intent.reject(error));
+      this.intents.listen(RenameCommand, (cmd) => {
+        void this._moveFile(cmd.payload.fromPath, cmd.payload.toPath)
+          .then(() => cmd.resolve())
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
     register(
-      handleVisualizeFile(this.intents, (intent) => {
-        const { uri, referencePanelId } = intent.payload;
+      this.intents.listen(VisualizeFileCommand, (cmd) => {
+        const { uri, referencePanelId } = cmd.payload;
         const mime = guessMimeType(uri);
         const renderer = pickMimeRenderer(this.slots, mime);
         if (!renderer) {
-          intent.reject(new Error(`No mime-renderer registered for "${mime}"`));
+          cmd.reject(new Error(`No mime-renderer registered for "${mime}"`));
           return true;
         }
         void this._openVisualizePanel(renderer, uri, referencePanelId)
-          .then(() => intent.resolve())
-          .catch((error) => intent.reject(error));
+          .then(() => cmd.resolve())
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
@@ -156,7 +149,7 @@ export class FilesManager {
     // view. AgentRuntime calls the factory during build, passing
     // its own filtered files-tools view (system path hidden).
     this._cycleCleanup.push(
-      provideAgentTool(this.slots, (ctx) => createFileTools(ctx.files, { excludedPrefixes: [] })),
+      this.slots.provide(agentToolsSlot, (ctx) => createFileTools(ctx.files, { excludedPrefixes: [] })),
     );
     // Hold a reference so the closure target stays in scope; the
     // factory itself ignores `files` from this scope (uses
@@ -176,7 +169,7 @@ export class FilesManager {
     this._cycleCleanup = [];
   }
 
-  // ── Intent handler implementations ────────────────────────────
+  // ── Command handler implementations ────────────────────────────
 
   private async _loadDirectory(
     path: string,
@@ -242,7 +235,7 @@ export class FilesManager {
         // Non-persistent: dock manager evicts on last panel close.
       });
     }
-    await runShowDockPanel(this.intents, {
+    await this.intents.call(ShowDockPanelCommand, {
       panelId: plan.panelId,
       specId: plan.specId,
       title: filenameFromUri(uri),

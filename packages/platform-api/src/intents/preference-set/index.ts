@@ -1,4 +1,4 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 
 export const PREFERENCE_SET_INTENT_KEY = "platform:preference-set";
 
@@ -7,6 +7,4 @@ export interface PreferenceSetPayload {
   value: unknown;
 }
 
-export const [runPreferenceSet, handlePreferenceSet] = newIntent<PreferenceSetPayload, void>(
-  PREFERENCE_SET_INTENT_KEY,
-);
+export const PreferenceSetCommand = defineCommand<PreferenceSetPayload, void>(PREFERENCE_SET_INTENT_KEY, () => {});

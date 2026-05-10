@@ -1,4 +1,4 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 import type { Workspace } from "./types/workspace.js";
 
@@ -26,7 +26,5 @@ export interface ChangeWorkspaceResult {
   workspace: Workspace;
 }
 
-export const [runChangeWorkspace, handleChangeWorkspace] = newIntent<
-  ChangeWorkspacePayload,
-  ChangeWorkspaceResult
->(CHANGE_WORKSPACE_INTENT_KEY);
+export const ChangeWorkspaceCommand = defineCommand<ChangeWorkspacePayload,
+  ChangeWorkspaceResult>(CHANGE_WORKSPACE_INTENT_KEY, () => {});

@@ -1,6 +1,6 @@
 import { useAppWorkspace } from "@statewalker/core-react";
-import { type DirectoryEntry, runLoadDirectory, runVisualizeFile } from "@statewalker/files";
-import { Intents } from "@statewalker/shared-intents";
+import { LoadDirectoryCommand, VisualizeFileCommand, type DirectoryEntry } from "@statewalker/files";
+import { Commands } from "@statewalker/shared-commands";
 import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 interface DirectoryCardEntry {
@@ -56,7 +56,7 @@ function joinChildUri(parent: string, child: string): string {
  */
 export function DirectoryCard({ props }: { props: unknown }): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Intents);
+  const intents = workspace.requireAdapter(Commands);
 
   const valid = isDirectoryCardProps(props);
   const explicitEntries = valid ? props.entries : undefined;
@@ -75,7 +75,7 @@ export function DirectoryCard({ props }: { props: unknown }): ReactElement {
     let cancelled = false;
     setState({ kind: "loading" });
     const path = uri.replace(/^file:\/\//, "");
-    runLoadDirectory(intents, { path, recursive: false })
+    intents.call(LoadDirectoryCommand, { path, recursive: false })
       .promise.then((loaded) => {
         if (cancelled) return;
         const mapped: DirectoryCardEntry[] = loaded.map((e: DirectoryEntry) => ({
@@ -100,7 +100,7 @@ export function DirectoryCard({ props }: { props: unknown }): ReactElement {
     (entryName: string) => {
       if (!valid) return;
       const childUri = joinChildUri(uri, entryName);
-      void runVisualizeFile(intents, { uri: childUri }).promise.catch((error: unknown) => {
+      void intents.call(VisualizeFileCommand, { uri: childUri }).promise.catch((error: unknown) => {
         console.warn("[inline-content] DirectoryCard visualize failed:", error);
       });
     },

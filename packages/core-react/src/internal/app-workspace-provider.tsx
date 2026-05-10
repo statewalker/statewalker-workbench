@@ -10,11 +10,9 @@ interface AppWorkspaceProviderProps {
 
 /**
  * Provides the application-wide `Workspace` instance from
- * `@statewalker/workspace` to React consumers. Per ADR 0002,
- * this React-tree glue lives in the renderer fragment
- * `workspace-bridge-views` (not in any logic fragment) — React
- * hooks routing typed contracts are contract surface in renderer
- * fragments.
+ * `@statewalker/workspace` to React consumers. The provider lives in
+ * the renderer fragment because React-tree glue routing typed
+ * contracts is contract surface in renderer fragments.
  *
  * The Workspace is created in `main.tsx` BEFORE React mounts; this
  * provider only carries the already-existing instance into the

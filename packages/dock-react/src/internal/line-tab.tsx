@@ -1,12 +1,12 @@
 import { useAdapter, useAppWorkspace, useSlot } from "@statewalker/core-react";
-import { runClosePanel } from "@statewalker/dock";
+import { ClosePanelCommand } from "@statewalker/dock";
 import { cn } from "@statewalker/shadcn-react";
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import type { DockviewPanelApi, IDockviewPanelHeaderProps } from "dockview-react";
 import { X } from "lucide-react";
 import { type ReactElement, useCallback, useMemo, useSyncExternalStore } from "react";
-import { observeDockTabIcons } from "../public/extension-points.js";
+import { dockTabIconSlot } from "../public/extension-points.js";
 
 /**
  * Shadcn standard tab styling — see https://ui.shadcn.com/docs/components/radix/tabs.
@@ -29,9 +29,9 @@ export function LineTab({ api }: IDockviewPanelHeaderProps): ReactElement {
   const title = useTabTitle(api);
   const isActive = useTabActive(api);
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Intents);
+  const intents = workspace.requireAdapter(Commands);
   const slots = useAdapter(Slots);
-  const icons = useSlot(slots, observeDockTabIcons);
+  const icons = useSlot(slots, dockTabIconSlot);
   const Icon = useMemo(() => {
     // Longest matching prefix wins so a more-specific contribution
     // (e.g. `"chat:agent:"`) can override a broad one (`"chat:"`).
@@ -52,7 +52,7 @@ export function LineTab({ api }: IDockviewPanelHeaderProps): ReactElement {
       // Prevent DockView's tab-click-to-focus from firing when the
       // user clicks the X button.
       e.stopPropagation();
-      runClosePanel(intents, { panelId: api.id });
+      intents.call(ClosePanelCommand, { panelId: api.id });
     },
     [intents, api.id],
   );

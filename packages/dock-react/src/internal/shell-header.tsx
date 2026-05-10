@@ -1,12 +1,12 @@
 import {
   compareByOrderAndId,
+  type KeyedSlotView,
   useAdapter,
   useSlot,
   useViewRegistry,
   type ViewComponent,
 } from "@statewalker/core-react";
-import { type DockHeaderItem, observeDockHeaderItems } from "@statewalker/dock";
-import type { KeyedSlot } from "@statewalker/shared-slots";
+import { type DockHeaderItem, dockHeaderItemsSlot } from "@statewalker/dock";
 import { Slots } from "@statewalker/shared-slots";
 import { type ReactElement, useMemo } from "react";
 
@@ -19,7 +19,7 @@ import { type ReactElement, useMemo } from "react";
 export function ShellHeader(): ReactElement {
   const slots = useAdapter(Slots);
   const registry = useViewRegistry();
-  const items = useSlot(slots, observeDockHeaderItems);
+  const items = useSlot(slots, dockHeaderItemsSlot);
 
   const { leading, trailing } = useMemo(() => {
     const lead: DockHeaderItem[] = [];
@@ -49,7 +49,7 @@ function HeaderItemView({
   registry,
   item,
 }: {
-  registry: KeyedSlot<ViewComponent>;
+  registry: KeyedSlotView<ViewComponent>;
   item: DockHeaderItem;
 }): ReactElement | null {
   const Component = registry.get(item.viewKey);

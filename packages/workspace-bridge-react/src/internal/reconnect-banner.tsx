@@ -1,7 +1,7 @@
 import { useAdapter, useAdapterValue } from "@statewalker/core-react";
 import { Button } from "@statewalker/shadcn-react";
-import { Intents } from "@statewalker/shared-intents";
-import { runWorkspaceReconnect, WorkspaceShellAdapter } from "@statewalker/workspace-bridge";
+import { Commands } from "@statewalker/shared-commands";
+import { WorkspaceReconnectCommand, WorkspaceShellAdapter } from "@statewalker/workspace-bridge";
 import { RefreshCw } from "lucide-react";
 import type { ReactElement } from "react";
 
@@ -12,7 +12,7 @@ import type { ReactElement } from "react";
  * `requestPermission()` call is allowed by the browser.
  */
 export function ReconnectBanner(): ReactElement | null {
-  const intents = useAdapter(Intents);
+  const intents = useAdapter(Commands);
   const state = useAdapterValue(WorkspaceShellAdapter, (a) => a.getState());
   if (state.status !== "needs-permission") return null;
   return (
@@ -20,7 +20,7 @@ export function ReconnectBanner(): ReactElement | null {
       <span className="flex-1">
         Reconnect to workspace <span className="font-medium text-foreground">{state.label}</span>?
       </span>
-      <Button size="sm" onClick={() => void runWorkspaceReconnect(intents, {}).promise}>
+      <Button size="sm" onClick={() => void intents.call(WorkspaceReconnectCommand, {}).promise}>
         <RefreshCw /> Reconnect
       </Button>
     </div>

@@ -1,4 +1,4 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 
 export interface OpenSettingsPayload {
   /** Optional initial tab id. When omitted, the dialog opens to
@@ -11,9 +11,7 @@ export interface OpenSettingsPayload {
  * `SettingsManager`; consumers fire the intent without importing
  * the adapter directly.
  */
-export const [runOpenSettings, handleOpenSettings] = newIntent<OpenSettingsPayload, void>(
-  "settings:open",
-);
+export const OpenSettingsCommand = defineCommand<OpenSettingsPayload, void>("settings:open", () => {});
 
 /** Close the settings dialog. */
-export const [runCloseSettings, handleCloseSettings] = newIntent<void, void>("settings:close");
+export const CloseSettingsCommand = defineCommand<void, void>("settings:close", () => {});

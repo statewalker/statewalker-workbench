@@ -1,19 +1,19 @@
-import type { Intents } from "@statewalker/shared-intents";
+import type { Commands } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { initWorkspace } from "../public/init-workspace.js";
-import { handleChangeWorkspace } from "../public/intents.js";
-import { runPickDirectory } from "../public/pick-directory.js";
+import { ChangeWorkspaceCommand } from "../public/intents.js";
+import { PickDirectoryCommand } from "../public/pick-directory.js";
 import type { Workspace } from "../public/types/workspace.js";
 
 /**
  * Register the `workspace:change` handler.
  *
  * Two activation paths share this handler:
- *   1. Non-interactive: `runChangeWorkspace(intents, { files, label? })` —
+ *   1. Non-interactive: `intents.call(ChangeWorkspaceCommand, { files, label? })` —
  *      the handler skips the dialog and rebinds the workspace to the
  *      supplied `FilesApi` directly. Used by tests, the integration
  *      harness, the `?fs=mem` shortcut, and any non-UI caller.
- *   2. Interactive: `runChangeWorkspace(intents, {})` — the handler fires
+ *   2. Interactive: `intents.call(ChangeWorkspaceCommand, {})` — the handler fires
  *      `platform:pick-directory` and awaits the user's choice.
  *      Cancel/dismiss rejects the intent with `UserCancelledError`.
  *
@@ -26,10 +26,10 @@ export function registerChangeWorkspaceHandler({
   intents,
   workspace,
 }: {
-  intents: Intents;
+  intents: Commands;
   workspace: Workspace;
 }): () => void {
-  return handleChangeWorkspace(intents, (intent) => {
+  return intents.listen(ChangeWorkspaceCommand, (intent) => {
     void (async () => {
       let newFiles: FilesApi;
       let newLabel: string | undefined;
@@ -37,7 +37,7 @@ export function registerChangeWorkspaceHandler({
         newFiles = intent.payload.files;
         newLabel = intent.payload.label;
       } else {
-        const picked = await runPickDirectory(intents, {
+        const picked = await intents.call(PickDirectoryCommand, {
           title: "Change workspace folder",
         }).promise;
         newFiles = picked.files;

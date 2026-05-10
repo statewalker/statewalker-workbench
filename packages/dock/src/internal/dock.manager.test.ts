@@ -1,4 +1,4 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { SpecStore } from "@statewalker/spec-store";
 import initSpecStore from "@statewalker/spec-store/fragment";
 import { getWorkspace } from "@statewalker/workspace";
@@ -6,7 +6,7 @@ import type { DockviewApi, IDockviewPanel } from "dockview-react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DockHost } from "../public/dock-host.js";
 import initDock from "../public/init.js";
-import { runClosePanel, runFocusPanel, runShowDockPanel } from "../public/intents.js";
+import { ClosePanelCommand, FocusPanelCommand, ShowDockPanelCommand } from "../public/intents.js";
 
 interface FakePanel {
   id: string;
@@ -64,12 +64,12 @@ describe("dock:* intent handlers (DockManager)", () => {
     const cleanupDock = await initDock(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
       const dockHost = ws.requireAdapter(DockHost);
 
       const specId = store.create({ catalogId: "c", spec: { hello: "world" } });
-      const intent = runShowDockPanel(intents, { panelId: "p1", specId });
+      const intent = intents.call(ShowDockPanelCommand, { panelId: "p1", specId });
       expect(dockHost._pendingCount()).toBe(1);
 
       const { api, panels } = makeFakeApi();
@@ -90,7 +90,7 @@ describe("dock:* intent handlers (DockManager)", () => {
     const cleanupDock = await initDock(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
       const dockHost = ws.requireAdapter(DockHost);
 
@@ -98,7 +98,7 @@ describe("dock:* intent handlers (DockManager)", () => {
       dockHost.setApi(api);
 
       const specId = store.create({ catalogId: "c", spec: 1 });
-      await runShowDockPanel(intents, { panelId: "p1", specId }).promise;
+      await intents.call(ShowDockPanelCommand, { panelId: "p1", specId }).promise;
       expect(panels.has("p1")).toBe(true);
     } finally {
       await cleanupDock();
@@ -112,18 +112,18 @@ describe("dock:* intent handlers (DockManager)", () => {
     const cleanupDock = await initDock(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
       const dockHost = ws.requireAdapter(DockHost);
 
       const { api, panels } = makeFakeApi();
       dockHost.setApi(api);
       const specId = store.create({ catalogId: "c", spec: 1 });
-      await runShowDockPanel(intents, { panelId: "p1", specId }).promise;
+      await intents.call(ShowDockPanelCommand, { panelId: "p1", specId }).promise;
       expect(panels.has("p1")).toBe(true);
       expect(store.get(specId)).not.toBeNull();
 
-      await runClosePanel(intents, { panelId: "p1" }).promise;
+      await intents.call(ClosePanelCommand, { panelId: "p1" }).promise;
       expect(panels.has("p1")).toBe(false);
       expect(store.get(specId)).toBeNull(); // transient → evicted
     } finally {
@@ -138,7 +138,7 @@ describe("dock:* intent handlers (DockManager)", () => {
     const cleanupDock = await initDock(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
       const dockHost = ws.requireAdapter(DockHost);
 
@@ -149,8 +149,8 @@ describe("dock:* intent handlers (DockManager)", () => {
         spec: 1,
         meta: { persistent: true },
       });
-      await runShowDockPanel(intents, { panelId: "p1", specId }).promise;
-      await runClosePanel(intents, { panelId: "p1" }).promise;
+      await intents.call(ShowDockPanelCommand, { panelId: "p1", specId }).promise;
+      await intents.call(ClosePanelCommand, { panelId: "p1" }).promise;
 
       expect(panels.has("p1")).toBe(false);
       expect(store.get(specId)).not.toBeNull();
@@ -166,17 +166,17 @@ describe("dock:* intent handlers (DockManager)", () => {
     const cleanupDock = await initDock(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
       const dockHost = ws.requireAdapter(DockHost);
 
       const { api, panels } = makeFakeApi();
       dockHost.setApi(api);
       const specId = store.create({ catalogId: "c", spec: 1 });
-      await runShowDockPanel(intents, { panelId: "p1", specId }).promise;
+      await intents.call(ShowDockPanelCommand, { panelId: "p1", specId }).promise;
       panels.get("p1")?.focus.mockClear();
 
-      await runFocusPanel(intents, { panelId: "p1" }).promise;
+      await intents.call(FocusPanelCommand, { panelId: "p1" }).promise;
       expect(panels.get("p1")?.focus).toHaveBeenCalledTimes(1);
     } finally {
       await cleanupDock();
@@ -190,7 +190,7 @@ describe("dock:* intent handlers (DockManager)", () => {
     const cleanupDock = await initDock(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
       const dockHost = ws.requireAdapter(DockHost);
 
@@ -198,17 +198,17 @@ describe("dock:* intent handlers (DockManager)", () => {
       dockHost.setApi(api);
       const specId = store.create({ catalogId: "c", spec: 1 });
       // Two panels share the same spec.
-      await runShowDockPanel(intents, { panelId: "p-a", specId }).promise;
-      await runShowDockPanel(intents, { panelId: "p-b", specId }).promise;
+      await intents.call(ShowDockPanelCommand, { panelId: "p-a", specId }).promise;
+      await intents.call(ShowDockPanelCommand, { panelId: "p-b", specId }).promise;
       expect(panels.size).toBe(2);
 
       // Closing one panel keeps the spec alive.
-      await runClosePanel(intents, { panelId: "p-a" }).promise;
+      await intents.call(ClosePanelCommand, { panelId: "p-a" }).promise;
       expect(panels.has("p-a")).toBe(false);
       expect(store.get(specId)).not.toBeNull();
 
       // Closing the second (last) panel evicts.
-      await runClosePanel(intents, { panelId: "p-b" }).promise;
+      await intents.call(ClosePanelCommand, { panelId: "p-b" }).promise;
       expect(panels.has("p-b")).toBe(false);
       expect(store.get(specId)).toBeNull();
     } finally {
@@ -223,11 +223,11 @@ describe("dock:* intent handlers (DockManager)", () => {
     const cleanupDock = await initDock(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Intents);
+      const intents = ws.requireAdapter(Commands);
       const dockHost = ws.requireAdapter(DockHost);
       const { api } = makeFakeApi();
       dockHost.setApi(api);
-      await expect(runFocusPanel(intents, { panelId: "missing" }).promise).resolves.toBeUndefined();
+      await expect(intents.call(FocusPanelCommand, { panelId: "missing" }).promise).resolves.toBeUndefined();
     } finally {
       await cleanupDock();
       await cleanupSpec();

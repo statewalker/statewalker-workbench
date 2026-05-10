@@ -1,5 +1,5 @@
 import { newViewRegistry } from "@statewalker/core-react";
-import { provideDockOverlay } from "@statewalker/dock";
+import { dockOverlaysSlot } from "@statewalker/dock";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace";
@@ -36,7 +36,7 @@ export default function initSettingsReact(ctx: Record<string, unknown>): () => P
     ),
   );
   register(
-    provideDockOverlay(slots, {
+    slots.provide(dockOverlaysSlot, {
       id: "settings:dialog",
       viewKey: VIEW_KEY_DIALOG,
     }),

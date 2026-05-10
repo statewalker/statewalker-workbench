@@ -1,4 +1,4 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 
 /**
@@ -21,7 +21,5 @@ export interface PickDirectoryResult {
   label: string;
 }
 
-export const [runPickDirectory, handlePickDirectory] = newIntent<
-  PickDirectoryPayload,
-  PickDirectoryResult
->(PICK_DIRECTORY_INTENT_KEY);
+export const PickDirectoryCommand = defineCommand<PickDirectoryPayload,
+  PickDirectoryResult>(PICK_DIRECTORY_INTENT_KEY, () => {});

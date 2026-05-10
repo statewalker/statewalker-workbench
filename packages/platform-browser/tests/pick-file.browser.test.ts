@@ -1,4 +1,4 @@
-import { getIntents, runPickFile } from "@statewalker/platform-api";
+import { PickFileCommand, getIntents } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerPickFileBrowser } from "../src/handlers/pick-file.browser.js";
 
@@ -26,7 +26,7 @@ describe("pick-file browser handler — FS Access API path", () => {
     const ctx = {};
     const unregister = registerPickFileBrowser(getIntents(ctx));
     try {
-      const result = await runPickFile(getIntents(ctx), {
+      const result = await getIntents(ctx).call(PickFileCommand, {
         multiple: true,
         accept: [".txt", ".md"],
       }).promise;
@@ -77,7 +77,7 @@ describe("pick-file browser handler — input element fallback", () => {
     const ctx = {};
     const unregister = registerPickFileBrowser(getIntents(ctx));
     try {
-      const result = await runPickFile(getIntents(ctx), { accept: [".txt"] }).promise;
+      const result = await getIntents(ctx).call(PickFileCommand, { accept: [".txt"] }).promise;
       expect(result.names).toEqual(["note.txt"]);
       expect(result.blobs).toHaveLength(1);
     } finally {

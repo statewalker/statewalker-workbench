@@ -1,6 +1,6 @@
 import { AppWorkspaceProvider } from "@statewalker/core-react";
-import { handleLoadFile } from "@statewalker/files";
-import { Intents } from "@statewalker/shared-intents";
+import { LoadFileCommand } from "@statewalker/files";
+import { Commands } from "@statewalker/shared-commands";
 import { Workspace } from "@statewalker/workspace";
 import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -21,8 +21,8 @@ if (typeof URL.createObjectURL === "undefined") {
 describe("ImageView", () => {
   it("renders an <img> with a blob: URL after the file loads", async () => {
     const ws = new Workspace();
-    const intents = ws.requireAdapter(Intents);
-    const dispose = handleLoadFile(intents, (intent) => {
+    const intents = ws.requireAdapter(Commands);
+    const dispose = intents.listen(LoadFileCommand, (intent) => {
       intent.resolve({
         path: intent.payload.path,
         bytes: new Uint8Array([0x89, 0x50, 0x4e, 0x47]),

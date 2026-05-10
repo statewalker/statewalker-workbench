@@ -1,4 +1,4 @@
-import { newIntent } from "@statewalker/shared-intents";
+import { defineCommand } from "@statewalker/shared-commands";
 
 export const PREFERENCE_GET_INTENT_KEY = "platform:preference-get";
 
@@ -10,7 +10,5 @@ export interface PreferenceGetResult {
   value: unknown | undefined;
 }
 
-export const [runPreferenceGet, handlePreferenceGet] = newIntent<
-  PreferenceGetPayload,
-  PreferenceGetResult
->(PREFERENCE_GET_INTENT_KEY);
+export const PreferenceGetCommand = defineCommand<PreferenceGetPayload,
+  PreferenceGetResult>(PREFERENCE_GET_INTENT_KEY, () => {});

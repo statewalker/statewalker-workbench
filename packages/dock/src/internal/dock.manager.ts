@@ -1,14 +1,11 @@
-import { Intents } from "@statewalker/shared-intents";
+import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { SpecStore } from "@statewalker/spec-store";
 import type { Workspace } from "@statewalker/workspace";
 import { DockHost } from "../public/dock-host.js";
 import {
-  handleClosePanel,
-  handleFocusPanel,
-  handleSetPanelTitle,
-  handleShowDockPanel,
+  ClosePanelCommand, FocusPanelCommand, SetPanelTitleCommand, ShowDockPanelCommand
 } from "../public/intents.js";
 import { installBusTrace } from "./bus-trace.js";
 
@@ -26,7 +23,7 @@ export interface DockManagerOptions {
  * because the workspace is never `open()`ed in the current codebase.
  */
 export class DockManager {
-  private readonly intents: Intents;
+  private readonly intents: Commands;
   private readonly slots: Slots;
   private readonly dockHost: DockHost;
   private readonly store: SpecStore;
@@ -35,7 +32,7 @@ export class DockManager {
 
   constructor({ workspace }: DockManagerOptions) {
     [this._register, this._cleanup] = newRegistry();
-    this.intents = workspace.requireAdapter(Intents);
+    this.intents = workspace.requireAdapter(Commands);
     this.slots = workspace.requireAdapter(Slots);
     this.dockHost = workspace.requireAdapter(DockHost);
     this.store = workspace.requireAdapter(SpecStore);
@@ -47,18 +44,18 @@ export class DockManager {
     this._register(installBusTrace(this.intents, this.slots));
 
     this._register(
-      handleShowDockPanel(this.intents, (intent) => {
+      this.intents.listen(ShowDockPanelCommand, (cmd) => {
         this.dockHost
-          .showOrFocus(intent.payload)
-          .then(() => intent.resolve())
-          .catch((error) => intent.reject(error));
+          .showOrFocus(cmd.payload)
+          .then(() => cmd.resolve())
+          .catch((error) => cmd.reject(error));
         return true;
       }),
     );
 
     this._register(
-      handleClosePanel(this.intents, (intent) => {
-        const { panelId } = intent.payload;
+      this.intents.listen(ClosePanelCommand, (cmd) => {
+        const { panelId } = cmd.payload;
         const api = this.dockHost._getApi();
         const panel = api?.getPanel(panelId);
         const specId = (panel?.params as { specId?: string } | undefined)?.specId;
@@ -73,23 +70,23 @@ export class DockManager {
             this.store.delete(specId);
           }
         }
-        intent.resolve();
+        cmd.resolve();
         return true;
       }),
     );
 
     this._register(
-      handleFocusPanel(this.intents, (intent) => {
-        this.dockHost.focusPanel(intent.payload.panelId);
-        intent.resolve();
+      this.intents.listen(FocusPanelCommand, (cmd) => {
+        this.dockHost.focusPanel(cmd.payload.panelId);
+        cmd.resolve();
         return true;
       }),
     );
 
     this._register(
-      handleSetPanelTitle(this.intents, (intent) => {
-        this.dockHost.setPanelTitle(intent.payload.panelId, intent.payload.title);
-        intent.resolve();
+      this.intents.listen(SetPanelTitleCommand, (cmd) => {
+        this.dockHost.setPanelTitle(cmd.payload.panelId, cmd.payload.title);
+        cmd.resolve();
         return true;
       }),
     );

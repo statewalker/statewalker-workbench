@@ -1,4 +1,4 @@
-import { newSlot } from "@statewalker/shared-slots";
+import { defineSlot } from "@statewalker/shared-slots";
 import type { ComponentType } from "react";
 
 /**
@@ -20,4 +20,4 @@ export interface DockTabIcon {
   Icon: ComponentType<{ className?: string }>;
 }
 
-export const [provideDockTabIcon, observeDockTabIcons] = newSlot<DockTabIcon>("dock:tab-icons");
+export const dockTabIconSlot = defineSlot<DockTabIcon>("dock:tab-icons");

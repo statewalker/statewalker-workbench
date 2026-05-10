@@ -1,23 +1,17 @@
 import { defineRegistry } from "@json-render/react";
 import { newCatalogRegistry } from "@statewalker/catalog-registry";
-import { provideDockTabIcon } from "@statewalker/dock-react";
-import { provideMimeRenderer } from "@statewalker/files";
+import { dockTabIconSlot } from "@statewalker/dock-react";
+import { mimeRenderersSlot } from "@statewalker/files";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import {
-  DOCK_LAYOUT_STORAGE_KEY,
-  restorePanelSpecsFromLayout,
-  SpecStore,
+  DOCK_LAYOUT_STORAGE_KEY, SpecStore, restorePanelSpecsFromLayout
 } from "@statewalker/spec-store";
 import { getWorkspace } from "@statewalker/workspace";
 import { FileText } from "lucide-react";
 import { PdfView } from "../internal/pdf-view.js";
 import {
-  makePdfSpec,
-  PDF_VIEWER_CATALOG_ID,
-  pdfViewerCatalog,
-  pdfViewerPanelId,
-  pdfViewerSpecId,
+  PDF_VIEWER_CATALOG_ID, makePdfSpec, pdfViewerCatalog, pdfViewerPanelId, pdfViewerSpecId
 } from "./catalog.js";
 
 export default function initPdfViewerReact(ctx: Record<string, unknown>): () => Promise<void> {
@@ -49,7 +43,7 @@ export default function initPdfViewerReact(ctx: Record<string, unknown>): () => 
   register(catalogs.register(PDF_VIEWER_CATALOG_ID, registry));
 
   register(
-    provideMimeRenderer(slots, {
+    slots.provide(mimeRenderersSlot, {
       mimeTypePattern: "application/pdf",
       buildPanel(uri) {
         return {
@@ -62,7 +56,7 @@ export default function initPdfViewerReact(ctx: Record<string, unknown>): () => 
     }),
   );
 
-  register(provideDockTabIcon(slots, { panelIdPrefix: "pdf-viewer:", Icon: FileText }));
+  register(slots.provide(dockTabIconSlot, { panelIdPrefix: "pdf-viewer:", Icon: FileText }));
 
   return cleanup;
 }

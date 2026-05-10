@@ -5,8 +5,8 @@ import type { ReactElement } from "react";
 import { useAdapterValue } from "./use-adapter-value.js";
 
 /**
- * Root surface switch (per ADR 0003). Reads `WorkspaceShellAdapter`
- * via `useAdapterValue` and renders one of two top-level surfaces:
+ * Root surface switch. Reads `WorkspaceShellAdapter` via
+ * `useAdapterValue` and renders one of two top-level surfaces:
  *
  *   - `<DirectoryPickerEmptyState/>` whenever the workspace shell is
  *     `loading | unsupported | empty | needs-permission`. The single

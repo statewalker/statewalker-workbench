@@ -12,7 +12,7 @@ import { z } from "zod";
  *
  * One element (`FileExplorerView`) parameterised by `panelId` so each
  * dock tab gets its own controller, label, and starting path. Opening
- * via `runShowDockPanel({ panelId: fileExplorerPanelId(id), ... })`
+ * via `intents.call(ShowDockPanelCommand, { panelId: fileExplorerPanelId(id), ... })`
  * yields the deterministic mapping: id → tab.
  */
 export const fileExplorerCatalog = defineCatalog(schema, {
