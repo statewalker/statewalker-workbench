@@ -16,6 +16,9 @@ import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace-api";
 import { FileExplorerPanel } from "../internal/file-explorer-panel.js";
+import { restoreFileExplorerSpecsFromLayout } from "../internal/layout-restore.js";
+
+const LAYOUT_KEY = "chat-mini:dock-layout";
 
 /**
  * Renderer-fragment init for `@statewalker/file-explorer-react`.
@@ -46,6 +49,13 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
   const catalogs = newCatalogRegistry(workspace);
 
   const [register, cleanup] = newRegistry();
+
+  // ── Pre-allocate specs for restored tabs ──────────────────────
+  // Runs synchronously at fragment-init so DockView's fromJSON()
+  // (called once the React tree mounts and `DockHost.setApi` runs)
+  // finds a spec for every persisted file-explorer panel id, instead
+  // of flashing the `PanelMissing` placeholder.
+  restoreFileExplorerSpecsFromLayout(store, globalThis.localStorage, LAYOUT_KEY);
 
   // ── Catalog binding ───────────────────────────────────────────
   const { registry } = defineRegistry(fileExplorerCatalog, {
