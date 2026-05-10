@@ -1,0 +1,61 @@
+import { newIntent } from "@statewalker/shared-intents";
+
+/**
+ * Per the `file-management-split` capability, file-explorer-owned
+ * orchestration intents stay namespaced under `file-explorer:*`.
+ * Primitive file operations live on `files:*` (in `@statewalker/files`)
+ * and SHALL NOT be re-declared here.
+ */
+
+export interface RenamePromptPayload {
+  path: string;
+}
+/**
+ * Open the rename prompt UI for `path`. Resolves with the new
+ * basename on confirm, rejects on cancel. The handler lives in
+ * `file-explorer-react` so the panel renderer owns the dialog.
+ */
+export const [runRenamePrompt, handleRenamePrompt] = newIntent<
+  RenamePromptPayload,
+  { name: string }
+>("file-explorer:rename-prompt");
+
+export interface MkdirPromptPayload {
+  parentPath: string;
+}
+/**
+ * Open the mkdir prompt UI under `parentPath`. Resolves with the
+ * new directory name on confirm, rejects on cancel.
+ */
+export const [runMkdirPrompt, handleMkdirPrompt] = newIntent<
+  MkdirPromptPayload,
+  { name: string }
+>("file-explorer:mkdir-prompt");
+
+export interface ConfirmDeletePayload {
+  paths: string[];
+}
+/**
+ * Open the delete-confirmation dialog. Resolves on confirm, rejects
+ * on cancel. The actual deletion is performed by the caller via
+ * `files:delete-file`.
+ */
+export const [runConfirmDelete, handleConfirmDelete] = newIntent<
+  ConfirmDeletePayload,
+  void
+>("file-explorer:confirm-delete");
+
+export interface ConfirmCopyMovePayload {
+  operation: "copy" | "move";
+  sourcePaths: string[];
+  targetPath: string;
+}
+/**
+ * Open the copy/move confirmation dialog. Resolves on confirm,
+ * rejects on cancel. The caller iterates and dispatches
+ * `files:move-file` (move) or single-file copy operations.
+ */
+export const [runConfirmCopyMove, handleConfirmCopyMove] = newIntent<
+  ConfirmCopyMovePayload,
+  void
+>("file-explorer:confirm-copy-move");

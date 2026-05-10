@@ -28,16 +28,26 @@
     "@statewalker/shared-intents": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/core-react": "workspace:*",
+    "@statewalker/dock": "workspace:*",
+    "@statewalker/dock-react": "workspace:*",
+    "@statewalker/file-explorer": "workspace:*",
+    "@statewalker/files": "workspace:*",
+    "@statewalker/shadcn-react": "workspace:*",
     "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/workspace-api": "workspace:*"
+    "@statewalker/webrun-files": "workspace:*",
+    "@statewalker/workspace-api": "workspace:*",
+    "lucide-react": "catalog:"
   },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
   },
   "devDependencies": {
+    "@statewalker/webrun-files-mem": "workspace:*",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "jsdom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "catalog:",

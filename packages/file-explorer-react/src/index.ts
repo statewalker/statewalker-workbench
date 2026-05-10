@@ -1,2 +1,1 @@
-// Public surface — populated as fragments migrate in.
-export {};
+export * from "./public/index.js";
