@@ -13,7 +13,7 @@ describe("FilesListView", () => {
       { name: "README.md", path: "/projects/README.md", kind: "file", size: 1024 },
     ];
 
-    render(<FilesListView model={model} panelId="left" />);
+    render(<FilesListView model={model} panelId="left" onOpen={() => {}} />);
 
     expect(screen.getByText("README.md")).toBeTruthy();
     expect(screen.getByText("src")).toBeTruthy();
@@ -24,7 +24,7 @@ describe("FilesListView", () => {
   it("re-renders when the model notifies", () => {
     const model = new FilesListModel();
     model.entries = [{ name: "first.txt", path: "/first.txt", kind: "file" }];
-    render(<FilesListView model={model} panelId="left" />);
+    render(<FilesListView model={model} panelId="left" onOpen={() => {}} />);
 
     expect(screen.queryByText("second.txt")).toBeNull();
 

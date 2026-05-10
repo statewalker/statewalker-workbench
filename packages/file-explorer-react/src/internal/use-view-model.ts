@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from "react";
 import type { ViewModel } from "@statewalker/file-explorer";
+import { useSyncExternalStore } from "react";
 
 /**
  * Subscribes a component to a `ViewModel`'s `onUpdate` notifications.

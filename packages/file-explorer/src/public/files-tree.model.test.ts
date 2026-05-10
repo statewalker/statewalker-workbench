@@ -36,10 +36,6 @@ describe("FilesTreeView", () => {
     tree.setRootNodes([entry("a"), entry(".hidden"), entry("b")]);
     expect(tree.getVisibleNodes().map((n) => n.entry.name)).toEqual(["a", "b"]);
     tree.toggleHidden();
-    expect(tree.getVisibleNodes().map((n) => n.entry.name)).toEqual([
-      "a",
-      ".hidden",
-      "b",
-    ]);
+    expect(tree.getVisibleNodes().map((n) => n.entry.name)).toEqual(["a", ".hidden", "b"]);
   });
 });

@@ -1,3 +1,4 @@
+export * from "./catalog.js";
 export * from "./extension-points.js";
 export * from "./file-display.js";
 export * from "./files-list.model.js";

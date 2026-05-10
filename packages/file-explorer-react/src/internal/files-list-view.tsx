@@ -1,5 +1,5 @@
 import type { FilesListModel } from "@statewalker/file-explorer";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import type { DragEvent, ReactElement } from "react";
 import { Breadcrumb } from "./breadcrumb.js";
 import { FileRow } from "./file-row.js";
@@ -9,10 +9,16 @@ interface FilesListViewProps {
   model: FilesListModel;
   /** Stable id used as the DnD `application/x-fe-panel` channel. */
   panelId: string;
+  /**
+   * Activation callback. Fired for every navigation/open gesture
+   * (single-click on folder, double-click, Enter, Backspace-up,
+   * breadcrumb click). The host wires this to the `files:open` intent.
+   */
+  onOpen: (path: string) => void;
 }
 
 /** Panel-internal list view: breadcrumb + filter + sortable table. */
-export function FilesListView({ model, panelId }: FilesListViewProps): ReactElement {
+export function FilesListView({ model, panelId, onOpen }: FilesListViewProps): ReactElement {
   useViewModel(model);
 
   const visible = model.getDisplayEntries();
@@ -25,18 +31,34 @@ export function FilesListView({ model, panelId }: FilesListViewProps): ReactElem
   if (model.filter) parts.push(`filter: "${model.filter}"`);
   const footerText = parts.join(", ") || "Empty";
 
-  function handleNavigate(path: string): void {
-    model.requestNavigation(path);
+  function activateCursor(): void {
+    const entry = model.getCursorEntry();
+    if (entry) onOpen(entry.path);
+  }
+
+  function navigateUp(): void {
+    if (model.path === "/") return;
+    const dotdot = model.getVisibleEntries().find((e) => e.name === "..");
+    if (dotdot) onOpen(dotdot.path);
   }
 
   function handleSelect(index: number): void {
     model.cursorIndex = index;
-    model.notify();
+    const entry = model.getVisibleEntries()[index];
+    // Single-click navigation for directories matches the user's
+    // mental model from web file browsers. Files still require
+    // double-click (or Enter) so they can be selected for drag.
+    if (entry?.kind === "directory") {
+      onOpen(entry.path);
+    } else {
+      model.notify();
+    }
   }
 
   function handleActivate(index: number): void {
     model.cursorIndex = index;
-    model.requestActivateEntry();
+    const entry = model.getVisibleEntries()[index];
+    if (entry) onOpen(entry.path);
   }
 
   function handleDragStart(e: DragEvent, path: string): void {
@@ -52,10 +74,12 @@ export function FilesListView({ model, panelId }: FilesListViewProps): ReactElem
   }
 
   return (
-    <div
-      className="fe-panel flex flex-col h-full"
-      data-fe-panel={panelId}
+    <section
+      aria-label={`Files panel ${panelId}`}
+      // biome-ignore lint/a11y/noNoninteractiveTabindex: panel needs focus for the keyboard nav (Arrow/PageUp/Down/Home/End/Enter/Backspace/Insert) wired below
       tabIndex={0}
+      className="fe-panel flex flex-col h-full focus:outline-none"
+      data-fe-panel={panelId}
       onKeyDown={(e) => {
         switch (e.key) {
           case "ArrowUp":
@@ -86,11 +110,11 @@ export function FilesListView({ model, panelId }: FilesListViewProps): ReactElem
             break;
           case "Enter":
             e.preventDefault();
-            model.requestActivateEntry();
+            activateCursor();
             break;
           case "Backspace":
             e.preventDefault();
-            model.requestNavigateToParent();
+            navigateUp();
             break;
           case "Insert":
             e.preventDefault();
@@ -103,17 +127,36 @@ export function FilesListView({ model, panelId }: FilesListViewProps): ReactElem
       }}
     >
       <div className="flex items-center gap-2 py-1 px-2 border-b border-border/50">
-        <Breadcrumb path={model.path} onNavigate={handleNavigate} />
+        <Breadcrumb path={model.path} onNavigate={onOpen} />
         {model.loading && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
       </div>
       <div className="px-2 py-1 border-b border-border/50">
-        <input
-          type="text"
-          className="text-xs px-2 py-1 border rounded bg-background w-full"
-          placeholder="Filter..."
-          value={model.filter}
-          onChange={(e) => model.setFilter(e.target.value)}
-        />
+        <div className="relative">
+          <input
+            type="text"
+            className="text-xs px-2 py-1 pr-7 border rounded bg-background w-full"
+            placeholder="Filter..."
+            value={model.filter}
+            onChange={(e) => model.setFilter(e.target.value)}
+            onKeyDown={(e) => {
+              e.stopPropagation();
+              if (e.key === "Escape") {
+                e.preventDefault();
+                model.setFilter("");
+              }
+            }}
+          />
+          {model.filter && (
+            <button
+              type="button"
+              aria-label="Clear filter"
+              className="absolute inset-y-0 right-1 flex items-center px-1 text-muted-foreground hover:text-foreground cursor-pointer"
+              onClick={() => model.setFilter("")}
+            >
+              <X className="size-3" />
+            </button>
+          )}
+        </div>
       </div>
       {model.error && (
         <div className="text-sm text-destructive px-2 py-1 border-b border-border/50">
@@ -160,6 +203,6 @@ export function FilesListView({ model, panelId }: FilesListViewProps): ReactElem
       <div className="text-xs text-muted-foreground px-2 py-1 border-t border-border/50">
         {footerText}
       </div>
-    </div>
+    </section>
   );
 }

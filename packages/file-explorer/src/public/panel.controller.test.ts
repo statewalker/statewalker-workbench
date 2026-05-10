@@ -1,11 +1,14 @@
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createPanelController, parentPath } from "./panel.controller.js";
 
 async function flush(): Promise<void> {
   await new Promise((r) => setTimeout(r, 0));
   await new Promise((r) => setTimeout(r, 0));
 }
+
+const enc = new TextEncoder();
+const bytes = (s: string): Uint8Array[] => [enc.encode(s)];
 
 describe("parentPath", () => {
   it("collapses to root from a one-deep path", () => {
@@ -22,9 +25,9 @@ describe("parentPath", () => {
 describe("createPanelController", () => {
   it("loads root entries on construction and inserts a synthetic .. when navigating into a child", async () => {
     const files = new MemFilesApi();
-    await files.write("/a.txt", ["hi"]);
+    await files.write("/a.txt", bytes("hi"));
     await files.mkdir("/dir");
-    await files.write("/dir/inner.txt", ["x"]);
+    await files.write("/dir/inner.txt", bytes("x"));
 
     const panel = createPanelController({ files, title: "Files" });
     await flush();
@@ -40,41 +43,29 @@ describe("createPanelController", () => {
     const childNames = panel.model.getVisibleEntries().map((e) => e.name);
     expect(childNames).toContain("..");
     expect(childNames).toContain("inner.txt");
-
-    panel.cleanup();
   });
 
-  it("invokes onOpenFile when the cursor is on a file and pendingViewFile fires", async () => {
+  it("honours initialPath on construction", async () => {
     const files = new MemFilesApi();
-    await files.write("/note.md", ["hello"]);
-
-    const onOpenFile = vi.fn();
-    const panel = createPanelController({ files, title: "Files", onOpenFile });
+    await files.write("/dir/x.txt", bytes("x"));
+    const panel = createPanelController({ files, title: "Files", initialPath: "/dir" });
     await flush();
 
-    const idx = panel.model
-      .getVisibleEntries()
-      .findIndex((e) => e.name === "note.md");
-    expect(idx).toBeGreaterThanOrEqual(0);
-    panel.model.cursorIndex = idx;
-    panel.model.requestActivateEntry();
-
-    expect(onOpenFile).toHaveBeenCalledWith("/note.md");
-    panel.cleanup();
+    expect(panel.model.path).toBe("/dir");
+    expect(panel.model.getVisibleEntries().map((e) => e.name)).toContain("x.txt");
   });
 
   it("refresh re-navigates to the current path", async () => {
     const files = new MemFilesApi();
-    await files.write("/a.txt", ["a"]);
+    await files.write("/a.txt", bytes("a"));
     const panel = createPanelController({ files, title: "Files" });
     await flush();
 
-    await files.write("/b.txt", ["b"]);
+    await files.write("/b.txt", bytes("b"));
     panel.refresh();
     await flush();
 
     const names = panel.model.getVisibleEntries().map((e) => e.name);
     expect(names).toContain("b.txt");
-    panel.cleanup();
   });
 });

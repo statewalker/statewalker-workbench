@@ -14,6 +14,11 @@
  */
 
 .dockview-theme-line {
+  /* `dockview-theme-light` hard-codes `--dv-group-view-background-color: white`,
+     which forces a white panel surface that clashes with the shadcn dark
+     theme. Bind it to `--background` so panel content sits on the same
+     surface as the rest of the app and follows `.dark` mode. */
+  --dv-group-view-background-color: var(--background);
   /* Shadcn `TabsList` look: muted track behind the pills. */
   --dv-tabs-and-actions-container-background-color: var(--muted);
   /* Both active and inactive tabs use a transparent background;
