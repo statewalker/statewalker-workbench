@@ -1,6 +1,10 @@
 /// <reference types="@testing-library/jest-dom" />
 import "@testing-library/jest-dom/vitest";
-import { AppWorkspaceProvider, newViewRegistry } from "@statewalker/core-react";
+import {
+  AppWorkspaceProvider,
+  coreViewsSlot,
+  type ViewComponent,
+} from "@statewalker/core-react";
 import initCoreReact from "@statewalker/core-react/fragment";
 import { OpenSettingsCommand, Settings, settingsTabSlot } from "@statewalker/settings";
 import initSettings from "@statewalker/settings/fragment";
@@ -51,14 +55,17 @@ describe("SettingsDialog", () => {
     active = bootHarness();
     const { ws } = active;
     const slots = ws.requireAdapter(Slots);
-    const registry = newViewRegistry(ws);
     const intents = ws.requireAdapter(Commands);
     void ws.requireAdapter(Settings);
 
     function TestPanel(): React.ReactElement {
       return <div data-testid="test-panel">Contributed tab content</div>;
     }
-    registry.register("test:settings-tab", TestPanel as never);
+    slots.register(
+      coreViewsSlot,
+      "test:settings-tab",
+      TestPanel as unknown as ViewComponent,
+    );
     slots.provide(settingsTabSlot, {
       id: "test",
       title: "Test Tab",

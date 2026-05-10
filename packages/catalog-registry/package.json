@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Catalog-registry logic fragment: json:catalogs slot key + newCatalogRegistry(workspace) helper.",
+  "description": "Catalog-registry logic fragment: declares the catalogsSlot (`json:catalogs` keyed slot) for registering JSON-render catalogs.",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",

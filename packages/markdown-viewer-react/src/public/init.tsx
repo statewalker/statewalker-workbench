@@ -1,5 +1,5 @@
 import { defineRegistry } from "@json-render/react";
-import { newCatalogRegistry } from "@statewalker/catalog-registry";
+import { catalogsSlot } from "@statewalker/catalog-registry";
 import { dockTabIconSlot } from "@statewalker/dock-react";
 import { mimeRenderersSlot } from "@statewalker/files";
 import { newRegistry } from "@statewalker/shared-registry";
@@ -27,7 +27,6 @@ export default function initMarkdownViewerReact(ctx: Record<string, unknown>): (
   const workspace = getWorkspace(ctx);
   const slots = workspace.requireAdapter(Slots);
   const store = workspace.requireAdapter(SpecStore);
-  const catalogs = newCatalogRegistry(workspace);
 
   restorePanelSpecsFromLayout({
     store,
@@ -45,7 +44,7 @@ export default function initMarkdownViewerReact(ctx: Record<string, unknown>): (
     },
     actions: {},
   });
-  register(catalogs.register(MARKDOWN_VIEWER_CATALOG_ID, registry));
+  register(slots.register(catalogsSlot, MARKDOWN_VIEWER_CATALOG_ID, registry));
 
   register(
     slots.provide(mimeRenderersSlot, {

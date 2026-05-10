@@ -11,7 +11,7 @@ import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import initInlineContentReact from "../public/init.js";
 import { InlineContent } from "../public/inline-content.js";
-import { newInlineContentRegistry } from "../public/inline-content-registry.js";
+import { inlineContentRenderersSlot } from "../public/inline-content-registry.js";
 
 function mount(ws: Workspace, ui: ReactElement) {
   return render(<AppWorkspaceProvider workspace={ws}>{ui}</AppWorkspaceProvider>);
@@ -23,15 +23,15 @@ describe("inline-content-views built-ins", () => {
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentReact(ctx);
 
-    const registry = newInlineContentRegistry(ws);
-    expect(registry.get("metric-card")).not.toBeNull();
-    expect(registry.get("line-chart")).not.toBeNull();
-    expect(registry.get("file-card")).not.toBeNull();
-    expect(registry.get("directory-card")).not.toBeNull();
-    expect(registry.get("action-button")).not.toBeNull();
+    const slots = ws.requireAdapter(Slots);
+    expect(slots.get(inlineContentRenderersSlot, "metric-card")).not.toBeNull();
+    expect(slots.get(inlineContentRenderersSlot, "line-chart")).not.toBeNull();
+    expect(slots.get(inlineContentRenderersSlot, "file-card")).not.toBeNull();
+    expect(slots.get(inlineContentRenderersSlot, "directory-card")).not.toBeNull();
+    expect(slots.get(inlineContentRenderersSlot, "action-button")).not.toBeNull();
 
     await cleanup();
-    expect(registry.get("metric-card")).toBeNull();
+    expect(slots.get(inlineContentRenderersSlot, "metric-card")).toBeNull();
   });
 
   it("contributes descriptors to inline-content:components", async () => {
@@ -248,10 +248,16 @@ describe("inline-content-views built-ins", () => {
     // Plug-in path: register a custom component into the same
     // registry. Renders via InlineContent without any built-in
     // glue knowing about it.
-    const registry = newInlineContentRegistry(ws);
-    const disposeCustom = registry.register("plugin:badge", ({ props }) => (
-      <span data-testid="plugin-badge">{(props as { text: string }).text}</span>
-    ));
+    const slots = ws.requireAdapter(Slots);
+    const disposeCustom = slots.register(
+      inlineContentRenderersSlot,
+      "plugin:badge",
+      ({ props }) => (
+        <span data-testid="plugin-badge">
+          {(props as { text: string }).text}
+        </span>
+      ),
+    );
 
     const utils = mount(
       ws,

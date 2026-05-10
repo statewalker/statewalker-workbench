@@ -1,10 +1,11 @@
 import {
   compareByOrderAndId,
+  coreViewsSlot,
   type KeyedSlotView,
   useAdapter,
   useAdapterValue,
+  useKeyedSlot,
   useSlot,
-  useViewRegistry,
   type ViewComponent,
 } from "@statewalker/core-react";
 import { settingsTabSlot, Settings, type SettingsTab } from "@statewalker/settings";
@@ -31,8 +32,8 @@ import { type ReactElement, useMemo } from "react";
  */
 export function SettingsDialog(): ReactElement | null {
   const settings = useAdapter(Settings);
-  const registry = useViewRegistry();
   const slots = useAdapter(Slots);
+  const registry = useKeyedSlot(slots, coreViewsSlot);
 
   // Read each primitive separately so getSnapshot returns stable
   // values across renders (Object.is identity).

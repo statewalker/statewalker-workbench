@@ -1,4 +1,4 @@
-import { newViewRegistry } from "@statewalker/core-react";
+import { coreViewsSlot, type ViewComponent } from "@statewalker/core-react";
 import { dockOverlaysSlot } from "@statewalker/dock";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
@@ -20,19 +20,20 @@ const VIEW_KEY_DIALOG = "settings:dialog";
 export default function initSettingsReact(ctx: Record<string, unknown>): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
-  const views = newViewRegistry(workspace);
   const slots = workspace.requireAdapter(Slots);
 
   register(
-    views.register(
+    slots.register(
+      coreViewsSlot,
       VIEW_KEY_BUTTON,
-      SettingsButton as unknown as Parameters<typeof views.register>[1],
+      SettingsButton as unknown as ViewComponent,
     ),
   );
   register(
-    views.register(
+    slots.register(
+      coreViewsSlot,
       VIEW_KEY_DIALOG,
-      SettingsDialog as unknown as Parameters<typeof views.register>[1],
+      SettingsDialog as unknown as ViewComponent,
     ),
   );
   register(

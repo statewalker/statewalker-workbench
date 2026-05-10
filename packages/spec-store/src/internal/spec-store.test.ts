@@ -153,9 +153,10 @@ describe("spec:create / spec:patch intents", () => {
     const store = ws.requireAdapter(SpecStore);
     const sizeBefore = countSpecs(store);
     await cleanup();
-    // After cleanup, runCreateSpec falls through to newIntent's default
-    // handler (() => true) which claims and resolves with no payload —
-    // critically, no SpecStore.create is called anymore.
+    // After cleanup, intents.call(CreateSpecCommand, ...) falls through to
+    // CreateSpecCommand's declared default (() => {}), which silently
+    // resolves with no payload — critically, no SpecStore.create is
+    // called anymore.
     intents.call(CreateSpecCommand, { catalogId: "c", spec: 1 });
     expect(countSpecs(store)).toBe(sizeBefore);
   });

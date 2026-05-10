@@ -1,5 +1,5 @@
 import { defineRegistry } from "@json-render/react";
-import { newCatalogRegistry } from "@statewalker/catalog-registry";
+import { catalogsSlot } from "@statewalker/catalog-registry";
 import { dockTabIconSlot } from "@statewalker/dock-react";
 import { mimeRenderersSlot } from "@statewalker/files";
 import { newRegistry } from "@statewalker/shared-registry";
@@ -19,7 +19,6 @@ export default function initPdfViewerReact(ctx: Record<string, unknown>): () => 
   const workspace = getWorkspace(ctx);
   const slots = workspace.requireAdapter(Slots);
   const store = workspace.requireAdapter(SpecStore);
-  const catalogs = newCatalogRegistry(workspace);
 
   // Pre-allocate specs for any pdf-viewer tabs in the persisted dock
   // layout so DockView's fromJSON() — which fires when the React tree
@@ -40,7 +39,7 @@ export default function initPdfViewerReact(ctx: Record<string, unknown>): () => 
     },
     actions: {},
   });
-  register(catalogs.register(PDF_VIEWER_CATALOG_ID, registry));
+  register(slots.register(catalogsSlot, PDF_VIEWER_CATALOG_ID, registry));
 
   register(
     slots.provide(mimeRenderersSlot, {

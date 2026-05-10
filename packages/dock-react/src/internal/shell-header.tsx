@@ -1,9 +1,10 @@
 import {
   compareByOrderAndId,
+  coreViewsSlot,
   type KeyedSlotView,
   useAdapter,
+  useKeyedSlot,
   useSlot,
-  useViewRegistry,
   type ViewComponent,
 } from "@statewalker/core-react";
 import { type DockHeaderItem, dockHeaderItemsSlot } from "@statewalker/dock";
@@ -18,7 +19,7 @@ import { type ReactElement, useMemo } from "react";
  */
 export function ShellHeader(): ReactElement {
   const slots = useAdapter(Slots);
-  const registry = useViewRegistry();
+  const registry = useKeyedSlot(slots, coreViewsSlot);
   const items = useSlot(slots, dockHeaderItemsSlot);
 
   const { leading, trailing } = useMemo(() => {

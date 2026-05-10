@@ -1,10 +1,11 @@
 import {
   compareByOrderAndId,
+  coreViewsSlot,
   type KeyedSlotView,
   useAdapter,
   useAppWorkspace,
+  useKeyedSlot,
   useSlot,
-  useViewRegistry,
   type ViewComponent,
 } from "@statewalker/core-react";
 import {
@@ -35,7 +36,7 @@ import { ShellHeader } from "./shell-header.js";
 export function MainShell(): ReactElement {
   const workspace = useAppWorkspace();
   const slots = useAdapter(Slots);
-  const registry = useViewRegistry();
+  const registry = useKeyedSlot(slots, coreViewsSlot);
   const sidePanels = useSlot(slots, dockSidePanelsSlot);
   const overlays = useSlot(slots, dockOverlaysSlot);
 

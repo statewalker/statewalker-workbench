@@ -1,5 +1,4 @@
-import { defineKeyedSlot, Slots } from "@statewalker/shared-slots";
-import type { Workspace } from "@statewalker/workspace";
+import { defineKeyedSlot } from "@statewalker/shared-slots";
 
 /**
  * Keyed slot carrying json-render registries (the value returned by
@@ -13,19 +12,3 @@ import type { Workspace } from "@statewalker/workspace";
  *   const reg = slots.get(catalogsSlot, "chat");
  */
 export const catalogsSlot = defineKeyedSlot<unknown>("json:catalogs");
-
-/**
- * Convenience: returns a write-capable view of `catalogsSlot` bound
- * to the workspace's `Slots` adapter. Use from logic-side init code
- * that registers a catalog by id.
- */
-export function newCatalogRegistry(workspace: Workspace): {
-  register(id: string, registry: unknown): () => void;
-  get(id: string): unknown | null;
-} {
-  const slots = workspace.requireAdapter(Slots);
-  return {
-    register: (id, registry) => slots.register(catalogsSlot, id, registry),
-    get: (id) => slots.get(catalogsSlot, id),
-  };
-}

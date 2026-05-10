@@ -10,7 +10,7 @@ import { FileCard } from "../internal/components/file-card.js";
 import { LineChart } from "../internal/components/line-chart.js";
 import { MetricCard } from "../internal/components/metric-card.js";
 import {
-  newInlineContentRegistry, type InlineContentComponent
+  inlineContentRenderersSlot, type InlineContentComponent
 } from "./inline-content-registry.js";
 
 const BUILTINS: ReadonlyArray<{
@@ -72,11 +72,10 @@ const BUILTINS: ReadonlyArray<{
 export default function initInlineContentReact(ctx: Record<string, unknown>): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
-  const registry = newInlineContentRegistry(workspace);
   const slots = workspace.requireAdapter(Slots);
 
   for (const { descriptor, component } of BUILTINS) {
-    register(registry.register(descriptor.id, component));
+    register(slots.register(inlineContentRenderersSlot, descriptor.id, component));
     register(slots.provide(inlineComponentSlot, descriptor));
   }
 

@@ -1,6 +1,8 @@
+import { useAdapter, useKeyedSlot } from "@statewalker/core-react";
 import type { InlineContentSpec } from "@statewalker/inline-content";
+import { Slots } from "@statewalker/shared-slots";
 import type { ReactElement } from "react";
-import { useInlineContentRegistry } from "../internal/use-inline-content-registry.js";
+import { inlineContentRenderersSlot } from "./inline-content-registry.js";
 
 /**
  * Resolves `spec.componentId` against the application's
@@ -13,7 +15,8 @@ import { useInlineContentRegistry } from "../internal/use-inline-content-registr
  * unknown id should be visible (not silently swallowed).
  */
 export function InlineContent({ spec }: { spec: InlineContentSpec }): ReactElement {
-  const registry = useInlineContentRegistry();
+  const slots = useAdapter(Slots);
+  const registry = useKeyedSlot(slots, inlineContentRenderersSlot);
   const Component = registry.get(spec.componentId);
 
   if (!Component) {

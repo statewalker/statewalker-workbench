@@ -1,5 +1,4 @@
-import { defineKeyedSlot, Slots } from "@statewalker/shared-slots";
-import type { Workspace } from "@statewalker/workspace";
+import { defineKeyedSlot } from "@statewalker/shared-slots";
 import type { ComponentType } from "react";
 
 /**
@@ -24,20 +23,3 @@ export type InlineContentComponent = ComponentType<{ props: unknown }>;
 export const inlineContentRenderersSlot = defineKeyedSlot<InlineContentComponent>(
   "inline-content:renderers",
 );
-
-/**
- * Convenience: returns a write-capable view of
- * `inlineContentRenderersSlot` bound to the workspace's `Slots`
- * adapter. Use from renderer-fragment init code that registers
- * inline-content components by name.
- */
-export function newInlineContentRegistry(workspace: Workspace): {
-  register(id: string, component: InlineContentComponent): () => void;
-  get(id: string): InlineContentComponent | null;
-} {
-  const slots = workspace.requireAdapter(Slots);
-  return {
-    register: (id, component) => slots.register(inlineContentRenderersSlot, id, component),
-    get: (id) => slots.get(inlineContentRenderersSlot, id),
-  };
-}

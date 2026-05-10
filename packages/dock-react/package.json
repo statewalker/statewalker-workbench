@@ -22,6 +22,7 @@
   "dependencies": {
     "@json-render/react": "0.18.0",
     "@statewalker/core-react": "workspace:*",
+    "@statewalker/catalog-registry": "workspace:*",
     "@statewalker/catalog-registry-react": "workspace:*",
     "@statewalker/dock": "workspace:*",
     "@statewalker/shadcn-react": "workspace:*",
