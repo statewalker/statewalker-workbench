@@ -40,6 +40,18 @@ export const [runDeleteFile, handleDeleteFile] = newIntent<DeleteFilePayload, vo
   "files:delete-file",
 );
 
+export interface MkdirPayload {
+  /** Workspace-relative path of the directory to create. */
+  path: string;
+}
+export const [runMkdir, handleMkdir] = newIntent<MkdirPayload, void>("files:mkdir");
+
+export interface RenamePayload {
+  fromPath: string;
+  toPath: string;
+}
+export const [runRename, handleRename] = newIntent<RenamePayload, void>("files:rename");
+
 export interface VisualizeFilePayload {
   /**
    * `file://` URI or workspace-relative path. The handler resolves
