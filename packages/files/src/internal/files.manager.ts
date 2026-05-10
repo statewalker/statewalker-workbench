@@ -7,11 +7,14 @@ import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { extname, readFile, writeText } from "@statewalker/webrun-files";
 import type { Workspace } from "@statewalker/workspace-api";
+import { pickMimeRenderer } from "../public/pick-mime-renderer.js";
 import {
   handleDeleteFile,
   handleLoadDirectory,
   handleLoadFile,
+  handleMkdir,
   handleMoveFile,
+  handleRename,
   handleVisualizeFile,
   handleWriteFile,
 } from "../public/intents.js";
@@ -102,13 +105,26 @@ export class FilesManager {
       }),
     );
     register(
+      handleMkdir(this.intents, (intent) => {
+        void this._mkdir(intent.payload.path)
+          .then(() => intent.resolve())
+          .catch((error) => intent.reject(error));
+        return true;
+      }),
+    );
+    register(
+      handleRename(this.intents, (intent) => {
+        void this._moveFile(intent.payload.fromPath, intent.payload.toPath)
+          .then(() => intent.resolve())
+          .catch((error) => intent.reject(error));
+        return true;
+      }),
+    );
+    register(
       handleVisualizeFile(this.intents, (intent) => {
         const { uri } = intent.payload;
         const mime = guessMimeType(uri);
-        const renderer = pickRenderer(
-          this.slots.getSnapshot<MimeRenderer>("files:mime-renderers"),
-          mime,
-        );
+        const renderer = pickMimeRenderer(this.slots, mime);
         if (!renderer) {
           intent.reject(new Error(`No mime-renderer registered for "${mime}"`));
           return true;
@@ -199,6 +215,11 @@ export class FilesManager {
   private async _deleteFile(path: string): Promise<void> {
     this._requireOpen();
     await this.workspace.files.remove(path);
+  }
+
+  private async _mkdir(path: string): Promise<void> {
+    this._requireOpen();
+    await this.workspace.files.mkdir(path);
   }
 
   private _requireOpen(): void {
