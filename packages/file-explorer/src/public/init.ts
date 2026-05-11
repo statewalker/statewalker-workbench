@@ -5,7 +5,7 @@ import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace";
 import { fileExplorerPanelId } from "./catalog.js";
-import { activeFileExplorerPanelsSlot, type ActiveFileExplorerPanel } from "./extension-points.js";
+import { type ActiveFileExplorerPanel, activeFileExplorerPanelsSlot } from "./extension-points.js";
 
 /**
  * Logic-fragment init for `@statewalker/file-explorer`.
@@ -14,9 +14,10 @@ import { activeFileExplorerPanelsSlot, type ActiveFileExplorerPanel } from "./ex
  *
  *   - `files:open` intent handler — probes the URI's kind on the
  *     workspace's `FilesApi` and routes by role:
- *       * directory → the panel flagged `folderNavigationHost`
- *         (falls back to `panelId` from the click, then any active
- *         panel) and brings that panel's tab into focus.
+ *       * directory → the panel named by the intent's `target`
+ *         (falls back to the panel flagged `folderNavigationHost`,
+ *         then `origin`, then any active panel) and brings that
+ *         panel's tab into focus.
  *       * file → `files:visualize` with `referencePanelId` set to
  *         the panel flagged `mainViewerHost`, so viewers always
  *         dock into a known group regardless of which panel was
@@ -44,20 +45,23 @@ export default function initFileExplorer(ctx: Record<string, unknown>): () => Pr
 
   register(
     intents.listen(OpenCommand, (intent) => {
-      const { uri, panelId } = intent.payload;
+      const { uri, origin, target } = intent.payload;
       void (async () => {
         try {
           const files = workspace.files;
           const stats = await files.stats(uri);
           if (stats?.kind === "directory") {
-            // Folder routing priority: folderNavigationHost > clicked
-            // panelId > first registered. Fall through if no panel
-            // is mounted (rather than throwing) so the intent surface
-            // stays forgiving of teardown timing.
+            // Folder routing priority: explicit `target` (panels
+            // self-target so folders open in-place) > the workspace's
+            // `folderNavigationHost` (default destination for external
+            // callers) > `origin` > first registered. Fall through if
+            // no panel is mounted rather than throwing so the intent
+            // surface stays forgiving of teardown timing.
             const navHostId = findHostId((p) => p.isFolderNavigationHost);
             const targetId =
+              (target && panelsGet(target) ? target : null) ??
               navHostId ??
-              (panelId && panelsGet(panelId) ? panelId : null) ??
+              (origin && panelsGet(origin) ? origin : null) ??
               [...slots.getSnapshot(activeFileExplorerPanelsSlot).keys()][0] ??
               null;
             if (!targetId) {
@@ -72,10 +76,12 @@ export default function initFileExplorer(ctx: Record<string, unknown>): () => Pr
             panel.navigate(uri);
             // Bring the tab into focus so the navigation is visible
             // even when the user clicked from the *other* panel.
-            intents.call(FocusPanelCommand, { panelId: fileExplorerPanelId(targetId) }).promise.catch(() => {
-              // Focus is best-effort: a panel that hasn't been
-              // dock-shown yet has nothing to focus. Swallow.
-            });
+            intents
+              .call(FocusPanelCommand, { panelId: fileExplorerPanelId(targetId) })
+              .promise.catch(() => {
+                // Focus is best-effort: a panel that hasn't been
+                // dock-shown yet has nothing to focus. Swallow.
+              });
             intent.resolve();
             return;
           }

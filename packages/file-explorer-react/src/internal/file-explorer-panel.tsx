@@ -1,6 +1,8 @@
 import { useAdapter, useAppWorkspace } from "@statewalker/core-react";
 import {
-  activeFileExplorerPanelsSlot, createPanelController, type PanelController
+  activeFileExplorerPanelsSlot,
+  createPanelController,
+  type PanelController,
 } from "@statewalker/file-explorer";
 import { OpenCommand } from "@statewalker/files";
 import { Commands } from "@statewalker/shared-commands";
@@ -24,9 +26,11 @@ export interface FileExplorerPanelProps {
 /**
  * One file-explorer panel. The panel owns its `PanelController`
  * (model + I/O glue) but stays decoupled from activation routing —
- * every click/keypress dispatches `files:open` with this panel's id,
- * and the workspace-level intent handler routes folders back to this
- * panel via the `file-explorer:active-panels` registry.
+ * every click/keypress dispatches `files:open` with this panel's id
+ * as both `origin` and `target`, so folders navigate in-place. The
+ * workspace-level intent handler honors `target` first, falling back
+ * to the workspace's folder-navigation host only when the caller
+ * (e.g. an agent) supplies no target.
  *
  * Two-pane preset (explorer.app): the renderer mounts two of these,
  * one with `panelId="left"` and one with `panelId="right"`.
@@ -61,7 +65,7 @@ export function FileExplorerPanel({
   }, [panel, panelId, slots, mainViewerHost, folderNavigationHost]);
 
   function handleOpen(uri: string): void {
-    intents.call(OpenCommand, { uri, panelId }).promise.catch((err) => {
+    intents.call(OpenCommand, { uri, origin: panelId, target: panelId }).promise.catch((err) => {
       console.error("[file-explorer] files:open failed:", err);
     });
   }
