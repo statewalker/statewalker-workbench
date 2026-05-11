@@ -46,9 +46,10 @@ export function FileRow({
   const isDir = entry.kind === "directory";
 
   return (
+    // biome-ignore lint/a11y/useFocusableInteractive: rows are non-focusable on purpose — keyboard nav is handled at the section level (listbox pattern)
+    // biome-ignore lint/a11y/useKeyWithClickEvents: same as above — keyboard activation lives on the parent section (Enter on cursor row)
     <div
       role="option"
-      tabIndex={0}
       aria-selected={isSelected}
       data-cursor={isCursor || undefined}
       className={[
@@ -57,9 +58,6 @@ export function FileRow({
       ].join(" ")}
       onClick={onSelect}
       onDoubleClick={onActivate}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") onActivate();
-      }}
       draggable={draggable}
       onDragStart={onDragStart}
     >
@@ -74,7 +72,7 @@ export function FileRow({
           {isDir && entry.name !== ".." ? "<DIR>" : entry.displaySize}
         </span>
       </div>
-      <div className="w-28 text-right shrink-0">
+      <div className="w-20 text-right shrink-0">
         <span className="text-xs text-muted-foreground">{entry.displayDate}</span>
       </div>
     </div>
