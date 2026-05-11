@@ -80,6 +80,16 @@ export function FilesListView({ model, panelId, onOpen }: FilesListViewProps): R
       tabIndex={0}
       className="fe-panel flex flex-col h-full focus:outline-none"
       data-fe-panel={panelId}
+      // Grab focus on any click inside the panel so keyboard nav engages
+      // without the user having to tab in first. Skip when the click lands
+      // on a natively-focusable element (filter input, breadcrumb, sort
+      // header) so those still receive focus normally. Rows are not
+      // focusable (see FileRow) — they fall through to focusing the section.
+      onMouseDown={(e) => {
+        if (!(e.target as HTMLElement).closest("button, input, textarea, select, a")) {
+          e.currentTarget.focus();
+        }
+      }}
       onKeyDown={(e) => {
         switch (e.key) {
           case "ArrowUp":
@@ -180,7 +190,7 @@ export function FilesListView({ model, panelId, onOpen }: FilesListViewProps): R
         </button>
         <button
           type="button"
-          className="w-28 text-right hover:underline cursor-pointer"
+          className="w-20 text-right hover:underline cursor-pointer"
           onClick={() => model.setSort("lastModified")}
         >
           Modified{sortIndicator("lastModified")}
