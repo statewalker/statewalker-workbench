@@ -7,13 +7,18 @@ export interface LoadDirectoryPayload {
   /** Recursive listing (descends into subdirectories). */
   recursive?: boolean;
 }
-export const LoadDirectoryCommand = defineCommand<LoadDirectoryPayload,
-  readonly DirectoryEntry[]>("files:load-directory", () => {});
+export const LoadDirectoryCommand = defineCommand<LoadDirectoryPayload, readonly DirectoryEntry[]>(
+  "files:load-directory",
+  () => {},
+);
 
 export interface LoadFilePayload {
   path: string;
 }
-export const LoadFileCommand = defineCommand<LoadFilePayload, LoadedFile>("files:load-file", () => {});
+export const LoadFileCommand = defineCommand<LoadFilePayload, LoadedFile>(
+  "files:load-file",
+  () => {},
+);
 
 export interface WriteFilePayload {
   path: string;
@@ -30,7 +35,10 @@ export const MoveFileCommand = defineCommand<MoveFilePayload, void>("files:move-
 export interface DeleteFilePayload {
   path: string;
 }
-export const DeleteFileCommand = defineCommand<DeleteFilePayload, void>("files:delete-file", () => {});
+export const DeleteFileCommand = defineCommand<DeleteFilePayload, void>(
+  "files:delete-file",
+  () => {},
+);
 
 export interface MkdirPayload {
   /** Workspace-relative path of the directory to create. */
@@ -60,21 +68,31 @@ export interface VisualizeFilePayload {
    */
   referencePanelId?: string;
 }
-export const VisualizeFileCommand = defineCommand<VisualizeFilePayload, void>("files:visualize", () => {});
+export const VisualizeFileCommand = defineCommand<VisualizeFilePayload, void>(
+  "files:visualize",
+  () => {},
+);
 
 export interface OpenPayload {
   /** `file://` URI or workspace-relative path of a file or directory. */
   uri: string;
   /**
-   * Originating file-explorer panel id. When the URI resolves to a
-   * directory, the handler routes the navigation to this panel; the
-   * field is informational for files (which always open in a dock tab).
+   * Id of the file-explorer panel that initiated the open (informational —
+   * useful for cross-panel features; the handler does not route folder
+   * navigation here unless `target` is omitted).
    */
-  panelId?: string;
+  origin?: string;
+  /**
+   * Id of the file-explorer panel that should host the folder navigation
+   * when the URI resolves to a directory. Panels self-target by default
+   * so folders open in-place; external callers (e.g. agents) may omit
+   * this to fall back on the workspace's folder-navigation host.
+   */
+  target?: string;
 }
 /**
  * Smart open: probes the URI's kind (file vs directory) and dispatches
- * — directories navigate the panel identified by `panelId`, files
+ * — directories navigate the panel identified by `target`, files
  * delegate to `files:visualize`.
  */
 export const OpenCommand = defineCommand<OpenPayload, void>("files:open", () => {});
