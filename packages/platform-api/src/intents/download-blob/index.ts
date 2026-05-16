@@ -1,4 +1,4 @@
-import { defineCommand } from "@statewalker/shared-commands";
+import { Command, passthrough } from "@statewalker/shared-commands";
 
 export const DOWNLOAD_BLOB_INTENT_KEY = "platform:download-blob";
 
@@ -7,4 +7,7 @@ export interface DownloadBlobPayload {
   filename: string;
 }
 
-export const DownloadBlobCommand = defineCommand<DownloadBlobPayload, void>(DOWNLOAD_BLOB_INTENT_KEY, () => {});
+export const DownloadBlobCommand = Command.silent(DOWNLOAD_BLOB_INTENT_KEY)
+  .input(passthrough<DownloadBlobPayload>())
+  .output(passthrough<void>())
+  .build();

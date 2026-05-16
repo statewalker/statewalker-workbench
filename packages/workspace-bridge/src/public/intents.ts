@@ -1,4 +1,4 @@
-import { defineCommand } from "@statewalker/shared-commands";
+import { Command, passthrough } from "@statewalker/shared-commands";
 
 /**
  * Re-export the canonical `workspace:change` intent from
@@ -32,8 +32,10 @@ export type WorkspaceVoidResult = Record<string, never>;
  * `requestPermission()` call is allowed by the browser.
  */
 export const WORKSPACE_RECONNECT_INTENT_KEY = "workspace:reconnect";
-export const WorkspaceReconnectCommand = defineCommand<WorkspaceVoidPayload,
-  WorkspaceVoidResult>(WORKSPACE_RECONNECT_INTENT_KEY, () => {});
+export const WorkspaceReconnectCommand = Command.silent(WORKSPACE_RECONNECT_INTENT_KEY)
+  .input(passthrough<WorkspaceVoidPayload>())
+  .output(passthrough<WorkspaceVoidResult>())
+  .build();
 
 /**
  * `workspace:disconnect` — `await workspace.close()`, clear the
@@ -43,5 +45,7 @@ export const WorkspaceReconnectCommand = defineCommand<WorkspaceVoidPayload,
  * runtime is fully torn down before the next pick lands.
  */
 export const WORKSPACE_DISCONNECT_INTENT_KEY = "workspace:disconnect";
-export const WorkspaceDisconnectCommand = defineCommand<WorkspaceVoidPayload,
-  WorkspaceVoidResult>(WORKSPACE_DISCONNECT_INTENT_KEY, () => {});
+export const WorkspaceDisconnectCommand = Command.silent(WORKSPACE_DISCONNECT_INTENT_KEY)
+  .input(passthrough<WorkspaceVoidPayload>())
+  .output(passthrough<WorkspaceVoidResult>())
+  .build();

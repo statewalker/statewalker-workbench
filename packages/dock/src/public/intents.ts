@@ -1,4 +1,4 @@
-import { defineCommand } from "@statewalker/shared-commands";
+import { Command, passthrough } from "@statewalker/shared-commands";
 import type { PanelPosition } from "./types.js";
 
 export interface ShowDockPanelPayload {
@@ -24,17 +24,26 @@ export interface ShowDockPanelPayload {
  * (vision audit C7 / proposal §5.5) — the dock fragment is the only
  * place that knows the panel kind is `"json"`.
  */
-export const ShowDockPanelCommand = defineCommand<ShowDockPanelPayload, void>("dock:show-panel", () => {});
+export const ShowDockPanelCommand = Command.silent("dock:show-panel")
+  .input(passthrough<ShowDockPanelPayload>())
+  .output(passthrough<void>())
+  .build();
 
 export interface ClosePanelPayload {
   panelId: string;
 }
-export const ClosePanelCommand = defineCommand<ClosePanelPayload, void>("dock:close-panel", () => {});
+export const ClosePanelCommand = Command.silent("dock:close-panel")
+  .input(passthrough<ClosePanelPayload>())
+  .output(passthrough<void>())
+  .build();
 
 export interface FocusPanelPayload {
   panelId: string;
 }
-export const FocusPanelCommand = defineCommand<FocusPanelPayload, void>("dock:focus-panel", () => {});
+export const FocusPanelCommand = Command.silent("dock:focus-panel")
+  .input(passthrough<FocusPanelPayload>())
+  .output(passthrough<void>())
+  .build();
 
 export interface SetPanelTitlePayload {
   panelId: string;
@@ -46,4 +55,7 @@ export interface SetPanelTitlePayload {
  * file tabs, etc. — so the dock fragment owns the mechanism rather
  * than each catalog reinventing it.
  */
-export const SetPanelTitleCommand = defineCommand<SetPanelTitlePayload, void>("dock:set-panel-title", () => {});
+export const SetPanelTitleCommand = Command.silent("dock:set-panel-title")
+  .input(passthrough<SetPanelTitlePayload>())
+  .output(passthrough<void>())
+  .build();

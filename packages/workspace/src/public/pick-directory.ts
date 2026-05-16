@@ -1,4 +1,4 @@
-import { defineCommand } from "@statewalker/shared-commands";
+import { Command, passthrough } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 
 /**
@@ -21,5 +21,7 @@ export interface PickDirectoryResult {
   label: string;
 }
 
-export const PickDirectoryCommand = defineCommand<PickDirectoryPayload,
-  PickDirectoryResult>(PICK_DIRECTORY_INTENT_KEY, () => {});
+export const PickDirectoryCommand = Command.silent(PICK_DIRECTORY_INTENT_KEY)
+  .input(passthrough<PickDirectoryPayload>())
+  .output(passthrough<PickDirectoryResult>())
+  .build();

@@ -1,4 +1,4 @@
-import { defineCommand } from "@statewalker/shared-commands";
+import { Command, passthrough } from "@statewalker/shared-commands";
 import type { DirectoryEntry, LoadedFile } from "./types.js";
 
 export interface LoadDirectoryPayload {
@@ -7,50 +7,62 @@ export interface LoadDirectoryPayload {
   /** Recursive listing (descends into subdirectories). */
   recursive?: boolean;
 }
-export const LoadDirectoryCommand = defineCommand<LoadDirectoryPayload, readonly DirectoryEntry[]>(
-  "files:load-directory",
-  () => {},
-);
+export const LoadDirectoryCommand = Command.silent("files:load-directory")
+  .input(passthrough<LoadDirectoryPayload>())
+  .output(passthrough<readonly DirectoryEntry[]>())
+  .build();
 
 export interface LoadFilePayload {
   path: string;
 }
-export const LoadFileCommand = defineCommand<LoadFilePayload, LoadedFile>(
-  "files:load-file",
-  () => {},
-);
+export const LoadFileCommand = Command.silent("files:load-file")
+  .input(passthrough<LoadFilePayload>())
+  .output(passthrough<LoadedFile>())
+  .build();
 
 export interface WriteFilePayload {
   path: string;
   content: Uint8Array | string;
 }
-export const WriteFileCommand = defineCommand<WriteFilePayload, void>("files:write-file", () => {});
+export const WriteFileCommand = Command.silent("files:write-file")
+  .input(passthrough<WriteFilePayload>())
+  .output(passthrough<void>())
+  .build();
 
 export interface MoveFilePayload {
   fromPath: string;
   toPath: string;
 }
-export const MoveFileCommand = defineCommand<MoveFilePayload, void>("files:move-file", () => {});
+export const MoveFileCommand = Command.silent("files:move-file")
+  .input(passthrough<MoveFilePayload>())
+  .output(passthrough<void>())
+  .build();
 
 export interface DeleteFilePayload {
   path: string;
 }
-export const DeleteFileCommand = defineCommand<DeleteFilePayload, void>(
-  "files:delete-file",
-  () => {},
-);
+export const DeleteFileCommand = Command.silent("files:delete-file")
+  .input(passthrough<DeleteFilePayload>())
+  .output(passthrough<void>())
+  .build();
 
 export interface MkdirPayload {
   /** Workspace-relative path of the directory to create. */
   path: string;
 }
-export const MkdirCommand = defineCommand<MkdirPayload, void>("files:mkdir", () => {});
+export const MkdirCommand = Command.silent("files:mkdir")
+  .input(passthrough<MkdirPayload>())
+  .output(passthrough<void>())
+  .build();
 
 export interface RenamePayload {
   fromPath: string;
   toPath: string;
 }
-export const RenameCommand = defineCommand<RenamePayload, void>("files:rename", () => {});
+export const RenameCommand = Command.silent("files:rename")
+  .input(passthrough<RenamePayload>())
+  .output(passthrough<void>())
+  .build();
 
 export interface VisualizeFilePayload {
   /**
@@ -68,10 +80,10 @@ export interface VisualizeFilePayload {
    */
   referencePanelId?: string;
 }
-export const VisualizeFileCommand = defineCommand<VisualizeFilePayload, void>(
-  "files:visualize",
-  () => {},
-);
+export const VisualizeFileCommand = Command.silent("files:visualize")
+  .input(passthrough<VisualizeFilePayload>())
+  .output(passthrough<void>())
+  .build();
 
 export interface OpenPayload {
   /** `file://` URI or workspace-relative path of a file or directory. */
@@ -95,4 +107,7 @@ export interface OpenPayload {
  * — directories navigate the panel identified by `target`, files
  * delegate to `files:visualize`.
  */
-export const OpenCommand = defineCommand<OpenPayload, void>("files:open", () => {});
+export const OpenCommand = Command.silent("files:open")
+  .input(passthrough<OpenPayload>())
+  .output(passthrough<void>())
+  .build();

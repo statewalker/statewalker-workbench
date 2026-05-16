@@ -25,10 +25,11 @@ describe("Commands as a workspace adapter", () => {
     const ws = new Workspace();
     const bus = ws.requireAdapter(Commands);
 
-    const HelloCommand = (await import("@statewalker/shared-commands")).defineCommand<
-      { msg: string },
-      void
-    >("hello", () => {});
+    const mod = await import("@statewalker/shared-commands");
+    const HelloCommand = mod.Command.silent("hello")
+      .input(mod.passthrough<{ msg: string }>())
+      .output(mod.passthrough<void>())
+      .build();
 
     let received: string | null = null;
     bus.listen(HelloCommand, (cmd) => {
@@ -37,6 +38,7 @@ describe("Commands as a workspace adapter", () => {
     });
 
     bus.call(HelloCommand, { msg: "hi" });
+    await Promise.resolve();
     expect(received).toBe("hi");
   });
 });
