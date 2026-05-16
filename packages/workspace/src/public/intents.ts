@@ -1,4 +1,4 @@
-import { defineCommand } from "@statewalker/shared-commands";
+import { Command, passthrough } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 import type { Workspace } from "./types/workspace.js";
 
@@ -26,5 +26,7 @@ export interface ChangeWorkspaceResult {
   workspace: Workspace;
 }
 
-export const ChangeWorkspaceCommand = defineCommand<ChangeWorkspacePayload,
-  ChangeWorkspaceResult>(CHANGE_WORKSPACE_INTENT_KEY, () => {});
+export const ChangeWorkspaceCommand = Command.silent(CHANGE_WORKSPACE_INTENT_KEY)
+  .input(passthrough<ChangeWorkspacePayload>())
+  .output(passthrough<ChangeWorkspaceResult>())
+  .build();

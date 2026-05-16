@@ -1,4 +1,4 @@
-import { defineCommand } from "@statewalker/shared-commands";
+import { Command, passthrough } from "@statewalker/shared-commands";
 
 export interface OpenSettingsPayload {
   /** Optional initial tab id. When omitted, the dialog opens to
@@ -11,7 +11,13 @@ export interface OpenSettingsPayload {
  * `SettingsManager`; consumers fire the intent without importing
  * the adapter directly.
  */
-export const OpenSettingsCommand = defineCommand<OpenSettingsPayload, void>("settings:open", () => {});
+export const OpenSettingsCommand = Command.silent("settings:open")
+  .input(passthrough<OpenSettingsPayload>())
+  .output(passthrough<void>())
+  .build();
 
 /** Close the settings dialog. */
-export const CloseSettingsCommand = defineCommand<void, void>("settings:close", () => {});
+export const CloseSettingsCommand = Command.silent("settings:close")
+  .input(passthrough<void>())
+  .output(passthrough<void>())
+  .build();

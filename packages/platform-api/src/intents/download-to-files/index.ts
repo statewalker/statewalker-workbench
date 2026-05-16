@@ -1,4 +1,4 @@
-import { defineCommand } from "@statewalker/shared-commands";
+import { Command, passthrough } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 
 export const DOWNLOAD_TO_FILES_INTENT_KEY = "platform:download-to-files";
@@ -21,5 +21,7 @@ export interface DownloadToFilesResult {
   bytes: number;
 }
 
-export const DownloadToFilesCommand = defineCommand<DownloadToFilesPayload,
-  DownloadToFilesResult>(DOWNLOAD_TO_FILES_INTENT_KEY, () => {});
+export const DownloadToFilesCommand = Command.silent(DOWNLOAD_TO_FILES_INTENT_KEY)
+  .input(passthrough<DownloadToFilesPayload>())
+  .output(passthrough<DownloadToFilesResult>())
+  .build();

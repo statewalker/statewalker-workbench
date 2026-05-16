@@ -1,6 +1,16 @@
 import {
-  COPY_TO_CLIPBOARD_INTENT_KEY, CopyToClipboardCommand, DOWNLOAD_BLOB_INTENT_KEY, DOWNLOAD_TO_FILES_INTENT_KEY, PICK_DIRECTORY_INTENT_KEY, PICK_FILE_INTENT_KEY, PREFERENCE_GET_INTENT_KEY, PREFERENCE_SET_INTENT_KEY, PreferenceSetCommand, getIntents
+  COPY_TO_CLIPBOARD_INTENT_KEY,
+  CopyToClipboardCommand,
+  DOWNLOAD_BLOB_INTENT_KEY,
+  DOWNLOAD_TO_FILES_INTENT_KEY,
+  getIntents,
+  PICK_DIRECTORY_INTENT_KEY,
+  PICK_FILE_INTENT_KEY,
+  PREFERENCE_GET_INTENT_KEY,
+  PREFERENCE_SET_INTENT_KEY,
+  PreferenceSetCommand,
 } from "@statewalker/platform-api";
+import { Command, passthrough } from "@statewalker/shared-commands";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import initPlatformWeb from "../src/index.js";
 
@@ -42,11 +52,16 @@ describe("platform.browser initPlatformWeb(ctx)", () => {
     ).resolves.toBeUndefined();
 
     // After cleanup, every platform command stays unsettled (no listener,
-    // no default rejection — the noop default leaves it pending so the
-    // caller can supply external resolution if needed).
+    // silent policy leaves it pending so the caller can supply external
+    // resolution if needed).
     await cleanup();
     for (const key of PLATFORM_INTENT_KEYS) {
-      const cmd = getIntents(ctx).call({ key, defaultFn: () => {} }, {});
+      const decl = Command.silent(key)
+        .input(passthrough<Record<string, unknown>>())
+        .output(passthrough<unknown>())
+        .build();
+      const cmd = getIntents(ctx).call(decl, {});
+      await Promise.resolve();
       expect(cmd.settled).toBe(false);
     }
   });
