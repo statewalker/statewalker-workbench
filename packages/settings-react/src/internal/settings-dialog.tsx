@@ -49,7 +49,7 @@ export function SettingsDialog(): ReactElement | null {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => settings._setOpen(open)}>
-      <DialogContent className="max-h-[85vh] max-w-3xl overflow-hidden p-0 sm:max-w-3xl">
+      <DialogContent className="h-[85vh] max-h-[85vh] w-[90vw] max-w-5xl overflow-hidden p-0 sm:max-w-5xl">
         <DialogHeader className="border-b p-4 pb-3">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
