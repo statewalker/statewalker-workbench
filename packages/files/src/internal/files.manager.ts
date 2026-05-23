@@ -149,7 +149,7 @@ export class FilesManager {
     // view. AgentRuntime calls the factory during build, passing
     // its own filtered files-tools view (system path hidden).
     this._cycleCleanup.push(
-      this.slots.provide(agentToolsSlot, (ctx) => createFileTools(ctx.files, { excludedPrefixes: [] })),
+      this.slots.provide(agentToolsSlot, (ctx) => createFileTools(ctx.files)),
     );
     // Hold a reference so the closure target stays in scope; the
     // factory itself ignores `files` from this scope (uses
