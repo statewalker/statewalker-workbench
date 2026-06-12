@@ -12,7 +12,7 @@ interface FilesListViewProps {
   /**
    * Activation callback. Fired for every navigation/open gesture
    * (single-click on folder, double-click, Enter, Backspace-up,
-   * breadcrumb click). The host wires this to the `files:open` intent.
+   * breadcrumb click). The host wires this to the `files:open` command.
    */
   onOpen: (path: string) => void;
 }

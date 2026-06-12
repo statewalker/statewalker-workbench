@@ -69,7 +69,7 @@ export interface PanelController {
  * owns the panel's `FilesListModel` and the I/O glue that loads
  * directories into it. It does NOT subscribe to model events —
  * activation routing is the caller's responsibility (typically via
- * the `files:open` intent), so the controller stays free of
+ * the `files:open` command), so the controller stays free of
  * lifecycle/StrictMode coupling.
  *
  * The first `navigate("/")` (or to `initialPath`, when provided) is

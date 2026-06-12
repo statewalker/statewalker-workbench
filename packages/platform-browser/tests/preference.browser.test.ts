@@ -1,4 +1,4 @@
-import { PreferenceGetCommand, PreferenceSetCommand, getIntents } from "@statewalker/platform-api";
+import { getCommands, PreferenceGetCommand, PreferenceSetCommand } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { registerPreferenceGetBrowser } from "../src/handlers/preference-get.browser.js";
 import { registerPreferenceSetBrowser } from "../src/handlers/preference-set.browser.js";
@@ -14,12 +14,13 @@ describe("preference-get/set browser handlers", () => {
 
   it("round-trips a value through localStorage", async () => {
     const ctx = {};
-    const intents = getIntents(ctx);
-    const unregisterGet = registerPreferenceGetBrowser(intents);
-    const unregisterSet = registerPreferenceSetBrowser(intents);
+    const commands = getCommands(ctx);
+    const unregisterGet = registerPreferenceGetBrowser(commands);
+    const unregisterSet = registerPreferenceSetBrowser(commands);
     try {
-      await intents.call(PreferenceSetCommand, { key: "k", value: { a: 1, b: [true, "s"] } }).promise;
-      const result = await intents.call(PreferenceGetCommand, { key: "k" }).promise;
+      await commands.call(PreferenceSetCommand, { key: "k", value: { a: 1, b: [true, "s"] } })
+        .promise;
+      const result = await commands.call(PreferenceGetCommand, { key: "k" }).promise;
       expect(result.value).toEqual({ a: 1, b: [true, "s"] });
 
       // Namespaced under workbench: prefix.
@@ -32,10 +33,10 @@ describe("preference-get/set browser handlers", () => {
 
   it("returns { value: undefined } for a missing key", async () => {
     const ctx = {};
-    const intents = getIntents(ctx);
-    const unregisterGet = registerPreferenceGetBrowser(intents);
+    const commands = getCommands(ctx);
+    const unregisterGet = registerPreferenceGetBrowser(commands);
     try {
-      const result = await intents.call(PreferenceGetCommand, { key: "never-set" }).promise;
+      const result = await commands.call(PreferenceGetCommand, { key: "never-set" }).promise;
       expect(result).toEqual({ value: undefined });
     } finally {
       unregisterGet();
@@ -44,11 +45,11 @@ describe("preference-get/set browser handlers", () => {
 
   it("treats a corrupt JSON entry as missing", async () => {
     const ctx = {};
-    const intents = getIntents(ctx);
-    const unregisterGet = registerPreferenceGetBrowser(intents);
+    const commands = getCommands(ctx);
+    const unregisterGet = registerPreferenceGetBrowser(commands);
     try {
       localStorage.setItem("workbench:broken", "{not json");
-      const result = await intents.call(PreferenceGetCommand, { key: "broken" }).promise;
+      const result = await commands.call(PreferenceGetCommand, { key: "broken" }).promise;
       expect(result.value).toBeUndefined();
     } finally {
       unregisterGet();

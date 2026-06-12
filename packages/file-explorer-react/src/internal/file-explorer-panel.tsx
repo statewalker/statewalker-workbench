@@ -28,7 +28,7 @@ export interface FileExplorerPanelProps {
  * (model + I/O glue) but stays decoupled from activation routing —
  * every click/keypress dispatches `files:open` with this panel's id
  * as both `origin` and `target`, so folders navigate in-place. The
- * workspace-level intent handler honors `target` first, falling back
+ * workspace-level command handler honors `target` first, falling back
  * to the workspace's folder-navigation host only when the caller
  * (e.g. an agent) supplies no target.
  *
@@ -43,7 +43,7 @@ export function FileExplorerPanel({
   folderNavigationHost = false,
 }: FileExplorerPanelProps): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = useAdapter(Commands);
+  const commands = useAdapter(Commands);
   const slots = useAdapter(Slots);
 
   const panel: PanelController = useMemo(
@@ -65,7 +65,7 @@ export function FileExplorerPanel({
   }, [panel, panelId, slots, mainViewerHost, folderNavigationHost]);
 
   function handleOpen(uri: string): void {
-    intents.call(OpenCommand, { uri, origin: panelId, target: panelId }).promise.catch((err) => {
+    commands.call(OpenCommand, { uri, origin: panelId, target: panelId }).promise.catch((err) => {
       console.error("[file-explorer] files:open failed:", err);
     });
   }

@@ -9,22 +9,22 @@ const PREFIX = "workbench:";
  * key is absent or parsing fails (the latter is logged but not thrown — the
  * caller gets the "missing value" signal and can re-seed).
  */
-export function registerPreferenceGetBrowser(intents: Commands): () => void {
-  return intents.listen(PreferenceGetCommand, (intent) => {
+export function registerPreferenceGetBrowser(commands: Commands): () => void {
+  return commands.listen(PreferenceGetCommand, (command) => {
     try {
-      const raw = localStorage.getItem(PREFIX + intent.payload.key);
+      const raw = localStorage.getItem(PREFIX + command.payload.key);
       if (raw === null) {
-        intent.resolve({ value: undefined });
+        command.resolve({ value: undefined });
         return true;
       }
       try {
-        intent.resolve({ value: JSON.parse(raw) as unknown });
+        command.resolve({ value: JSON.parse(raw) as unknown });
       } catch {
         // Corrupt entry — surface as missing; leave the raw value for manual recovery.
-        intent.resolve({ value: undefined });
+        command.resolve({ value: undefined });
       }
     } catch (error) {
-      intent.reject(error);
+      command.reject(error);
     }
     return true;
   });

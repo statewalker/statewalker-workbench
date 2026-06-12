@@ -15,33 +15,33 @@ interface OpenFilePickerGlobal {
  * (File System Access API) when available, falls back to a synthesised
  * `<input type="file">` click otherwise (covers Safari / Firefox).
  */
-export function registerPickFileBrowser(intents: Commands): () => void {
-  return intents.listen(PickFileCommand, (intent) => {
+export function registerPickFileBrowser(commands: Commands): () => void {
+  return commands.listen(PickFileCommand, (command) => {
     const api = globalThis as unknown as OpenFilePickerGlobal;
     const picker = api.showOpenFilePicker;
 
     if (typeof picker === "function") {
       picker({
-        multiple: intent.payload.multiple ?? false,
-        ...buildFSAccessTypes(intent.payload.accept),
+        multiple: command.payload.multiple ?? false,
+        ...buildFSAccessTypes(command.payload.accept),
       })
         .then(async (handles) => {
           const files = await Promise.all(handles.map((h) => h.getFile()));
-          intent.resolve({ blobs: files, names: files.map((f) => f.name) });
+          command.resolve({ blobs: files, names: files.map((f) => f.name) });
         })
         .catch((error) => {
-          intent.reject(error);
+          command.reject(error);
         });
       return true;
     }
 
     // Fallback: synthesize an <input type="file"> click.
-    pickWithInputElement(intent.payload)
+    pickWithInputElement(command.payload)
       .then((result) => {
-        intent.resolve(result);
+        command.resolve(result);
       })
       .catch((error) => {
-        intent.reject(error);
+        command.reject(error);
       });
     return true;
   });

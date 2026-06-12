@@ -1,5 +1,8 @@
 import {
-  ActiveModel, AgentRuntimeAdapter, agentToolsSlot, type AgentToolContribution
+  ActiveModel,
+  AgentRuntimeAdapter,
+  type AgentToolContribution,
+  agentToolsSlot,
 } from "@statewalker/ai-agent-runtime";
 import { ShowDockPanelCommand } from "@statewalker/dock";
 import { Commands } from "@statewalker/shared-commands";
@@ -10,7 +13,13 @@ import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { Workspace } from "@statewalker/workspace";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  DeleteFileCommand, LoadDirectoryCommand, LoadFileCommand, MoveFileCommand, VisualizeFileCommand, WriteFileCommand, mimeRenderersSlot
+  DeleteFileCommand,
+  LoadDirectoryCommand,
+  LoadFileCommand,
+  MoveFileCommand,
+  mimeRenderersSlot,
+  VisualizeFileCommand,
+  WriteFileCommand,
 } from "../index.js";
 import { FilesManager, guessMimeType, pickRenderer } from "./files.manager.js";
 
@@ -42,9 +51,9 @@ describe("FilesManager", () => {
     await writeText(files, "/notes/data.json", '{"k":1}');
     const { ws, manager } = bootWorkspace(files);
     await ws.open();
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
 
-    const entries = await intents.call(LoadDirectoryCommand, { path: "/notes" }).promise;
+    const entries = await commands.call(LoadDirectoryCommand, { path: "/notes" }).promise;
     expect(entries.map((e) => e.name).sort()).toEqual(["data.json", "hello.md"]);
     expect(entries.find((e) => e.name === "hello.md")?.mimeType).toBe("text/markdown");
     expect(entries.find((e) => e.name === "data.json")?.mimeType).toBe("application/json");
@@ -56,14 +65,14 @@ describe("FilesManager", () => {
     const files = new MemFilesApi();
     const { ws, manager } = bootWorkspace(files);
     await ws.open();
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
 
-    await intents.call(WriteFileCommand, { path: "/a.txt", content: "hello" }).promise;
-    const loaded = await intents.call(LoadFileCommand, { path: "/a.txt" }).promise;
+    await commands.call(WriteFileCommand, { path: "/a.txt", content: "hello" }).promise;
+    const loaded = await commands.call(LoadFileCommand, { path: "/a.txt" }).promise;
     expect(new TextDecoder().decode(loaded.bytes)).toBe("hello");
     expect(loaded.mimeType).toBe("text/plain");
 
-    await intents.call(DeleteFileCommand, { path: "/a.txt" }).promise;
+    await commands.call(DeleteFileCommand, { path: "/a.txt" }).promise;
     expect(await files.exists("/a.txt")).toBe(false);
 
     await manager.close();
@@ -74,21 +83,21 @@ describe("FilesManager", () => {
     await writeText(files, "/a.md", "old");
     const { ws, manager } = bootWorkspace(files);
     await ws.open();
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
 
-    await intents.call(MoveFileCommand, { fromPath: "/a.md", toPath: "/b.md" }).promise;
+    await commands.call(MoveFileCommand, { fromPath: "/a.md", toPath: "/b.md" }).promise;
     expect(await files.exists("/a.md")).toBe(false);
     expect(await readText(files, "/b.md")).toBe("old");
 
     await manager.close();
   });
 
-  it("intents reject when the workspace is closed", async () => {
+  it("commands reject when the workspace is closed", async () => {
     const files = new MemFilesApi();
     const { ws, manager } = bootWorkspace(files);
-    // ws not opened — intents must reject.
-    const intents = ws.requireAdapter(Commands);
-    await expect(intents.call(LoadDirectoryCommand, {}).promise).rejects.toThrow(/open workspace/);
+    // ws not opened — commands must reject.
+    const commands = ws.requireAdapter(Commands);
+    await expect(commands.call(LoadDirectoryCommand, {}).promise).rejects.toThrow(/open workspace/);
     await manager.close();
     void ws;
   });
@@ -169,9 +178,9 @@ describe("runVisualizeFile", () => {
     const files = new MemFilesApi();
     const { ws, manager } = bootWorkspace(files);
     await ws.open();
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
 
-    await expect(intents.call(VisualizeFileCommand, { uri: "/note.md" }).promise).rejects.toThrow(
+    await expect(commands.call(VisualizeFileCommand, { uri: "/note.md" }).promise).rejects.toThrow(
       /mime-renderer/,
     );
 
@@ -187,17 +196,17 @@ describe("runVisualizeFile", () => {
     const manager = new FilesManager({ workspace: ws });
     const slots = ws.requireAdapter(Slots);
     const store = ws.requireAdapter(SpecStore);
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
 
     // Stand-in dock handler — replaces the dock fragment in this
     // unit test. Captures show-panel calls for assertion.
     const shows: Array<{ panelId: string; specId: string }> = [];
-    const disposeDock = intents.listen(ShowDockPanelCommand, (intent) => {
+    const disposeDock = commands.listen(ShowDockPanelCommand, (command) => {
       shows.push({
-        panelId: intent.payload.panelId,
-        specId: intent.payload.specId,
+        panelId: command.payload.panelId,
+        specId: command.payload.specId,
       });
-      intent.resolve();
+      command.resolve();
       return true;
     });
 
@@ -218,7 +227,7 @@ describe("runVisualizeFile", () => {
       }),
     });
 
-    await intents.call(VisualizeFileCommand, { uri: "/note.md" }).promise;
+    await commands.call(VisualizeFileCommand, { uri: "/note.md" }).promise;
     expect(shows).toEqual([
       {
         panelId: "markdown-viewer:/note.md",
@@ -231,7 +240,7 @@ describe("runVisualizeFile", () => {
     // Reopen: same spec id, no duplicate create — dock is asked
     // again (it focuses internally), but SpecStore.create is NOT
     // called twice.
-    await intents.call(VisualizeFileCommand, { uri: "/note.md" }).promise;
+    await commands.call(VisualizeFileCommand, { uri: "/note.md" }).promise;
     expect(shows).toHaveLength(2);
 
     disposeDock();

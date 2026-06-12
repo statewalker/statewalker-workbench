@@ -22,18 +22,18 @@ function isTraceEnabled(): boolean {
  * the instances passed in. The wrappers log on registration and on
  * claim/dispatch.
  */
-export function installBusTrace(intents: Commands, slots: Slots): () => void {
+export function installBusTrace(commands: Commands, slots: Slots): () => void {
   if (!isTraceEnabled()) return () => {};
 
   // ── Commands trace ────────────────────────────────────────────
-  const originalListen = intents.listen.bind(intents);
+  const originalListen = commands.listen.bind(commands);
   let registerOrder = 0;
-  intents.listen = function tracedListen<P, R>(
+  commands.listen = function tracedListen<P, R>(
     decl: CommandDeclaration<P, R>,
-    fn: (cmd: Command<P, R>) => true | Promise<R> | void,
+    fn: (cmd: Command<P, R>) => true | Promise<R> | undefined,
   ): () => void {
     const order = registerOrder++;
-    const wrapped = (cmd: Command<P, R>): true | Promise<R> | void => {
+    const wrapped = (cmd: Command<P, R>): true | Promise<R> | undefined => {
       const result = fn(cmd);
       if (result !== undefined) {
         console.debug("[chat-mini:bus-trace] command claimed", {
@@ -59,7 +59,7 @@ export function installBusTrace(intents: Commands, slots: Slots): () => void {
   };
 
   return () => {
-    delete (intents as unknown as { listen?: unknown }).listen;
+    delete (commands as unknown as { listen?: unknown }).listen;
     delete (slots as unknown as { provide?: unknown }).provide;
   };
 }

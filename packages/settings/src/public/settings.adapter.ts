@@ -3,7 +3,7 @@ import { BaseClass } from "@statewalker/shared-baseclass";
 /**
  * Workspace-adapter holding the settings dialog's open / active-tab
  * state. Mutated only by `SettingsManager` (in response to
- * `runOpenSettings` / `runCloseSettings` intents); React consumers
+ * `runOpenSettings` / `runCloseSettings` commands); React consumers
  * read via `useAdapter(Settings)` + `useSyncExternalStore` on
  * `BaseClass.onUpdate`.
  */

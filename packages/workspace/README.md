@@ -1,6 +1,6 @@
 # @statewalker/workspace
 
-Workspace logic fragment: the `Workspace` class, its system/secrets/settings adapters, the `workspace:change` intent, and the registrar init that wires the change-handler.
+Workspace logic fragment: the `Workspace` class, its system/secrets/settings adapters, the `workspace:change` command, and the registrar init that wires the change-handler.
 
 ## What it exports
 
@@ -22,22 +22,22 @@ Workspace logic fragment: the `Workspace` class, its system/secrets/settings ada
   `Workspace` (or a passed-in instance) to a `FilesApi` and the default
   files-backed adapters. Used by hosts that build the workspace before
   activation.
-- **`workspace:change` intent** — `runChangeWorkspace(intents, { files?, label? })`.
+- **`workspace:change` command** — `runChangeWorkspace(commands, { files?, label? })`.
   When `files` is supplied, rebinds non-interactively. When absent, opens
   the unified request-file-system dialog. The handler is registered by the
   package's default-exported fragment-init.
-- **`platform:pick-directory` intent re-declaration** — `runPickDirectory`,
+- **`platform:pick-directory` command re-declaration** — `runPickDirectory`,
   `handlePickDirectory`. Re-declared locally (not imported from
   `@statewalker/platform-api`) to avoid a cyclic dependency.
 - **`init(ctx) → cleanup`** (default export, also at `./fragment`) —
   registers the `workspace:change` handler against the workspace's
-  `Intents` adapter.
+  `Commands` adapter.
 
 ## Companion packages
 
 - [`@statewalker/workspace-bridge`](../workspace-bridge/README.md) —
   shell-side wiring for the workspace: menu item, dialog renderer,
-  reconnect / disconnect intents.
+  reconnect / disconnect commands.
 - [`@statewalker/workspace-bridge-react`](../workspace-bridge-react/README.md) —
   the renderer-side bridge surfaces (`AppWorkspaceProvider`,
   `DirectoryPickerEmptyState`, `ReconnectBanner`, switch-workspace header

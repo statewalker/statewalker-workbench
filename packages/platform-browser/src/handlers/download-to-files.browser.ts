@@ -9,16 +9,16 @@ import type { FilesApi } from "@statewalker/webrun-files";
  * true and the target path already has content on disk, issues a
  * `Range: bytes=<offset>-` header and concatenates the existing bytes with the
  * new stream so the final on-disk file is the full object. Respects
- * `AbortSignal` on the payload; an abort throws and the intent rejects.
+ * `AbortSignal` on the payload; an abort throws and the command rejects.
  */
-export function registerDownloadToFilesBrowser(intents: Commands): () => void {
-  return intents.listen(DownloadToFilesCommand, (intent) => {
-    void performDownload(intent.payload)
+export function registerDownloadToFilesBrowser(commands: Commands): () => void {
+  return commands.listen(DownloadToFilesCommand, (command) => {
+    void performDownload(command.payload)
       .then((result) => {
-        intent.resolve(result);
+        command.resolve(result);
       })
       .catch((error) => {
-        intent.reject(error);
+        command.reject(error);
       });
     return true;
   });

@@ -2,9 +2,7 @@ import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import { Workspace } from "@statewalker/workspace";
 import { describe, expect, it } from "vitest";
-import {
-  CloseSettingsCommand, OpenSettingsCommand, Settings, settingsTabSlot
-} from "../index.js";
+import { CloseSettingsCommand, OpenSettingsCommand, Settings, settingsTabSlot } from "../index.js";
 import { SettingsManager } from "./settings.manager.js";
 
 function makeWorkspace(): { ws: Workspace; manager: SettingsManager } {
@@ -17,11 +15,11 @@ function makeWorkspace(): { ws: Workspace; manager: SettingsManager } {
 describe("SettingsManager", () => {
   it("runOpenSettings flips Settings.isOpen and writes activeTabId", async () => {
     const { ws, manager } = makeWorkspace();
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
     const settings = ws.requireAdapter(Settings);
 
     expect(settings.isOpen).toBe(false);
-    await intents.call(OpenSettingsCommand, { tabId: "providers" }).promise;
+    await commands.call(OpenSettingsCommand, { tabId: "providers" }).promise;
     expect(settings.isOpen).toBe(true);
     expect(settings.activeTabId).toBe("providers");
 
@@ -30,12 +28,12 @@ describe("SettingsManager", () => {
 
   it("runCloseSettings flips Settings.isOpen back", async () => {
     const { ws, manager } = makeWorkspace();
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
     const settings = ws.requireAdapter(Settings);
 
-    await intents.call(OpenSettingsCommand, {}).promise;
+    await commands.call(OpenSettingsCommand, {}).promise;
     expect(settings.isOpen).toBe(true);
-    await intents.call(CloseSettingsCommand, undefined).promise;
+    await commands.call(CloseSettingsCommand, undefined).promise;
     expect(settings.isOpen).toBe(false);
 
     await manager.close();

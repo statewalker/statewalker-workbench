@@ -1,5 +1,9 @@
 import { useAppWorkspace } from "@statewalker/core-react";
-import { LoadDirectoryCommand, VisualizeFileCommand, type DirectoryEntry } from "@statewalker/files";
+import {
+  type DirectoryEntry,
+  LoadDirectoryCommand,
+  VisualizeFileCommand,
+} from "@statewalker/files";
 import { Commands } from "@statewalker/shared-commands";
 import { type ReactElement, useCallback, useEffect, useState } from "react";
 
@@ -56,7 +60,7 @@ function joinChildUri(parent: string, child: string): string {
  */
 export function DirectoryCard({ props }: { props: unknown }): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Commands);
+  const commands = workspace.requireAdapter(Commands);
 
   const valid = isDirectoryCardProps(props);
   const explicitEntries = valid ? props.entries : undefined;
@@ -75,7 +79,8 @@ export function DirectoryCard({ props }: { props: unknown }): ReactElement {
     let cancelled = false;
     setState({ kind: "loading" });
     const path = uri.replace(/^file:\/\//, "");
-    intents.call(LoadDirectoryCommand, { path, recursive: false })
+    commands
+      .call(LoadDirectoryCommand, { path, recursive: false })
       .promise.then((loaded) => {
         if (cancelled) return;
         const mapped: DirectoryCardEntry[] = loaded.map((e: DirectoryEntry) => ({
@@ -94,17 +99,19 @@ export function DirectoryCard({ props }: { props: unknown }): ReactElement {
     return () => {
       cancelled = true;
     };
-  }, [intents, uri, explicitEntries, valid]);
+  }, [commands, uri, explicitEntries, valid]);
 
   const onEntryClick = useCallback(
     (entryName: string) => {
       if (!valid) return;
       const childUri = joinChildUri(uri, entryName);
-      void intents.call(VisualizeFileCommand, { uri: childUri }).promise.catch((error: unknown) => {
-        console.warn("[inline-content] DirectoryCard visualize failed:", error);
-      });
+      void commands
+        .call(VisualizeFileCommand, { uri: childUri })
+        .promise.catch((error: unknown) => {
+          console.warn("[inline-content] DirectoryCard visualize failed:", error);
+        });
     },
-    [intents, uri, valid],
+    [commands, uri, valid],
   );
 
   if (!valid) {

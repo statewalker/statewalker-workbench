@@ -21,10 +21,10 @@ if (typeof URL.createObjectURL === "undefined") {
 describe("VideoView", () => {
   it("renders a <video> with controls and a blob: URL", async () => {
     const ws = new Workspace();
-    const intents = ws.requireAdapter(Commands);
-    const dispose = intents.listen(LoadFileCommand, (intent) => {
-      intent.resolve({
-        path: intent.payload.path,
+    const commands = ws.requireAdapter(Commands);
+    const dispose = commands.listen(LoadFileCommand, (command) => {
+      command.resolve({
+        path: command.payload.path,
         bytes: new Uint8Array([0x00, 0x00, 0x00, 0x18]),
         mimeType: "video/mp4",
       });

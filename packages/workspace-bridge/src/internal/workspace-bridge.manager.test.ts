@@ -1,8 +1,8 @@
 import { Commands } from "@statewalker/shared-commands";
 import { ChangeWorkspaceCommand, getWorkspace } from "@statewalker/workspace";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { WorkspaceDisconnectCommand, WorkspaceReconnectCommand } from "../public/commands.js";
 import initWorkspaceBridge from "../public/init.js";
-import { WorkspaceDisconnectCommand, WorkspaceReconnectCommand } from "../public/intents.js";
 import { WorkspaceShellAdapter } from "./workspace-shell-adapter.js";
 
 vi.mock("idb-keyval", () => {
@@ -85,7 +85,7 @@ async function settle(): Promise<void> {
   }
 }
 
-describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
+describe("WorkspaceBridgeManager — silent-restore + command handlers", () => {
   it("silent-restore with granted permission transitions loading → ready and fires runChangeWorkspace", async () => {
     const handle = makeHandle("my-folder", "granted");
     await setIdbHandle(handle);
@@ -138,7 +138,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     const cleanup = initWorkspaceBridge(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Commands);
+      const commands = ws.requireAdapter(Commands);
       const shell = ws.requireAdapter(WorkspaceShellAdapter);
 
       await settle(); // silent-restore → empty
@@ -151,7 +151,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
         showDirectoryPicker,
       });
 
-      await intents.call(ChangeWorkspaceCommand, {}).promise;
+      await commands.call(ChangeWorkspaceCommand, {}).promise;
       await settle();
 
       expect(showDirectoryPicker).toHaveBeenCalledOnce();
@@ -194,7 +194,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     const cleanup = initWorkspaceBridge(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Commands);
+      const commands = ws.requireAdapter(Commands);
       const shell = ws.requireAdapter(WorkspaceShellAdapter);
 
       await settle();
@@ -202,7 +202,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
       expect(shell.getState().status).toBe("ready");
       expect(ws.isOpened).toBe(true);
 
-      await intents.call(WorkspaceDisconnectCommand, {}).promise;
+      await commands.call(WorkspaceDisconnectCommand, {}).promise;
 
       expect(shell.getState()).toEqual({ status: "empty" });
       expect(ws.isOpened).toBe(false);
@@ -222,13 +222,13 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     const cleanup = initWorkspaceBridge(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Commands);
+      const commands = ws.requireAdapter(Commands);
       const shell = ws.requireAdapter(WorkspaceShellAdapter);
 
       await settle();
       expect(shell.getState().status).toBe("needs-permission");
 
-      const reconnect = intents.call(WorkspaceReconnectCommand, {});
+      const reconnect = commands.call(WorkspaceReconnectCommand, {});
       await reconnect.promise;
       // _adoptHandle internally awaits runChangeWorkspace which is
       // itself awaited inside the handler — but the resolve happens
@@ -245,7 +245,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     }
   });
 
-  it("re-entrant initWorkspaceBridge cycles do not leak intent handlers or shell-adapter listeners", async () => {
+  it("re-entrant initWorkspaceBridge cycles do not leak command handlers or shell-adapter listeners", async () => {
     const handle = makeHandle("re-entrant", "granted");
     await setIdbHandle(handle);
 
@@ -254,7 +254,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     // ── Cycle 1 ──
     const cleanup1 = initWorkspaceBridge(ctx);
     const ws = getWorkspace(ctx);
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
     const shell = ws.requireAdapter(WorkspaceShellAdapter);
 
     await settle();
@@ -262,7 +262,7 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
     expect(shell.getState().status).toBe("ready");
 
     // Disconnect the handlers + workspace.
-    await intents.call(WorkspaceDisconnectCommand, {}).promise;
+    await commands.call(WorkspaceDisconnectCommand, {}).promise;
     expect(shell.getState().status).toBe("empty");
 
     await cleanup1();
@@ -281,10 +281,10 @@ describe("WorkspaceBridgeManager — silent-restore + intent handlers", () => {
         label: "re-entrant",
       });
       // After two cycles the workspace should have a single set of
-      // active intent handlers — firing disconnect once should
+      // active command handlers — firing disconnect once should
       // transition cleanly to `empty` rather than throwing or
       // double-handling.
-      await intents.call(WorkspaceDisconnectCommand, {}).promise;
+      await commands.call(WorkspaceDisconnectCommand, {}).promise;
       expect(shell.getState()).toEqual({ status: "empty" });
     } finally {
       await cleanup2();

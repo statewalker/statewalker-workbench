@@ -1,6 +1,6 @@
 import { Command, passthrough } from "@statewalker/shared-commands";
 
-export const PICK_FILE_INTENT_KEY = "platform:pick-file";
+export const PICK_FILE_COMMAND_KEY = "platform:pick-file";
 
 export interface PickFilePayload {
   title?: string;
@@ -13,7 +13,7 @@ export interface PickFileResult {
   names: string[];
 }
 
-export const PickFileCommand = Command.silent(PICK_FILE_INTENT_KEY)
+export const PickFileCommand = Command.silent(PICK_FILE_COMMAND_KEY)
   .input(passthrough<PickFilePayload>())
   .output(passthrough<PickFileResult>())
   .build();

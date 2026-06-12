@@ -2,7 +2,7 @@ import { Command, passthrough } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 import type { Workspace } from "./types/workspace.js";
 
-export const CHANGE_WORKSPACE_INTENT_KEY = "workspace:change";
+export const CHANGE_WORKSPACE_COMMAND_KEY = "workspace:change";
 
 export interface ChangeWorkspacePayload {
   /**
@@ -26,7 +26,7 @@ export interface ChangeWorkspaceResult {
   workspace: Workspace;
 }
 
-export const ChangeWorkspaceCommand = Command.silent(CHANGE_WORKSPACE_INTENT_KEY)
+export const ChangeWorkspaceCommand = Command.silent(CHANGE_WORKSPACE_COMMAND_KEY)
   .input(passthrough<ChangeWorkspacePayload>())
   .output(passthrough<ChangeWorkspaceResult>())
   .build();

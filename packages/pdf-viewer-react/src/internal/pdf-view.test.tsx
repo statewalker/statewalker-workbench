@@ -21,10 +21,10 @@ if (typeof URL.createObjectURL === "undefined") {
 describe("PdfView", () => {
   it("renders an <embed> with type=application/pdf and a blob: URL", async () => {
     const ws = new Workspace();
-    const intents = ws.requireAdapter(Commands);
-    const dispose = intents.listen(LoadFileCommand, (intent) => {
-      intent.resolve({
-        path: intent.payload.path,
+    const commands = ws.requireAdapter(Commands);
+    const dispose = commands.listen(LoadFileCommand, (command) => {
+      command.resolve({
+        path: command.payload.path,
         bytes: new Uint8Array([0x25, 0x50, 0x44, 0x46]),
         mimeType: "application/pdf",
       });

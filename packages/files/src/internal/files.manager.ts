@@ -8,8 +8,15 @@ import { SpecStore } from "@statewalker/spec-store";
 import { extname, readFile, writeText } from "@statewalker/webrun-files";
 import type { Workspace } from "@statewalker/workspace";
 import {
-  DeleteFileCommand, LoadDirectoryCommand, LoadFileCommand, MkdirCommand, MoveFileCommand, RenameCommand, VisualizeFileCommand, WriteFileCommand
-} from "../public/intents.js";
+  DeleteFileCommand,
+  LoadDirectoryCommand,
+  LoadFileCommand,
+  MkdirCommand,
+  MoveFileCommand,
+  RenameCommand,
+  VisualizeFileCommand,
+  WriteFileCommand,
+} from "../public/commands.js";
 import { pickMimeRenderer } from "../public/pick-mime-renderer.js";
 import type { DirectoryEntry, LoadedFile, MimeRenderer } from "../public/types.js";
 
@@ -27,7 +34,7 @@ export interface FilesManagerOptions {
  *     contributed tools.
  *
  * Lifetime-scoped:
- *   - Registers `files:*` intent handlers against the workspace's
+ *   - Registers `files:*` command handlers against the workspace's
  *     primary `FilesApi`. Handlers no-op while the workspace is
  *     closed (they `reject` with a clear error message).
  *
@@ -39,7 +46,7 @@ export interface FilesManagerOptions {
  */
 export class FilesManager {
   private readonly workspace: Workspace;
-  private readonly intents: Commands;
+  private readonly commands: Commands;
   private readonly slots: Slots;
   private readonly store: SpecStore;
   private readonly _cleanup: () => Promise<void>;
@@ -47,7 +54,7 @@ export class FilesManager {
 
   constructor({ workspace }: FilesManagerOptions) {
     this.workspace = workspace;
-    this.intents = workspace.requireAdapter(Commands);
+    this.commands = workspace.requireAdapter(Commands);
     this.slots = workspace.requireAdapter(Slots);
     this.store = workspace.requireAdapter(SpecStore);
 
@@ -56,7 +63,7 @@ export class FilesManager {
 
     // ── Command handlers (lifetime-scoped) ───────────────────────
     register(
-      this.intents.listen(LoadDirectoryCommand, (cmd) => {
+      this.commands.listen(LoadDirectoryCommand, (cmd) => {
         const path = cmd.payload?.path ?? "/";
         const recursive = cmd.payload?.recursive ?? false;
         void this._loadDirectory(path, recursive)
@@ -66,7 +73,7 @@ export class FilesManager {
       }),
     );
     register(
-      this.intents.listen(LoadFileCommand, (cmd) => {
+      this.commands.listen(LoadFileCommand, (cmd) => {
         void this._loadFile(cmd.payload.path)
           .then((file) => cmd.resolve(file))
           .catch((error) => cmd.reject(error));
@@ -74,7 +81,7 @@ export class FilesManager {
       }),
     );
     register(
-      this.intents.listen(WriteFileCommand, (cmd) => {
+      this.commands.listen(WriteFileCommand, (cmd) => {
         void this._writeFile(cmd.payload.path, cmd.payload.content)
           .then(() => cmd.resolve())
           .catch((error) => cmd.reject(error));
@@ -82,7 +89,7 @@ export class FilesManager {
       }),
     );
     register(
-      this.intents.listen(MoveFileCommand, (cmd) => {
+      this.commands.listen(MoveFileCommand, (cmd) => {
         void this._moveFile(cmd.payload.fromPath, cmd.payload.toPath)
           .then(() => cmd.resolve())
           .catch((error) => cmd.reject(error));
@@ -90,7 +97,7 @@ export class FilesManager {
       }),
     );
     register(
-      this.intents.listen(DeleteFileCommand, (cmd) => {
+      this.commands.listen(DeleteFileCommand, (cmd) => {
         void this._deleteFile(cmd.payload.path)
           .then(() => cmd.resolve())
           .catch((error) => cmd.reject(error));
@@ -98,7 +105,7 @@ export class FilesManager {
       }),
     );
     register(
-      this.intents.listen(MkdirCommand, (cmd) => {
+      this.commands.listen(MkdirCommand, (cmd) => {
         void this._mkdir(cmd.payload.path)
           .then(() => cmd.resolve())
           .catch((error) => cmd.reject(error));
@@ -106,7 +113,7 @@ export class FilesManager {
       }),
     );
     register(
-      this.intents.listen(RenameCommand, (cmd) => {
+      this.commands.listen(RenameCommand, (cmd) => {
         void this._moveFile(cmd.payload.fromPath, cmd.payload.toPath)
           .then(() => cmd.resolve())
           .catch((error) => cmd.reject(error));
@@ -114,7 +121,7 @@ export class FilesManager {
       }),
     );
     register(
-      this.intents.listen(VisualizeFileCommand, (cmd) => {
+      this.commands.listen(VisualizeFileCommand, (cmd) => {
         const { uri, referencePanelId } = cmd.payload;
         const mime = guessMimeType(uri);
         const renderer = pickMimeRenderer(this.slots, mime);
@@ -217,7 +224,7 @@ export class FilesManager {
 
   private _requireOpen(): void {
     if (!this.workspace.isOpened) {
-      throw new Error("files:* intents require an open workspace — call runChangeWorkspace first");
+      throw new Error("files:* commands require an open workspace — call runChangeWorkspace first");
     }
   }
 
@@ -235,7 +242,7 @@ export class FilesManager {
         // Non-persistent: dock manager evicts on last panel close.
       });
     }
-    await this.intents.call(ShowDockPanelCommand, {
+    await this.commands.call(ShowDockPanelCommand, {
       panelId: plan.panelId,
       specId: plan.specId,
       title: filenameFromUri(uri),

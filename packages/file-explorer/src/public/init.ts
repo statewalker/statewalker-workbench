@@ -12,9 +12,9 @@ import { type ActiveFileExplorerPanel, activeFileExplorerPanelsSlot } from "./ex
  *
  * Registers the workspace-level glue:
  *
- *   - `files:open` intent handler — probes the URI's kind on the
+ *   - `files:open` command handler — probes the URI's kind on the
  *     workspace's `FilesApi` and routes by role:
- *       * directory → the panel named by the intent's `target`
+ *       * directory → the panel named by the command's `target`
  *         (falls back to the panel flagged `folderNavigationHost`,
  *         then `origin`, then any active panel) and brings that
  *         panel's tab into focus.
@@ -27,7 +27,7 @@ import { type ActiveFileExplorerPanel, activeFileExplorerPanelsSlot } from "./ex
  */
 export default function initFileExplorer(ctx: Record<string, unknown>): () => Promise<void> {
   const workspace = getWorkspace(ctx);
-  const intents = workspace.requireAdapter(Commands);
+  const commands = workspace.requireAdapter(Commands);
   const slots = workspace.requireAdapter(Slots);
 
   const [register, cleanup] = newRegistry();
@@ -44,8 +44,8 @@ export default function initFileExplorer(ctx: Record<string, unknown>): () => Pr
   }
 
   register(
-    intents.listen(OpenCommand, (intent) => {
-      const { uri, origin, target } = intent.payload;
+    commands.listen(OpenCommand, (command) => {
+      const { uri, origin, target } = command.payload;
       void (async () => {
         try {
           const files = workspace.files;
@@ -55,7 +55,7 @@ export default function initFileExplorer(ctx: Record<string, unknown>): () => Pr
             // self-target so folders open in-place) > the workspace's
             // `folderNavigationHost` (default destination for external
             // callers) > `origin` > first registered. Fall through if
-            // no panel is mounted rather than throwing so the intent
+            // no panel is mounted rather than throwing so the command
             // surface stays forgiving of teardown timing.
             const navHostId = findHostId((p) => p.isFolderNavigationHost);
             const targetId =
@@ -76,13 +76,13 @@ export default function initFileExplorer(ctx: Record<string, unknown>): () => Pr
             panel.navigate(uri);
             // Bring the tab into focus so the navigation is visible
             // even when the user clicked from the *other* panel.
-            intents
+            commands
               .call(FocusPanelCommand, { panelId: fileExplorerPanelId(targetId) })
               .promise.catch(() => {
                 // Focus is best-effort: a panel that hasn't been
                 // dock-shown yet has nothing to focus. Swallow.
               });
-            intent.resolve();
+            command.resolve();
             return;
           }
           // Files (and unknowns) go through the mime-renderer pipeline.
@@ -90,13 +90,13 @@ export default function initFileExplorer(ctx: Record<string, unknown>): () => Pr
           // so the dock fragment opens the tab inside that panel's
           // group rather than wherever the active group happens to be.
           const viewerHostId = findHostId((p) => p.isMainViewerHost);
-          await intents.call(VisualizeFileCommand, {
+          await commands.call(VisualizeFileCommand, {
             uri,
             referencePanelId: viewerHostId ? fileExplorerPanelId(viewerHostId) : undefined,
           }).promise;
-          intent.resolve();
+          command.resolve();
         } catch (err) {
-          intent.reject(err instanceof Error ? err : new Error(String(err)));
+          command.reject(err instanceof Error ? err : new Error(String(err)));
         }
       })();
       return true;

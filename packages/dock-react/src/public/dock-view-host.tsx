@@ -17,7 +17,7 @@ interface DockViewHostProps {
  * The DockView host component (named mount point — App.tsx renders
  * this when the workspace is open). On `onReady`, captures the
  * `DockviewApi` and binds it to the workspace's `DockHost` adapter
- * so the `dock:*` intent handlers can dispatch (or replay queued
+ * so the `dock:*` command handlers can dispatch (or replay queued
  * dispatches) against a real DockView instance.
  *
  * One DockView component kind is registered: `"json"` →

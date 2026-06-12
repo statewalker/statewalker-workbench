@@ -16,7 +16,7 @@ interface VideoViewProps {
  */
 export function VideoView({ uri }: VideoViewProps): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Commands);
+  const commands = workspace.requireAdapter(Commands);
 
   const [state, setState] = useState<
     { kind: "loading" } | { kind: "ready"; url: string } | { kind: "error"; message: string }
@@ -27,7 +27,8 @@ export function VideoView({ uri }: VideoViewProps): ReactElement {
     let cancelled = false;
     setState({ kind: "loading" });
     const path = uri.replace(/^file:\/\//, "");
-    intents.call(LoadFileCommand, { path })
+    commands
+      .call(LoadFileCommand, { path })
       .promise.then((loaded) => {
         if (cancelled) return;
         const url = URL.createObjectURL(
@@ -49,7 +50,7 @@ export function VideoView({ uri }: VideoViewProps): ReactElement {
       cancelled = true;
       revoke?.();
     };
-  }, [uri, intents]);
+  }, [uri, commands]);
 
   if (state.kind === "loading") {
     return (

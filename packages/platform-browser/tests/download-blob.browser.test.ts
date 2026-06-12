@@ -1,4 +1,4 @@
-import { DownloadBlobCommand, getIntents } from "@statewalker/platform-api";
+import { DownloadBlobCommand, getCommands } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerDownloadBlobBrowser } from "../src/handlers/download-blob.browser.js";
 
@@ -30,10 +30,10 @@ describe("download-blob browser handler", () => {
   it("creates an anchor, clicks it, removes it, and revokes the object URL", async () => {
     vi.useFakeTimers();
     const ctx = {};
-    const unregister = registerDownloadBlobBrowser(getIntents(ctx));
+    const unregister = registerDownloadBlobBrowser(getCommands(ctx));
     try {
       const blob = new Blob(["payload"], { type: "text/plain" });
-      await getIntents(ctx).call(DownloadBlobCommand, { blob, filename: "file.txt" }).promise;
+      await getCommands(ctx).call(DownloadBlobCommand, { blob, filename: "file.txt" }).promise;
 
       expect(createObjectURL).toHaveBeenCalledWith(blob);
       expect(clickSpy).toHaveBeenCalledOnce();

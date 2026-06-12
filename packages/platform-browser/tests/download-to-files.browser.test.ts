@@ -1,5 +1,5 @@
 import type { DownloadProgress } from "@statewalker/platform-api";
-import { DownloadToFilesCommand, getIntents } from "@statewalker/platform-api";
+import { DownloadToFilesCommand, getCommands } from "@statewalker/platform-api";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerDownloadToFilesBrowser } from "../src/handlers/download-to-files.browser.js";
@@ -54,10 +54,10 @@ describe("download-to-files browser handler", () => {
     fetchMock.mockResolvedValueOnce(makeStreamingResponse(payload));
 
     const ctx = {};
-    const unregister = registerDownloadToFilesBrowser(getIntents(ctx));
+    const unregister = registerDownloadToFilesBrowser(getCommands(ctx));
     try {
       const progressEvents: DownloadProgress[] = [];
-      const result = await getIntents(ctx).call(DownloadToFilesCommand, {
+      const result = await getCommands(ctx).call(DownloadToFilesCommand, {
         url: "https://example.test/data.bin",
         files,
         path: "/data.bin",
@@ -101,9 +101,9 @@ describe("download-to-files browser handler", () => {
     });
 
     const ctx = {};
-    const unregister = registerDownloadToFilesBrowser(getIntents(ctx));
+    const unregister = registerDownloadToFilesBrowser(getCommands(ctx));
     try {
-      const result = await getIntents(ctx).call(DownloadToFilesCommand, {
+      const result = await getCommands(ctx).call(DownloadToFilesCommand, {
         url: "https://example.test/data.bin",
         files,
         path: "/data.bin",
@@ -140,9 +140,9 @@ describe("download-to-files browser handler", () => {
 
     const controller = new AbortController();
     const ctx = {};
-    const unregister = registerDownloadToFilesBrowser(getIntents(ctx));
+    const unregister = registerDownloadToFilesBrowser(getCommands(ctx));
     try {
-      const run = getIntents(ctx).call(DownloadToFilesCommand, {
+      const run = getCommands(ctx).call(DownloadToFilesCommand, {
         url: "https://example.test/data.bin",
         files,
         path: "/data.bin",
@@ -169,9 +169,9 @@ describe("download-to-files browser handler", () => {
     fetchMock.mockResolvedValueOnce(makeStreamingResponse(full, { status: 200 }));
 
     const ctx = {};
-    const unregister = registerDownloadToFilesBrowser(getIntents(ctx));
+    const unregister = registerDownloadToFilesBrowser(getCommands(ctx));
     try {
-      const result = await getIntents(ctx).call(DownloadToFilesCommand, {
+      const result = await getCommands(ctx).call(DownloadToFilesCommand, {
         url: "https://example.test/data.bin",
         files,
         path: "/data.bin",

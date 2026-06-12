@@ -5,7 +5,7 @@ import { Settings } from "./settings.adapter.js";
 
 /**
  * Logic-fragment init for `settings`. Registers the `Settings`
- * adapter (state) and the `SettingsManager` (intent handlers).
+ * adapter (state) and the `SettingsManager` (command handlers).
  * Per ADR 0002 (logic-only): no React imports.
  *
  * Boot order: register AFTER the substrate fragments

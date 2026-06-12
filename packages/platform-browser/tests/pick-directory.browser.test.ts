@@ -1,4 +1,4 @@
-import { PickDirectoryCommand, UserCancelledError, getIntents } from "@statewalker/platform-api";
+import { getCommands, PickDirectoryCommand, UserCancelledError } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerPickDirectoryBrowser } from "../src/handlers/pick-directory.browser.js";
 
@@ -25,9 +25,9 @@ describe("pick-directory browser handler", () => {
     ).showDirectoryPicker = showDirectoryPicker;
 
     const ctx = {};
-    const unregister = registerPickDirectoryBrowser(getIntents(ctx));
+    const unregister = registerPickDirectoryBrowser(getCommands(ctx));
     try {
-      const result = await getIntents(ctx).call(PickDirectoryCommand, { title: "pick" }).promise;
+      const result = await getCommands(ctx).call(PickDirectoryCommand, { title: "pick" }).promise;
       expect(showDirectoryPicker).toHaveBeenCalledOnce();
       expect(result.label).toBe("my-workspace");
       // BrowserFilesApi exposes the FilesApi contract — we only check the constructor ran
@@ -40,9 +40,9 @@ describe("pick-directory browser handler", () => {
 
   it("rejects when showDirectoryPicker is unavailable", async () => {
     const ctx = {};
-    const unregister = registerPickDirectoryBrowser(getIntents(ctx));
+    const unregister = registerPickDirectoryBrowser(getCommands(ctx));
     try {
-      await expect(getIntents(ctx).call(PickDirectoryCommand, {}).promise).rejects.toThrow(
+      await expect(getCommands(ctx).call(PickDirectoryCommand, {}).promise).rejects.toThrow(
         /showDirectoryPicker is not available/,
       );
     } finally {
@@ -54,9 +54,9 @@ describe("pick-directory browser handler", () => {
     (globalThis as unknown as { showDirectoryPicker: () => Promise<never> }).showDirectoryPicker =
       () => Promise.reject(new DOMException("The user aborted a request.", "AbortError"));
     const ctx = {};
-    const unregister = registerPickDirectoryBrowser(getIntents(ctx));
+    const unregister = registerPickDirectoryBrowser(getCommands(ctx));
     try {
-      await expect(getIntents(ctx).call(PickDirectoryCommand, {}).promise).rejects.toBeInstanceOf(
+      await expect(getCommands(ctx).call(PickDirectoryCommand, {}).promise).rejects.toBeInstanceOf(
         UserCancelledError,
       );
     } finally {
@@ -69,9 +69,9 @@ describe("pick-directory browser handler", () => {
     (globalThis as unknown as { showDirectoryPicker: () => Promise<never> }).showDirectoryPicker =
       () => Promise.reject(original);
     const ctx = {};
-    const unregister = registerPickDirectoryBrowser(getIntents(ctx));
+    const unregister = registerPickDirectoryBrowser(getCommands(ctx));
     try {
-      await expect(getIntents(ctx).call(PickDirectoryCommand, {}).promise).rejects.toBe(original);
+      await expect(getCommands(ctx).call(PickDirectoryCommand, {}).promise).rejects.toBe(original);
     } finally {
       unregister();
     }
@@ -81,9 +81,9 @@ describe("pick-directory browser handler", () => {
     (globalThis as unknown as { showDirectoryPicker: () => Promise<never> }).showDirectoryPicker =
       () => Promise.reject({ name: "AbortError", message: "shaped like a DOMException" });
     const ctx = {};
-    const unregister = registerPickDirectoryBrowser(getIntents(ctx));
+    const unregister = registerPickDirectoryBrowser(getCommands(ctx));
     try {
-      await expect(getIntents(ctx).call(PickDirectoryCommand, {}).promise).rejects.toBeInstanceOf(
+      await expect(getCommands(ctx).call(PickDirectoryCommand, {}).promise).rejects.toBeInstanceOf(
         UserCancelledError,
       );
     } finally {

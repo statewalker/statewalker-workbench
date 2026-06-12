@@ -7,13 +7,13 @@ const PREFIX = "workbench:";
  * Browser default for `platform:preference-set`. Writes JSON to `localStorage`
  * under the `workbench:` key prefix.
  */
-export function registerPreferenceSetBrowser(intents: Commands): () => void {
-  return intents.listen(PreferenceSetCommand, (intent) => {
+export function registerPreferenceSetBrowser(commands: Commands): () => void {
+  return commands.listen(PreferenceSetCommand, (command) => {
     try {
-      localStorage.setItem(PREFIX + intent.payload.key, JSON.stringify(intent.payload.value));
-      intent.resolve(undefined);
+      localStorage.setItem(PREFIX + command.payload.key, JSON.stringify(command.payload.value));
+      command.resolve(undefined);
     } catch (error) {
-      intent.reject(error);
+      command.reject(error);
     }
     return true;
   });

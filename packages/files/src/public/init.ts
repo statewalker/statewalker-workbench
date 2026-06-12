@@ -5,7 +5,7 @@ import { FilesManager } from "../internal/files.manager.js";
 /**
  * Logic-fragment init for `files`. Constructs the `FilesManager`
  * which:
- *  - Registers `files:*` intent handlers against the workspace's
+ *  - Registers `files:*` command handlers against the workspace's
  *    primary `FilesApi`.
  *  - Contributes a `ToolFactory` to `agent:tools` per workspace
  *    cycle (closes over the current files view) — replaces the

@@ -29,7 +29,7 @@ export function LineTab({ api }: IDockviewPanelHeaderProps): ReactElement {
   const title = useTabTitle(api);
   const isActive = useTabActive(api);
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Commands);
+  const commands = workspace.requireAdapter(Commands);
   const slots = useAdapter(Slots);
   const icons = useSlot(slots, dockTabIconSlot);
   const Icon = useMemo(() => {
@@ -52,9 +52,9 @@ export function LineTab({ api }: IDockviewPanelHeaderProps): ReactElement {
       // Prevent DockView's tab-click-to-focus from firing when the
       // user clicks the X button.
       e.stopPropagation();
-      intents.call(ClosePanelCommand, { panelId: api.id });
+      commands.call(ClosePanelCommand, { panelId: api.id });
     },
-    [intents, api.id],
+    [commands, api.id],
   );
 
   return (

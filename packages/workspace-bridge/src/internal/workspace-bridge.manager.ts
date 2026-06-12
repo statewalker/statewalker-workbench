@@ -2,9 +2,13 @@ import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { ChangeWorkspaceCommand, initWorkspace, type Workspace } from "@statewalker/workspace";
-import { WorkspaceDisconnectCommand, WorkspaceReconnectCommand } from "../public/intents.js";
+import { WorkspaceDisconnectCommand, WorkspaceReconnectCommand } from "../public/commands.js";
 import {
-  createBrowserFilesApi, isFileSystemAccessSupported, pickDirectory, queryHandlePermission, requestHandlePermission
+  createBrowserFilesApi,
+  isFileSystemAccessSupported,
+  pickDirectory,
+  queryHandlePermission,
+  requestHandlePermission,
 } from "./files-api-factory.js";
 import { clearStoredHandle, getStoredHandle, setStoredHandle } from "./handle-store.js";
 import { WorkspaceShellAdapter } from "./workspace-shell-adapter.js";
@@ -35,21 +39,21 @@ export interface WorkspaceBridgeManagerOptions {
  */
 export class WorkspaceBridgeManager {
   private readonly _workspace: Workspace;
-  private readonly _intents: Commands;
+  private readonly _commands: Commands;
   private readonly _shell: WorkspaceShellAdapter;
   private readonly _cleanup: () => Promise<void>;
   private _currentHandle: FileSystemDirectoryHandle | null = null;
 
   constructor({ workspace }: WorkspaceBridgeManagerOptions) {
     this._workspace = workspace;
-    this._intents = workspace.requireAdapter(Commands);
+    this._commands = workspace.requireAdapter(Commands);
     this._shell = workspace.requireAdapter(WorkspaceShellAdapter);
 
     const [register, cleanup] = newRegistry();
     this._cleanup = cleanup;
 
     // Whenever the workspace opens (silent-restore, interactive pick,
-    // or a non-interactive `intents.call(ChangeWorkspaceCommand, { files })`
+    // or a non-interactive `commands.call(ChangeWorkspaceCommand, { files })`
     // call from a test / integration harness), reflect that as "ready"
     // in the shell adapter.
     register(
@@ -62,7 +66,7 @@ export class WorkspaceBridgeManager {
     );
 
     register(
-      this._intents.listen(ChangeWorkspaceCommand, (cmd) => {
+      this._commands.listen(ChangeWorkspaceCommand, (cmd) => {
         void this._handleChangeWorkspace(cmd.payload)
           .then((result) => cmd.resolve(result))
           .catch((error) => cmd.reject(error));
@@ -71,7 +75,7 @@ export class WorkspaceBridgeManager {
     );
 
     register(
-      this._intents.listen(WorkspaceReconnectCommand, (cmd) => {
+      this._commands.listen(WorkspaceReconnectCommand, (cmd) => {
         void this._reconnect()
           .then(() => cmd.resolve({}))
           .catch((error) => cmd.reject(error));
@@ -80,7 +84,7 @@ export class WorkspaceBridgeManager {
     );
 
     register(
-      this._intents.listen(WorkspaceDisconnectCommand, (cmd) => {
+      this._commands.listen(WorkspaceDisconnectCommand, (cmd) => {
         void this._disconnect()
           .then(() => cmd.resolve({}))
           .catch((error) => cmd.reject(error));

@@ -29,14 +29,14 @@ function tail(uri: string): string {
  */
 export function FileCard({ props }: { props: unknown }): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Commands);
+  const commands = workspace.requireAdapter(Commands);
 
   const onClick = useCallback(() => {
     if (!isFileCardProps(props)) return;
-    void intents.call(VisualizeFileCommand, { uri: props.uri }).promise.catch((error: unknown) => {
+    void commands.call(VisualizeFileCommand, { uri: props.uri }).promise.catch((error: unknown) => {
       console.warn("[inline-content] FileCard visualize failed:", error);
     });
-  }, [intents, props]);
+  }, [commands, props]);
 
   if (!isFileCardProps(props)) {
     return (

@@ -5,7 +5,7 @@ import { useAppWorkspace } from "./app-workspace-provider.js";
  * Single React idiom for reading a workspace adapter from inside
  * any view component:
  *
- *   const intents = useAdapter(Intents);
+ *   const commands = useAdapter(Commands);
  *   const slots   = useAdapter(Slots);
  *
  * Equivalent to `useAppWorkspace().requireAdapter(key)` but reads

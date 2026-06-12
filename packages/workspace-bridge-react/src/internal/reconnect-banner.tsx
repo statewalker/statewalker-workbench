@@ -12,7 +12,7 @@ import type { ReactElement } from "react";
  * `requestPermission()` call is allowed by the browser.
  */
 export function ReconnectBanner(): ReactElement | null {
-  const intents = useAdapter(Commands);
+  const commands = useAdapter(Commands);
   const state = useAdapterValue(WorkspaceShellAdapter, (a) => a.getState());
   if (state.status !== "needs-permission") return null;
   return (
@@ -20,7 +20,7 @@ export function ReconnectBanner(): ReactElement | null {
       <span className="flex-1">
         Reconnect to workspace <span className="font-medium text-foreground">{state.label}</span>?
       </span>
-      <Button size="sm" onClick={() => void intents.call(WorkspaceReconnectCommand, {}).promise}>
+      <Button size="sm" onClick={() => void commands.call(WorkspaceReconnectCommand, {}).promise}>
         <RefreshCw /> Reconnect
       </Button>
     </div>

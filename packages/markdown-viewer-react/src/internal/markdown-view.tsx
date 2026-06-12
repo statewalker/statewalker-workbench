@@ -15,7 +15,7 @@ interface MarkdownViewProps {
  */
 export function MarkdownView({ uri }: MarkdownViewProps): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Commands);
+  const commands = workspace.requireAdapter(Commands);
 
   const [state, setState] = useState<
     { kind: "loading" } | { kind: "ready"; text: string } | { kind: "error"; message: string }
@@ -25,7 +25,8 @@ export function MarkdownView({ uri }: MarkdownViewProps): ReactElement {
     let cancelled = false;
     setState({ kind: "loading" });
     const path = uri.replace(/^file:\/\//, "");
-    intents.call(LoadFileCommand, { path })
+    commands
+      .call(LoadFileCommand, { path })
       .promise.then((loaded) => {
         if (cancelled) return;
         const text = new TextDecoder().decode(loaded.bytes);
@@ -41,7 +42,7 @@ export function MarkdownView({ uri }: MarkdownViewProps): ReactElement {
     return () => {
       cancelled = true;
     };
-  }, [uri, intents]);
+  }, [uri, commands]);
 
   if (state.kind === "loading") {
     return (

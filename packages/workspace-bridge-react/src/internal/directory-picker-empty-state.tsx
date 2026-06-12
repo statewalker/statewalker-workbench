@@ -1,10 +1,17 @@
 import { useAdapter, useAdapterValue } from "@statewalker/core-react";
 import {
-  Button, Card, CardContent, CardDescription, CardHeader, CardTitle
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@statewalker/shadcn-react";
 import { Commands } from "@statewalker/shared-commands";
 import {
-  ChangeWorkspaceCommand, WorkspaceReconnectCommand, WorkspaceShellAdapter
+  ChangeWorkspaceCommand,
+  WorkspaceReconnectCommand,
+  WorkspaceShellAdapter,
 } from "@statewalker/workspace-bridge";
 import { FolderOpen } from "lucide-react";
 import { type ReactElement, useState } from "react";
@@ -21,7 +28,7 @@ import { type ReactElement, useState } from "react";
  *     persisted workspace, plus a "pick a different folder" fallback.
  */
 export function DirectoryPickerEmptyState(): ReactElement {
-  const intents = useAdapter(Commands);
+  const commands = useAdapter(Commands);
   const state = useAdapterValue(WorkspaceShellAdapter, (a) => a.getState());
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +39,7 @@ export function DirectoryPickerEmptyState(): ReactElement {
   const onPick = async (): Promise<void> => {
     setError(null);
     try {
-      await intents.call(ChangeWorkspaceCommand, {}).promise;
+      await commands.call(ChangeWorkspaceCommand, {}).promise;
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
       setError(e instanceof Error ? e.message : String(e));
@@ -42,7 +49,7 @@ export function DirectoryPickerEmptyState(): ReactElement {
   const onReconnect = async (): Promise<void> => {
     setError(null);
     try {
-      await intents.call(WorkspaceReconnectCommand, {}).promise;
+      await commands.call(WorkspaceReconnectCommand, {}).promise;
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }

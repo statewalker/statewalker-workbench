@@ -1,4 +1,4 @@
-import { CopyToClipboardCommand, getIntents } from "@statewalker/platform-api";
+import { CopyToClipboardCommand, getCommands } from "@statewalker/platform-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerCopyToClipboardBrowser } from "../src/handlers/copy-to-clipboard.browser.js";
 
@@ -19,9 +19,9 @@ describe("copy-to-clipboard browser handler", () => {
 
   it("resolves after navigator.clipboard.writeText succeeds", async () => {
     const ctx = {};
-    const unregister = registerCopyToClipboardBrowser(getIntents(ctx));
+    const unregister = registerCopyToClipboardBrowser(getCommands(ctx));
     try {
-      await getIntents(ctx).call(CopyToClipboardCommand, { text: "hello" }).promise;
+      await getCommands(ctx).call(CopyToClipboardCommand, { text: "hello" }).promise;
       expect(writeText).toHaveBeenCalledWith("hello");
     } finally {
       unregister();
@@ -31,11 +31,11 @@ describe("copy-to-clipboard browser handler", () => {
   it("rejects when writeText fails", async () => {
     const ctx = {};
     writeText.mockRejectedValueOnce(new Error("permission denied"));
-    const unregister = registerCopyToClipboardBrowser(getIntents(ctx));
+    const unregister = registerCopyToClipboardBrowser(getCommands(ctx));
     try {
-      await expect(getIntents(ctx).call(CopyToClipboardCommand, { text: "x" }).promise).rejects.toThrow(
-        "permission denied",
-      );
+      await expect(
+        getCommands(ctx).call(CopyToClipboardCommand, { text: "x" }).promise,
+      ).rejects.toThrow("permission denied");
     } finally {
       unregister();
     }
@@ -43,9 +43,9 @@ describe("copy-to-clipboard browser handler", () => {
 
   it("unregister leaves subsequent fires unsettled (noop default)", () => {
     const ctx = {};
-    const unregister = registerCopyToClipboardBrowser(getIntents(ctx));
+    const unregister = registerCopyToClipboardBrowser(getCommands(ctx));
     unregister();
-    const intent = getIntents(ctx).call(CopyToClipboardCommand, { text: "x" });
-    expect(intent.settled).toBe(false);
+    const command = getCommands(ctx).call(CopyToClipboardCommand, { text: "x" });
+    expect(command.settled).toBe(false);
   });
 });

@@ -21,10 +21,10 @@ if (typeof URL.createObjectURL === "undefined") {
 describe("ImageView", () => {
   it("renders an <img> with a blob: URL after the file loads", async () => {
     const ws = new Workspace();
-    const intents = ws.requireAdapter(Commands);
-    const dispose = intents.listen(LoadFileCommand, (intent) => {
-      intent.resolve({
-        path: intent.payload.path,
+    const commands = ws.requireAdapter(Commands);
+    const dispose = commands.listen(LoadFileCommand, (command) => {
+      command.resolve({
+        path: command.payload.path,
         bytes: new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
         mimeType: "image/png",
       });

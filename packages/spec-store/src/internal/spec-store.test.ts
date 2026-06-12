@@ -1,8 +1,8 @@
 import { Commands } from "@statewalker/shared-commands";
 import { getWorkspace } from "@statewalker/workspace";
 import { describe, expect, it, vi } from "vitest";
+import { CreateSpecCommand, PatchSpecCommand } from "../public/commands.js";
 import initSpecStore from "../public/init.js";
-import { CreateSpecCommand, PatchSpecCommand } from "../public/intents.js";
 import { SpecStore } from "../public/spec-store.js";
 
 describe("SpecStore", () => {
@@ -106,19 +106,19 @@ describe("SpecStore", () => {
   });
 });
 
-describe("spec:create / spec:patch intents", () => {
+describe("spec:create / spec:patch commands", () => {
   it("runCreateSpec allocates and returns the id", async () => {
     const ctx: Record<string, unknown> = {};
     const cleanup = await initSpecStore(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Commands);
+      const commands = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
-      const intent = intents.call(CreateSpecCommand, {
+      const command = commands.call(CreateSpecCommand, {
         catalogId: "c",
         spec: { hello: "world" },
       });
-      const { specId } = await intent.promise;
+      const { specId } = await command.promise;
       expect(specId).toMatch(/^spec:/);
       expect(store.get(specId)?.spec).toEqual({ hello: "world" });
     } finally {
@@ -131,13 +131,13 @@ describe("spec:create / spec:patch intents", () => {
     const cleanup = await initSpecStore(ctx);
     try {
       const ws = getWorkspace(ctx);
-      const intents = ws.requireAdapter(Commands);
+      const commands = ws.requireAdapter(Commands);
       const store = ws.requireAdapter(SpecStore);
       const specId = store.create({ id: "spec:s", catalogId: "c", spec: 1 });
       const cb = vi.fn();
       store.observe(specId, cb);
-      const intent = intents.call(PatchSpecCommand, { specId, patch: { spec: 2 } });
-      await intent.promise;
+      const command = commands.call(PatchSpecCommand, { specId, patch: { spec: 2 } });
+      await command.promise;
       expect(store.get(specId)?.spec).toBe(2);
       expect(cb).toHaveBeenCalledTimes(1);
     } finally {
@@ -145,19 +145,19 @@ describe("spec:create / spec:patch intents", () => {
     }
   });
 
-  it("cleanup removes the intent handlers", async () => {
+  it("cleanup removes the command handlers", async () => {
     const ctx: Record<string, unknown> = {};
     const cleanup = await initSpecStore(ctx);
     const ws = getWorkspace(ctx);
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
     const store = ws.requireAdapter(SpecStore);
     const sizeBefore = countSpecs(store);
     await cleanup();
-    // After cleanup, intents.call(CreateSpecCommand, ...) falls through to
+    // After cleanup, commands.call(CreateSpecCommand, ...) falls through to
     // CreateSpecCommand's declared default (() => {}), which silently
     // resolves with no payload — critically, no SpecStore.create is
     // called anymore.
-    intents.call(CreateSpecCommand, { catalogId: "c", spec: 1 });
+    commands.call(CreateSpecCommand, { catalogId: "c", spec: 1 });
     expect(countSpecs(store)).toBe(sizeBefore);
   });
 });

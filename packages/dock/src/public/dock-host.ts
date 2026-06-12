@@ -1,5 +1,5 @@
 import type { DockviewApi } from "dockview-react";
-import type { ShowDockPanelPayload } from "./intents.js";
+import type { ShowDockPanelPayload } from "./commands.js";
 
 const LAYOUT_KEY = "chat-mini:dock-layout";
 
@@ -14,7 +14,7 @@ interface PendingPanel {
  * queue of `runShowDockPanel` calls that fired before the
  * `<DockviewReact>` host mounted.
  *
- * The dock fragment's `init` runs during boot, so the intent
+ * The dock fragment's `init` runs during boot, so the command
  * handlers it registers are reachable immediately. The
  * `<DockviewReact>` component, however, only mounts inside the
  * React tree (via the renderer fragment's DockViewHost). Any
@@ -128,7 +128,7 @@ export class DockHost {
    * Either dispatch immediately if the api is online, or queue the
    * panel until `setApi` is called. Returns a promise that resolves
    * once the panel is actually open (mirroring what callers expect
-   * from the intent's promise contract).
+   * from the command's promise contract).
    */
   showOrFocus(options: ShowDockPanelPayload): Promise<void> {
     if (this._api) {

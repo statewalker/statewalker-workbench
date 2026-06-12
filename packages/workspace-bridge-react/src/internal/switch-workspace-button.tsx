@@ -14,11 +14,11 @@ import type { ReactElement } from "react";
  * `onUnload` listeners (per ADR 0001).
  */
 export function SwitchWorkspaceButton(): ReactElement {
-  const intents = useAdapter(Commands);
+  const commands = useAdapter(Commands);
   const onClick = async (): Promise<void> => {
-    await intents.call(WorkspaceDisconnectCommand, {}).promise;
+    await commands.call(WorkspaceDisconnectCommand, {}).promise;
     try {
-      await intents.call(ChangeWorkspaceCommand, {}).promise;
+      await commands.call(ChangeWorkspaceCommand, {}).promise;
     } catch (e) {
       // User cancellation throws AbortError; user already in `empty`.
       if (e instanceof DOMException && e.name === "AbortError") return;

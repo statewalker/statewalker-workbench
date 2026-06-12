@@ -1,16 +1,25 @@
 import { defineRegistry } from "@json-render/react";
 import { catalogsSlot } from "@statewalker/catalog-registry";
 import { compareByOrderAndId } from "@statewalker/core-react";
-import { ShowDockPanelCommand, type PanelPosition } from "@statewalker/dock";
+import { type PanelPosition, ShowDockPanelCommand } from "@statewalker/dock";
 import { dockTabIconSlot } from "@statewalker/dock-react";
 import {
-  FILE_EXPLORER_CATALOG_ID, NewFileExplorerPanelCommand, fileExplorerCatalog, fileExplorerPanelId, fileExplorerPanelPresetsSlot, fileExplorerSpecId, makeFileExplorerSpec, type FileExplorerPanelPreset
+  FILE_EXPLORER_CATALOG_ID,
+  type FileExplorerPanelPreset,
+  fileExplorerCatalog,
+  fileExplorerPanelId,
+  fileExplorerPanelPresetsSlot,
+  fileExplorerSpecId,
+  makeFileExplorerSpec,
+  NewFileExplorerPanelCommand,
 } from "@statewalker/file-explorer";
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import {
-  DOCK_LAYOUT_STORAGE_KEY, SpecStore, restorePanelSpecsFromLayout
+  DOCK_LAYOUT_STORAGE_KEY,
+  restorePanelSpecsFromLayout,
+  SpecStore,
 } from "@statewalker/spec-store";
 import { getWorkspace } from "@statewalker/workspace";
 import { FolderOpen } from "lucide-react";
@@ -39,7 +48,7 @@ import { FileExplorerPanel } from "../internal/file-explorer-panel.js";
  */
 export default function initFileExplorerReact(ctx: Record<string, unknown>): () => Promise<void> {
   const workspace = getWorkspace(ctx);
-  const intents = workspace.requireAdapter(Commands);
+  const commands = workspace.requireAdapter(Commands);
   const store = workspace.requireAdapter(SpecStore);
   const slots = workspace.requireAdapter(Slots);
 
@@ -113,7 +122,7 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
 
       const position = i === 0 ? undefined : sidePosition(preset.side);
       try {
-        await intents.call(ShowDockPanelCommand, {
+        await commands.call(ShowDockPanelCommand, {
           panelId: fileExplorerPanelId(preset.id),
           specId,
           position,
@@ -145,32 +154,33 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
 
   register(workspace.onUnload(() => opened.clear()));
 
-  // ── New-panel intent ──────────────────────────────────────────
+  // ── New-panel command ──────────────────────────────────────────
   // Lets users (via the toolbar button or any caller) spin up a
   // fresh file-explorer tab on demand. Each invocation produces a
   // new id so the tab is independent of any existing panel.
   register(
-    intents.listen(NewFileExplorerPanelCommand, (intent) => {
+    commands.listen(NewFileExplorerPanelCommand, (command) => {
       const id = `panel-${crypto.randomUUID().slice(0, 8)}`;
       const specId = fileExplorerSpecId(id);
-      const label = intent.payload.label ?? "Files";
+      const label = command.payload.label ?? "Files";
       store.create({
         id: specId,
         catalogId: FILE_EXPLORER_CATALOG_ID,
         spec: makeFileExplorerSpec(id, {
           label,
-          initialPath: intent.payload.initialPath,
+          initialPath: command.payload.initialPath,
         }),
         meta: { persistent: true },
       });
-      intents.call(ShowDockPanelCommand, {
-        panelId: fileExplorerPanelId(id),
-        specId,
-        title: label,
-        position: intent.payload.position ?? "within",
-      })
-        .promise.then(() => intent.resolve({ panelId: id }))
-        .catch((err) => intent.reject(err));
+      commands
+        .call(ShowDockPanelCommand, {
+          panelId: fileExplorerPanelId(id),
+          specId,
+          title: label,
+          position: command.payload.position ?? "within",
+        })
+        .promise.then(() => command.resolve({ panelId: id }))
+        .catch((err) => command.reject(err));
       return true;
     }),
   );

@@ -12,7 +12,7 @@ import { ViewModel } from "./view-model.js";
  * Pure data — no side effects. The panel orchestrator does I/O and
  * pushes results in via `startLoading`. Activation (folder
  * navigation, file open) is dispatched by the view through the
- * `files:open` intent and never flows through model state.
+ * `files:open` command and never flows through model state.
  */
 export class FilesListModel extends ViewModel {
   path = "/";

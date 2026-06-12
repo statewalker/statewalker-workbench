@@ -1,39 +1,39 @@
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { getWorkspace } from "@statewalker/workspace";
-import { CreateSpecCommand, PatchSpecCommand } from "./intents.js";
+import { CreateSpecCommand, PatchSpecCommand } from "./commands.js";
 import { SpecStore } from "./spec-store.js";
 
 /**
  * Attach a `SpecStore` to the workspace and register the default
- * `spec:create` / `spec:patch` intent handlers. After this fragment
+ * `spec:create` / `spec:patch` command handlers. After this fragment
  * runs, every other fragment can:
  *   - resolve the store via `workspace.requireAdapter(SpecStore)`
- *   - invoke `intents.call(CreateSpecCommand, ...)` / `intents.call(PatchSpecCommand, ...)`
+ *   - invoke `commands.call(CreateSpecCommand, ...)` / `commands.call(PatchSpecCommand, ...)`
  *
  * Returns the cleanup; LIFO via shared-registry releases the
- * adapter binding and intent handlers on shutdown.
+ * adapter binding and command handlers on shutdown.
  */
 export default function initSpecStore(ctx: Record<string, unknown>): () => Promise<void> {
   const [register, cleanup] = newRegistry();
   const workspace = getWorkspace(ctx);
   const store = workspace.requireAdapter(SpecStore);
-  const intents = workspace.requireAdapter(Commands);
+  const commands = workspace.requireAdapter(Commands);
 
   register(
-    intents.listen(CreateSpecCommand, (intent) => {
-      const { catalogId, spec, meta } = intent.payload;
+    commands.listen(CreateSpecCommand, (command) => {
+      const { catalogId, spec, meta } = command.payload;
       const specId = store.create({ catalogId, spec, meta });
-      intent.resolve({ specId });
+      command.resolve({ specId });
       return true;
     }),
   );
 
   register(
-    intents.listen(PatchSpecCommand, (intent) => {
-      const { specId, patch } = intent.payload;
+    commands.listen(PatchSpecCommand, (command) => {
+      const { specId, patch } = command.payload;
       store.patch(specId, patch);
-      intent.resolve();
+      command.resolve();
       return true;
     }),
   );

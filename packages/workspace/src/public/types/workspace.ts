@@ -80,8 +80,8 @@ export class Workspace extends BaseClass {
   private readonly _instantiatedInOrder: unknown[] = [];
   private readonly _instantiating = new Set<AnyKey>();
 
-  private readonly _onLoadListeners = new Set<() => void>();
-  private readonly _onUnloadListeners = new Set<() => void>();
+  private readonly _onLoadListeners = new Set<() => void | Promise<void>>();
+  private readonly _onUnloadListeners = new Set<() => void | Promise<void>>();
 
   get isOpened(): boolean {
     return this._isOpened;
@@ -132,7 +132,7 @@ export class Workspace extends BaseClass {
 
     // Resolve the impl. Prefer an explicit registration; otherwise fall
     // back to the token itself when it is a class — concrete tokens
-    // (`Intents`, `Toasts`, …) self-host and need no setAdapter call.
+    // (`Commands`, `Toasts`, …) self-host and need no setAdapter call.
     const ctor = type as unknown as AnyCtor;
     const impl = this._registrations.get(type) ?? (isClass(ctor) ? ctor : null);
     if (!impl) return null;
@@ -159,10 +159,10 @@ export class Workspace extends BaseClass {
     return instance;
   }
 
-  onLoad(cb: () => void): () => void {
+  onLoad(cb: () => void | Promise<void>): () => void {
     if (this._isOpened) {
       try {
-        cb();
+        void cb();
       } catch (err) {
         logListenerError("onLoad", err);
       }
@@ -173,7 +173,7 @@ export class Workspace extends BaseClass {
     };
   }
 
-  onUnload(cb: () => void): () => void {
+  onUnload(cb: () => void | Promise<void>): () => void {
     this._onUnloadListeners.add(cb);
     return () => {
       this._onUnloadListeners.delete(cb);
@@ -189,7 +189,7 @@ export class Workspace extends BaseClass {
     this.notify();
     for (const listener of this._onLoadListeners) {
       try {
-        listener();
+        await listener();
       } catch (err) {
         logListenerError("onLoad", err);
       }
@@ -202,7 +202,7 @@ export class Workspace extends BaseClass {
     this._isOpened = false;
     for (const listener of this._onUnloadListeners) {
       try {
-        listener();
+        await listener();
       } catch (err) {
         logListenerError("onUnload", err);
       }

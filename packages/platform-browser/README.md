@@ -1,10 +1,10 @@
 # @statewalker/platform-browser
 
-Browser implementation of [`@statewalker/platform-api`](../platform-api). Provides default handlers for every `platform:*` intent plus a `bindUrlState` helper that hooks `UrlStateView` to `location.hash`.
+Browser implementation of [`@statewalker/platform-api`](../platform-api). Provides default handlers for every `platform:*` command plus a `bindUrlState` helper that hooks `UrlStateView` to `location.hash`.
 
 ## Why it exists
 
-`platform-api` declares the contract; *something* must satisfy it on each host. This package is the browser-side implementation — all logic that touches `window`, `document`, `navigator`, `localStorage`, `URL.createObjectURL`, `<input type="file">`, `showDirectoryPicker`, etc. lives behind the intent boundary so consumer fragments stay platform-agnostic. Future `platform-node` / `platform-electron` packages would provide the same handlers against the same contract.
+`platform-api` declares the contract; *something* must satisfy it on each host. This package is the browser-side implementation — all logic that touches `window`, `document`, `navigator`, `localStorage`, `URL.createObjectURL`, `<input type="file">`, `showDirectoryPicker`, etc. lives behind the command boundary so consumer fragments stay platform-agnostic. Future `platform-node` / `platform-electron` packages would provide the same handlers against the same contract.
 
 ## Installation
 
@@ -34,7 +34,7 @@ await bootstrap(
 
 Inside `initPlatformWeb`:
 
-1. Resolves the shared `Intents` bus via `getIntents(ctx)`.
+1. Resolves the shared `Commands` bus via `getCommands(ctx)`.
 2. Registers handlers for `pick-directory`, `pick-file`, `download-to-files`, `copy-to-clipboard`, `download-blob`, `preference-get`, `preference-set`.
 3. Resolves `getUrlStateView(ctx)` and registers `bindUrlState(view)` so `location.hash` and the model stay in sync without any consumer-side wiring.
 
@@ -42,7 +42,7 @@ Returns an async cleanup that unregisters everything in reverse order.
 
 ## Handlers
 
-| Intent | Implementation |
+| Command | Implementation |
 |---|---|
 | `platform:pick-directory` | File System Access API `showDirectoryPicker()`, wrapped in `BrowserFilesApi`. |
 | `platform:pick-file` | `showOpenFilePicker()` with `<input type="file">` fallback. |
@@ -71,7 +71,7 @@ const cleanup = bindUrlState(getUrlStateView(ctx));
 ## Related
 
 - [`@statewalker/platform-api`](../platform-api) — the contract this package implements.
-- [`@statewalker/workbench-dom`](../workbench-dom) — DOM-side input bindings (pointer/keyboard/theme), not platform intents.
+- [`@statewalker/workbench-dom`](../workbench-dom) — DOM-side input bindings (pointer/keyboard/theme), not platform commands.
 
 ## License
 

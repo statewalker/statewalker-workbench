@@ -42,15 +42,14 @@ export interface FileExplorerPanelPreset {
   folderNavigationHost?: boolean;
 }
 
-export const fileExplorerPanelPresetsSlot = defineSlot<FileExplorerPanelPreset>(
-  "file-explorer:panels",
-);
+export const fileExplorerPanelPresetsSlot =
+  defineSlot<FileExplorerPanelPreset>("file-explorer:panels");
 
 /**
  * Runtime handle exposed by an active file-explorer panel. Mounted
  * panels register one of these under their `panelId` so the
- * `files:open` intent handler can route directory navigations to the
- * right panel without coupling the intent layer to React.
+ * `files:open` command handler can route directory navigations to the
+ * right panel without coupling the command layer to React.
  */
 export interface ActiveFileExplorerPanel {
   /** Navigate this panel to `path`, loading it through the panel's `FilesApi`. */

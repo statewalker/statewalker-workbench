@@ -5,17 +5,17 @@ import type { Commands } from "@statewalker/shared-commands";
  * Browser default for `platform:copy-to-clipboard`. Uses
  * `navigator.clipboard.writeText`; the call requires a secure context and may
  * fail if the user has not granted clipboard permission — failures reject the
- * intent with the underlying error for the caller to surface.
+ * command with the underlying error for the caller to surface.
  */
-export function registerCopyToClipboardBrowser(intents: Commands): () => void {
-  return intents.listen(CopyToClipboardCommand, (intent) => {
+export function registerCopyToClipboardBrowser(commands: Commands): () => void {
+  return commands.listen(CopyToClipboardCommand, (command) => {
     void navigator.clipboard
-      .writeText(intent.payload.text)
+      .writeText(command.payload.text)
       .then(() => {
-        intent.resolve(undefined);
+        command.resolve(undefined);
       })
       .catch((error) => {
-        intent.reject(error);
+        command.reject(error);
       });
     return true;
   });

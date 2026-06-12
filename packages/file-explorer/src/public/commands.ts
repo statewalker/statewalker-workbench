@@ -2,7 +2,7 @@ import { Command, passthrough } from "@statewalker/shared-commands";
 
 /**
  * Per the `file-management-split` capability, file-explorer-owned
- * orchestration intents stay namespaced under `file-explorer:*`.
+ * orchestration commands stay namespaced under `file-explorer:*`.
  * Primitive file operations live on `files:*` (in `@statewalker/files`)
  * and SHALL NOT be re-declared here.
  */

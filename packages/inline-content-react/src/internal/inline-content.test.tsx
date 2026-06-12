@@ -1,8 +1,6 @@
 import { AppWorkspaceProvider } from "@statewalker/core-react";
 import { LoadDirectoryCommand, VisualizeFileCommand } from "@statewalker/files";
-import {
-  inlineComponentSlot, type InlineComponentDescriptor
-} from "@statewalker/inline-content";
+import { type InlineComponentDescriptor, inlineComponentSlot } from "@statewalker/inline-content";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import { Workspace } from "@statewalker/workspace";
@@ -125,12 +123,12 @@ describe("inline-content-views built-ins", () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentReact(ctx);
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
 
     const loadDir = vi.fn();
-    const disposeLoad = intents.listen(LoadDirectoryCommand, (intent) => {
-      loadDir(intent.payload);
-      intent.resolve([]);
+    const disposeLoad = commands.listen(LoadDirectoryCommand, (command) => {
+      loadDir(command.payload);
+      command.resolve([]);
       return true;
     });
 
@@ -165,12 +163,12 @@ describe("inline-content-views built-ins", () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentReact(ctx);
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
 
     const loadDir = vi.fn();
-    const disposeLoad = intents.listen(LoadDirectoryCommand, (intent) => {
-      loadDir(intent.payload);
-      intent.resolve([
+    const disposeLoad = commands.listen(LoadDirectoryCommand, (command) => {
+      loadDir(command.payload);
+      command.resolve([
         { name: "a.md", path: "/docs/a.md", kind: "file" },
         { name: "sub", path: "/docs/sub", kind: "directory" },
       ]);
@@ -203,12 +201,12 @@ describe("inline-content-views built-ins", () => {
     const ws = new Workspace();
     const ctx: Record<string, unknown> = { "workspace:workspace": ws };
     const cleanup = initInlineContentReact(ctx);
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
 
     const visualize = vi.fn();
-    const disposeVisualize = intents.listen(VisualizeFileCommand, (intent) => {
-      visualize(intent.payload);
-      intent.resolve();
+    const disposeVisualize = commands.listen(VisualizeFileCommand, (command) => {
+      visualize(command.payload);
+      command.resolve();
       return true;
     });
 
@@ -252,11 +250,7 @@ describe("inline-content-views built-ins", () => {
     const disposeCustom = slots.register(
       inlineContentRenderersSlot,
       "plugin:badge",
-      ({ props }) => (
-        <span data-testid="plugin-badge">
-          {(props as { text: string }).text}
-        </span>
-      ),
+      ({ props }) => <span data-testid="plugin-badge">{(props as { text: string }).text}</span>,
     );
 
     const utils = mount(

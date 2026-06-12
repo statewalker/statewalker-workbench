@@ -8,7 +8,7 @@ export interface OpenSettingsPayload {
 
 /**
  * Open the settings dialog. Default handler lives in
- * `SettingsManager`; consumers fire the intent without importing
+ * `SettingsManager`; consumers fire the command without importing
  * the adapter directly.
  */
 export const OpenSettingsCommand = Command.silent("settings:open")

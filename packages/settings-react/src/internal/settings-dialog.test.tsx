@@ -1,16 +1,12 @@
 /// <reference types="@testing-library/jest-dom" />
 import "@testing-library/jest-dom/vitest";
-import {
-  AppWorkspaceProvider,
-  coreViewsSlot,
-  type ViewComponent,
-} from "@statewalker/core-react";
+import { AppWorkspaceProvider, coreViewsSlot, type ViewComponent } from "@statewalker/core-react";
 import initCoreReact from "@statewalker/core-react/fragment";
 import { OpenSettingsCommand, Settings, settingsTabSlot } from "@statewalker/settings";
 import initSettings from "@statewalker/settings/fragment";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
-import { Workspace, getWorkspace, type Workspace as WorkspaceType } from "@statewalker/workspace";
+import { getWorkspace, Workspace, type Workspace as WorkspaceType } from "@statewalker/workspace";
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { SettingsDialog } from "./settings-dialog.js";
@@ -55,17 +51,13 @@ describe("SettingsDialog", () => {
     active = bootHarness();
     const { ws } = active;
     const slots = ws.requireAdapter(Slots);
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
     void ws.requireAdapter(Settings);
 
     function TestPanel(): React.ReactElement {
       return <div data-testid="test-panel">Contributed tab content</div>;
     }
-    slots.register(
-      coreViewsSlot,
-      "test:settings-tab",
-      TestPanel as unknown as ViewComponent,
-    );
+    slots.register(coreViewsSlot, "test:settings-tab", TestPanel as unknown as ViewComponent);
     slots.provide(settingsTabSlot, {
       id: "test",
       title: "Test Tab",
@@ -79,7 +71,7 @@ describe("SettingsDialog", () => {
     );
 
     await act(async () => {
-      await intents.call(OpenSettingsCommand, { tabId: "test" }).promise;
+      await commands.call(OpenSettingsCommand, { tabId: "test" }).promise;
     });
 
     expect(screen.getByText("Test Tab")).toBeInTheDocument();
@@ -90,7 +82,7 @@ describe("SettingsDialog", () => {
     active = bootHarness();
     const { ws } = active;
     const slots = ws.requireAdapter(Slots);
-    const intents = ws.requireAdapter(Commands);
+    const commands = ws.requireAdapter(Commands);
 
     slots.provide(settingsTabSlot, {
       id: "orphan",
@@ -105,7 +97,7 @@ describe("SettingsDialog", () => {
     );
 
     await act(async () => {
-      await intents.call(OpenSettingsCommand, { tabId: "orphan" }).promise;
+      await commands.call(OpenSettingsCommand, { tabId: "orphan" }).promise;
     });
 
     expect(screen.getByText(/no component is bound/i)).toBeInTheDocument();

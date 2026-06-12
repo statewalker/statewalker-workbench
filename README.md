@@ -16,15 +16,15 @@ Application shell and fragment platform for the statewalker ecosystem — backbo
 
 | Package | Description |
 | --- | --- |
-| [`@statewalker/platform-api`](packages/platform-api) | Type-only intent vocabulary: pickers, downloads, clipboard, preferences, URL state. |
-| [`@statewalker/platform-browser`](packages/platform-browser) | Browser implementation of the platform-api intents. |
+| [`@statewalker/platform-api`](packages/platform-api) | Type-only command vocabulary: pickers, downloads, clipboard, preferences, URL state. |
+| [`@statewalker/platform-browser`](packages/platform-browser) | Browser implementation of the platform-api commands. |
 
 ### Substrate fragments — workspace foundation
 
 | Package | Description |
 | --- | --- |
-| [`@statewalker/workspace`](packages/workspace) | Workspace logic fragment: the `Workspace` class, system/secrets/settings adapters, the `workspace:change` intent and its registrar init. |
-| [`@statewalker/workspace-bridge`](packages/workspace-bridge) | Workspace-bridge logic fragment: `WorkspaceShellAdapter` + `workspace:*` intents. |
+| [`@statewalker/workspace`](packages/workspace) | Workspace logic fragment: the `Workspace` class, system/secrets/settings adapters, the `workspace:change` command and its registrar init. |
+| [`@statewalker/workspace-bridge`](packages/workspace-bridge) | Workspace-bridge logic fragment: `WorkspaceShellAdapter` + `workspace:*` commands. |
 | [`@statewalker/workspace-bridge-react`](packages/workspace-bridge-react) | Workspace-bridge renderer: `AppWorkspaceProvider`, `DirectoryPickerEmptyState`, `ReconnectBanner`, switch-workspace header item. |
 
 ### Substrate fragments — shell substrate
@@ -33,18 +33,18 @@ Application shell and fragment platform for the statewalker ecosystem — backbo
 | --- | --- |
 | [`@statewalker/core-react`](packages/core-react) | React mount, `<AppRoot>`, `core:views` slot, substrate hooks (`useSlot`, `useKeyedSlot`, `useAdapterValue`, `useAdapter`), theme binding. |
 | [`@statewalker/shadcn-react`](packages/shadcn-react) | shadcn/ui primitives + `cn()` helper for the workbench substrate. |
-| [`@statewalker/dock`](packages/dock) | Dock logic fragment: `dock:*` slot keys, `dock:show-panel`/`close-panel`/`focus-panel` intents, dock state. |
+| [`@statewalker/dock`](packages/dock) | Dock logic fragment: `dock:*` slot keys, `dock:show-panel`/`close-panel`/`focus-panel` commands, dock state. |
 | [`@statewalker/dock-react`](packages/dock-react) | Dock renderer: `dockview-react` host, `MainShell`, `ShellHeader`, `JsonPanel`. |
-| [`@statewalker/files`](packages/files) | Files logic fragment: file-op intents, `files:*` slots, `MimeRenderer` + `pickMimeRenderer`, `FilesManager`. |
-| [`@statewalker/file-explorer`](packages/file-explorer) | File-explorer logic fragment: navigation, search controller, tree-state, browser orchestration intents. |
+| [`@statewalker/files`](packages/files) | Files logic fragment: file-op commands, `files:*` slots, `MimeRenderer` + `pickMimeRenderer`, `FilesManager`. |
+| [`@statewalker/file-explorer`](packages/file-explorer) | File-explorer logic fragment: navigation, search controller, tree-state, browser orchestration commands. |
 | [`@statewalker/file-explorer-react`](packages/file-explorer-react) | File-explorer renderer: tree, list, drag-and-drop, context menu, navigation breadcrumbs, search panel. |
-| [`@statewalker/settings`](packages/settings) | Settings logic fragment: `settings:*` slots and intents. |
+| [`@statewalker/settings`](packages/settings) | Settings logic fragment: `settings:*` slots and commands. |
 | [`@statewalker/settings-react`](packages/settings-react) | Settings renderer: settings dialog and `dock:header-items` button. |
 | [`@statewalker/inline-content`](packages/inline-content) | Inline-content logic fragment: `inline-content:components` descriptor slot + descriptor types. |
 | [`@statewalker/inline-content-react`](packages/inline-content-react) | Inline-content renderer fragment: `inline-content:renderers` slot, `<InlineContent>`, built-in components. |
 | [`@statewalker/catalog-registry`](packages/catalog-registry) | Catalog-registry logic fragment: `json:catalogs` slot key + `newCatalogRegistry(workspace)` helper. |
 | [`@statewalker/catalog-registry-react`](packages/catalog-registry-react) | Catalog-registry renderer: `useCatalogRegistry()` React hook. |
-| [`@statewalker/spec-store`](packages/spec-store) | Spec-store logic fragment: `SpecStore` adapter + `spec:create`/`spec:patch` intents + `restorePanelSpecsFromLayout` helper. |
+| [`@statewalker/spec-store`](packages/spec-store) | Spec-store logic fragment: `SpecStore` adapter + `spec:create`/`spec:patch` commands + `restorePanelSpecsFromLayout` helper. |
 
 ### Substrate fragments — per-MIME viewers
 
@@ -69,7 +69,7 @@ Every substrate fragment package follows a single canonical layout, enforced by 
 src/
   index.ts          # re-exports public/index.js
   fragment.ts       # re-exports public/init.js's default
-  public/           # types, intents, slot keys, manager classes, init
+  public/           # types, commands, slot keys, manager classes, init
   internal/         # impl + tests; not reachable through any export sub-path
   styles.css        # renderer fragments only — Tailwind v4 @source globs
 ```

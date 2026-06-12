@@ -3,12 +3,12 @@ import { DockManager } from "../internal/dock.manager.js";
 
 /**
  * Attach the `DockHost` adapter to the workspace and register the
- * `dock:*` intent handlers via a `DockManager`. Also installs the
+ * `dock:*` command handlers via a `DockManager`. Also installs the
  * bus-trace toggle (no-op unless `localStorage["chat-mini:bus-trace"]`
  * is `"1"`).
  *
  * The `<DockviewReact>` host (in the `dock-views` fragment) mounts
- * later inside the React tree; intent calls that fire before then
+ * later inside the React tree; command calls that fire before then
  * are queued by `DockHost` and drain on `setApi`.
  *
  * Eviction policy: `dock:close-panel` removes the panel from

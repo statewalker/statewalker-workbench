@@ -1,6 +1,4 @@
-import {
-  inlineComponentSlot, type InlineComponentDescriptor
-} from "@statewalker/inline-content";
+import { type InlineComponentDescriptor, inlineComponentSlot } from "@statewalker/inline-content";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace";
@@ -10,7 +8,8 @@ import { FileCard } from "../internal/components/file-card.js";
 import { LineChart } from "../internal/components/line-chart.js";
 import { MetricCard } from "../internal/components/metric-card.js";
 import {
-  inlineContentRenderersSlot, type InlineContentComponent
+  type InlineContentComponent,
+  inlineContentRenderersSlot,
 } from "./inline-content-registry.js";
 
 const BUILTINS: ReadonlyArray<{
@@ -53,7 +52,7 @@ const BUILTINS: ReadonlyArray<{
     descriptor: {
       id: "action-button",
       label: "Action Button",
-      description: "Fires an arbitrary intent on click.",
+      description: "Fires an arbitrary command on click.",
     },
     component: ActionButton as unknown as InlineContentComponent,
   },

@@ -16,13 +16,13 @@ export interface SettingsButtonProps {
  * mounted once at the top of the React tree.
  */
 export function SettingsButton({ tabId }: SettingsButtonProps): ReactElement {
-  const intents = useAdapter(Commands);
+  const commands = useAdapter(Commands);
   return (
     <Button
       size="sm"
       variant="ghost"
       aria-label="Settings"
-      onClick={() => intents.call(OpenSettingsCommand, { tabId })}
+      onClick={() => commands.call(OpenSettingsCommand, { tabId })}
     >
       <SettingsIcon className="h-3.5 w-3.5" /> Settings
     </Button>

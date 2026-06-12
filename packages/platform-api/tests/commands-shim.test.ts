@@ -1,44 +1,44 @@
 import { Commands } from "@statewalker/shared-commands";
 import { getWorkspace } from "@statewalker/workspace";
 import { describe, expect, it, vi } from "vitest";
-import { getIntents, removeIntents, setIntents } from "../src/adapters.ts";
+import { getCommands, removeCommands, setCommands } from "../src/adapters.ts";
 
-describe("getIntents shim", () => {
+describe("getCommands shim", () => {
   it("returns the same instance as workspace.requireAdapter(Commands) for the same ctx", () => {
     const ctx: Record<string, unknown> = {};
-    const fromShim = getIntents(ctx);
+    const fromShim = getCommands(ctx);
     const fromWorkspace = getWorkspace(ctx).requireAdapter(Commands);
     expect(fromShim).toBe(fromWorkspace);
   });
 
   it("returns the same instance across calls on the same ctx", () => {
     const ctx: Record<string, unknown> = {};
-    const a = getIntents(ctx);
-    const b = getIntents(ctx);
+    const a = getCommands(ctx);
+    const b = getCommands(ctx);
     expect(a).toBe(b);
   });
 
   it("returns an Commands instance", () => {
     const ctx: Record<string, unknown> = {};
-    expect(getIntents(ctx)).toBeInstanceOf(Commands);
+    expect(getCommands(ctx)).toBeInstanceOf(Commands);
   });
 
   it("returns distinct instances for distinct ctx (each ctx gets its own workspace)", () => {
-    const a = getIntents({});
-    const b = getIntents({});
+    const a = getCommands({});
+    const b = getCommands({});
     expect(a).not.toBe(b);
   });
 });
 
-describe("setIntents / removeIntents — deprecation no-op semantics", () => {
-  it("setIntents does not replace the workspace-bound bus", () => {
+describe("setCommands / removeCommands — deprecation no-op semantics", () => {
+  it("setCommands does not replace the workspace-bound bus", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
       const ctx: Record<string, unknown> = {};
-      const original = getIntents(ctx);
+      const original = getCommands(ctx);
       const mock = new Commands();
-      setIntents(ctx, mock);
-      const after = getIntents(ctx);
+      setCommands(ctx, mock);
+      const after = getCommands(ctx);
       expect(after).toBe(original);
       expect(after).not.toBe(mock);
       expect(warn).toHaveBeenCalled();
@@ -47,13 +47,13 @@ describe("setIntents / removeIntents — deprecation no-op semantics", () => {
     }
   });
 
-  it("removeIntents does not detach the workspace-bound bus", () => {
+  it("removeCommands does not detach the workspace-bound bus", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
       const ctx: Record<string, unknown> = {};
-      const original = getIntents(ctx);
-      removeIntents(ctx);
-      const after = getIntents(ctx);
+      const original = getCommands(ctx);
+      removeCommands(ctx);
+      const after = getCommands(ctx);
       expect(after).toBe(original);
       expect(getWorkspace(ctx).requireAdapter(Commands)).toBe(original);
       expect(warn).toHaveBeenCalled();

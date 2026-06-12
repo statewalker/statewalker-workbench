@@ -6,10 +6,10 @@ import type { Commands } from "@statewalker/shared-commands";
  * an object URL and synthesises a click. The object URL is revoked after the
  * click fires to avoid leaking the blob reference.
  */
-export function registerDownloadBlobBrowser(intents: Commands): () => void {
-  return intents.listen(DownloadBlobCommand, (intent) => {
+export function registerDownloadBlobBrowser(commands: Commands): () => void {
+  return commands.listen(DownloadBlobCommand, (command) => {
     try {
-      const { blob, filename } = intent.payload;
+      const { blob, filename } = command.payload;
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -22,9 +22,9 @@ export function registerDownloadBlobBrowser(intents: Commands): () => void {
       setTimeout(() => {
         URL.revokeObjectURL(url);
       }, 0);
-      intent.resolve(undefined);
+      command.resolve(undefined);
     } catch (error) {
-      intent.reject(error);
+      command.reject(error);
     }
     return true;
   });

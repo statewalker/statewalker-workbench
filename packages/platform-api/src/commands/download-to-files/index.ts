@@ -1,7 +1,7 @@
 import { Command, passthrough } from "@statewalker/shared-commands";
 import type { FilesApi } from "@statewalker/webrun-files";
 
-export const DOWNLOAD_TO_FILES_INTENT_KEY = "platform:download-to-files";
+export const DOWNLOAD_TO_FILES_COMMAND_KEY = "platform:download-to-files";
 
 export interface DownloadProgress {
   loaded: number;
@@ -21,7 +21,7 @@ export interface DownloadToFilesResult {
   bytes: number;
 }
 
-export const DownloadToFilesCommand = Command.silent(DOWNLOAD_TO_FILES_INTENT_KEY)
+export const DownloadToFilesCommand = Command.silent(DOWNLOAD_TO_FILES_COMMAND_KEY)
   .input(passthrough<DownloadToFilesPayload>())
   .output(passthrough<DownloadToFilesResult>())
   .build();

@@ -5,8 +5,8 @@ import { type ReactElement, useCallback } from "react";
 interface ActionButtonProps {
   label: string;
   /** Command key fired when the button is clicked. */
-  intent: string;
-  /** Payload passed to the intent. Optional. */
+  command: string;
+  /** Payload passed to the command. Optional. */
   payload?: unknown;
   /** Visual emphasis. Defaults to "default". */
   variant?: "default" | "primary" | "destructive";
@@ -15,24 +15,24 @@ interface ActionButtonProps {
 function isActionButtonProps(value: unknown): value is ActionButtonProps {
   if (!value || typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
-  return typeof v.label === "string" && typeof v.intent === "string";
+  return typeof v.label === "string" && typeof v.command === "string";
 }
 
 /**
- * Inline button that fires an arbitrary intent on click. The
- * spec carries the intent key + payload so a single component
+ * Inline button that fires an arbitrary command on click. The
+ * spec carries the command key + payload so a single component
  * covers many use cases without per-action React bindings.
  */
 export function ActionButton({ props }: { props: unknown }): ReactElement {
   const workspace = useAppWorkspace();
-  const intents = workspace.requireAdapter(Commands);
+  const commands = workspace.requireAdapter(Commands);
 
   const onClick = useCallback(() => {
     if (!isActionButtonProps(props)) return;
     // Dynamic dispatch by string key. The action key is configured per
     // declarative spec; the bus accepts any CommandDeclaration shape.
-    intents.call({ key: props.intent }, props.payload);
-  }, [intents, props]);
+    commands.call({ key: props.command }, props.payload);
+  }, [commands, props]);
 
   if (!isActionButtonProps(props)) {
     return (

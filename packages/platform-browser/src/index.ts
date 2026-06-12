@@ -1,4 +1,4 @@
-import { getIntents, getUrlStateView } from "@statewalker/platform-api";
+import { getCommands, getUrlStateView } from "@statewalker/platform-api";
 import { newRegistry } from "@statewalker/shared-registry";
 import { bindUrlState } from "./bind-url-state.js";
 import { registerCopyToClipboardBrowser } from "./handlers/copy-to-clipboard.browser.js";
@@ -20,7 +20,7 @@ export { registerPreferenceSetBrowser } from "./handlers/preference-set.browser.
 
 /**
  * Register every browser-backed capability for `@statewalker/platform-api`
- * against the context's shared `Intents` bus, and bind the context's
+ * against the context's shared `Commands` bus, and bind the context's
  * `UrlStateView` to `location.hash` so navigation synchronisation activates
  * automatically. Returns a cleanup that unregisters everything in reverse.
  */
@@ -30,14 +30,14 @@ export default function initPlatformWeb(ctx: Record<string, unknown>): () => voi
   const stateView = getUrlStateView(ctx);
   register(bindUrlState(stateView));
 
-  const intents = getIntents(ctx);
-  register(registerPickDirectoryBrowser(intents));
-  register(registerPickFileBrowser(intents));
-  register(registerDownloadToFilesBrowser(intents));
-  register(registerCopyToClipboardBrowser(intents));
-  register(registerDownloadBlobBrowser(intents));
-  register(registerPreferenceGetBrowser(intents));
-  register(registerPreferenceSetBrowser(intents));
+  const commands = getCommands(ctx);
+  register(registerPickDirectoryBrowser(commands));
+  register(registerPickFileBrowser(commands));
+  register(registerDownloadToFilesBrowser(commands));
+  register(registerCopyToClipboardBrowser(commands));
+  register(registerDownloadBlobBrowser(commands));
+  register(registerPreferenceGetBrowser(commands));
+  register(registerPreferenceSetBrowser(commands));
 
   return cleanup;
 }
