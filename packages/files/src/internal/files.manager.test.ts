@@ -1,9 +1,3 @@
-import {
-  ActiveModel,
-  AgentRuntimeAdapter,
-  type AgentToolContribution,
-  agentToolsSlot,
-} from "@statewalker/ai-agent-runtime";
 import { ShowDockPanelCommand } from "@statewalker/dock";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
@@ -28,8 +22,6 @@ function bootWorkspace(files: MemFilesApi): {
   manager: FilesManager;
 } {
   const ws = new Workspace();
-  ws.setAdapter(ActiveModel);
-  ws.setAdapter(AgentRuntimeAdapter);
   ws.setFileSystem(files, "test");
   const manager = new FilesManager({ workspace: ws });
   return { ws, manager };
@@ -101,30 +93,6 @@ describe("FilesManager", () => {
     await manager.close();
     void ws;
   });
-
-  it("contributes a ToolFactory to agent:tools per workspace cycle", async () => {
-    const files = new MemFilesApi();
-    const { ws, manager } = bootWorkspace(files);
-    const slots = ws.requireAdapter(Slots);
-
-    const observed: Array<readonly AgentToolContribution[]> = [];
-    const dispose = slots.observe(agentToolsSlot, (vs) => observed.push(vs));
-
-    expect(observed.at(-1)?.length ?? 0).toBe(0);
-
-    await ws.open();
-    expect(observed.at(-1)?.length).toBe(1);
-
-    await ws.close();
-    expect(observed.at(-1)?.length).toBe(0);
-
-    // Cycle 2: fresh contribution.
-    await ws.open();
-    expect(observed.at(-1)?.length).toBe(1);
-
-    dispose();
-    await manager.close();
-  });
 });
 
 describe("pickRenderer", () => {
@@ -190,8 +158,6 @@ describe("runVisualizeFile", () => {
   it("creates a spec, opens a dock panel, and is idempotent on reopen", async () => {
     const files = new MemFilesApi();
     const ws = new Workspace();
-    ws.setAdapter(ActiveModel);
-    ws.setAdapter(AgentRuntimeAdapter);
     ws.setFileSystem(files, "test");
     const manager = new FilesManager({ workspace: ws });
     const slots = ws.requireAdapter(Slots);

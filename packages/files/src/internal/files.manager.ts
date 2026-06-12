@@ -1,5 +1,3 @@
-import { createFileTools } from "@statewalker/ai-agent/tools";
-import { agentToolsSlot } from "@statewalker/ai-agent-runtime";
 import { ShowDockPanelCommand } from "@statewalker/dock";
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
@@ -27,12 +25,6 @@ export interface FilesManagerOptions {
 /**
  * Re-entrant orchestrator for the files fragment.
  *
- * On `workspace.onLoad`:
- *   - Contributes a `ToolFactory` to `agent:tools` that closes over
- *     the current `workspace.files`. The agent-runtime manager
- *     observes the slot and rebuilds the AgentRuntime with the
- *     contributed tools.
- *
  * Lifetime-scoped:
  *   - Registers `files:*` command handlers against the workspace's
  *     primary `FilesApi`. Handlers no-op while the workspace is
@@ -50,7 +42,6 @@ export class FilesManager {
   private readonly slots: Slots;
   private readonly store: SpecStore;
   private readonly _cleanup: () => Promise<void>;
-  private _cycleCleanup: Array<() => void> = [];
 
   constructor({ workspace }: FilesManagerOptions) {
     this.workspace = workspace;
@@ -135,45 +126,10 @@ export class FilesManager {
         return true;
       }),
     );
-
-    // ── Per-cycle: agent:tools contribution ─────────────────────
-    register(workspace.onLoad(() => this._onLoad()));
-    register(workspace.onUnload(() => this._onUnload()));
-
-    if (workspace.isOpened) this._onLoad();
   }
 
   async close(): Promise<void> {
-    this._onUnload();
     await this._cleanup();
-  }
-
-  // ── Lifecycle ─────────────────────────────────────────────────
-
-  private _onLoad(): void {
-    const files = this.workspace.files;
-    // Contribute a ToolFactory closing over the current files
-    // view. AgentRuntime calls the factory during build, passing
-    // its own filtered files-tools view (system path hidden).
-    this._cycleCleanup.push(
-      this.slots.provide(agentToolsSlot, (ctx) => createFileTools(ctx.files)),
-    );
-    // Hold a reference so the closure target stays in scope; the
-    // factory itself ignores `files` from this scope (uses
-    // `ctx.files` which is the agent-runtime tools view), but
-    // future overrides (e.g. plug-in path filters) may want it.
-    void files;
-  }
-
-  private _onUnload(): void {
-    for (const dispose of this._cycleCleanup) {
-      try {
-        dispose();
-      } catch (err) {
-        console.error("[files] cycle cleanup threw:", err);
-      }
-    }
-    this._cycleCleanup = [];
   }
 
   // ── Command handler implementations ────────────────────────────
