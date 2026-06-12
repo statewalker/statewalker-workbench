@@ -1,5 +1,5 @@
-import { ProjectAdapter, type Project } from "@statewalker/workspace";
 import type { FilesApi } from "@statewalker/webrun-files";
+import { type Project, ProjectAdapter } from "@statewalker/workspace";
 import { tryReadJson, writeJsonAtomic } from "../util/io.js";
 import { projectIndexPath } from "./page-paths.js";
 import type {

@@ -1,6 +1,6 @@
 import { createDefaultRegistry } from "@statewalker/content-extractors";
+import type { FilesApi } from "@statewalker/webrun-files";
 import { LoggerAdapter, type LoggerLevel, Workspace } from "@statewalker/workspace";
-import { type FilesApi } from "@statewalker/webrun-files";
 import { stringify as stringifyYaml } from "yaml";
 import { costOf, roundUsd } from "../llm/index.js";
 import type { Answer } from "../query/index.js";
@@ -276,7 +276,7 @@ export async function runWikiCli(args: string[], deps: CliDeps): Promise<void> {
       let announced = 0;
       progress.onChange(() => {
         for (; announced < progress.stages.length; announced++) {
-          warn(`  ${progress.stages[announced]!.name}: running`);
+          warn(`  ${progress.stages[announced]?.name}: running`);
         }
       });
       const answer = await progress.complete();

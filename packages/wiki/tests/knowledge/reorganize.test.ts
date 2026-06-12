@@ -1,5 +1,5 @@
-import { ContentReadAdapter, ContentWriteAdapter, Project, ProjectBuilder, ResourceRepository, TextAdapter, Workspace } from "@statewalker/workspace";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { ProjectBuilder, Workspace } from "@statewalker/workspace";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   contentBuilder,
@@ -42,25 +42,19 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
 };
 
 describe("reorganizer + pruner", () => {
-  let repository: ResourceRepository;
+  let repository: Workspace;
   let filesApi: MemFilesApi;
 
   beforeEach(() => {
     filesApi = new MemFilesApi({ initialFiles: { "proj/a.md": "# A", "proj/b.md": "# B" } });
-    repository = new ResourceRepository({ filesApi });
-    repository.register("", ContentReadAdapter);
-    repository.register("", ContentWriteAdapter);
-    repository.register("", TextAdapter);
-    repository.register("", Project);
-    repository.register("", ProjectBuilder);
-    repository.register(ResourceRepository, Workspace);
+    repository = new Workspace().setFileSystem(filesApi);
     registerContentExtraction(repository);
-    registerKnowledgeAdapters(repository);
+    registerKnowledgeAdapters();
     registerStubLlm(repository, { generateObject });
   });
 
   it("aggregates a topic across documents, and prunes a removed source's reference", async () => {
-    const workspace = repository.requireAdapter<Workspace>(Workspace);
+    const workspace = repository;
     const project = (await workspace.getProject("proj"))!;
     const builder = project.requireAdapter(ProjectBuilder);
 

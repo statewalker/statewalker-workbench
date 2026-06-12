@@ -1,5 +1,5 @@
-import { ContentReadAdapter, Project, ResourceRepository, TextAdapter, Workspace } from "@statewalker/workspace";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { Workspace } from "@statewalker/workspace";
 import { beforeEach, describe, expect, it } from "vitest";
 import { type Answer, registerSnapshots, WikiSnapshotsAdapter } from "../../src/index.js";
 
@@ -16,23 +16,19 @@ function answer(text: string): Answer {
 }
 
 describe("WikiSnapshotsAdapter", () => {
-  let repository: ResourceRepository;
+  let repository: Workspace;
   let clockValues: string[];
 
   beforeEach(() => {
     clockValues = ["2026-01-01", "2026-01-02", "2026-01-03", "2026-01-04"];
-    repository = new ResourceRepository({
-      filesApi: new MemFilesApi({ initialFiles: { "proj/a.md": "x" } }),
-    });
-    repository.register("", ContentReadAdapter);
-    repository.register("", TextAdapter);
-    repository.register("", Project);
-    repository.register(ResourceRepository, Workspace);
+    repository = new Workspace().setFileSystem(
+      new MemFilesApi({ initialFiles: { "proj/a.md": "x" } }),
+    );
     registerSnapshots(repository, { clock: () => clockValues.shift() ?? "z" });
   });
 
   it("saves, lists, reads back, and versions on re-save (frozen across the first)", async () => {
-    const workspace = repository.requireAdapter<Workspace>(Workspace);
+    const workspace = repository;
     const project = await workspace.getProject("proj");
     if (!project) throw new Error("no project");
     const snaps = project.requireAdapter(WikiSnapshotsAdapter);
@@ -51,7 +47,7 @@ describe("WikiSnapshotsAdapter", () => {
   });
 
   it("records an optional label and surfaces it in listing + read-back", async () => {
-    const workspace = repository.requireAdapter<Workspace>(Workspace);
+    const workspace = repository;
     const project = await workspace.getProject("proj");
     if (!project) throw new Error("no project");
     const snaps = project.requireAdapter(WikiSnapshotsAdapter);

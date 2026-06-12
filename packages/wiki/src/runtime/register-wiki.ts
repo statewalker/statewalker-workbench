@@ -1,6 +1,6 @@
 import type { ExtractorRegistry } from "@statewalker/content-extractors";
 import {
-  Project,
+  type Project,
   ProjectBuilder,
   type RegisteredBuilder,
   type Resource,

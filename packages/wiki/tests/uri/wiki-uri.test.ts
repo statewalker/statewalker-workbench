@@ -1,5 +1,5 @@
-import { ContentReadAdapter, ContentWriteAdapter, Project, ResourceRepository, TextAdapter, Workspace } from "@statewalker/workspace";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { Workspace } from "@statewalker/workspace";
 import { describe, expect, it } from "vitest";
 import {
   CrossWikiRefError,
@@ -102,27 +102,20 @@ describe("validateWikiPath (migrated path-validation parity)", () => {
 
 describe("openWiki — key bound to project name", () => {
   function newRepository(files: Record<string, string>) {
-    const repository = new ResourceRepository({
-      filesApi: new MemFilesApi({ initialFiles: files }),
-    });
-    repository.register("", ContentReadAdapter);
-    repository.register("", ContentWriteAdapter);
-    repository.register("", TextAdapter);
-    repository.register("", Project);
-    repository.register(ResourceRepository, Workspace);
+    const repository = new Workspace().setFileSystem(new MemFilesApi({ initialFiles: files }));
     return repository;
   }
 
   it("opens a project whose name is a valid key", async () => {
     const repository = newRepository({ "chem-lab/a.md": "# A" });
-    const workspace = repository.requireAdapter<Workspace>(Workspace);
+    const workspace = repository;
     const wiki = await openWiki(workspace, "chem-lab");
     expect(wiki?.projectName).toBe("chem-lab");
   });
 
   it("rejects creating a wiki with an invalid key", async () => {
     const repository = newRepository({});
-    const workspace = repository.requireAdapter<Workspace>(Workspace);
+    const workspace = repository;
     await expect(openWiki(workspace, "Lab Journal", true)).rejects.toThrow(WikiKeyError);
   });
 });

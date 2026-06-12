@@ -1,5 +1,5 @@
-import { ContentReadAdapter, ContentWriteAdapter, Project, ProjectBuilder, ResourceRepository, TextAdapter, Workspace } from "@statewalker/workspace";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { ProjectBuilder, Workspace } from "@statewalker/workspace";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   contentBuilder,
@@ -76,20 +76,14 @@ function tracker() {
 
 async function setup() {
   const filesApi = new MemFilesApi({ initialFiles: {} });
-  const repository = new ResourceRepository({ filesApi });
-  repository.register("", ContentReadAdapter);
-  repository.register("", ContentWriteAdapter);
-  repository.register("", TextAdapter);
-  repository.register("", Project);
-  repository.register("", ProjectBuilder);
-  repository.register(ResourceRepository, Workspace);
+  const repository = new Workspace().setFileSystem(filesApi);
   registerContentExtraction(repository);
-  registerKnowledgeAdapters(repository);
+  registerKnowledgeAdapters();
 
   const t = tracker();
   registerStubLlm(repository, { generateObject: t.generateObject });
-  const workspace = repository.requireAdapter<Workspace>(Workspace);
-  const project = await workspace.getProject("proj", true);
+  const workspace = repository;
+  const project = (await workspace.getProject("proj", true))!;
   const builder = project.requireAdapter(ProjectBuilder);
   builder.registerBuilder(contentBuilder());
   builder.registerBuilder(summarizeBuilder());
@@ -133,7 +127,7 @@ describe("reorganizer — incremental LLM topic merge", () => {
 
     const tp = await h.topics();
     expect(tp.map((x) => x.key)).toEqual(["shared"]);
-    expect(tp[0].references.map((r) => r.uri).sort()).toEqual(["a.md#shared", "b.md#shared"]);
+    expect(tp[0]!.references.map((r) => r.uri).sort()).toEqual(["a.md#shared", "b.md#shared"]);
     expect(h.t.calls).not.toContain("reorganize-topics");
   });
 
@@ -167,7 +161,7 @@ describe("reorganizer — incremental LLM topic merge", () => {
     expect(h.t.calls).toContain("reorganize-topics");
     const tp = await h.topics();
     expect(tp.map((x) => x.key)).toEqual(["fund-performance"]);
-    expect(tp[0].references.map((r) => r.uri).sort()).toEqual([
+    expect(tp[0]!.references.map((r) => r.uri).sort()).toEqual([
       "a.md#fund-performance",
       "b.md#investment-fund-performance",
     ]);
@@ -228,7 +222,7 @@ describe("reorganizer — incremental LLM topic merge", () => {
 
     const tp = await h.topics();
     expect(tp.map((x) => x.key)).toEqual(["fund-performance"]);
-    const topic = tp[0];
+    const topic = tp[0]!;
     expect(topic.description).toBe("Fund returns. Adds IRR detail.");
     expect(topic.references.map((r) => r.uri).sort()).toEqual([
       "a.md#fund-performance",
@@ -266,6 +260,6 @@ describe("reorganizer — incremental LLM topic merge", () => {
 
     const tp = await h.topics();
     expect(tp.map((x) => x.key)).toEqual(["fresh"]);
-    expect(tp[0].references.map((r) => r.uri)).toEqual(["a.md#fresh"]);
+    expect(tp[0]!.references.map((r) => r.uri)).toEqual(["a.md#fresh"]);
   });
 });

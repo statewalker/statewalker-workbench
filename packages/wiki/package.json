@@ -13,7 +13,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "files": ["src", "bin"],
+  "files": [
+    "src",
+    "bin"
+  ],
   "scripts": {
     "start": "tsx bin/wiki.ts",
     "test": "vitest run --passWithNoTests",
@@ -42,6 +45,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@statewalker/fsm-validator": "catalog:",
     "@statewalker/shared-logger-pino": "catalog:",
     "@statewalker/webrun-files-mem": "catalog:",
     "@statewalker/webrun-files-node": "catalog:",

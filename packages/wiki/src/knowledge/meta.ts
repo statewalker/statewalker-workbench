@@ -1,4 +1,10 @@
-import { type BuilderUpdate, type EmittedUpdate, loggerOf, ProjectBuilder, type RegisteredBuilder } from "@statewalker/workspace";
+import {
+  type BuilderUpdate,
+  type EmittedUpdate,
+  loggerOf,
+  ProjectBuilder,
+  type RegisteredBuilder,
+} from "@statewalker/workspace";
 import { llmOf, wikiConfigOf } from "../llm/index.js";
 import { toBatch } from "../util/batch.js";
 import { collectExistingClasses } from "./indexes.js";

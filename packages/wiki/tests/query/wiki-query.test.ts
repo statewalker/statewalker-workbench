@@ -1,5 +1,5 @@
-import { ContentReadAdapter, ContentWriteAdapter, Project, ProjectBuilder, type Resource, ResourceRepository, TextAdapter, Workspace } from "@statewalker/workspace";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { ProjectBuilder, type Resource, Workspace } from "@statewalker/workspace";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   contentBuilder,
@@ -128,15 +128,9 @@ async function buildProject() {
   const filesApi = new MemFilesApi({
     initialFiles: { "proj/a.md": "Acme is a company.\nJane founded Acme." },
   });
-  const repository = new ResourceRepository({ filesApi });
-  repository.register("", ContentReadAdapter);
-  repository.register("", ContentWriteAdapter);
-  repository.register("", TextAdapter);
-  repository.register("", Project);
-  repository.register("", ProjectBuilder);
-  repository.register(ResourceRepository, Workspace);
+  const repository = new Workspace().setFileSystem(filesApi);
   registerContentExtraction(repository);
-  registerKnowledgeAdapters(repository);
+  registerKnowledgeAdapters();
   registerStubLlm(repository, {
     generateObject,
     embed,
@@ -146,7 +140,7 @@ async function buildProject() {
   registerSearch(repository, { embed, model: "fixture", dimensionality: DIM, blocks });
   registerQuery(repository);
 
-  const workspace = repository.requireAdapter<Workspace>(Workspace);
+  const workspace = repository;
   const project = await workspace.getProject("proj", true);
   if (!project) throw new Error("no project");
   const builder = project.requireAdapter(ProjectBuilder);

@@ -1,5 +1,5 @@
-import { type Resource } from "@statewalker/workspace";
 import { joinPath as concatPath } from "@statewalker/webrun-files";
+import type { Resource } from "@statewalker/workspace";
 
 const DEFAULT_SYSTEM_FOLDER = ".project";
 

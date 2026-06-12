@@ -12,6 +12,7 @@ import {
 } from "@statewalker/indexer-fulltext";
 import { createFlexSearchIndexer } from "@statewalker/indexer-mem-flexsearch";
 import { newVectorAccess, type VectorBlock, type VectorQuery } from "@statewalker/indexer-vector";
+import { joinPath as concatPath } from "@statewalker/webrun-files";
 import {
   loggerOf,
   ProjectAdapter,
@@ -21,7 +22,6 @@ import {
   SOURCES_REMOVED_SIGNAL,
   type Workspace,
 } from "@statewalker/workspace";
-import { joinPath as concatPath } from "@statewalker/webrun-files";
 import { writeJsonAtomic } from "../util/io.js";
 import { FilesIndexerPersistence } from "./files-persistence.js";
 

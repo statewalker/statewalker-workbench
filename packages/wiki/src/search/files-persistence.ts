@@ -1,6 +1,6 @@
 import type { IndexerPersistence, PersistenceEntry } from "@statewalker/indexer-api";
-import { joinPath as concatPath } from "@statewalker/webrun-files";
 import type { FilesApi } from "@statewalker/webrun-files";
+import { joinPath as concatPath } from "@statewalker/webrun-files";
 
 /**
  * `IndexerPersistence` over a `FilesApi`: each persistence entry is stored as a

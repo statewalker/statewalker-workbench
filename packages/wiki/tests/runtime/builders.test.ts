@@ -1,7 +1,7 @@
 import type { EmbedFn } from "@statewalker/indexer-api";
-import { ResourceRepository, Workspace } from "@statewalker/workspace";
-import { type FilesApi } from "@statewalker/webrun-files";
+import type { FilesApi } from "@statewalker/webrun-files";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { Workspace } from "@statewalker/workspace";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   type DocumentMetaOutput,
@@ -84,14 +84,14 @@ async function writeFile(filesApi: FilesApi, path: string, text: string): Promis
 
 describe("wiki builders — incremental behaviour", () => {
   let filesApi: MemFilesApi;
-  let repository: ResourceRepository;
+  let repository: Workspace;
   let t: ReturnType<typeof tracker>;
 
   beforeEach(() => {
     filesApi = new MemFilesApi({
       initialFiles: { "proj/a.md": "Acme.", "proj/b.md": "Bravo." },
     });
-    repository = new ResourceRepository({ filesApi });
+    repository = new Workspace().setFileSystem(filesApi);
     t = tracker();
     t.topicByUri.set("a.md", "alpha");
     t.topicByUri.set("b.md", "bravo");
@@ -104,7 +104,7 @@ describe("wiki builders — incremental behaviour", () => {
   });
 
   async function openProject() {
-    const workspace = repository.requireAdapter<Workspace>(Workspace);
+    const workspace = repository;
     const project = await workspace.getProject("proj", true);
     if (!project) throw new Error("no project");
     return project;

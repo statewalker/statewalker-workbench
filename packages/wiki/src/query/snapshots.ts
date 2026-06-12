@@ -1,5 +1,5 @@
-import { ProjectAdapter, type Workspace } from "@statewalker/workspace";
 import { joinPath as concatPath } from "@statewalker/webrun-files";
+import { ProjectAdapter, type Workspace } from "@statewalker/workspace";
 import { tryReadJson, writeJsonAtomic } from "../util/io.js";
 import type { Answer } from "./wiki-query.js";
 import { WikiQuery } from "./wiki-query.js";

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { ContentReadAdapter, ContentWriteAdapter, Project, ProjectBuilder, type Resource, ResourceRepository, SOURCES_SIGNAL, TextAdapter, Workspace } from "@statewalker/workspace";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { ProjectBuilder, type Resource, SOURCES_SIGNAL, Workspace } from "@statewalker/workspace";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   type EmbedFn,
@@ -41,27 +41,21 @@ const blocks = async (_resource: Resource, uri: string): Promise<SearchBlock[]> 
 
 function newRepository() {
   const filesApi = new MemFilesApi({ initialFiles: { "proj/a.md": "# A", "proj/b.md": "# B" } });
-  const repository = new ResourceRepository({ filesApi });
-  repository.register("", ContentReadAdapter);
-  repository.register("", ContentWriteAdapter);
-  repository.register("", TextAdapter);
-  repository.register("", Project);
-  repository.register("", ProjectBuilder);
-  repository.register(ResourceRepository, Workspace);
+  const repository = new Workspace().setFileSystem(filesApi);
   registerContentExtraction(repository);
   registerSearch(repository, { embed, model: "fixture", dimensionality: DIM, blocks });
   return repository;
 }
 
 describe("SearchAdapter", () => {
-  let repository: ResourceRepository;
+  let repository: Workspace;
 
   beforeEach(() => {
     repository = newRepository();
   });
 
   async function buildAndSearch() {
-    const workspace = repository.requireAdapter<Workspace>(Workspace);
+    const workspace = repository;
     const project = (await workspace.getProject("proj"))!;
     const builder = project.requireAdapter(ProjectBuilder);
     builder.registerBuilder(searchBuilder({ inputSignal: SOURCES_SIGNAL }));
@@ -81,7 +75,7 @@ describe("SearchAdapter", () => {
 
   it("records the embedding model and dimensionality in the index config", async () => {
     await buildAndSearch();
-    const filesApi = (repository as unknown as { filesApi: MemFilesApi }).filesApi;
+    const filesApi = repository.files;
     const cfg = JSON.parse(
       await (async () => {
         let text = "";
@@ -103,7 +97,7 @@ describe("SearchAdapter", () => {
 
   it("persists the index and loads it on a fresh adapter without rebuilding", async () => {
     await buildAndSearch();
-    const filesApi = (repository as unknown as { filesApi: MemFilesApi }).filesApi;
+    const filesApi = repository.files;
 
     // The serialized index lives under index/search/.
     const persisted: string[] = [];
@@ -114,13 +108,7 @@ describe("SearchAdapter", () => {
 
     // A fresh repository over the SAME files searches the loaded index — the block
     // provider throws if touched, proving no query-time rebuild/re-embedding occurs.
-    const repo2 = new ResourceRepository({ filesApi });
-    repo2.register("", ContentReadAdapter);
-    repo2.register("", ContentWriteAdapter);
-    repo2.register("", TextAdapter);
-    repo2.register("", Project);
-    repo2.register("", ProjectBuilder);
-    repo2.register(ResourceRepository, Workspace);
+    const repo2 = new Workspace().setFileSystem(filesApi);
     registerContentExtraction(repo2);
     registerSearch(repo2, {
       embed,
@@ -130,7 +118,7 @@ describe("SearchAdapter", () => {
         throw new Error("block provider must not be called on a loaded index");
       },
     });
-    const project2 = (await repo2.requireAdapter<Workspace>(Workspace).getProject("proj"))!;
+    const project2 = (await repo2.getProject("proj"))!;
     const results = await project2.requireAdapter(SearchAdapter).search({ query: "alpha" });
     expect(results.find((r) => r.uri === "a.md")).toBeDefined();
   });

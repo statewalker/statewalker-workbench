@@ -1,5 +1,5 @@
-import { ContentReadAdapter, ContentWriteAdapter, Project, ProjectBuilder, ResourceRepository, TextAdapter, Workspace } from "@statewalker/workspace";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
+import { ProjectBuilder, Workspace } from "@statewalker/workspace";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   contentBuilder,
@@ -62,15 +62,9 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
 };
 
 function newRepository(files: Record<string, string>) {
-  const repository = new ResourceRepository({ filesApi: new MemFilesApi({ initialFiles: files }) });
-  repository.register("", ContentReadAdapter);
-  repository.register("", ContentWriteAdapter);
-  repository.register("", TextAdapter);
-  repository.register("", Project);
-  repository.register("", ProjectBuilder);
-  repository.register(ResourceRepository, Workspace);
+  const repository = new Workspace().setFileSystem(new MemFilesApi({ initialFiles: files }));
   registerContentExtraction(repository);
-  registerKnowledgeAdapters(repository);
+  registerKnowledgeAdapters();
   registerStubLlm(repository, { generateObject });
   return repository;
 }
@@ -106,7 +100,7 @@ describe("filterUnknownSubjects", () => {
         relations: [["Ghost", "rel", "Acme"]],
       },
     ];
-    const [out] = filterUnknownSubjects(sections);
+    const out = filterUnknownSubjects(sections)[0]!;
     expect(out.statements).toEqual([["Acme", "makes", "widgets"]]);
     expect(out.relations).toEqual([]);
   });
@@ -125,20 +119,20 @@ describe("filterUnknownSubjects", () => {
         relations: [],
       },
     ];
-    const [out] = filterUnknownSubjects(sections);
+    const out = filterUnknownSubjects(sections)[0]!;
     expect(out.statements).toEqual([["Acme", "makes", "widgets"]]);
   });
 });
 
 describe("meta + graph builders", () => {
-  let repository: ResourceRepository;
+  let repository: Workspace;
 
   beforeEach(() => {
     repository = newRepository({ "proj/a.md": "# Acme\n\nAcme makes widgets." });
   });
 
   it("writes DocumentMeta and DocumentGraph, dropping orphan-subject triples", async () => {
-    const workspace = repository.requireAdapter<Workspace>(Workspace);
+    const workspace = repository;
     const project = (await workspace.getProject("proj"))!;
     const builder = project.requireAdapter(ProjectBuilder);
 
@@ -157,8 +151,8 @@ describe("meta + graph builders", () => {
     expect(meta?.topics.map((t) => t.key)).toEqual(["company-founders"]);
 
     const graph = await resource.requireAdapter(WikiPageGraph).get();
-    expect(graph?.sections[0].entities.map((e) => e.value)).toEqual(["Acme"]);
+    expect(graph?.sections[0]!.entities.map((e) => e.value)).toEqual(["Acme"]);
     // The orphan-subject statement ("Ghost") was dropped by validation.
-    expect(graph?.sections[0].statements).toEqual([["Acme", "makes", "widgets"]]);
+    expect(graph?.sections[0]!.statements).toEqual([["Acme", "makes", "widgets"]]);
   });
 });

@@ -1,5 +1,5 @@
-import { type Logger, LoggerAdapter, type LoggerLevel } from "@statewalker/workspace";
 import { newPinoLogger } from "@statewalker/shared-logger-pino";
+import { type Logger, LoggerAdapter, type LoggerLevel } from "@statewalker/workspace";
 
 /**
  * A {@link LoggerAdapter} backed by pino (`@statewalker/shared-logger-pino`). One

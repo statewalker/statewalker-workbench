@@ -8,6 +8,7 @@ catalog:
   "@ai-sdk/openai": ^3.0.53
   "@statewalker/content-extractors": ^0.1.0
   "@statewalker/fsm": ^0.37.0
+  "@statewalker/fsm-validator": ^0.2.0
   "@statewalker/indexer-api": ^0.1.0
   "@statewalker/indexer-fulltext": ^0.1.0
   "@statewalker/indexer-mem-flexsearch": ^0.1.0

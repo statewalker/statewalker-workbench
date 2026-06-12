@@ -2,10 +2,10 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { EmbedFn } from "@statewalker/indexer-api";
-import { ResourceRepository, Workspace } from "@statewalker/workspace";
-import { type FilesApi } from "@statewalker/webrun-files";
+import type { FilesApi } from "@statewalker/webrun-files";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { NodeFilesApi } from "@statewalker/webrun-files-node";
+import { Workspace } from "@statewalker/workspace";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   type DocumentGraphOutput,
@@ -130,7 +130,7 @@ async function makeFilesApi(kind: "mem" | "node"): Promise<FilesApi> {
 describe.each(["mem", "node"] as const)("registerWiki end-to-end (%s FilesApi)", (kind) => {
   it("scans a project into a queryable wiki", async () => {
     const filesApi = await makeFilesApi(kind);
-    const repository = new ResourceRepository({ filesApi });
+    const repository = new Workspace().setFileSystem(filesApi);
     registerWiki(repository, {
       llm,
       models: { default: "fixture-model" },
@@ -138,7 +138,7 @@ describe.each(["mem", "node"] as const)("registerWiki end-to-end (%s FilesApi)",
       dimensionality: DIM,
     });
 
-    const workspace = repository.requireAdapter<Workspace>(Workspace);
+    const workspace = repository;
     const project = await workspace.getProject("proj", true);
     if (!project) throw new Error("no project");
     await writeFile(filesApi, "proj/a.md", "Acme is a company.");

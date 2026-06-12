@@ -1,4 +1,4 @@
-import type { ResourceRepository } from "@statewalker/workspace";
+import type { Workspace } from "@statewalker/workspace";
 import {
   type LlmApi,
   LlmProjectAdapter,
@@ -39,11 +39,11 @@ export function makeStubLlm(opts: {
  * (generic generation/embedding) and `WikiLlmConfiguration` (stage→model names) —
  * for tests that wire adapters manually instead of through `registerWiki`.
  */
-export function registerStubLlm(repository: ResourceRepository, opts: StubLlmOptions): LlmApi {
+export function registerStubLlm(repository: Workspace, opts: StubLlmOptions): LlmApi {
   const llm = makeStubLlm(opts);
-  repository.register("", LlmProjectAdapter, () => llm);
-  repository.register(
-    "",
+  repository.adaptersRegistry.register("project", LlmProjectAdapter, () => llm);
+  repository.adaptersRegistry.register(
+    "project",
     WikiLlmConfiguration,
     () =>
       new WikiLlmConfiguration({
