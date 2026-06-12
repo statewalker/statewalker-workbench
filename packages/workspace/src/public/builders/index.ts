@@ -1,4 +1,3 @@
-export * from "./logger.js";
 export * from "./nature.js";
 export * from "./project-builder.js";
 export * from "./project-ignore.js";

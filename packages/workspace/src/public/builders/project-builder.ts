@@ -1,8 +1,8 @@
 import { type CellDefinition, DataflowGraph, readCellUpdates } from "@statewalker/shared-dataflow";
 import { type FilesApi, joinPath, tryReadText } from "@statewalker/webrun-files";
+import { type Logger, loggerOf } from "../types/logger.js";
 import { DEFAULT_SYSTEM_FOLDER, type Project } from "../types/project.js";
 import { tryReadJson, writeJsonAtomic } from "./json-io.js";
-import { type Logger, NULL_LOGGER } from "./logger.js";
 import { makeProjectIgnore } from "./project-ignore.js";
 import { FileBackedTransactionStore } from "./transaction-store.js";
 import type {
@@ -64,15 +64,8 @@ export class ProjectBuilder {
   private stores?: Stores;
   private yieldCounter = 0;
   private yieldCfg: YieldConfig = DEFAULT_YIELD_CONFIG;
-  private log: Logger = NULL_LOGGER;
 
   constructor(readonly project: Project) {}
-
-  /** Inject a logger (defaults to a no-op). */
-  setLogger(logger: Logger): this {
-    this.log = logger;
-    return this;
-  }
 
   /** Override the cooperative-yield throttle. */
   configureYield(partial: Partial<YieldConfig>): this {
@@ -229,7 +222,7 @@ export class ProjectBuilder {
     const stages = this.executionOrder(graph).filter((c) => c !== SCAN_CELL);
     const only = opts?.builders ? new Set(opts.builders) : undefined;
     const active = only ? stages.filter((c) => only.has(c)) : stages;
-    const log = this.log;
+    const log = loggerOf(this.project, "ProjectBuilder");
     log.info("build run started", { stages: active });
 
     try {

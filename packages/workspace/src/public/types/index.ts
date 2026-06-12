@@ -1,6 +1,7 @@
 export * from "./adaptable.js";
 export * from "./adapters-registry.js";
 export * from "./config.js";
+export * from "./logger.js";
 export * from "./project.js";
 export * from "./resource.js";
 export * from "./secrets.js";
