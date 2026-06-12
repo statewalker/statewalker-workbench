@@ -1,68 +1,27 @@
 import { Command, passthrough } from "@statewalker/shared-commands";
-import type { DirectoryEntry, LoadedFile } from "./types.js";
 
-export interface LoadDirectoryPayload {
-  /** Workspace-relative path. Defaults to `/` when omitted. */
-  path?: string;
-  /** Recursive listing (descends into subdirectories). */
-  recursive?: boolean;
-}
-export const LoadDirectoryCommand = Command.silent("files:load-directory")
-  .input(passthrough<LoadDirectoryPayload>())
-  .output(passthrough<readonly DirectoryEntry[]>())
-  .build();
-
-export interface LoadFilePayload {
-  path: string;
-}
-export const LoadFileCommand = Command.silent("files:load-file")
-  .input(passthrough<LoadFilePayload>())
-  .output(passthrough<LoadedFile>())
-  .build();
-
-export interface WriteFilePayload {
-  path: string;
-  content: Uint8Array | string;
-}
-export const WriteFileCommand = Command.silent("files:write-file")
-  .input(passthrough<WriteFilePayload>())
-  .output(passthrough<void>())
-  .build();
-
-export interface MoveFilePayload {
-  fromPath: string;
-  toPath: string;
-}
-export const MoveFileCommand = Command.silent("files:move-file")
-  .input(passthrough<MoveFilePayload>())
-  .output(passthrough<void>())
-  .build();
-
-export interface DeleteFilePayload {
-  path: string;
-}
-export const DeleteFileCommand = Command.silent("files:delete-file")
-  .input(passthrough<DeleteFilePayload>())
-  .output(passthrough<void>())
-  .build();
-
-export interface MkdirPayload {
-  /** Workspace-relative path of the directory to create. */
-  path: string;
-}
-export const MkdirCommand = Command.silent("files:mkdir")
-  .input(passthrough<MkdirPayload>())
-  .output(passthrough<void>())
-  .build();
-
-export interface RenamePayload {
-  fromPath: string;
-  toPath: string;
-}
-export const RenameCommand = Command.silent("files:rename")
-  .input(passthrough<RenamePayload>())
-  .output(passthrough<void>())
-  .build();
+// The primitive `files:*` filesystem commands now live in
+// `@statewalker/workspace` (the workspace owns the repository role).
+// Re-exported here so existing `@statewalker/files` importers keep
+// resolving against the same command objects.
+export {
+  DeleteFileCommand,
+  type DeleteFilePayload,
+  type DirectoryEntry,
+  LoadDirectoryCommand,
+  type LoadDirectoryPayload,
+  type LoadedFile,
+  LoadFileCommand,
+  type LoadFilePayload,
+  MkdirCommand,
+  type MkdirPayload,
+  MoveFileCommand,
+  type MoveFilePayload,
+  RenameCommand,
+  type RenamePayload,
+  WriteFileCommand,
+  type WriteFilePayload,
+} from "@statewalker/workspace";
 
 export interface VisualizeFilePayload {
   /**

@@ -2,30 +2,11 @@ import { ShowDockPanelCommand } from "@statewalker/dock";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import { SpecStore } from "@statewalker/spec-store";
-import { readText, writeText } from "@statewalker/webrun-files";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { Workspace } from "@statewalker/workspace";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  DeleteFileCommand,
-  LoadDirectoryCommand,
-  LoadFileCommand,
-  MoveFileCommand,
-  mimeRenderersSlot,
-  VisualizeFileCommand,
-  WriteFileCommand,
-} from "../index.js";
+import { mimeRenderersSlot, VisualizeFileCommand } from "../index.js";
 import { FilesManager, guessMimeType, pickRenderer } from "./files.manager.js";
-
-function bootWorkspace(files: MemFilesApi): {
-  ws: Workspace;
-  manager: FilesManager;
-} {
-  const ws = new Workspace();
-  ws.setFileSystem(files, "test");
-  const manager = new FilesManager({ workspace: ws });
-  return { ws, manager };
-}
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -34,65 +15,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
-});
-
-describe("FilesManager", () => {
-  it("runLoadDirectory lists workspace.files entries with mime types", async () => {
-    const files = new MemFilesApi();
-    await writeText(files, "/notes/hello.md", "# hi");
-    await writeText(files, "/notes/data.json", '{"k":1}');
-    const { ws, manager } = bootWorkspace(files);
-    await ws.open();
-    const commands = ws.requireAdapter(Commands);
-
-    const entries = await commands.call(LoadDirectoryCommand, { path: "/notes" }).promise;
-    expect(entries.map((e) => e.name).sort()).toEqual(["data.json", "hello.md"]);
-    expect(entries.find((e) => e.name === "hello.md")?.mimeType).toBe("text/markdown");
-    expect(entries.find((e) => e.name === "data.json")?.mimeType).toBe("application/json");
-
-    await manager.close();
-  });
-
-  it("runLoadFile / runWriteFile / runDeleteFile round-trip", async () => {
-    const files = new MemFilesApi();
-    const { ws, manager } = bootWorkspace(files);
-    await ws.open();
-    const commands = ws.requireAdapter(Commands);
-
-    await commands.call(WriteFileCommand, { path: "/a.txt", content: "hello" }).promise;
-    const loaded = await commands.call(LoadFileCommand, { path: "/a.txt" }).promise;
-    expect(new TextDecoder().decode(loaded.bytes)).toBe("hello");
-    expect(loaded.mimeType).toBe("text/plain");
-
-    await commands.call(DeleteFileCommand, { path: "/a.txt" }).promise;
-    expect(await files.exists("/a.txt")).toBe(false);
-
-    await manager.close();
-  });
-
-  it("runMoveFile renames a file", async () => {
-    const files = new MemFilesApi();
-    await writeText(files, "/a.md", "old");
-    const { ws, manager } = bootWorkspace(files);
-    await ws.open();
-    const commands = ws.requireAdapter(Commands);
-
-    await commands.call(MoveFileCommand, { fromPath: "/a.md", toPath: "/b.md" }).promise;
-    expect(await files.exists("/a.md")).toBe(false);
-    expect(await readText(files, "/b.md")).toBe("old");
-
-    await manager.close();
-  });
-
-  it("commands reject when the workspace is closed", async () => {
-    const files = new MemFilesApi();
-    const { ws, manager } = bootWorkspace(files);
-    // ws not opened — commands must reject.
-    const commands = ws.requireAdapter(Commands);
-    await expect(commands.call(LoadDirectoryCommand, {}).promise).rejects.toThrow(/open workspace/);
-    await manager.close();
-    void ws;
-  });
 });
 
 describe("pickRenderer", () => {
@@ -144,7 +66,9 @@ describe("pickRenderer", () => {
 describe("runVisualizeFile", () => {
   it("rejects when no mime-renderer is registered for the URI", async () => {
     const files = new MemFilesApi();
-    const { ws, manager } = bootWorkspace(files);
+    const ws = new Workspace();
+    ws.setFileSystem(files, "test");
+    const manager = new FilesManager({ workspace: ws });
     await ws.open();
     const commands = ws.requireAdapter(Commands);
 

@@ -1,5 +1,3 @@
-import type { FileInfo, FileStats } from "@statewalker/webrun-files";
-
 /**
  * Plan returned by a `MimeRenderer.buildPanel`. The viewer fragment
  * owns its catalog id, spec shape, and deterministic ids — so opening
@@ -77,22 +75,5 @@ export interface Indexer {
   run(opts: { signal?: AbortSignal }): Promise<void>;
 }
 
-/**
- * Result returned by `runLoadDirectory`. Mirrors a thin slice of
- * `FileInfo` plus optional MIME metadata that future enrichment
- * passes can attach.
- */
-export interface DirectoryEntry extends FileInfo {
-  mimeType?: string;
-}
-
-/**
- * Result returned by `runLoadFile`. Carries the bytes plus
- * derived metadata so consumers don't re-stat after read.
- */
-export interface LoadedFile {
-  path: string;
-  bytes: Uint8Array;
-  stats?: FileStats;
-  mimeType?: string;
-}
+// `DirectoryEntry` / `LoadedFile` (the `files:load-*` result shapes) now
+// live in `@statewalker/workspace` and are re-exported from `./commands.js`.

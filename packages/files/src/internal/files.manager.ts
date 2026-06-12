@@ -3,48 +3,35 @@ import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { SpecStore } from "@statewalker/spec-store";
-import { extname, readFile, writeText } from "@statewalker/webrun-files";
+import { extname } from "@statewalker/webrun-files";
 import type { Workspace } from "@statewalker/workspace";
-import {
-  DeleteFileCommand,
-  LoadDirectoryCommand,
-  LoadFileCommand,
-  MkdirCommand,
-  MoveFileCommand,
-  RenameCommand,
-  VisualizeFileCommand,
-  WriteFileCommand,
-} from "../public/commands.js";
+import { VisualizeFileCommand } from "../public/commands.js";
 import { pickMimeRenderer } from "../public/pick-mime-renderer.js";
-import type { DirectoryEntry, LoadedFile, MimeRenderer } from "../public/types.js";
+import type { MimeRenderer } from "../public/types.js";
 
 export interface FilesManagerOptions {
   workspace: Workspace;
 }
 
 /**
- * Re-entrant orchestrator for the files fragment.
+ * Orchestrator for the files fragment's `files:visualize` command.
  *
- * Lifetime-scoped:
- *   - Registers `files:*` command handlers against the workspace's
- *     primary `FilesApi`. Handlers no-op while the workspace is
- *     closed (they `reject` with a clear error message).
- *
- * `files:visualize` resolves a matching `MimeRenderer` from the
+ * Resolves a matching `MimeRenderer` from the `files:mime-renderers`
  * slot, calls `buildPanel(uri)` to obtain spec + deterministic ids,
  * registers the spec in `SpecStore`, and opens a dock panel via
  * `runShowDockPanel`. Spec eviction on panel close is owned by the
  * dock manager (non-persistent specs evict on last unmount).
+ *
+ * The primitive `files:*` filesystem commands (load/write/move/…) are
+ * owned by `@statewalker/workspace`'s `WorkspaceFilesManager`.
  */
 export class FilesManager {
-  private readonly workspace: Workspace;
   private readonly commands: Commands;
   private readonly slots: Slots;
   private readonly store: SpecStore;
   private readonly _cleanup: () => Promise<void>;
 
   constructor({ workspace }: FilesManagerOptions) {
-    this.workspace = workspace;
     this.commands = workspace.requireAdapter(Commands);
     this.slots = workspace.requireAdapter(Slots);
     this.store = workspace.requireAdapter(SpecStore);
@@ -52,65 +39,6 @@ export class FilesManager {
     const [register, cleanup] = newRegistry();
     this._cleanup = cleanup;
 
-    // ── Command handlers (lifetime-scoped) ───────────────────────
-    register(
-      this.commands.listen(LoadDirectoryCommand, (cmd) => {
-        const path = cmd.payload?.path ?? "/";
-        const recursive = cmd.payload?.recursive ?? false;
-        void this._loadDirectory(path, recursive)
-          .then((entries) => cmd.resolve(entries))
-          .catch((error) => cmd.reject(error));
-        return true;
-      }),
-    );
-    register(
-      this.commands.listen(LoadFileCommand, (cmd) => {
-        void this._loadFile(cmd.payload.path)
-          .then((file) => cmd.resolve(file))
-          .catch((error) => cmd.reject(error));
-        return true;
-      }),
-    );
-    register(
-      this.commands.listen(WriteFileCommand, (cmd) => {
-        void this._writeFile(cmd.payload.path, cmd.payload.content)
-          .then(() => cmd.resolve())
-          .catch((error) => cmd.reject(error));
-        return true;
-      }),
-    );
-    register(
-      this.commands.listen(MoveFileCommand, (cmd) => {
-        void this._moveFile(cmd.payload.fromPath, cmd.payload.toPath)
-          .then(() => cmd.resolve())
-          .catch((error) => cmd.reject(error));
-        return true;
-      }),
-    );
-    register(
-      this.commands.listen(DeleteFileCommand, (cmd) => {
-        void this._deleteFile(cmd.payload.path)
-          .then(() => cmd.resolve())
-          .catch((error) => cmd.reject(error));
-        return true;
-      }),
-    );
-    register(
-      this.commands.listen(MkdirCommand, (cmd) => {
-        void this._mkdir(cmd.payload.path)
-          .then(() => cmd.resolve())
-          .catch((error) => cmd.reject(error));
-        return true;
-      }),
-    );
-    register(
-      this.commands.listen(RenameCommand, (cmd) => {
-        void this._moveFile(cmd.payload.fromPath, cmd.payload.toPath)
-          .then(() => cmd.resolve())
-          .catch((error) => cmd.reject(error));
-        return true;
-      }),
-    );
     register(
       this.commands.listen(VisualizeFileCommand, (cmd) => {
         const { uri, referencePanelId } = cmd.payload;
@@ -133,56 +61,6 @@ export class FilesManager {
   }
 
   // ── Command handler implementations ────────────────────────────
-
-  private async _loadDirectory(
-    path: string,
-    recursive: boolean,
-  ): Promise<readonly DirectoryEntry[]> {
-    this._requireOpen();
-    const entries: DirectoryEntry[] = [];
-    for await (const info of this.workspace.files.list(path, { recursive })) {
-      entries.push({ ...info, mimeType: guessMimeType(info.path) });
-    }
-    return entries;
-  }
-
-  private async _loadFile(path: string): Promise<LoadedFile> {
-    this._requireOpen();
-    const bytes = await readFile(this.workspace.files, path);
-    const stats = await this.workspace.files.stats(path);
-    return { path, bytes, stats, mimeType: guessMimeType(path) };
-  }
-
-  private async _writeFile(path: string, content: Uint8Array | string): Promise<void> {
-    this._requireOpen();
-    if (typeof content === "string") {
-      await writeText(this.workspace.files, path, content);
-    } else {
-      await this.workspace.files.write(path, [content]);
-    }
-  }
-
-  private async _moveFile(from: string, to: string): Promise<void> {
-    this._requireOpen();
-    const ok = await this.workspace.files.move(from, to);
-    if (!ok) throw new Error(`move failed: source missing: ${from}`);
-  }
-
-  private async _deleteFile(path: string): Promise<void> {
-    this._requireOpen();
-    await this.workspace.files.remove(path);
-  }
-
-  private async _mkdir(path: string): Promise<void> {
-    this._requireOpen();
-    await this.workspace.files.mkdir(path);
-  }
-
-  private _requireOpen(): void {
-    if (!this.workspace.isOpened) {
-      throw new Error("files:* commands require an open workspace — call runChangeWorkspace first");
-    }
-  }
 
   private async _openVisualizePanel(
     renderer: MimeRenderer,
