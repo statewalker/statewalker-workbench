@@ -1,5 +1,11 @@
 import type { ExtractorRegistry } from "@statewalker/content-extractors";
-import { ContentReadAdapter, ContentWriteAdapter, Project, ProjectBuilder, type RegisteredBuilder, type Resource, ResourceRepository, TextAdapter, Workspace } from "@statewalker/workspace";
+import {
+  Project,
+  ProjectBuilder,
+  type RegisteredBuilder,
+  type Resource,
+  type Workspace,
+} from "@statewalker/workspace";
 import { contentBuilder, registerContentExtraction } from "../content/index.js";
 import {
   EMBEDDED_SIGNAL,
@@ -92,19 +98,15 @@ function resolveLlm(deps: WikiDeps): LlmApi {
  * on a `ResourceRepository`. Providers/config are injected here — adapters read no
  * environment. Use `wireWikiProject` to attach the builders to a project before a run.
  */
-export function registerWiki(repository: ResourceRepository, deps: WikiDeps): void {
+export function registerWiki(workspace: Workspace, deps: WikiDeps): void {
   const llm = resolveLlm(deps);
-  // Core resource model.
-  repository.register("", ContentReadAdapter);
-  repository.register("", ContentWriteAdapter);
-  repository.register("", TextAdapter);
-  repository.register("", Project);
-  repository.register("", ProjectBuilder);
-  repository.register(ResourceRepository, Workspace);
+  const registry = workspace.adaptersRegistry;
+  // Core resource adapters (ContentRead/Write/Text), Project, and ProjectBuilder
+  // self-host on the workspace model — no registration needed.
   // Model access (generic) + model configuration (wiki-specific), as project adapters.
-  repository.register("", LlmProjectAdapter, () => llm);
-  repository.register(
-    "",
+  registry.register("project", LlmProjectAdapter, () => llm);
+  registry.register(
+    "project",
     WikiLlmConfiguration,
     () =>
       new WikiLlmConfiguration({
@@ -115,17 +117,17 @@ export function registerWiki(repository: ResourceRepository, deps: WikiDeps): vo
       }),
   );
   // Wiki adapters.
-  registerContentExtraction(repository, { registry: deps.extractors });
-  registerKnowledgeAdapters(repository);
-  registerSearch(repository, {
+  registerContentExtraction(workspace, { registry: deps.extractors });
+  registerKnowledgeAdapters();
+  registerSearch(workspace, {
     // Search embeds the query through the same LLM adapter the pipeline uses.
     embed: (text) => llm.embed(text, deps.embedModel),
     model: deps.embedModel,
     dimensionality: deps.dimensionality,
     blocks: wikiSearchBlocks(deps.embedModel, deps.dimensionality),
   });
-  registerQuery(repository);
-  registerSnapshots(repository, { clock: deps.clock });
+  registerQuery(workspace);
+  registerSnapshots(workspace, { clock: deps.clock });
 }
 
 /** The wiki's builder pipeline, in registration order. Builders read their models

@@ -1,4 +1,4 @@
-import { type Adaptable, type Logger, LoggerAdapter, type LoggerLevel } from "@statewalker/workspace";
+import { type Logger, LoggerAdapter, type LoggerLevel } from "@statewalker/workspace";
 import { newPinoLogger } from "@statewalker/shared-logger-pino";
 
 /**
@@ -17,8 +17,8 @@ import { newPinoLogger } from "@statewalker/shared-logger-pino";
 export class PinoLoggerAdapter extends LoggerAdapter {
   private readonly root: Logger;
 
-  constructor(adaptable: Adaptable, options?: Record<string, unknown>) {
-    super(adaptable, options);
+  constructor(host: unknown, options?: Record<string, unknown>) {
+    super(host, options);
     const destination = (options?.destination as 1 | 2) ?? 1;
     this.root = newPinoLogger((options?.level as LoggerLevel) ?? "info", {}, { destination });
   }

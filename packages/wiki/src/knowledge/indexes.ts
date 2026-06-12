@@ -1,4 +1,4 @@
-import { type Project, ResourceAdapter, type ResourceRepository } from "@statewalker/workspace";
+import { ProjectAdapter, type Project } from "@statewalker/workspace";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { tryReadJson, writeJsonAtomic } from "../util/io.js";
 import { projectIndexPath } from "./page-paths.js";
@@ -10,14 +10,14 @@ import type {
   TopicIndex,
 } from "./types.js";
 
-function filesApiOf(adapter: ResourceAdapter): FilesApi {
-  return (adapter.repository as ResourceRepository).filesApi;
+function filesApiOf(adapter: { filesApi: FilesApi }): FilesApi {
+  return adapter.filesApi;
 }
 
 /** Project-level read/write of the global topic index (`index/topics.json`). */
-export class WikiTopicIndex extends ResourceAdapter {
+export class WikiTopicIndex extends ProjectAdapter {
   private artifactPath(): string {
-    return projectIndexPath(this.resource, "topics.json");
+    return projectIndexPath(this.project.root, "topics.json");
   }
 
   async read(): Promise<TopicIndex> {
@@ -43,9 +43,9 @@ export class WikiTopicIndex extends ResourceAdapter {
 }
 
 /** Project-level read/write of the global outlier index (`index/outliers.json`). */
-export class WikiOutlierIndex extends ResourceAdapter {
+export class WikiOutlierIndex extends ProjectAdapter {
   private artifactPath(): string {
-    return projectIndexPath(this.resource, "outliers.json");
+    return projectIndexPath(this.project.root, "outliers.json");
   }
 
   async read(): Promise<OutlierIndex> {

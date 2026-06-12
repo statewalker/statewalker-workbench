@@ -1,6 +1,5 @@
-import { type Adaptable, Project, ResourceAdapter, type ResourceRepository } from "@statewalker/workspace";
+import { ProjectAdapter, type Workspace } from "@statewalker/workspace";
 import { joinPath as concatPath } from "@statewalker/webrun-files";
-import type { FilesApi } from "@statewalker/webrun-files";
 import { tryReadJson, writeJsonAtomic } from "../util/io.js";
 import type { Answer } from "./wiki-query.js";
 import { WikiQuery } from "./wiki-query.js";
@@ -30,23 +29,17 @@ interface AdapterOptions extends Record<string, unknown> {
  * folder (`<systemFolder>/snapshots/<id>.json`). Snapshots are never auto-updated and
  * never re-ingested as sources; re-running produces a new dated snapshot.
  */
-export class WikiSnapshotsAdapter extends ResourceAdapter {
+export class WikiSnapshotsAdapter extends ProjectAdapter {
   private counter = 0;
 
   private get opts(): AdapterOptions {
     return this.options as AdapterOptions;
   }
-  private get filesApi(): FilesApi {
-    return (this.repository as ResourceRepository).filesApi;
-  }
-  private get project(): Project {
-    return this.resource.requireAdapter<Project>(Project);
-  }
   private get systemFolder(): string {
-    return (this.repository.options.systemFolder as string | undefined) ?? DEFAULT_SYSTEM_FOLDER;
+    return DEFAULT_SYSTEM_FOLDER;
   }
   private dir(): string {
-    return concatPath(this.resource.path.replace(/^\/+|\/+$/g, ""), this.systemFolder, "snapshots");
+    return concatPath(this.path.replace(/^\/+|\/+$/g, ""), this.systemFolder, "snapshots");
   }
   private now(): string {
     return this.opts.clock ? this.opts.clock() : new Date().toISOString();
@@ -107,10 +100,12 @@ export class WikiSnapshotsAdapter extends ResourceAdapter {
 
 /** Register `WikiSnapshotsAdapter` (project-level). */
 export function registerSnapshots(
-  repository: ResourceRepository,
+  workspace: Workspace,
   deps: { clock?: () => string } = {},
 ): () => void {
-  return repository.register("", WikiSnapshotsAdapter, (adaptable: Adaptable) => {
-    return new WikiSnapshotsAdapter(adaptable, { clock: deps.clock });
-  });
+  return workspace.adaptersRegistry.register(
+    "project",
+    WikiSnapshotsAdapter,
+    (project) => new WikiSnapshotsAdapter(project, { clock: deps.clock }),
+  );
 }

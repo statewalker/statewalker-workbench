@@ -1,5 +1,5 @@
 import { createDefaultRegistry } from "@statewalker/content-extractors";
-import { type Adaptable, LoggerAdapter, type LoggerLevel, ResourceRepository, Workspace } from "@statewalker/workspace";
+import { LoggerAdapter, type LoggerLevel, Workspace } from "@statewalker/workspace";
 import { type FilesApi } from "@statewalker/webrun-files";
 import { stringify as stringifyYaml } from "yaml";
 import { costOf, roundUsd } from "../llm/index.js";
@@ -26,9 +26,10 @@ function extractLogLevel(args: string[]): { level: LoggerLevel; args: string[] }
   const rest: string[] = [];
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
+    if (a === undefined) continue;
     const inline = a.match(/^--log-level=(.+)$/);
     if (inline) {
-      level = coerce(inline[1]);
+      level = coerce(inline[1]!);
     } else if (a === "--log-level" || a === "-l") {
       const v = args[++i];
       if (v !== undefined) level = coerce(v);
@@ -50,9 +51,10 @@ function extractFormat(args: string[]): { format?: OutputFormat; args: string[] 
   const rest: string[] = [];
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
+    if (a === undefined) continue;
     const inline = a.match(/^--format=(.+)$/);
     if (inline) {
-      format = coerce(inline[1]);
+      format = coerce(inline[1]!);
     } else if (a === "--format" || a === "-f") {
       const v = args[++i];
       if (v !== undefined) format = coerce(v);
@@ -189,15 +191,16 @@ export async function runWikiCli(args: string[], deps: CliDeps): Promise<void> {
   const { format: flagFormat, args: positional } = extractFormat(afterLevel);
   const [command, projectKey, ...rest] = positional;
 
-  const repository = new ResourceRepository({ filesApi: deps.filesApi });
+  const workspace = new Workspace().setFileSystem(deps.filesApi);
+  await workspace.open();
   // Stage logging: pino-backed loggers at the chosen level, pinned to stderr so
-  // they never reach the data channel on stdout.
-  repository.register(
-    "",
-    LoggerAdapter,
-    (a: Adaptable) => new PinoLoggerAdapter(a, { level: logLevel, destination: 2 }),
-  );
-  const cliLog = repository.requireAdapter<LoggerAdapter>(LoggerAdapter).newLogger("wiki-cli");
+  // they never reach the data channel on stdout. Registered at the workspace and
+  // project levels so both the CLI and the builders resolve it.
+  const makeLogger = (host: unknown) =>
+    new PinoLoggerAdapter(host, { level: logLevel, destination: 2 });
+  workspace.setAdapter(LoggerAdapter, makeLogger);
+  workspace.adaptersRegistry.register("project", LoggerAdapter, makeLogger);
+  const cliLog = workspace.requireAdapter(LoggerAdapter).newLogger("wiki-cli");
   // Diagnostics sink: the caller's `warn`, or the (stderr-bound) run logger.
   const warn = deps.warn ?? ((m: string) => cliLog.warn(m));
 
@@ -223,8 +226,7 @@ export async function runWikiCli(args: string[], deps: CliDeps): Promise<void> {
     ...providers,
     extractors: createDefaultRegistry(),
   };
-  registerWiki(repository, wikiDeps);
-  const workspace = repository.requireAdapter<Workspace>(Workspace);
+  registerWiki(workspace, wikiDeps);
   const project =
     command === "scan"
       ? await workspace.getProject(projectKey, true)
@@ -274,7 +276,7 @@ export async function runWikiCli(args: string[], deps: CliDeps): Promise<void> {
       let announced = 0;
       progress.onChange(() => {
         for (; announced < progress.stages.length; announced++) {
-          warn(`  ${progress.stages[announced].name}: running`);
+          warn(`  ${progress.stages[announced]!.name}: running`);
         }
       });
       const answer = await progress.complete();

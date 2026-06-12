@@ -38,7 +38,8 @@ export class AdaptersRegistry {
   register<T>(
     level: AdapterLevel,
     type: AdapterCtor<T>,
-    impl: ConcreteAdapterCtor<T> | AdapterFactory<T>,
+    // biome-ignore lint/suspicious/noExplicitAny: factory host is the level's handle type
+    impl: ConcreteAdapterCtor<T> | AdapterFactory<T, any>,
   ): () => void {
     const map = this.maps[level];
     map.set(type, impl as AnyImpl);

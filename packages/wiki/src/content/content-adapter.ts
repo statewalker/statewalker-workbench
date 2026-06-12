@@ -3,7 +3,17 @@ import {
   createDefaultRegistry,
   type ExtractorRegistry,
 } from "@statewalker/content-extractors";
-import { type Adaptable, type BuilderUpdate, type EmittedUpdate, loggerOf, ProjectBuilder, type RegisteredBuilder, type Resource, ResourceAdapter, type ResourceRepository, SOURCES_SIGNAL } from "@statewalker/workspace";
+import {
+  type BuilderUpdate,
+  type EmittedUpdate,
+  loggerOf,
+  ProjectBuilder,
+  type RegisteredBuilder,
+  type Resource,
+  ResourceAdapter,
+  SOURCES_SIGNAL,
+  type Workspace,
+} from "@statewalker/workspace";
 import { toBatch } from "../util/batch.js";
 
 /** Signal emitted for each resource whose text content is available/changed. */
@@ -41,10 +51,6 @@ export class ContentAdapter extends ResourceAdapter {
     return this.options as AdapterOptions;
   }
 
-  private get filesApi() {
-    return (this.repository as ResourceRepository).filesApi;
-  }
-
   private extractor(): ContentExtractor | undefined {
     return this.opts.registry.get(this.resource.url) ?? this.opts.fallback;
   }
@@ -65,13 +71,12 @@ export class ContentAdapter extends ResourceAdapter {
  * extractable resources. Returns an unregister function.
  */
 export function registerContentExtraction(
-  repository: ResourceRepository,
+  workspace: Workspace,
   opts: ContentExtractionOptions = {},
 ): () => void {
   const registry = opts.registry ?? createDefaultRegistry();
   const fallback = opts.fallback;
-  return repository.register("", ContentAdapter, (adaptable: Adaptable) => {
-    const resource = adaptable as Resource;
+  return workspace.adaptersRegistry.register("resource", ContentAdapter, (resource: Resource) => {
     const extractor = registry.get(resource.url) ?? fallback;
     return extractor ? new ContentAdapter(resource, { registry, fallback }) : null;
   });

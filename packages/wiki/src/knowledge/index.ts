@@ -1,13 +1,3 @@
-import type { ResourceRepository } from "@statewalker/workspace";
-import { WikiOutlierIndex, WikiTopicIndex } from "./indexes.js";
-import {
-  ResourceTextContentCache,
-  WikiPageEmbeddings,
-  WikiPageGraph,
-  WikiPageMeta,
-  WikiPageSummary,
-} from "./page-adapters.js";
-
 export { EMBED_BUILDER_ID, EMBEDDED_SIGNAL, embedderBuilder } from "./embedder.js";
 export { filterUnknownSubjects, GRAPH_BUILDER_ID, GRAPH_SIGNAL, graphBuilder } from "./graph.js";
 export {
@@ -83,18 +73,12 @@ export type {
   Triple,
 } from "./types.js";
 
-/** Register the per-page and project-level knowledge adapters on a repository. */
-export function registerKnowledgeAdapters(repository: ResourceRepository): () => void {
-  const unregisters = [
-    repository.register("", ResourceTextContentCache),
-    repository.register("", WikiPageSummary),
-    repository.register("", WikiPageMeta),
-    repository.register("", WikiPageGraph),
-    repository.register("", WikiPageEmbeddings),
-    repository.register("", WikiTopicIndex),
-    repository.register("", WikiOutlierIndex),
-  ];
-  return () => {
-    for (const u of unregisters) u();
-  };
+/**
+ * Knowledge adapters are concrete classes that self-host on their handle
+ * (per-page `ResourceAdapter`s on a `Resource`, project indexes on a `Project`),
+ * so no explicit registration is required. Kept as a no-op for composition-root
+ * symmetry.
+ */
+export function registerKnowledgeAdapters(): () => void {
+  return () => {};
 }

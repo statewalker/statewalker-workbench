@@ -31,7 +31,7 @@ export function filterUnknownSubjects(sections: SectionGraph[]): SectionGraph[] 
   const keep = (t: readonly string[]): boolean =>
     t.length === 3 &&
     t.every((x) => typeof x === "string" && x.length > 0) &&
-    knownSubjects.has(t[0]);
+    knownSubjects.has(t[0]!);
   return sections.map((s) => ({
     ...s,
     statements: s.statements.filter(keep),

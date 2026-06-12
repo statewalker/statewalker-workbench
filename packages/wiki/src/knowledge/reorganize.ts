@@ -1,4 +1,4 @@
-import { type BuilderUpdate, loggerOf, type Project, ProjectBuilder, type RegisteredBuilder, type ResourceRepository, SOURCES_REMOVED_SIGNAL } from "@statewalker/workspace";
+import { type BuilderUpdate, loggerOf, type Project, ProjectBuilder, type RegisteredBuilder, SOURCES_REMOVED_SIGNAL } from "@statewalker/workspace";
 import { type LlmApi, llmOf, wikiConfigOf } from "../llm/index.js";
 import { toBatch } from "../util/batch.js";
 import { WikiOutlierIndex, WikiTopicIndex } from "./indexes.js";
@@ -313,7 +313,6 @@ export function pruneBuilder(): RegisteredBuilder {
     async *handler(project) {
       const builder = project.requireAdapter(ProjectBuilder);
       const log = loggerOf(project, PRUNE_BUILDER_ID);
-      const repository = project.repository as ResourceRepository;
       const source = builder.readUpdates({
         signal: SOURCES_REMOVED_SIGNAL,
         cell: PRUNE_BUILDER_ID,
@@ -327,7 +326,7 @@ export function pruneBuilder(): RegisteredBuilder {
       async function handleEntry(u: BuilderUpdate): Promise<void> {
         try {
           log.debug("pruning artifacts", { uri: u.uri });
-          await repository.filesApi.remove(pageDirPath(project.resource, u.uri));
+          await project.workspace.files.remove(pageDirPath(project.root, u.uri));
         } catch {
           // already gone — fine
         } finally {

@@ -1,4 +1,4 @@
-import { ResourceAdapter, type ResourceRepository } from "@statewalker/workspace";
+import { ResourceAdapter } from "@statewalker/workspace";
 import { type FilesApi, tryReadFile } from "@statewalker/webrun-files";
 import {
   fixedSizeList,
@@ -20,8 +20,8 @@ import type {
   SectionSummary,
 } from "./types.js";
 
-function filesApiOf(adapter: ResourceAdapter): FilesApi {
-  return (adapter.repository as ResourceRepository).filesApi;
+function filesApiOf(adapter: { filesApi: FilesApi }): FilesApi {
+  return adapter.filesApi;
 }
 
 /**

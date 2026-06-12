@@ -12,7 +12,15 @@ import {
 } from "@statewalker/indexer-fulltext";
 import { createFlexSearchIndexer } from "@statewalker/indexer-mem-flexsearch";
 import { newVectorAccess, type VectorBlock, type VectorQuery } from "@statewalker/indexer-vector";
-import { type Adaptable, loggerOf, ProjectBuilder, type RegisteredBuilder, type Resource, ResourceAdapter, type ResourceRepository, SOURCES_REMOVED_SIGNAL } from "@statewalker/workspace";
+import {
+  loggerOf,
+  ProjectAdapter,
+  ProjectBuilder,
+  type RegisteredBuilder,
+  type Resource,
+  SOURCES_REMOVED_SIGNAL,
+  type Workspace,
+} from "@statewalker/workspace";
 import { joinPath as concatPath } from "@statewalker/webrun-files";
 import { writeJsonAtomic } from "../util/io.js";
 import { FilesIndexerPersistence } from "./files-persistence.js";
@@ -80,7 +88,7 @@ function fromDocumentPath(path: string): string {
  * is loaded into memory and used as-is — no rebuild, no query-time corpus
  * embedding. The model + dimensionality are recorded in `index/search.json`.
  */
-export class SearchAdapter extends ResourceAdapter {
+export class SearchAdapter extends ProjectAdapter {
   private indexer?: Indexer;
   /** Memoised index init: shared by concurrent callers so the open runs exactly once. */
   private indexReady?: Promise<Index>;
@@ -92,14 +100,11 @@ export class SearchAdapter extends ResourceAdapter {
   private get opts(): AdapterOptions {
     return this.options as AdapterOptions;
   }
-  private get filesApi() {
-    return (this.repository as ResourceRepository).filesApi;
-  }
   private get systemFolder(): string {
-    return (this.repository.options.systemFolder as string | undefined) ?? DEFAULT_SYSTEM_FOLDER;
+    return DEFAULT_SYSTEM_FOLDER;
   }
   private get projectPath(): string {
-    return this.resource.path.replace(/^\/+|\/+$/g, "");
+    return this.path.replace(/^\/+|\/+$/g, "");
   }
   private indexDir(): string {
     return concatPath(this.projectPath, this.systemFolder, "index");
@@ -243,15 +248,15 @@ export class SearchAdapter extends ResourceAdapter {
 }
 
 /** Register `SearchAdapter` (project-level) with its embedder / block provider. */
-export function registerSearch(repository: ResourceRepository, deps: SearchDeps): () => void {
-  return repository.register("", SearchAdapter, (adaptable: Adaptable) => {
+export function registerSearch(workspace: Workspace, deps: SearchDeps): () => void {
+  return workspace.adaptersRegistry.register("project", SearchAdapter, (project) => {
     const options: AdapterOptions = {
       embed: deps.embed,
       model: deps.model,
       dimensionality: deps.dimensionality,
       blocks: deps.blocks,
     };
-    return new SearchAdapter(adaptable, options);
+    return new SearchAdapter(project, options);
   });
 }
 

@@ -35,7 +35,10 @@ export function loggerMetaOf(host: unknown): Record<string, unknown> {
  * free of `@statewalker/shared-logger-pino`.
  */
 export class LoggerAdapter {
-  constructor(protected readonly host: unknown) {}
+  constructor(
+    protected readonly host: unknown,
+    protected readonly options: Record<string, unknown> = {},
+  ) {}
 
   newLogger(_key: string, _meta?: Record<string, unknown>): Logger {
     return NULL_LOGGER;
