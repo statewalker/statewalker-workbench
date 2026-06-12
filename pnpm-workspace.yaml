@@ -3,6 +3,19 @@ packages:
   - "apps/*"
 
 catalog:
+  "@statewalker/webrun-files-node": ^0.7.2
+  "@ai-sdk/google": ^3.0.64
+  "@ai-sdk/openai": ^3.0.53
+  "@statewalker/content-extractors": ^0.1.0
+  "@statewalker/fsm": ^0.37.0
+  "@statewalker/indexer-api": ^0.1.0
+  "@statewalker/indexer-fulltext": ^0.1.0
+  "@statewalker/indexer-mem-flexsearch": ^0.1.0
+  "@statewalker/indexer-vector": ^0.1.0
+  "@statewalker/shared-logger-pino": ^0.1.0
+  "@uwdata/flechette": ^2.4.0
+  "ai": ^5.0.94
+  "yaml": ^2.8.3
   "@adobe/react-spectrum": ^3.47.0
   "@biomejs/biome": ^2.4.12
   "@hono/node-server": ^1.19.14
