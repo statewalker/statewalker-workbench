@@ -2,6 +2,31 @@
 
 Workspace logic fragment: the `Workspace` class, its system/secrets/settings adapters, the `workspace:change` command, and the registrar init that wires the change-handler.
 
+## Workspace → project → resource model
+
+The package also hosts the class-keyed `workspace → project → resource`
+hierarchy (the consolidation of `@statewalker/resources-workspace`):
+
+- **`Adaptable`** (extends `BaseClass`) — the observable, class-keyed adapter
+  host. `Workspace`, `Project`, and `Resource` all extend it. Adapter
+  **instances are cached strongly** per handle; resolution order is
+  handle-local registration → level-scoped factory in the shared
+  `AdaptersRegistry` → concrete self-host.
+- **`AdaptersRegistry`** — level-aware factory store (workspace / project /
+  resource), exposed via `Workspace.adaptersRegistry`.
+- **`Workspace`** owns the `FilesApi` and two bounded LRUs — `getResource(path)`
+  (keyed by full path) and `getProject(name)` / `listProjects()` (keyed by
+  project name).
+- **Derived values** use weak-ref, dependency-tracked `Reference<{value}>`
+  (`newReference`) — see `TextAdapter.textRef` → `JsonAdapter.jsonRef`. Only
+  *values* are weak; adapter *instances* are strong.
+
+> **Transitional:** `@statewalker/resources-workspace` and
+> `@statewalker/resources-wiki` still exist and build unchanged; the wiki
+> migration onto this model and the deletion of `resources-workspace` are a
+> follow-up step. `ProjectBuilder` (the signal-driven build engine + `BuilderProvider`
+> "nature") is being ported here next.
+
 ## What it exports
 
 - **`Workspace` class** — observable workspace with a primary `FilesApi`

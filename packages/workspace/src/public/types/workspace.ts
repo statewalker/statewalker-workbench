@@ -1,87 +1,68 @@
 import { newAdapter } from "@statewalker/shared-adapters";
-import { BaseClass } from "@statewalker/shared-baseclass";
-import type { FilesApi } from "@statewalker/webrun-files";
+import { type FilesApi, normalizePath } from "@statewalker/webrun-files";
+import { LRU, type LruCache } from "../../internal/lru.js";
+import { Adaptable, type AdaptableAdapter } from "./adaptable.js";
+import { AdaptersRegistry } from "./adapters-registry.js";
+import { Project } from "./project.js";
+import { Resource } from "./resource.js";
 
 export const [getWorkspace, , resetWorkspace] = newAdapter<Workspace>(
   "workspace:workspace",
   () => new Workspace(),
 );
 
+// Re-exported for backward compatibility — these moved to ./adapters-registry.
+export type {
+  AdapterCtor,
+  AdapterFactory,
+  AdapterLevel,
+  ConcreteAdapterCtor,
+} from "./adapters-registry.js";
+export { AdaptersRegistry } from "./adapters-registry.js";
+
 /**
- * Optional teardown hook an adapter MAY expose. Called by `setAdapter` when
- * an existing instance is being explicitly replaced (e.g. `initWorkspace`
- * swapping a file-system-backed adapter to a new `FilesApi`). Adapter
- * instances themselves are stable across `workspace.open()` / `close()`
- * cycles — adapters that need to react to those state transitions
- * subscribe via `workspace.onLoad` / `onUnload` rather than relying on
- * being torn down and rebuilt.
+ * Optional teardown hook an adapter MAY expose (alias of `AdaptableAdapter`).
+ * Called when an existing instance is explicitly replaced via `setAdapter`.
+ * Adapter instances are otherwise stable across `open()` / `close()` cycles —
+ * adapters that need to react to those transitions subscribe via
+ * `workspace.onLoad` / `onUnload`.
  */
-export interface WorkspaceAdapter {
-  close?(): void | Promise<void>;
-}
+export type WorkspaceAdapter = AdaptableAdapter;
 
 /**
- * Registry key type. Abstract classes (like the `Secrets` / `Settings` /
- * `SystemFiles` tokens) MUST be usable as keys — hence `abstract new`. The
- * constructor signature is left unconstrained so token classes from any
- * substrate package — whose constructors take arbitrary args — can be
- * passed in. The workspace passes `this` as the first arg; tokens that
- * don't expect it simply ignore it.
- */
-// biome-ignore lint/suspicious/noExplicitAny: token constructors are heterogeneous
-export type AdapterCtor<T = unknown> = abstract new (...args: any[]) => T;
-
-/**
- * Concrete implementation shape. Used as the value side of the registry —
- * callable with `new` to produce an instance.
- */
-// biome-ignore lint/suspicious/noExplicitAny: token constructors are heterogeneous
-export type ConcreteAdapterCtor<T = unknown> = new (...args: any[]) => T;
-
-export type AdapterFactory<T = unknown> = (workspace: Workspace) => T;
-
-/**
- * Observable workspace the shell app and every fragment share. Holds a single
- * primary `FilesApi` (the directory the user picked) plus a class-keyed
- * registry of capability adapters (`SystemFiles`, `Secrets`, `Settings`, etc.).
+ * Observable workspace the shell app and every fragment share. Extends
+ * `Adaptable` (the class-keyed, observable adapter host) and additionally owns
+ * the single primary `FilesApi`, the open/close lifecycle, and — as the root of
+ * the workspace → project → resource hierarchy — the shared `AdaptersRegistry`.
  *
- * Lifecycle: the workspace is constructed in a closed state, adapters and the
- * file system are installed via chainable `setAdapter` / `setFileSystem`, and
- * `open()` transitions into the live state. Consumers subscribe via
- * `onLoad` / `onUnload` to run per-open and per-close work; `BaseClass.onUpdate`
- * fires on any state transition including `setFileSystem` rebinds.
+ * Lifecycle: constructed closed; adapters and the file system are installed via
+ * chainable `setAdapter` / `setFileSystem`; `open()` transitions live. Consumers
+ * subscribe via `onLoad` / `onUnload`; `BaseClass.onUpdate` fires on any state
+ * transition including `setFileSystem` rebinds. `close()` flips the state and
+ * fires onUnload listeners but does NOT tear down adapter instances — the
+ * registry is stable across cycles.
  */
-
-/**
- * Concrete `Workspace` implementation. Starts closed, publishes its live state
- * only after `open()` resolves. `close()` flips the state and fires onUnload
- * listeners but does NOT tear down adapter instances — the adapter registry
- * is stable across `open()` / `close()` cycles, so consumers that captured
- * a `requireAdapter(X)` reference keep talking to the same instance after
- * the workspace re-opens. Adapters that need per-cycle behavior subscribe
- * to `onLoad` / `onUnload` themselves; adapters that need to be replaced
- * outright (e.g. file-system-backed ones bound to a specific `FilesApi`)
- * are swapped via `setAdapter`, which still honours `adapter.close?.()`.
- */
-// biome-ignore lint/suspicious/noExplicitAny: registry keys are heterogeneous
-type AnyKey = AdapterCtor<any>;
-// biome-ignore lint/suspicious/noExplicitAny: concrete ctor values are heterogeneous
-type AnyCtor = ConcreteAdapterCtor<any>;
-// biome-ignore lint/suspicious/noExplicitAny: factory matches any adapter
-type AnyFactory = AdapterFactory<any>;
-
-export class Workspace extends BaseClass {
+export class Workspace extends Adaptable {
   private _isOpened = false;
   private _files: FilesApi | null = null;
   private _label = "";
+  private readonly _registry = new AdaptersRegistry();
 
-  private readonly _registrations = new Map<AnyKey, AnyCtor | AnyFactory>();
-  private readonly _instances = new Map<AnyKey, unknown>();
-  private readonly _instantiatedInOrder: unknown[] = [];
-  private readonly _instantiating = new Set<AnyKey>();
+  private readonly _resources: LruCache<Promise<Resource | null>> = new LRU({ max: 1000 });
+  private readonly _projects: LruCache<Promise<Project | null>> = new LRU({ max: 256 });
 
   private readonly _onLoadListeners = new Set<() => void | Promise<void>>();
   private readonly _onUnloadListeners = new Set<() => void | Promise<void>>();
+
+  /** This handle resolves workspace-level adapter factories. */
+  protected get adapterLevel() {
+    return "workspace" as const;
+  }
+
+  /** The shared registry that `Project`/`Resource` handles also consult. */
+  get adaptersRegistry(): AdaptersRegistry {
+    return this._registry;
+  }
 
   get isOpened(): boolean {
     return this._isOpened;
@@ -106,57 +87,6 @@ export class Workspace extends BaseClass {
     if (label !== undefined) this._label = label;
     this.notify();
     return this;
-  }
-
-  setAdapter<T>(type: ConcreteAdapterCtor<T>): this;
-  setAdapter<T, C extends T>(
-    type: AdapterCtor<T>,
-    impl: ConcreteAdapterCtor<C> | AdapterFactory<C>,
-  ): this;
-  setAdapter(type: AnyKey, impl?: AnyCtor | AnyFactory): this {
-    const implementation = impl ?? (type as unknown as AnyCtor);
-    const existing = this._instances.get(type);
-    if (existing) {
-      void this._closeInstance(existing);
-      this._instances.delete(type);
-      const idx = this._instantiatedInOrder.indexOf(existing);
-      if (idx !== -1) this._instantiatedInOrder.splice(idx, 1);
-    }
-    this._registrations.set(type, implementation);
-    return this;
-  }
-
-  getAdapter<T>(type: AdapterCtor<T>): T | null {
-    const cached = this._instances.get(type);
-    if (cached) return cached as T;
-
-    // Resolve the impl. Prefer an explicit registration; otherwise fall
-    // back to the token itself when it is a class — concrete tokens
-    // (`Commands`, `Toasts`, …) self-host and need no setAdapter call.
-    const ctor = type as unknown as AnyCtor;
-    const impl = this._registrations.get(type) ?? (isClass(ctor) ? ctor : null);
-    if (!impl) return null;
-
-    if (this._instantiating.has(type)) {
-      throw new Error(`Adapter cycle detected while constructing ${describe(type)}`);
-    }
-    this._instantiating.add(type);
-    try {
-      const instance = (isClass(impl) ? new impl(this) : impl(this)) as T;
-      this._instances.set(type, instance);
-      this._instantiatedInOrder.push(instance);
-      return instance;
-    } finally {
-      this._instantiating.delete(type);
-    }
-  }
-
-  requireAdapter<T>(type: AdapterCtor<T>): T {
-    const instance = this.getAdapter(type);
-    if (!instance) {
-      throw new Error(`No adapter registered for ${describe(type)}`);
-    }
-    return instance;
   }
 
   onLoad(cb: () => void | Promise<void>): () => void {
@@ -210,23 +140,55 @@ export class Workspace extends BaseClass {
     this.notify();
   }
 
-  private async _closeInstance(adapter: unknown): Promise<void> {
-    try {
-      await (adapter as WorkspaceAdapter).close?.();
-    } catch (err) {
-      logListenerError("adapter.close (re-register)", err);
+  /**
+   * Resolve a `Resource` for a path under the `FilesApi`, cached by full path.
+   * Returns `null` when the path is absent and `create` is false.
+   */
+  getResource(path: string, create = false): Promise<Resource | null> {
+    const key = normalizePath(path);
+    let promise = this._resources.get(key);
+    if (!promise) {
+      promise = (async () => {
+        const stats = await this.files.stats(key);
+        if (!stats && !create) return null;
+        return new Resource(this, key);
+      })().catch((err) => {
+        if (this._resources.get(key) === promise) this._resources.del(key);
+        throw err;
+      });
+      this._resources.set(key, promise);
+    }
+    return promise;
+  }
+
+  /**
+   * Resolve a `Project` for a top-level directory, cached by project name.
+   * Returns `null` when the directory is absent and `create` is false.
+   */
+  getProject(name: string, create = false): Promise<Project | null> {
+    let promise = this._projects.get(name);
+    if (!promise) {
+      promise = (async () => {
+        const dir = await this.getResource(name, create);
+        if (!dir) return null;
+        return new Project(this, dir);
+      })().catch((err) => {
+        if (this._projects.get(name) === promise) this._projects.del(name);
+        throw err;
+      });
+      this._projects.set(name, promise);
+    }
+    return promise;
+  }
+
+  /** Yield one `Project` per top-level directory under the `FilesApi`. */
+  async *listProjects(): AsyncGenerator<Project> {
+    for await (const info of this.files.list("/")) {
+      if (info.kind !== "directory") continue;
+      const project = await this.getProject(info.name);
+      if (project) yield project;
     }
   }
-}
-
-function isClass(value: AnyCtor | AnyFactory): value is AnyCtor {
-  return (
-    typeof value === "function" && typeof value.prototype === "object" && value.prototype !== null
-  );
-}
-
-function describe(type: AdapterCtor): string {
-  return type.name || "<anonymous adapter>";
 }
 
 function logListenerError(scope: string, err: unknown): void {
