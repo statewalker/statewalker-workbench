@@ -189,6 +189,13 @@ export class Workspace extends Adaptable {
       if (project) yield project;
     }
   }
+
+  /** Collect every top-level `Project` into an array. */
+  async getProjects(): Promise<Project[]> {
+    const projects: Project[] = [];
+    for await (const project of this.listProjects()) projects.push(project);
+    return projects;
+  }
 }
 
 function logListenerError(scope: string, err: unknown): void {
