@@ -1,5 +1,5 @@
-import { normalizePath } from "@statewalker/webrun-files";
 import type { FileStats } from "@statewalker/webrun-files";
+import { normalizePath } from "@statewalker/webrun-files";
 import { getMimeType } from "../../internal/get-mime-type.js";
 import { Adaptable } from "./adaptable.js";
 import type { AdaptersRegistry } from "./adapters-registry.js";

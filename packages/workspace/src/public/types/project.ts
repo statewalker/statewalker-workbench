@@ -4,6 +4,9 @@ import type { AdaptersRegistry } from "./adapters-registry.js";
 import type { Resource } from "./resource.js";
 import type { Workspace } from "./workspace.js";
 
+/** Default name of a project's system folder (holds persisted build state). */
+export const DEFAULT_SYSTEM_FOLDER = ".project";
+
 /**
  * A handle on a top-level project directory. Holds its root directory `Resource`
  * for file access; class-keyed adaptable at the project level (its nature /
@@ -15,6 +18,11 @@ export class Project extends Adaptable {
     readonly root: Resource,
   ) {
     super();
+  }
+
+  /** The project root directory path (under the workspace `FilesApi`). */
+  get path(): string {
+    return this.root.path;
   }
 
   /** The top-level directory name that keys this project in the workspace cache. */
