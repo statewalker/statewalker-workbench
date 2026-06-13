@@ -1,11 +1,15 @@
 /// <reference types="@testing-library/jest-dom" />
 import "@testing-library/jest-dom/vitest";
-import { AppWorkspaceProvider, coreViewsSlot, type ViewComponent } from "@statewalker/core-react";
-import initCoreReact from "@statewalker/core-react/fragment";
 import { OpenSettingsCommand, Settings, settingsTabSlot } from "@statewalker/settings.core";
 import initSettings from "@statewalker/settings.core/fragment";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
+import {
+  AppWorkspaceProvider,
+  coreViewsSlot,
+  type ViewComponent,
+} from "@statewalker/ui.view.react";
+import initCoreReact from "@statewalker/ui.view.react/fragment";
 import { getWorkspace, Workspace, type Workspace as WorkspaceType } from "@statewalker/workspace";
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";

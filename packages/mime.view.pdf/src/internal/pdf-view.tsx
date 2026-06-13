@@ -1,5 +1,5 @@
-import { useAppWorkspace } from "@statewalker/core-react";
 import { Commands } from "@statewalker/shared-commands";
+import { useAppWorkspace } from "@statewalker/ui.view.react";
 import { LoadFileCommand } from "@statewalker/workspace";
 import { type ReactElement, useEffect, useState } from "react";
 

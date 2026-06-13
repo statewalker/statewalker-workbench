@@ -1,7 +1,7 @@
-import { useAdapter } from "@statewalker/core-react";
 import { OpenSettingsCommand } from "@statewalker/settings.core";
-import { Button } from "@statewalker/shadcn-react";
 import { Commands } from "@statewalker/shared-commands";
+import { useAdapter } from "@statewalker/ui.view.react";
+import { Button } from "@statewalker/ui.view.shadcn";
 import { Settings as SettingsIcon } from "lucide-react";
 import type { ReactElement } from "react";
 

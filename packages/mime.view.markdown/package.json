@@ -23,7 +23,7 @@
     "@json-render/core": "0.18.0",
     "@statewalker/render.view.react": "workspace:*",
     "@repo/chat-mini.chat-react": "workspace:*",
-    "@statewalker/core-react": "workspace:*",
+    "@statewalker/ui.view.react": "workspace:*",
     "@statewalker/shell.view.react": "workspace:*",
     "@statewalker/render.core": "workspace:*",
     "@statewalker/mime.core": "workspace:*",

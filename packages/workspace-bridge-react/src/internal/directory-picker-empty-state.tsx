@@ -1,4 +1,5 @@
-import { useAdapter, useAdapterValue } from "@statewalker/core-react";
+import { Commands } from "@statewalker/shared-commands";
+import { useAdapter, useAdapterValue } from "@statewalker/ui.view.react";
 import {
   Button,
   Card,
@@ -6,8 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@statewalker/shadcn-react";
-import { Commands } from "@statewalker/shared-commands";
+} from "@statewalker/ui.view.shadcn";
 import {
   ChangeWorkspaceCommand,
   WorkspaceReconnectCommand,

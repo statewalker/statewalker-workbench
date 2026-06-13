@@ -1,4 +1,4 @@
-import { useAdapterValue } from "@statewalker/core-react";
+import { useAdapterValue } from "@statewalker/ui.view.react";
 import { WorkspaceShellAdapter } from "@statewalker/workspace-bridge";
 import type { ReactElement } from "react";
 

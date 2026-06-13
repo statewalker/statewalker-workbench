@@ -1,3 +1,5 @@
+import { Settings, type SettingsTab, settingsTabSlot } from "@statewalker/settings.core";
+import { Slots } from "@statewalker/shared-slots";
 import {
   compareByOrderAndId,
   coreViewsSlot,
@@ -7,8 +9,7 @@ import {
   useKeyedSlot,
   useSlot,
   type ViewComponent,
-} from "@statewalker/core-react";
-import { Settings, type SettingsTab, settingsTabSlot } from "@statewalker/settings.core";
+} from "@statewalker/ui.view.react";
 import {
   cn,
   Dialog,
@@ -16,8 +17,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@statewalker/shadcn-react";
-import { Slots } from "@statewalker/shared-slots";
+} from "@statewalker/ui.view.shadcn";
 import { type ReactElement, useMemo } from "react";
 
 /**

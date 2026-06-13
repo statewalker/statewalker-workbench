@@ -1,6 +1,6 @@
-import { useAppWorkspace } from "@statewalker/core-react";
 import { VisualizeFileCommand } from "@statewalker/mime.core";
 import { Commands } from "@statewalker/shared-commands";
+import { useAppWorkspace } from "@statewalker/ui.view.react";
 import { type ReactElement, useCallback } from "react";
 
 interface FileCardProps {

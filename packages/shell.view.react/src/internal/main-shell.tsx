@@ -1,3 +1,10 @@
+import { Slots } from "@statewalker/shared-slots";
+import {
+  type DockOverlay,
+  type DockSidePanel,
+  dockOverlaysSlot,
+  dockSidePanelsSlot,
+} from "@statewalker/shell.core";
 import {
   compareByOrderAndId,
   coreViewsSlot,
@@ -7,15 +14,8 @@ import {
   useKeyedSlot,
   useSlot,
   type ViewComponent,
-} from "@statewalker/core-react";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@statewalker/shadcn-react";
-import { Slots } from "@statewalker/shared-slots";
-import {
-  type DockOverlay,
-  type DockSidePanel,
-  dockOverlaysSlot,
-  dockSidePanelsSlot,
-} from "@statewalker/shell.core";
+} from "@statewalker/ui.view.react";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@statewalker/ui.view.shadcn";
 import { type ReactElement, useMemo } from "react";
 import { DockViewHost } from "../public/dock-view-host.js";
 import { ShellHeader } from "./shell-header.js";

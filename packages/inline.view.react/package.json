@@ -20,7 +20,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/core-react": "workspace:*",
+    "@statewalker/ui.view.react": "workspace:*",
     "@statewalker/mime.core": "workspace:*",
     "@statewalker/inline.core": "workspace:*",
     "@statewalker/shared-commands": "catalog:",

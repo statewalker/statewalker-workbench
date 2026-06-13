@@ -1,4 +1,3 @@
-import { useAdapter, useAppWorkspace } from "@statewalker/core-react";
 import {
   activeFileExplorerPanelsSlot,
   createPanelController,
@@ -7,6 +6,7 @@ import {
 import { OpenCommand } from "@statewalker/mime.core";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
+import { useAdapter, useAppWorkspace } from "@statewalker/ui.view.react";
 import { type ReactElement, useEffect, useMemo } from "react";
 import { FilesListView } from "./files-list-view.js";
 

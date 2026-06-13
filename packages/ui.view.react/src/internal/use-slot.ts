@@ -34,10 +34,7 @@ export interface KeyedSlotView<T> {
  * Returns a `KeyedSlotView<T>`. Re-renders whenever the underlying
  * slot's contributions for the declaration change.
  */
-export function useKeyedSlot<T>(
-  slots: Slots,
-  decl: KeyedSlotDeclaration<T>,
-): KeyedSlotView<T> {
+export function useKeyedSlot<T>(slots: Slots, decl: KeyedSlotDeclaration<T>): KeyedSlotView<T> {
   const entries = useSyncExternalStore(
     (notify) => slots.observe(decl, () => notify()),
     () => slots.getSnapshot(decl),

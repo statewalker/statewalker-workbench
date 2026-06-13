@@ -1,4 +1,3 @@
-import { compareByOrderAndId } from "@statewalker/core-react";
 import {
   FILE_EXPLORER_CATALOG_ID,
   type FileExplorerPanelPreset,
@@ -20,6 +19,7 @@ import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { type PanelPosition, ShowDockPanelCommand } from "@statewalker/shell.core";
 import { dockTabIconSlot } from "@statewalker/shell.view.react";
+import { compareByOrderAndId } from "@statewalker/ui.view.react";
 import { getWorkspace } from "@statewalker/workspace";
 import { FolderOpen } from "lucide-react";
 import { FileExplorerPanel } from "../internal/file-explorer-panel.js";

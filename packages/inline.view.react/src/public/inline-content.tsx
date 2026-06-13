@@ -1,6 +1,6 @@
-import { useAdapter, useKeyedSlot } from "@statewalker/core-react";
 import type { InlineContentSpec } from "@statewalker/inline.core";
 import { Slots } from "@statewalker/shared-slots";
+import { useAdapter, useKeyedSlot } from "@statewalker/ui.view.react";
 import type { ReactElement } from "react";
 import { inlineContentRenderersSlot } from "./inline-content-registry.js";
 

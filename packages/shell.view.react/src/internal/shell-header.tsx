@@ -1,3 +1,5 @@
+import { Slots } from "@statewalker/shared-slots";
+import { type DockHeaderItem, dockHeaderItemsSlot } from "@statewalker/shell.core";
 import {
   compareByOrderAndId,
   coreViewsSlot,
@@ -6,9 +8,7 @@ import {
   useKeyedSlot,
   useSlot,
   type ViewComponent,
-} from "@statewalker/core-react";
-import { Slots } from "@statewalker/shared-slots";
-import { type DockHeaderItem, dockHeaderItemsSlot } from "@statewalker/shell.core";
+} from "@statewalker/ui.view.react";
 import { type ReactElement, useMemo } from "react";
 
 /**
