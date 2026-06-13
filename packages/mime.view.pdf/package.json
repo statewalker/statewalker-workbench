@@ -1,0 +1,55 @@
+{
+  "name": "@statewalker/mime.view.pdf",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Per-MIME viewer renderer fragment: contributes a MimeRenderer to files:mime-renderers.",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fragment": "./src/fragment.ts",
+    "./styles": "./src/styles.css"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@json-render/core": "0.18.0",
+    "@statewalker/render.view.react": "workspace:*",
+    "@statewalker/core-react": "workspace:*",
+    "@statewalker/dock-react": "workspace:*",
+    "@statewalker/render.core": "workspace:*",
+    "@statewalker/mime.core": "workspace:*",
+    "@statewalker/shared-commands": "catalog:",
+    "@statewalker/shared-registry": "catalog:",
+    "@statewalker/workspace": "workspace:*",
+    "@statewalker/workspace-bridge-react": "workspace:*",
+    "lucide-react": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
