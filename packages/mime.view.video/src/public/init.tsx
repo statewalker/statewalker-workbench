@@ -1,4 +1,3 @@
-import { dockTabIconSlot } from "@statewalker/dock-react";
 import { mimeRenderersSlot } from "@statewalker/mime.core";
 import {
   catalogsSlot,
@@ -9,6 +8,7 @@ import {
 import { defineRegistry } from "@statewalker/render.view.react";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
+import { dockTabIconSlot } from "@statewalker/shell.view.react";
 import { getWorkspace } from "@statewalker/workspace";
 import { FileVideo } from "lucide-react";
 import { VideoView } from "../internal/video-view.js";

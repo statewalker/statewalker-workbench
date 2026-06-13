@@ -24,7 +24,7 @@
     "@statewalker/render.view.react": "workspace:*",
     "@repo/chat-mini.chat-react": "workspace:*",
     "@statewalker/core-react": "workspace:*",
-    "@statewalker/dock-react": "workspace:*",
+    "@statewalker/shell.view.react": "workspace:*",
     "@statewalker/render.core": "workspace:*",
     "@statewalker/mime.core": "workspace:*",
     "@statewalker/shared-commands": "catalog:",

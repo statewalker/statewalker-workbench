@@ -1,8 +1,8 @@
-import { FocusPanelCommand } from "@statewalker/dock";
 import { OpenCommand, VisualizeFileCommand } from "@statewalker/mime.core";
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
+import { FocusPanelCommand } from "@statewalker/shell.core";
 import { getWorkspace } from "@statewalker/workspace";
 import { fileExplorerPanelId } from "./catalog.js";
 import { type ActiveFileExplorerPanel, activeFileExplorerPanelsSlot } from "./extension-points.js";

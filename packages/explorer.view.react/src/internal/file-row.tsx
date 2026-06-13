@@ -1,4 +1,4 @@
-import type { FileDisplayEntry } from "@statewalker/file-explorer";
+import type { FileDisplayEntry } from "@statewalker/explorer.core";
 import {
   File,
   FileArchive,

@@ -1,4 +1,4 @@
-import type { ViewModel } from "@statewalker/file-explorer";
+import type { ViewModel } from "@statewalker/explorer.core";
 import { useSyncExternalStore } from "react";
 
 /**

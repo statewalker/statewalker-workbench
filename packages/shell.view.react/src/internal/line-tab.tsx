@@ -1,8 +1,8 @@
 import { useAdapter, useAppWorkspace, useSlot } from "@statewalker/core-react";
-import { ClosePanelCommand } from "@statewalker/dock";
 import { cn } from "@statewalker/shadcn-react";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
+import { ClosePanelCommand } from "@statewalker/shell.core";
 import type { DockviewPanelApi, IDockviewPanelHeaderProps } from "dockview-react";
 import { X } from "lucide-react";
 import { type ReactElement, useCallback, useMemo, useSyncExternalStore } from "react";

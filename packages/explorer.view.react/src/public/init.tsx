@@ -1,6 +1,4 @@
 import { compareByOrderAndId } from "@statewalker/core-react";
-import { type PanelPosition, ShowDockPanelCommand } from "@statewalker/dock";
-import { dockTabIconSlot } from "@statewalker/dock-react";
 import {
   FILE_EXPLORER_CATALOG_ID,
   type FileExplorerPanelPreset,
@@ -9,7 +7,7 @@ import {
   fileExplorerSpecId,
   makeFileExplorerSpec,
   NewFileExplorerPanelCommand,
-} from "@statewalker/file-explorer";
+} from "@statewalker/explorer.core";
 import {
   catalogsSlot,
   DOCK_LAYOUT_STORAGE_KEY,
@@ -20,6 +18,8 @@ import { defineRegistry } from "@statewalker/render.view.react";
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
+import { type PanelPosition, ShowDockPanelCommand } from "@statewalker/shell.core";
+import { dockTabIconSlot } from "@statewalker/shell.view.react";
 import { getWorkspace } from "@statewalker/workspace";
 import { FolderOpen } from "lucide-react";
 import { FileExplorerPanel } from "../internal/file-explorer-panel.js";

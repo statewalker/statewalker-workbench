@@ -1,4 +1,4 @@
-import type { FilesListModel } from "@statewalker/file-explorer";
+import type { FilesListModel } from "@statewalker/explorer.core";
 import { Loader2, X } from "lucide-react";
 import type { DragEvent, ReactElement } from "react";
 import { Breadcrumb } from "./breadcrumb.js";

@@ -1,5 +1,5 @@
 {
-  "name": "@statewalker/dock-react",
+  "name": "@statewalker/shell.view.react",
   "version": "0.1.0",
   "private": false,
   "type": "module",
@@ -24,7 +24,7 @@
     "@statewalker/core-react": "workspace:*",
     "@statewalker/render.core": "workspace:*",
     "@statewalker/catalog-registry-react": "workspace:*",
-    "@statewalker/dock": "workspace:*",
+    "@statewalker/shell.core": "workspace:*",
     "@statewalker/shadcn-react": "workspace:*",
     "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",

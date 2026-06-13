@@ -1,9 +1,9 @@
 import { useAdapter, useAppWorkspace, useKeyedSlot } from "@statewalker/core-react";
-import { ClosePanelCommand } from "@statewalker/dock";
 import { catalogsSlot, type SpecRecord, SpecStore } from "@statewalker/render.core";
 import { SpecRenderer } from "@statewalker/render.view.react";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
+import { ClosePanelCommand } from "@statewalker/shell.core";
 import type { IDockviewPanelProps } from "dockview-react";
 import { type ReactElement, useSyncExternalStore } from "react";
 

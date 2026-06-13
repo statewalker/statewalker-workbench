@@ -7,8 +7,8 @@ import {
   useSlot,
   type ViewComponent,
 } from "@statewalker/core-react";
-import { type DockHeaderItem, dockHeaderItemsSlot } from "@statewalker/dock";
 import { Slots } from "@statewalker/shared-slots";
+import { type DockHeaderItem, dockHeaderItemsSlot } from "@statewalker/shell.core";
 import { type ReactElement, useMemo } from "react";
 
 /**

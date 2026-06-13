@@ -3,7 +3,7 @@ import {
   activeFileExplorerPanelsSlot,
   createPanelController,
   type PanelController,
-} from "@statewalker/file-explorer";
+} from "@statewalker/explorer.core";
 import { OpenCommand } from "@statewalker/mime.core";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";

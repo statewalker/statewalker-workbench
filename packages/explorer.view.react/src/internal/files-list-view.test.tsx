@@ -1,4 +1,4 @@
-import { FilesListModel } from "@statewalker/file-explorer";
+import { FilesListModel } from "@statewalker/explorer.core";
 import { act, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { FilesListView } from "./files-list-view.js";
