@@ -35,6 +35,10 @@ export abstract class AiConfig {
   ): Promise<void>;
   /** Remove a connection and delete its secret. */
   abstract removeConnection(id: string): Promise<void>;
+  /** Disconnect a connection: delete its stored key (`Secrets`) and clear its
+   * `discoveredModels`, `discoveredAt`, and `starredModelIds`, keeping the
+   * shell (id/type/name/url/headers) so the user can re-connect with one click. */
+  abstract disconnect(connectionId: string): Promise<void>;
   /** Store/replace a connection's API key in `Secrets` (never in the config file). */
   abstract setApiKey(connectionId: string, apiKey: string): Promise<void>;
   /** Refresh a connection's discovered-models cache via the provider's model endpoint. */

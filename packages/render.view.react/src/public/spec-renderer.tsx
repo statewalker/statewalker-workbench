@@ -6,6 +6,14 @@ export interface SpecRendererProps {
   spec: unknown;
   /** json-render registry, held opaquely by the catalogs slot. */
   registry: unknown;
+  /**
+   * Optional external json-render `StateStore` (held opaquely). Pass one when
+   * the spec is state-driven and an outside projection (e.g. a domain → state
+   * bridge) needs to seed and update the store the `<Renderer>` reads. When
+   * omitted, `<JSONUIProvider>` manages its own internal store — the right
+   * default for self-contained single-component specs (dock panels).
+   */
+  store?: unknown;
 }
 
 /**
@@ -18,13 +26,15 @@ export interface SpecRendererProps {
  * `json:catalogs` slot deliberately hold them opaquely; the concrete
  * json-render types live only at this boundary.
  */
-export function SpecRenderer({ spec, registry }: SpecRendererProps): ReactElement {
+export function SpecRenderer({ spec, registry, store }: SpecRendererProps): ReactElement {
   // biome-ignore lint/suspicious/noExplicitAny: json-render's Spec/Registry types live behind `unknown` in our stores
   const Renderer$ = Renderer as any;
   // biome-ignore lint/suspicious/noExplicitAny: ditto for the registry shape
   const registry$ = registry as any;
+  // biome-ignore lint/suspicious/noExplicitAny: the StateStore is held opaquely at this boundary
+  const store$ = store as any;
   return (
-    <JSONUIProvider registry={registry$}>
+    <JSONUIProvider registry={registry$} store={store$}>
       <Renderer$ spec={spec} registry={registry$} />
     </JSONUIProvider>
   );

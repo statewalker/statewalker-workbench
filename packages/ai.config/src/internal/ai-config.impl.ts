@@ -112,6 +112,16 @@ export class AiConfigImpl extends AiConfig {
     this._notify();
   }
 
+  async disconnect(connectionId: string): Promise<void> {
+    const c = this.getConnection(connectionId);
+    if (!c) return;
+    await this.secrets.delete(apiKeySecretKey(connectionId));
+    c.discoveredModels = undefined;
+    c.discoveredAt = undefined;
+    c.starredModelIds = [];
+    await this._persist();
+  }
+
   async refreshModels(connectionId: string): Promise<DiscoveredModel[]> {
     const c = this.getConnection(connectionId);
     if (!c) throw new Error(`AiConfig: no connection "${connectionId}"`);

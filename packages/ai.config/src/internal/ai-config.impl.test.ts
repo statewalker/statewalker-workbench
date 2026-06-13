@@ -91,6 +91,39 @@ describe("AiConfigImpl", () => {
     expect(await cfg.hasKey("keyed")).toBe(false);
   });
 
+  it("disconnect clears the key, discovered models, and stars but keeps the shell", async () => {
+    await cfg.upsertConnection(
+      {
+        id: "openai",
+        type: "openai",
+        name: "OpenAI",
+        url: "https://x",
+        starredModelIds: ["gpt-4o"],
+      },
+      "sk-1",
+    );
+    const orig = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify({ data: [{ id: "gpt-4o" }] }), { status: 200 })) as typeof fetch;
+    try {
+      await cfg.refreshModels("openai");
+    } finally {
+      globalThis.fetch = orig;
+    }
+    expect(cfg.getModels("openai").length).toBe(1);
+
+    await cfg.disconnect("openai");
+
+    const shell = cfg.getConnection("openai");
+    expect(shell).toBeDefined();
+    expect(shell?.name).toBe("OpenAI");
+    expect(shell?.url).toBe("https://x");
+    expect(shell?.discoveredModels).toBeUndefined();
+    expect(shell?.discoveredAt).toBeUndefined();
+    expect(shell?.starredModelIds).toEqual([]);
+    expect(await cfg.hasKey("openai")).toBe(false);
+  });
+
   it("migrates a legacy plaintext apiKey into Secrets on load (one-time)", async () => {
     const files = new MemFilesApi();
     await writeText(

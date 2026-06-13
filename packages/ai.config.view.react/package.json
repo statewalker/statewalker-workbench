@@ -1,0 +1,60 @@
+{
+  "name": "@statewalker/ai.config.view.react",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Renderer fragment for the AI connections settings tab: the json-render registry + components (controlled Collapsible, status Tabs, FieldInput), the AiConfig→state bridge, and the AiConfig+Secrets action handlers.",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fragment": "./src/fragment.ts",
+    "./styles": "./src/styles.css"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@json-render/core": "0.18.0",
+    "@json-render/shadcn": "0.18.0",
+    "@statewalker/ai.config": "workspace:*",
+    "@statewalker/render.core": "workspace:*",
+    "@statewalker/render.view.react": "workspace:*",
+    "@statewalker/settings.core": "workspace:*",
+    "@statewalker/shared-commands": "catalog:",
+    "@statewalker/shared-registry": "catalog:",
+    "@statewalker/shared-slots": "workspace:*",
+    "@statewalker/ui.view.react": "workspace:*",
+    "@statewalker/ui.view.shadcn": "workspace:*",
+    "@statewalker/workspace.core": "workspace:*",
+    "lucide-react": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@statewalker/webrun-files-mem": "catalog:",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

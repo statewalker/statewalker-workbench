@@ -1,3 +1,4 @@
+export { AiConfigImpl, type AiConfigImplOptions } from "../internal/ai-config.impl.js";
 export { capabilitiesFor, DEFAULT_CAPABILITIES } from "../internal/capabilities.js";
 export { applyDefaultStarred, DEFAULT_STARRED_BY_TYPE } from "../internal/default-starred.js";
 export { AiConfig, apiKeySecretKey } from "./ai-config.js";
