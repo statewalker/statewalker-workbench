@@ -1,9 +1,9 @@
 import { AppWorkspaceProvider } from "@statewalker/core-react";
-import { LoadDirectoryCommand, VisualizeFileCommand } from "@statewalker/files";
 import { type InlineComponentDescriptor, inlineComponentSlot } from "@statewalker/inline-content";
+import { VisualizeFileCommand } from "@statewalker/mime.core";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
-import { Workspace } from "@statewalker/workspace";
+import { LoadDirectoryCommand, Workspace } from "@statewalker/workspace";
 import { fireEvent, render } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";

@@ -74,6 +74,3 @@ export interface Indexer {
    * primary `FilesApi` so the indexer can scan / read files. */
   run(opts: { signal?: AbortSignal }): Promise<void>;
 }
-
-// `DirectoryEntry` / `LoadedFile` (the `files:load-*` result shapes) now
-// live in `@statewalker/workspace` and are re-exported from `./commands.js`.

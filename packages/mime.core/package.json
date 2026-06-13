@@ -1,9 +1,9 @@
 {
-  "name": "@statewalker/files",
+  "name": "@statewalker/mime.core",
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Files logic fragment: file-op intents, files:* slots, MimeRenderer + pickMimeRenderer, FilesManager.",
+  "description": "Mime-viewer dispatch: files:visualize + files:open commands, mime:renderers/mime-icons/editor-factories slots, MimeRenderer + pickMimeRenderer.",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",

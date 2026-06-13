@@ -1,6 +1,6 @@
 import { useAppWorkspace } from "@statewalker/core-react";
-import { LoadFileCommand } from "@statewalker/files";
 import { Commands } from "@statewalker/shared-commands";
+import { LoadFileCommand } from "@statewalker/workspace";
 import { type ReactElement, useEffect, useState } from "react";
 
 interface PdfViewProps {

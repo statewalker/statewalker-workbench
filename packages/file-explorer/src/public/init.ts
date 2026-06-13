@@ -1,5 +1,5 @@
 import { FocusPanelCommand } from "@statewalker/dock";
-import { OpenCommand, VisualizeFileCommand } from "@statewalker/files";
+import { OpenCommand, VisualizeFileCommand } from "@statewalker/mime.core";
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";

@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@statewalker/core-react": "workspace:*",
-    "@statewalker/files": "workspace:*",
+    "@statewalker/mime.core": "workspace:*",
     "@statewalker/inline-content": "workspace:*",
     "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",

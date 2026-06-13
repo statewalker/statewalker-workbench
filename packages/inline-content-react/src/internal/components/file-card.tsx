@@ -1,5 +1,5 @@
 import { useAppWorkspace } from "@statewalker/core-react";
-import { VisualizeFileCommand } from "@statewalker/files";
+import { VisualizeFileCommand } from "@statewalker/mime.core";
 import { Commands } from "@statewalker/shared-commands";
 import { type ReactElement, useCallback } from "react";
 

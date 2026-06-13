@@ -35,7 +35,7 @@
     "@statewalker/dock-react": "workspace:*",
     "@statewalker/file-explorer": "workspace:*",
     "@statewalker/catalog-registry": "workspace:*",
-    "@statewalker/files": "workspace:*",
+    "@statewalker/mime.core": "workspace:*",
     "@statewalker/shadcn-react": "workspace:*",
     "@statewalker/spec-store": "workspace:*",
     "@statewalker/shared-slots": "workspace:*",

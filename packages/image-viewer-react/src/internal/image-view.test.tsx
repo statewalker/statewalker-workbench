@@ -1,7 +1,6 @@
 import { AppWorkspaceProvider } from "@statewalker/core-react";
-import { LoadFileCommand } from "@statewalker/files";
 import { Commands } from "@statewalker/shared-commands";
-import { Workspace } from "@statewalker/workspace";
+import { LoadFileCommand, Workspace } from "@statewalker/workspace";
 import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ImageView } from "./image-view.js";

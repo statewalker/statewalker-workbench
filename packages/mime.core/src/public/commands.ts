@@ -1,28 +1,5 @@
 import { Command, passthrough } from "@statewalker/shared-commands";
 
-// The primitive `files:*` filesystem commands now live in
-// `@statewalker/workspace` (the workspace owns the repository role).
-// Re-exported here so existing `@statewalker/files` importers keep
-// resolving against the same command objects.
-export {
-  DeleteFileCommand,
-  type DeleteFilePayload,
-  type DirectoryEntry,
-  LoadDirectoryCommand,
-  type LoadDirectoryPayload,
-  type LoadedFile,
-  LoadFileCommand,
-  type LoadFilePayload,
-  MkdirCommand,
-  type MkdirPayload,
-  MoveFileCommand,
-  type MoveFilePayload,
-  RenameCommand,
-  type RenamePayload,
-  WriteFileCommand,
-  type WriteFilePayload,
-} from "@statewalker/workspace";
-
 export interface VisualizeFilePayload {
   /**
    * `file://` URI or workspace-relative path. The handler resolves

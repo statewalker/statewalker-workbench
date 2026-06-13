@@ -4,7 +4,7 @@ import {
   createPanelController,
   type PanelController,
 } from "@statewalker/file-explorer";
-import { OpenCommand } from "@statewalker/files";
+import { OpenCommand } from "@statewalker/mime.core";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import { type ReactElement, useEffect, useMemo } from "react";

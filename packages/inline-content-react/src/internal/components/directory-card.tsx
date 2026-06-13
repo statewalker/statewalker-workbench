@@ -1,10 +1,7 @@
 import { useAppWorkspace } from "@statewalker/core-react";
-import {
-  type DirectoryEntry,
-  LoadDirectoryCommand,
-  VisualizeFileCommand,
-} from "@statewalker/files";
+import { VisualizeFileCommand } from "@statewalker/mime.core";
 import { Commands } from "@statewalker/shared-commands";
+import { type DirectoryEntry, LoadDirectoryCommand } from "@statewalker/workspace";
 import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 interface DirectoryCardEntry {
