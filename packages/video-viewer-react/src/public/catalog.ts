@@ -1,5 +1,5 @@
 import { defineCatalog, type Spec } from "@json-render/core";
-import { schema } from "@json-render/react";
+import { schema } from "@statewalker/render.view.react";
 import { z } from "zod";
 
 /**

@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "@json-render/core": "0.18.0",
-    "@json-render/react": "0.18.0",
     "@statewalker/dock": "workspace:*",
     "@statewalker/mime.core": "workspace:*",
     "@statewalker/shared-baseclass": "catalog:",

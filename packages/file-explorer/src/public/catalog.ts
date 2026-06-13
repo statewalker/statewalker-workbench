@@ -1,35 +1,16 @@
-import { defineCatalog, type Spec } from "@json-render/core";
-import { schema } from "@json-render/react";
-import { z } from "zod";
+import type { Spec } from "@json-render/core";
 
 /**
- * Catalog declaration for the file-explorer panel — typed schema
- * only, no React bindings. Per ADR 0002 (logic / renderer split):
- * the `file-explorer` logic fragment publishes this catalog as pure
- * data; the paired `file-explorer-react` renderer fragment binds the
- * React component for `FileExplorerView` and registers the resolved
- * entry into `CatalogRegistry`.
+ * Pure spec data + id helpers for the file-explorer panel. Per ADR 0002
+ * (logic / renderer split), this React-free logic fragment owns only the
+ * deterministic ids and the opaque `Spec` builder; the schema-typed
+ * `fileExplorerCatalog` (which needs `@json-render/react`'s `schema`) and
+ * the `FileExplorerView` React binding live in the paired
+ * `file-explorer-react` renderer fragment.
  *
- * One element (`FileExplorerView`) parameterised by `panelId` so each
- * dock tab gets its own controller, label, and starting path. Opening
- * via `commands.call(ShowDockPanelCommand, { panelId: fileExplorerPanelId(id), ... })`
- * yields the deterministic mapping: id → tab.
+ * The single element (`FileExplorerView`) is parameterised by `panelId`
+ * so each dock tab gets its own controller, label, and starting path.
  */
-export const fileExplorerCatalog = defineCatalog(schema, {
-  components: {
-    FileExplorerView: {
-      props: z.object({
-        panelId: z.string(),
-        label: z.string().optional(),
-        initialPath: z.string().optional(),
-        mainViewerHost: z.boolean().optional(),
-        folderNavigationHost: z.boolean().optional(),
-      }),
-    },
-  },
-  actions: {},
-});
-
 export const FILE_EXPLORER_CATALOG_ID = "file-explorer";
 
 export interface FileExplorerSpecOptions {

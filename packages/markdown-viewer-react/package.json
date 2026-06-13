@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@json-render/core": "0.18.0",
-    "@json-render/react": "0.18.0",
+    "@statewalker/render.view.react": "workspace:*",
     "@repo/chat-mini.chat-react": "workspace:*",
     "@statewalker/core-react": "workspace:*",
     "@statewalker/dock-react": "workspace:*",

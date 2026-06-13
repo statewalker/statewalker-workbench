@@ -1,4 +1,3 @@
-import { defineRegistry } from "@json-render/react";
 import { dockTabIconSlot } from "@statewalker/dock-react";
 import { mimeRenderersSlot } from "@statewalker/mime.core";
 import {
@@ -7,6 +6,7 @@ import {
   restorePanelSpecsFromLayout,
   SpecStore,
 } from "@statewalker/render.core";
+import { defineRegistry } from "@statewalker/render.view.react";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace";

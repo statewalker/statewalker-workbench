@@ -20,7 +20,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@json-render/react": "0.18.0",
+    "@statewalker/render.view.react": "workspace:*",
     "@statewalker/core-react": "workspace:*",
     "@statewalker/render.core": "workspace:*",
     "@statewalker/catalog-registry-react": "workspace:*",

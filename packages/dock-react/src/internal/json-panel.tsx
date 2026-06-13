@@ -1,7 +1,7 @@
-import { JSONUIProvider, Renderer } from "@json-render/react";
 import { useAdapter, useAppWorkspace, useKeyedSlot } from "@statewalker/core-react";
 import { ClosePanelCommand } from "@statewalker/dock";
 import { catalogsSlot, type SpecRecord, SpecStore } from "@statewalker/render.core";
+import { SpecRenderer } from "@statewalker/render.view.react";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import type { IDockviewPanelProps } from "dockview-react";
@@ -56,21 +56,11 @@ export function JsonPanel(props: IDockviewPanelProps<JsonPanelParams>): ReactEle
     );
   }
 
-  // The json-render `<Renderer>` types the spec/registry strictly;
-  // we cross from the deliberately-loose `unknown` storage in
-  // SpecStore + CatalogRegistry to its concrete types here.
-  // `<JSONUIProvider>` is required — it sets up the visibility /
-  // validation / state contexts that `<Renderer>`'s internals
-  // (e.g. `useVisibility`) read from.
-  // biome-ignore lint/suspicious/noExplicitAny: json-render's Spec/Registry types live behind `unknown` in our store
-  const Renderer$ = Renderer as any;
-  // biome-ignore lint/suspicious/noExplicitAny: ditto for the registry shape
-  const registry$ = catalogRegistry as any;
-  return (
-    <JSONUIProvider registry={registry$}>
-      <Renderer$ spec={record.spec} registry={registry$} />
-    </JSONUIProvider>
-  );
+  // `<SpecRenderer>` (from render.view.react) is the single boundary
+  // into `@json-render/react`; it crosses from the deliberately-loose
+  // `unknown` storage in SpecStore + the catalogs slot to json-render's
+  // concrete types.
+  return <SpecRenderer spec={record.spec} registry={catalogRegistry} />;
 }
 
 function PanelMissing({ specId, onClose }: { specId: string; onClose: () => void }): ReactElement {
