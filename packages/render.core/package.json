@@ -1,9 +1,9 @@
 {
-  "name": "@statewalker/catalog-registry",
+  "name": "@statewalker/render.core",
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Catalog-registry logic fragment: declares the catalogsSlot (`json:catalogs` keyed slot) for registering JSON-render catalogs.",
+  "description": "json-render engine state (opaque, no @json-render dep): SpecStore adapter + spec:create/spec:patch + restorePanelSpecsFromLayout, plus the json:catalogs keyed slot.",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
@@ -19,6 +19,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
+    "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
     "@statewalker/workspace": "workspace:*"

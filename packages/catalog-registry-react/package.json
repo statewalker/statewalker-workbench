@@ -20,7 +20,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/catalog-registry": "workspace:*",
+    "@statewalker/render.core": "workspace:*",
     "@statewalker/core-react": "workspace:*",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*"

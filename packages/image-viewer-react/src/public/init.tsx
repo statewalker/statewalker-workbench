@@ -1,14 +1,14 @@
 import { defineRegistry } from "@json-render/react";
-import { catalogsSlot } from "@statewalker/catalog-registry";
 import { dockTabIconSlot } from "@statewalker/dock-react";
 import { mimeRenderersSlot } from "@statewalker/mime.core";
-import { newRegistry } from "@statewalker/shared-registry";
-import { Slots } from "@statewalker/shared-slots";
 import {
+  catalogsSlot,
   DOCK_LAYOUT_STORAGE_KEY,
   restorePanelSpecsFromLayout,
   SpecStore,
-} from "@statewalker/spec-store";
+} from "@statewalker/render.core";
+import { newRegistry } from "@statewalker/shared-registry";
+import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace";
 import { FileImage } from "lucide-react";
 import { ImageView } from "../internal/image-view.js";

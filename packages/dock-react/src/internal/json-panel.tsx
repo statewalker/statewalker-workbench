@@ -1,10 +1,9 @@
 import { JSONUIProvider, Renderer } from "@json-render/react";
-import { catalogsSlot } from "@statewalker/catalog-registry";
 import { useAdapter, useAppWorkspace, useKeyedSlot } from "@statewalker/core-react";
 import { ClosePanelCommand } from "@statewalker/dock";
+import { catalogsSlot, type SpecRecord, SpecStore } from "@statewalker/render.core";
 import { Commands } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
-import { type SpecRecord, SpecStore } from "@statewalker/spec-store";
 import type { IDockviewPanelProps } from "dockview-react";
 import { type ReactElement, useSyncExternalStore } from "react";
 

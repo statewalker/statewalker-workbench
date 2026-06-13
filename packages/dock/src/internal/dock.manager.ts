@@ -1,7 +1,7 @@
+import { SpecStore } from "@statewalker/render.core";
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
-import { SpecStore } from "@statewalker/spec-store";
 import type { Workspace } from "@statewalker/workspace";
 import {
   ClosePanelCommand,

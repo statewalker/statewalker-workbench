@@ -1,6 +1,6 @@
+import { SpecStore } from "@statewalker/render.core";
+import initSpecStore from "@statewalker/render.core/fragment";
 import { Commands } from "@statewalker/shared-commands";
-import { SpecStore } from "@statewalker/spec-store";
-import initSpecStore from "@statewalker/spec-store/fragment";
 import { getWorkspace } from "@statewalker/workspace";
 import type { DockviewApi, IDockviewPanel } from "dockview-react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
