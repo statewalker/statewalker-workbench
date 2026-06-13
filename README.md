@@ -4,60 +4,84 @@ Application shell and fragment platform for the statewalker ecosystem — backbo
 
 ## Packages
 
+Packages follow the **`@statewalker/${domain}.${aspect}.${modifier}`** convention
+(all-dots; `aspect` ∈ `{core, view, browser, node, cloud, feature}`; a `view` leaf
+— `*.view.react` / `*.view.shadcn` / `*.view.<mime>` — is the only place a UI tech
+may be imported). See the `workbench-package-naming` capability spec.
+
 ### Backbone (independent runtime)
 
 | Package | Description |
 | --- | --- |
-| [`@statewalker/backbone-common`](packages/backbone-common) | Backbone primitives: resolver, topo sort, activation, manifest types, vendored logger. |
-| [`@statewalker/backbone-server`](packages/backbone-server) | Node bootstrap: resolves `AppManifest` against the filesystem and activates modules. |
-| [`@statewalker/backbone-web`](packages/backbone-web) | Browser runtime: fragment loader + web-side module activation. |
+| [`@statewalker/backbone.core`](packages/backbone.core) | Backbone primitives: resolver, topo sort, activation, manifest types, vendored logger. |
+| [`@statewalker/backbone.node`](packages/backbone.node) | Node bootstrap: resolves `AppManifest` against the filesystem and activates modules. |
+| [`@statewalker/backbone.browser`](packages/backbone.browser) | Browser runtime: fragment loader + web-side module activation. |
 
 ### Platform capabilities
 
 | Package | Description |
 | --- | --- |
-| [`@statewalker/platform-api`](packages/platform-api) | Type-only command vocabulary: pickers, downloads, clipboard, preferences, URL state. |
-| [`@statewalker/platform-browser`](packages/platform-browser) | Browser implementation of the platform-api commands. |
+| [`@statewalker/platform.core`](packages/platform.core) | Type-only command vocabulary: pickers, downloads, clipboard, preferences, URL state. |
+| [`@statewalker/platform.browser`](packages/platform.browser) | Browser implementation of the platform commands. |
 
-### Substrate fragments — workspace foundation
-
-| Package | Description |
-| --- | --- |
-| [`@statewalker/workspace`](packages/workspace) | Workspace logic fragment: the `Workspace` class, system/secrets/settings adapters, the `workspace:change` command and its registrar init. |
-| [`@statewalker/workspace-bridge`](packages/workspace-bridge) | Workspace-bridge logic fragment: `WorkspaceShellAdapter` + `workspace:*` commands. |
-| [`@statewalker/workspace-bridge-react`](packages/workspace-bridge-react) | Workspace-bridge renderer: `AppWorkspaceProvider`, `DirectoryPickerEmptyState`, `ReconnectBanner`, switch-workspace header item. |
-
-### Substrate fragments — shell substrate
+### Workspace foundation
 
 | Package | Description |
 | --- | --- |
-| [`@statewalker/core-react`](packages/core-react) | React mount, `<AppRoot>`, `core:views` slot, substrate hooks (`useSlot`, `useKeyedSlot`, `useAdapterValue`, `useAdapter`), theme binding. |
-| [`@statewalker/shadcn-react`](packages/shadcn-react) | shadcn/ui primitives + `cn()` helper for the workbench substrate. |
-| [`@statewalker/dock`](packages/dock) | Dock logic fragment: `dock:*` slot keys, `dock:show-panel`/`close-panel`/`focus-panel` commands, dock state. |
-| [`@statewalker/dock-react`](packages/dock-react) | Dock renderer: `dockview-react` host, `MainShell`, `ShellHeader`, `JsonPanel`. |
-| [`@statewalker/files`](packages/files) | Files logic fragment: file-op commands, `files:*` slots, `MimeRenderer` + `pickMimeRenderer`, `FilesManager`. |
-| [`@statewalker/file-explorer`](packages/file-explorer) | File-explorer logic fragment: navigation, search controller, tree-state, browser orchestration commands. |
-| [`@statewalker/file-explorer-react`](packages/file-explorer-react) | File-explorer renderer: tree, list, drag-and-drop, context menu, navigation breadcrumbs, search panel. |
-| [`@statewalker/settings`](packages/settings) | Settings logic fragment: `settings:*` slots and commands. |
-| [`@statewalker/settings-react`](packages/settings-react) | Settings renderer: settings dialog and `dock:header-items` button. |
-| [`@statewalker/inline-content`](packages/inline-content) | Inline-content logic fragment: `inline-content:components` descriptor slot + descriptor types. |
-| [`@statewalker/inline-content-react`](packages/inline-content-react) | Inline-content renderer fragment: `inline-content:renderers` slot, `<InlineContent>`, built-in components. |
-| [`@statewalker/catalog-registry`](packages/catalog-registry) | Catalog-registry logic fragment: `json:catalogs` slot key + `newCatalogRegistry(workspace)` helper. |
-| [`@statewalker/catalog-registry-react`](packages/catalog-registry-react) | Catalog-registry renderer: `useCatalogRegistry()` React hook. |
-| [`@statewalker/spec-store`](packages/spec-store) | Spec-store logic fragment: `SpecStore` adapter + `spec:create`/`spec:patch` commands + `restorePanelSpecsFromLayout` helper. |
+| [`@statewalker/workspace.core`](packages/workspace.core) | Workspace logic: the `Workspace` class, project/resource model, class-keyed adapters, the `files:*` filesystem commands (`WorkspaceFilesManager`), and the `workspace:change` command. |
+| [`@statewalker/workspace.browser`](packages/workspace.browser) | Browser FS-Access lifecycle for the workspace: `WorkspaceShellAdapter` + `workspace:*` commands. |
+| [`@statewalker/workspace.view.react`](packages/workspace.view.react) | Workspace renderer: `AppWorkspaceProvider`, `DirectoryPickerEmptyState`, `ReconnectBanner`, switch-workspace header item. |
 
-### Substrate fragments — per-MIME viewers
+### UI substrate
 
 | Package | Description |
 | --- | --- |
-| [`@statewalker/image-viewer-react`](packages/image-viewer-react) | Per-MIME viewer renderer: contributes a `MimeRenderer` to `files:mime-renderers`. |
-| [`@statewalker/markdown-viewer-react`](packages/markdown-viewer-react) | Markdown viewer renderer fragment. |
-| [`@statewalker/pdf-viewer-react`](packages/pdf-viewer-react) | PDF viewer renderer fragment. |
-| [`@statewalker/video-viewer-react`](packages/video-viewer-react) | Video viewer renderer fragment. |
+| [`@statewalker/ui.view.react`](packages/ui.view.react) | React mount, `<AppRoot>`, `core:views` slot, substrate hooks (`useSlot`, `useKeyedSlot`, `useAdapterValue`, `useAdapter`), theme binding. |
+| [`@statewalker/ui.view.shadcn`](packages/ui.view.shadcn) | shadcn/ui primitives + `cn()` helper for the workbench substrate. |
+
+### Shell (application frame)
+
+| Package | Description |
+| --- | --- |
+| [`@statewalker/shell.core`](packages/shell.core) | Frame logic: `dock:*` slot keys, `dock:show-panel`/`close-panel`/`focus-panel` commands, dock state. |
+| [`@statewalker/shell.view.react`](packages/shell.view.react) | Frame UI: `dockview-react` host, `MainShell`, `ShellHeader`, `JsonPanel` (registers `MainShell` into `core:views`). |
+
+### Render engine (json-render)
+
+| Package | Description |
+| --- | --- |
+| [`@statewalker/render.core`](packages/render.core) | json-render engine state (opaque, no `@json-render` dep): `SpecStore` + `spec:create`/`spec:patch` + `restorePanelSpecsFromLayout`, plus the `json:catalogs` slot. |
+| [`@statewalker/render.view.react`](packages/render.view.react) | The sole `@json-render/react` boundary: `<SpecRenderer spec registry>` + `defineRegistry`/`schema` re-exports. |
+
+### Files & MIME viewers
+
+| Package | Description |
+| --- | --- |
+| [`@statewalker/mime.core`](packages/mime.core) | Mime-viewer dispatch: `files:visualize`/`files:open`, the `mime:renderers`/`mime-icons`/`editor-factories` slots, `MimeRenderer` + `pickMimeRenderer`. |
+| [`@statewalker/mime.view.image`](packages/mime.view.image) | Image viewer renderer. |
+| [`@statewalker/mime.view.markdown`](packages/mime.view.markdown) | Markdown viewer renderer. |
+| [`@statewalker/mime.view.pdf`](packages/mime.view.pdf) | PDF viewer renderer. |
+| [`@statewalker/mime.view.video`](packages/mime.view.video) | Video viewer renderer. |
+
+### Explorer
+
+| Package | Description |
+| --- | --- |
+| [`@statewalker/explorer.core`](packages/explorer.core) | File-explorer logic: navigation, search controller, tree-state, browser orchestration commands. |
+| [`@statewalker/explorer.view.react`](packages/explorer.view.react) | File-explorer renderer: tree, list, drag-and-drop, context menu, breadcrumbs, search panel. |
+
+### Settings & inline content
+
+| Package | Description |
+| --- | --- |
+| [`@statewalker/settings.core`](packages/settings.core) | Settings logic: `settings:*` slots and commands. |
+| [`@statewalker/settings.view.react`](packages/settings.view.react) | Settings renderer: dialog + header-items button. |
+| [`@statewalker/inline.core`](packages/inline.core) | Inline-content logic: `inline-content:components` descriptor slot + types. |
+| [`@statewalker/inline.view.react`](packages/inline.view.react) | Inline-content renderer: `inline-content:renderers` slot, `<InlineContent>`, built-ins. |
 
 ## Backbone independence rule
 
-The `backbone-*` packages MUST NOT declare a runtime dependency on any other `@statewalker/*` package — including siblings in this monorepo. Backbone vendors the narrow slices it needs (currently `Logger`/`getLogger` from `@statewalker/shared-logger`) into `backbone-common/src/_vendor/`. A CI check (`scripts/check-backbone-isolation.ts`) enforces this invariant on every PR.
+The `backbone.*` packages MUST NOT declare a runtime dependency on any other `@statewalker/*` package — including siblings in this monorepo. Backbone vendors the narrow slices it needs (currently `Logger`/`getLogger` from `@statewalker/shared-logger`) into `backbone.core/src/_vendor/`. A CI check (`scripts/check-backbone-isolation.ts`) enforces this invariant on every PR.
 
 Substrate fragments may depend on backbone, never the reverse.
 
@@ -74,7 +98,7 @@ src/
   styles.css        # renderer fragments only — Tailwind v4 @source globs
 ```
 
-`package.json#exports` declares exactly `"."` and `"./fragment"` for logic fragments, plus `"./styles"` for renderer fragments (`*-react`). Logic fragments do not import React or any `*-react` package.
+`package.json#exports` declares exactly `"."` and `"./fragment"` for logic fragments, plus `"./styles"` for renderer fragments (the `*.view.*` leaves). `*.core` (and bare `*.view`) packages do not import React or any `*.view.*` package — the ADR-0002 boundary, keyed on the `view` leaf.
 
 ## Development
 
