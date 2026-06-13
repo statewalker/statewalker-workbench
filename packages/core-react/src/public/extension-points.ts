@@ -18,3 +18,12 @@ export type ViewComponent = ComponentType<unknown>;
  * e.g. `chat:turn-block:tool-call`, `providers:model-picker`.
  */
 export const coreViewsSlot = defineKeyedSlot<ViewComponent>("core:views");
+
+/**
+ * Root viewKey for the top-level application shell. The shell renderer
+ * fragment (dock-views) registers its `MainShell` here; `<App/>` renders
+ * whatever is registered under this key once the workspace is `ready`.
+ * This keeps the `core-react` ↔ `dock-react` edge one-way (`dock → core`):
+ * `core-react` never imports the shell, it resolves it through the slot.
+ */
+export const SHELL_ROOT_VIEW_KEY = "shell:root";

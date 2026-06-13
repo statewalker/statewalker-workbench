@@ -20,7 +20,6 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@statewalker/dock-react": "workspace:*",
     "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",
