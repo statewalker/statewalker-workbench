@@ -13,7 +13,7 @@ import {
 } from "./commands.js";
 
 /**
- * Logic-fragment init for `@statewalker/ai.config`. Registers the single
+ * Logic-fragment init for `@statewalker/ai-config`. Registers the single
  * `AiConfig` adapter (the unified source of truth for AI connections/models),
  * loads its config on workspace open (lifting any legacy plaintext key into
  * `Secrets`), and registers the `ai-config:*` command handlers.

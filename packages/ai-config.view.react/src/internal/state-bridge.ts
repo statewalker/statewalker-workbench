@@ -1,5 +1,5 @@
 import type { StateStore } from "@json-render/core";
-import { type AiConfig, type Connection, capabilitiesFor } from "@statewalker/ai.config";
+import { type AiConfig, type Connection, capabilitiesFor } from "@statewalker/ai-config";
 
 /** A connection is "connected" once a discovery has cached models on it. */
 function isConnected(c: Connection): boolean {

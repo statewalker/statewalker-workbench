@@ -7,7 +7,7 @@ import { CONNECTIONS_CATALOG_ID } from "./connections-catalog.js";
  * (logic / renderer split) this owns only the opaque `Spec` data + its initial
  * state seed; the schema-typed catalog binding, the React registry, the action
  * handlers, and the `state-bridge` that projects `AiConfig` into the state tree
- * all live in the paired `@statewalker/ai.config.view.react` renderer.
+ * all live in the paired `@statewalker/ai-config.view.react` renderer.
  *
  * ## Layout (prototype variant A — provider-as-tabs)
  *

@@ -1,5 +1,5 @@
 {
-  "name": "@statewalker/ai.config.view.react",
+  "name": "@statewalker/ai-config.view.react",
   "version": "0.1.0",
   "private": false,
   "type": "module",
@@ -23,7 +23,7 @@
   "dependencies": {
     "@json-render/core": "0.18.0",
     "@json-render/shadcn": "0.18.0",
-    "@statewalker/ai.config": "workspace:*",
+    "@statewalker/ai-config": "workspace:*",
     "@statewalker/render.core": "workspace:*",
     "@statewalker/render.view.react": "workspace:*",
     "@statewalker/settings.core": "workspace:*",

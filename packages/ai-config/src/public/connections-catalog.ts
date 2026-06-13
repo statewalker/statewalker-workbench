@@ -3,7 +3,7 @@
  * component vocabulary the spec is allowed to reference, and the action names the
  * spec dispatches. Per ADR 0002 the schema-typed `defineCatalog(schema, …)`
  * binding (which needs `@json-render/react`'s `schema`) and the React component /
- * action handler implementations live in `@statewalker/ai.config.view.react`;
+ * action handler implementations live in `@statewalker/ai-config.view.react`;
  * this module is the single source of truth those bindings — and the spec
  * validation test — agree on.
  */

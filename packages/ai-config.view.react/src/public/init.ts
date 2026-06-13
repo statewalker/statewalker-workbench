@@ -2,7 +2,7 @@ import {
   AI_CONFIG_CONNECTIONS_TAB_ID,
   AI_CONFIG_CONNECTIONS_TAB_VIEW_KEY,
   ConfigureAiCommand,
-} from "@statewalker/ai.config";
+} from "@statewalker/ai-config";
 import { OpenSettingsCommand, settingsTabSlot } from "@statewalker/settings.core";
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
@@ -12,8 +12,8 @@ import { getWorkspace } from "@statewalker/workspace.core";
 import { AiConfigConnectionsTab } from "../internal/connections-tab.js";
 
 /**
- * Renderer-fragment init for `@statewalker/ai.config.view.react`. Pairs with the
- * React-free `@statewalker/ai.config` logic fragment:
+ * Renderer-fragment init for `@statewalker/ai-config.view.react`. Pairs with the
+ * React-free `@statewalker/ai-config` logic fragment:
  *
  *  1. Registers the connections-tab `ViewComponent` into `core:views` under the
  *     `ai-config:connections` viewKey.

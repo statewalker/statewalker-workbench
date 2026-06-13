@@ -19,7 +19,7 @@ import { StatusTabs } from "./status-tabs.js";
  * catalog (which needs `@json-render/react`'s `schema`, reached via
  * `render.view.react`) and the React bindings live here on the renderer side;
  * the opaque spec + the catalog id/component/action name-sets live in the
- * React-free `@statewalker/ai.config` logic fragment.
+ * React-free `@statewalker/ai-config` logic fragment.
  *
  * Two stock components are re-typed for the panel's controlled variants:
  *   - `Collapsible` gains `openPath` (controlled fold, replacing `defaultOpen`)
