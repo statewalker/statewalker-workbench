@@ -34,3 +34,14 @@ export const StarModelsCommand = Command.silent("ai-config:star-models")
   .input(passthrough<{ connectionId: string; modelIds: string[] }>())
   .output(passthrough<void>())
   .build();
+
+/**
+ * Deep-link command: open the settings dialog on the `ai-config:connections`
+ * ("Remote Models") tab. The renderer's init listens for this and fires
+ * `OpenSettingsCommand({ tabId })`; the composer's "Configure models…" entry
+ * dispatches it. Replaces the old `models-config:configure-models`.
+ */
+export const ConfigureAiCommand = Command.silent("ai-config:configure")
+  .input(passthrough<void>())
+  .output(passthrough<void>())
+  .build();
