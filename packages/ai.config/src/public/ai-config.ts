@@ -22,6 +22,9 @@ export abstract class AiConfig {
   /** Build a provider for a connection, reading its key from `Secrets`. */
   abstract getProvider(connectionId: string): Promise<ProviderV3>;
   abstract getActive(): ActiveSelection;
+  /** Whether a non-empty API key is stored in `Secrets` for the connection.
+   * Drives the remove-confirm gate (the secret worth protecting). */
+  abstract hasKey(connectionId: string): Promise<boolean>;
   abstract onUpdate(cb: () => void): () => void;
 
   // ── writes ─────────────────────────────────────────────────────

@@ -79,6 +79,18 @@ describe("AiConfigImpl", () => {
     expect(cfg.listConnections()).toEqual([]);
   });
 
+  it("hasKey reflects whether a secret is stored (drives the remove-confirm gate)", async () => {
+    await cfg.upsertConnection(
+      { id: "keyed", type: "openai", name: "K", starredModelIds: [] },
+      "sk-1",
+    );
+    await cfg.upsertConnection({ id: "bare", type: "openai", name: "B", starredModelIds: [] });
+    expect(await cfg.hasKey("keyed")).toBe(true);
+    expect(await cfg.hasKey("bare")).toBe(false);
+    await cfg.removeConnection("keyed");
+    expect(await cfg.hasKey("keyed")).toBe(false);
+  });
+
   it("migrates a legacy plaintext apiKey into Secrets on load (one-time)", async () => {
     const files = new MemFilesApi();
     await writeText(

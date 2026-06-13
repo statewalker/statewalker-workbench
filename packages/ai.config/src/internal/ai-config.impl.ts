@@ -60,6 +60,10 @@ export class AiConfigImpl extends AiConfig {
   getActive(): ActiveSelection {
     return this._data.active;
   }
+  async hasKey(connectionId: string): Promise<boolean> {
+    const key = await this.secrets.get(apiKeySecretKey(connectionId));
+    return typeof key === "string" && key.length > 0;
+  }
   getModels(connectionId: string, capability?: Capability): DiscoveredModel[] {
     const models = this.getConnection(connectionId)?.discoveredModels ?? [];
     if (!capability) return models;
