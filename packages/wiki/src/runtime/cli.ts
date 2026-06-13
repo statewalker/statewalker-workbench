@@ -1,6 +1,6 @@
 import { createDefaultRegistry } from "@statewalker/content-extractors";
 import type { FilesApi } from "@statewalker/webrun-files";
-import { LoggerAdapter, type LoggerLevel, Workspace } from "@statewalker/workspace";
+import { LoggerAdapter, type LoggerLevel, Workspace } from "@statewalker/workspace.core";
 import { stringify as stringifyYaml } from "yaml";
 import { costOf, roundUsd } from "../llm/index.js";
 import type { Answer } from "../query/index.js";

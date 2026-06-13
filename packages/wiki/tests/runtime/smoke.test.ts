@@ -5,7 +5,7 @@ import type { EmbedFn } from "@statewalker/indexer-api";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { NodeFilesApi } from "@statewalker/webrun-files-node";
-import { Workspace } from "@statewalker/workspace";
+import { Workspace } from "@statewalker/workspace.core";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   type DocumentGraphOutput,

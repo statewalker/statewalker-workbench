@@ -1,5 +1,5 @@
 {
-  "name": "@statewalker/workspace-bridge",
+  "name": "@statewalker/workspace.browser",
   "version": "0.1.0",
   "private": false,
   "type": "module",
@@ -24,7 +24,7 @@
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/webrun-files": "catalog:",
     "@statewalker/webrun-files-browser": "catalog:",
-    "@statewalker/workspace": "workspace:*",
+    "@statewalker/workspace.core": "workspace:*",
     "idb-keyval": "catalog:"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { ProjectAdapter, type Workspace } from "@statewalker/workspace";
+import { ProjectAdapter, type Workspace } from "@statewalker/workspace.core";
 import { runQuery } from "./fsm/run.js";
 import type { QueryProgress } from "./progress.js";
 

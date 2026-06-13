@@ -1,7 +1,7 @@
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import type { FilesApi } from "@statewalker/webrun-files";
-import { ChangeWorkspaceCommand, initWorkspace, type Workspace } from "@statewalker/workspace";
+import { ChangeWorkspaceCommand, initWorkspace, type Workspace } from "@statewalker/workspace.core";
 import { WorkspaceDisconnectCommand, WorkspaceReconnectCommand } from "../public/commands.js";
 import {
   createBrowserFilesApi,

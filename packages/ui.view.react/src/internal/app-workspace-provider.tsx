@@ -1,4 +1,4 @@
-import type { Workspace } from "@statewalker/workspace";
+import type { Workspace } from "@statewalker/workspace.core";
 import { createContext, type ReactNode, useContext } from "react";
 
 const AppWorkspaceContext = createContext<Workspace | null>(null);

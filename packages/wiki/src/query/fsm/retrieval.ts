@@ -1,4 +1,4 @@
-import type { Project } from "@statewalker/workspace";
+import type { Project } from "@statewalker/workspace.core";
 import { WikiOutlierIndex, WikiTopicIndex } from "../../knowledge/indexes.js";
 import {
   ResourceTextContentCache,

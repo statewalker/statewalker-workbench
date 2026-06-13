@@ -12,7 +12,7 @@ import {
   ChangeWorkspaceCommand,
   WorkspaceReconnectCommand,
   WorkspaceShellAdapter,
-} from "@statewalker/workspace-bridge";
+} from "@statewalker/workspace.browser";
 import { FolderOpen } from "lucide-react";
 import { type ReactElement, useState } from "react";
 

@@ -4,7 +4,7 @@ import {
   loggerOf,
   ProjectBuilder,
   type RegisteredBuilder,
-} from "@statewalker/workspace";
+} from "@statewalker/workspace.core";
 import { CONTENT_SIGNAL } from "../content/index.js";
 import { llmOf, wikiConfigOf } from "../llm/index.js";
 import { toBatch } from "../util/batch.js";

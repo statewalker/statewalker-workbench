@@ -13,7 +13,7 @@ import {
   ResourceAdapter,
   SOURCES_SIGNAL,
   type Workspace,
-} from "@statewalker/workspace";
+} from "@statewalker/workspace.core";
 import { toBatch } from "../util/batch.js";
 
 /** Signal emitted for each resource whose text content is available/changed. */

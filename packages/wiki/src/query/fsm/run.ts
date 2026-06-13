@@ -1,5 +1,5 @@
 import { startProcess } from "@statewalker/fsm";
-import { loggerOf, type Project } from "@statewalker/workspace";
+import { loggerOf, type Project } from "@statewalker/workspace.core";
 import { QueryProgress } from "../progress.js";
 import { load } from "./load.js";
 import { QueryContext } from "./query-context.js";

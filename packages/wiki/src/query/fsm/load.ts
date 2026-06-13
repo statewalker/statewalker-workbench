@@ -1,4 +1,4 @@
-import { loggerOf } from "@statewalker/workspace";
+import { loggerOf } from "@statewalker/workspace.core";
 import {
   IntentDetectionTrigger,
   NegativeResponseTrigger,

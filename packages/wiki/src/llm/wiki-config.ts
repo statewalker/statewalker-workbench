@@ -1,4 +1,4 @@
-import type { Project } from "@statewalker/workspace";
+import type { Project } from "@statewalker/workspace.core";
 
 /**
  * The model *names* the wiki's indexing/search stages use. Every stage falls back

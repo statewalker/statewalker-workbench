@@ -1,4 +1,4 @@
-import type { Project } from "@statewalker/workspace";
+import type { Project } from "@statewalker/workspace.core";
 import {
   embed as aiEmbed,
   embedMany as aiEmbedMany,

@@ -1,7 +1,7 @@
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { coreViewsSlot, SHELL_ROOT_VIEW_KEY, type ViewComponent } from "@statewalker/ui.view.react";
-import { getWorkspace } from "@statewalker/workspace";
+import { getWorkspace } from "@statewalker/workspace.core";
 import { MainShell } from "../internal/main-shell.js";
 
 /**

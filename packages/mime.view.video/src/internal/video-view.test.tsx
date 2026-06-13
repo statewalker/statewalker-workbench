@@ -1,6 +1,6 @@
 import { Commands } from "@statewalker/shared-commands";
 import { AppWorkspaceProvider } from "@statewalker/ui.view.react";
-import { LoadFileCommand, Workspace } from "@statewalker/workspace";
+import { LoadFileCommand, Workspace } from "@statewalker/workspace.core";
 import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { VideoView } from "./video-view.js";

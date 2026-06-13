@@ -24,9 +24,9 @@
     "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/workspace": "workspace:*",
-    "@statewalker/workspace-bridge": "workspace:*",
-    "@statewalker/workspace-bridge-react": "workspace:*",
+    "@statewalker/workspace.core": "workspace:*",
+    "@statewalker/workspace.browser": "workspace:*",
+    "@statewalker/workspace.view.react": "workspace:*",
     "@tanstack/react-query": "^5.66.10"
   },
   "peerDependencies": {

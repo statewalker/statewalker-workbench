@@ -1,4 +1,4 @@
-import type { AdapterCtor, WorkspaceAdapter } from "@statewalker/workspace";
+import type { AdapterCtor, WorkspaceAdapter } from "@statewalker/workspace.core";
 import { useAppWorkspace } from "./app-workspace-provider.js";
 
 /**

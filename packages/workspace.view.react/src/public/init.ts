@@ -2,7 +2,7 @@ import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { dockHeaderItemsSlot } from "@statewalker/shell.core";
 import { coreViewsSlot, type ViewComponent } from "@statewalker/ui.view.react";
-import { getWorkspace } from "@statewalker/workspace";
+import { getWorkspace } from "@statewalker/workspace.core";
 import { SwitchWorkspaceButton } from "../internal/switch-workspace-button.js";
 import { WorkspaceLabelHeader } from "../internal/workspace-label-header.js";
 

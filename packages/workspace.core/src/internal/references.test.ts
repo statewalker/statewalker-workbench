@@ -30,9 +30,7 @@ describe("newReference — dependency tracking", () => {
     const upstream = newReference(() => ({ v: ++upstreamN }));
 
     const downstreamCreate = vi.fn((u: { v: number }) => ({ doubled: u.v * 2 }));
-    const downstream = newReference([upstream], (u) =>
-      downstreamCreate(u as { v: number }),
-    );
+    const downstream = newReference([upstream], (u) => downstreamCreate(u as { v: number }));
 
     expect(downstream().doubled).toBe(2);
     expect(downstream().doubled).toBe(2);

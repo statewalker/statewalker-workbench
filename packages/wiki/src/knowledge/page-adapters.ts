@@ -1,5 +1,5 @@
 import { type FilesApi, tryReadFile } from "@statewalker/webrun-files";
-import { ResourceAdapter } from "@statewalker/workspace";
+import { ResourceAdapter } from "@statewalker/workspace.core";
 import {
   fixedSizeList,
   float32,

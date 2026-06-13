@@ -41,7 +41,7 @@
     "@statewalker/ui.view.shadcn": "workspace:*",
     "@statewalker/shared-slots": "workspace:*",
     "@statewalker/webrun-files": "workspace:*",
-    "@statewalker/workspace": "workspace:*",
+    "@statewalker/workspace.core": "workspace:*",
     "lucide-react": "catalog:"
   },
   "peerDependencies": {

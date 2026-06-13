@@ -5,7 +5,7 @@ import {
   ProjectBuilder,
   type RegisteredBuilder,
   SOURCES_REMOVED_SIGNAL,
-} from "@statewalker/workspace";
+} from "@statewalker/workspace.core";
 import { type LlmApi, llmOf, wikiConfigOf } from "../llm/index.js";
 import { toBatch } from "../util/batch.js";
 import { WikiOutlierIndex, WikiTopicIndex } from "./indexes.js";

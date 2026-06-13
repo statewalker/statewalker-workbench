@@ -1,4 +1,4 @@
-import type { Project, Workspace } from "@statewalker/workspace";
+import type { Project, Workspace } from "@statewalker/workspace.core";
 import { assertWikiKey } from "./wiki-uri.js";
 
 /**

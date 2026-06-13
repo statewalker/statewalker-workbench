@@ -27,8 +27,8 @@
     "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/workspace": "workspace:*",
-    "@statewalker/workspace-bridge-react": "workspace:*",
+    "@statewalker/workspace.core": "workspace:*",
+    "@statewalker/workspace.view.react": "workspace:*",
     "lucide-react": "catalog:"
   },
   "peerDependencies": {

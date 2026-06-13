@@ -1,4 +1,4 @@
-import { getWorkspace } from "@statewalker/workspace";
+import { getWorkspace } from "@statewalker/workspace.core";
 import { WorkspaceBridgeManager } from "../internal/workspace-bridge.manager.js";
 import { WorkspaceShellAdapter } from "../internal/workspace-shell-adapter.js";
 

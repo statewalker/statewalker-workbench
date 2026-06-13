@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { ProjectBuilder, Workspace } from "@statewalker/workspace";
+import { ProjectBuilder, Workspace } from "@statewalker/workspace.core";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   CONTENT_SIGNAL,

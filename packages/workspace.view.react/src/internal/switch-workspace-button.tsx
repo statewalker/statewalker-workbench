@@ -1,7 +1,7 @@
 import { Commands } from "@statewalker/shared-commands";
 import { useAdapter } from "@statewalker/ui.view.react";
 import { Button } from "@statewalker/ui.view.shadcn";
-import { ChangeWorkspaceCommand, WorkspaceDisconnectCommand } from "@statewalker/workspace-bridge";
+import { ChangeWorkspaceCommand, WorkspaceDisconnectCommand } from "@statewalker/workspace.browser";
 import { LogOut } from "lucide-react";
 import type { ReactElement } from "react";
 

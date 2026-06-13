@@ -1,6 +1,6 @@
 import { Commands } from "@statewalker/shared-commands";
 import { useAppWorkspace } from "@statewalker/ui.view.react";
-import { LoadFileCommand } from "@statewalker/workspace";
+import { LoadFileCommand } from "@statewalker/workspace.core";
 import { type ReactElement, useEffect, useState } from "react";
 
 interface VideoViewProps {

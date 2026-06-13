@@ -1,5 +1,5 @@
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { ProjectBuilder, Workspace } from "@statewalker/workspace";
+import { ProjectBuilder, Workspace } from "@statewalker/workspace.core";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   contentBuilder,

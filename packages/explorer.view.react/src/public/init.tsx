@@ -20,7 +20,7 @@ import { Slots } from "@statewalker/shared-slots";
 import { type PanelPosition, ShowDockPanelCommand } from "@statewalker/shell.core";
 import { dockTabIconSlot } from "@statewalker/shell.view.react";
 import { compareByOrderAndId } from "@statewalker/ui.view.react";
-import { getWorkspace } from "@statewalker/workspace";
+import { getWorkspace } from "@statewalker/workspace.core";
 import { FolderOpen } from "lucide-react";
 import { FileExplorerPanel } from "../internal/file-explorer-panel.js";
 import { fileExplorerCatalog } from "./catalog.js";

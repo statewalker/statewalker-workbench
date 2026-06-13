@@ -9,7 +9,7 @@ import { defineRegistry } from "@statewalker/render.view.react";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { dockTabIconSlot } from "@statewalker/shell.view.react";
-import { getWorkspace } from "@statewalker/workspace";
+import { getWorkspace } from "@statewalker/workspace.core";
 import { FileImage } from "lucide-react";
 import { ImageView } from "../internal/image-view.js";
 import {

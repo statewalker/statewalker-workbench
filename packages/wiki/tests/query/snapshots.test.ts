@@ -1,5 +1,5 @@
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { Workspace } from "@statewalker/workspace";
+import { Workspace } from "@statewalker/workspace.core";
 import { beforeEach, describe, expect, it } from "vitest";
 import { type Answer, registerSnapshots, WikiSnapshotsAdapter } from "../../src/index.js";
 

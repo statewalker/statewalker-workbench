@@ -1,5 +1,5 @@
 import { Commands } from "@statewalker/shared-commands";
-import { ChangeWorkspaceCommand, getWorkspace } from "@statewalker/workspace";
+import { ChangeWorkspaceCommand, getWorkspace } from "@statewalker/workspace.core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorkspaceDisconnectCommand, WorkspaceReconnectCommand } from "../public/commands.js";
 import initWorkspaceBridge from "../public/init.js";

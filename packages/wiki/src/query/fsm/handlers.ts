@@ -1,4 +1,4 @@
-import { loggerOf, type Project } from "@statewalker/workspace";
+import { loggerOf, type Project } from "@statewalker/workspace.core";
 import { WikiPageSummary } from "../../knowledge/page-adapters.js";
 import type { DocumentMeta } from "../../knowledge/types.js";
 import {

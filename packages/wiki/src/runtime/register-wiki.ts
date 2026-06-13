@@ -5,7 +5,7 @@ import {
   type RegisteredBuilder,
   type Resource,
   type Workspace,
-} from "@statewalker/workspace";
+} from "@statewalker/workspace.core";
 import { contentBuilder, registerContentExtraction } from "../content/index.js";
 import {
   EMBEDDED_SIGNAL,

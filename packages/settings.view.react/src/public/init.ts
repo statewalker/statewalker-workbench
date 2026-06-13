@@ -2,7 +2,7 @@ import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { dockOverlaysSlot } from "@statewalker/shell.core";
 import { coreViewsSlot, type ViewComponent } from "@statewalker/ui.view.react";
-import { getWorkspace } from "@statewalker/workspace";
+import { getWorkspace } from "@statewalker/workspace.core";
 import { SettingsButton } from "../internal/settings-button.js";
 import { SettingsDialog } from "../internal/settings-dialog.js";
 

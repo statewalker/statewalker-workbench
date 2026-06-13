@@ -1,4 +1,4 @@
-import type { Workspace } from "@statewalker/workspace";
+import type { Workspace } from "@statewalker/workspace.core";
 import {
   type LlmApi,
   LlmProjectAdapter,

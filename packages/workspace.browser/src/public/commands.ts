@@ -15,7 +15,7 @@ export {
   ChangeWorkspaceCommand,
   type ChangeWorkspacePayload,
   type ChangeWorkspaceResult,
-} from "@statewalker/workspace";
+} from "@statewalker/workspace.core";
 
 /**
  * Empty payload type used by both reconnect/disconnect — neither

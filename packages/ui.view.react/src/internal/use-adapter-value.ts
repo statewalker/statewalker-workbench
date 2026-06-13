@@ -1,5 +1,5 @@
 import { useAdapter } from "@statewalker/ui.view.react";
-import type { AdapterCtor, WorkspaceAdapter } from "@statewalker/workspace";
+import type { AdapterCtor, WorkspaceAdapter } from "@statewalker/workspace.core";
 import { useSyncExternalStore } from "react";
 
 /**

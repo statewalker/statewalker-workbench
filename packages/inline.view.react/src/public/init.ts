@@ -1,7 +1,7 @@
 import { type InlineComponentDescriptor, inlineComponentSlot } from "@statewalker/inline.core";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
-import { getWorkspace } from "@statewalker/workspace";
+import { getWorkspace } from "@statewalker/workspace.core";
 import { ActionButton } from "../internal/components/action-button.js";
 import { DirectoryCard } from "../internal/components/directory-card.js";
 import { FileCard } from "../internal/components/file-card.js";

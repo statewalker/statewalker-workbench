@@ -1,4 +1,4 @@
-import type { Project } from "@statewalker/workspace";
+import type { Project } from "@statewalker/workspace.core";
 import type { Answer, EvidenceSection, QueryProgress } from "../progress.js";
 import { orderEvidence } from "./retrieval.js";
 

@@ -1,5 +1,5 @@
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
-import { Workspace } from "@statewalker/workspace";
+import { Workspace } from "@statewalker/workspace.core";
 import { describe, expect, it } from "vitest";
 import {
   CrossWikiRefError,

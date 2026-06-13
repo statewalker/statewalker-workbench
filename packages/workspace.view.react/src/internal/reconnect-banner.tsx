@@ -1,7 +1,7 @@
 import { Commands } from "@statewalker/shared-commands";
 import { useAdapter, useAdapterValue } from "@statewalker/ui.view.react";
 import { Button } from "@statewalker/ui.view.shadcn";
-import { WorkspaceReconnectCommand, WorkspaceShellAdapter } from "@statewalker/workspace-bridge";
+import { WorkspaceReconnectCommand, WorkspaceShellAdapter } from "@statewalker/workspace.browser";
 import { RefreshCw } from "lucide-react";
 import type { ReactElement } from "react";
 

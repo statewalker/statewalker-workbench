@@ -1,5 +1,5 @@
 {
-  "name": "@statewalker/workspace-bridge-react",
+  "name": "@statewalker/workspace.view.react",
   "version": "0.1.0",
   "private": false,
   "type": "module",
@@ -26,8 +26,8 @@
     "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/workspace": "workspace:*",
-    "@statewalker/workspace-bridge": "workspace:*",
+    "@statewalker/workspace.core": "workspace:*",
+    "@statewalker/workspace.browser": "workspace:*",
     "lucide-react": "catalog:"
   },
   "peerDependencies": {

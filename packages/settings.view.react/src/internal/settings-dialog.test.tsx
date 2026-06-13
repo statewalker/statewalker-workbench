@@ -10,7 +10,11 @@ import {
   type ViewComponent,
 } from "@statewalker/ui.view.react";
 import initCoreReact from "@statewalker/ui.view.react/fragment";
-import { getWorkspace, Workspace, type Workspace as WorkspaceType } from "@statewalker/workspace";
+import {
+  getWorkspace,
+  Workspace,
+  type Workspace as WorkspaceType,
+} from "@statewalker/workspace.core";
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { SettingsDialog } from "./settings-dialog.js";

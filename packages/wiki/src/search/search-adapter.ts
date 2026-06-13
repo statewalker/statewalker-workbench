@@ -21,7 +21,7 @@ import {
   type Resource,
   SOURCES_REMOVED_SIGNAL,
   type Workspace,
-} from "@statewalker/workspace";
+} from "@statewalker/workspace.core";
 import { writeJsonAtomic } from "../util/io.js";
 import { FilesIndexerPersistence } from "./files-persistence.js";
 
