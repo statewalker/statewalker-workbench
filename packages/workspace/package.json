@@ -16,7 +16,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./fragment": "./src/fragment.ts"
+    "./fragment": "./src/fragment.ts",
+    "./files-fragment": "./src/files-fragment.ts"
   },
   "files": [
     "src"
