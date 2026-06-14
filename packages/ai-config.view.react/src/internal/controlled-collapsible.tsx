@@ -31,7 +31,11 @@ export function ControlledCollapsible({
   const [open, setOpen] = useStateBinding<boolean>(props.openPath);
   const isOpen = open ?? false;
   return (
-    <Collapsible open={isOpen} onOpenChange={setOpen} className="rounded-lg border border-border">
+    <Collapsible
+      open={isOpen}
+      onOpenChange={setOpen}
+      className="w-full rounded-lg border border-border"
+    >
       <CollapsibleTrigger className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-accent/40">
         <span className={cn("text-muted-foreground transition-transform", isOpen && "rotate-90")}>
           ▸

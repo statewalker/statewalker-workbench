@@ -83,6 +83,11 @@ export function createConnectionsBridge(store: StateStore, aiConfig: AiConfig): 
     if (active && active.id !== loadedFormId) {
       store.set("/ui/form", formFromConnection(active));
       loadedFormId = active.id;
+      // Populate the saved key (async, from Secrets) so it's visible/editable.
+      const id = active.id;
+      void aiConfig.getApiKey(id).then((key) => {
+        if (loadedFormId === id) store.set("/ui/form/apiKey", key);
+      });
     } else if (!active) {
       loadedFormId = null;
     }

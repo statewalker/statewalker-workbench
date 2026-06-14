@@ -14,6 +14,14 @@ export interface SpecRendererProps {
    * default for self-contained single-component specs (dock panels).
    */
   store?: unknown;
+  /**
+   * Optional action-handler map (`{ [actionName]: (params) => void | Promise }`,
+   * held opaquely). Required for specs whose elements dispatch `on.<event>`
+   * actions: json-render's `ActionProvider` resolves handlers from here, NOT
+   * from the registry's action *schemas*. Without it, dispatched actions log
+   * "No handler registered" and do nothing.
+   */
+  handlers?: unknown;
 }
 
 /**
@@ -26,15 +34,17 @@ export interface SpecRendererProps {
  * `json:catalogs` slot deliberately hold them opaquely; the concrete
  * json-render types live only at this boundary.
  */
-export function SpecRenderer({ spec, registry, store }: SpecRendererProps): ReactElement {
+export function SpecRenderer({ spec, registry, store, handlers }: SpecRendererProps): ReactElement {
   // biome-ignore lint/suspicious/noExplicitAny: json-render's Spec/Registry types live behind `unknown` in our stores
   const Renderer$ = Renderer as any;
   // biome-ignore lint/suspicious/noExplicitAny: ditto for the registry shape
   const registry$ = registry as any;
   // biome-ignore lint/suspicious/noExplicitAny: the StateStore is held opaquely at this boundary
   const store$ = store as any;
+  // biome-ignore lint/suspicious/noExplicitAny: the handler map is held opaquely at this boundary
+  const handlers$ = handlers as any;
   return (
-    <JSONUIProvider registry={registry$} store={store$}>
+    <JSONUIProvider registry={registry$} store={store$} handlers={handlers$}>
       <Renderer$ spec={spec} registry={registry$} />
     </JSONUIProvider>
   );

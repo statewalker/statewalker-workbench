@@ -25,6 +25,9 @@ export abstract class AiConfig {
   /** Whether a non-empty API key is stored in `Secrets` for the connection.
    * Drives the remove-confirm gate (the secret worth protecting). */
   abstract hasKey(connectionId: string): Promise<boolean>;
+  /** The stored API key for a connection (from `Secrets`), or `""` when none.
+   * Used to populate the settings form so a saved key is visible/editable. */
+  abstract getApiKey(connectionId: string): Promise<string>;
   abstract onUpdate(cb: () => void): () => void;
 
   // ── writes ─────────────────────────────────────────────────────

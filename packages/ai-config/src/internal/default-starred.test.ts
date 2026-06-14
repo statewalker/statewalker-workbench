@@ -94,4 +94,24 @@ describe("applyDefaultStarred", () => {
   it("returns empty when no ids match", () => {
     expect(applyDefaultStarred("openai", ["claude-3-opus"])).toEqual([]);
   });
+
+  it("prefers the undated release alias over dated snapshots of the same family", () => {
+    expect(applyDefaultStarred("openai", ["gpt-4", "gpt-4-0613", "gpt-4-0314"])).toEqual(["gpt-4"]);
+    expect(applyDefaultStarred("openai", ["gpt-4o", "gpt-4o-2024-05-13"])).toEqual(["gpt-4o"]);
+  });
+
+  it("keeps one release per distinct family", () => {
+    expect(applyDefaultStarred("openai", ["gpt-4", "gpt-4-0613", "gpt-4o", "gpt-4-turbo"])).toEqual(
+      ["gpt-4", "gpt-4o", "gpt-4-turbo"],
+    );
+  });
+
+  it("keeps the latest dated snapshot when a family has no undated alias (anthropic)", () => {
+    expect(
+      applyDefaultStarred("anthropic", [
+        "claude-3-5-sonnet-20240620",
+        "claude-3-5-sonnet-20241022",
+      ]),
+    ).toEqual(["claude-3-5-sonnet-20241022"]);
+  });
 });

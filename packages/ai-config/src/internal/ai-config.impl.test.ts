@@ -87,8 +87,12 @@ describe("AiConfigImpl", () => {
     await cfg.upsertConnection({ id: "bare", type: "openai", name: "B", starredModelIds: [] });
     expect(await cfg.hasKey("keyed")).toBe(true);
     expect(await cfg.hasKey("bare")).toBe(false);
+    // getApiKey returns the stored key for display/edit, "" when none.
+    expect(await cfg.getApiKey("keyed")).toBe("sk-1");
+    expect(await cfg.getApiKey("bare")).toBe("");
     await cfg.removeConnection("keyed");
     expect(await cfg.hasKey("keyed")).toBe(false);
+    expect(await cfg.getApiKey("keyed")).toBe("");
   });
 
   it("disconnect clears the key, discovered models, and stars but keeps the shell", async () => {

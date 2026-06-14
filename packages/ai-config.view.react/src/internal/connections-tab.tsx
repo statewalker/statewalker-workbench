@@ -42,5 +42,5 @@ export function AiConfigConnectionsTab(): ReactElement {
     bridge.sync();
   }, [activeId, bridge]);
 
-  return <SpecRenderer spec={spec} registry={registry} store={store} />;
+  return <SpecRenderer spec={spec} registry={registry} store={store} handlers={handlers} />;
 }

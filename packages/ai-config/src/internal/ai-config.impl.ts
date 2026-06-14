@@ -64,6 +64,10 @@ export class AiConfigImpl extends AiConfig {
     const key = await this.secrets.get(apiKeySecretKey(connectionId));
     return typeof key === "string" && key.length > 0;
   }
+  async getApiKey(connectionId: string): Promise<string> {
+    const key = await this.secrets.get(apiKeySecretKey(connectionId));
+    return typeof key === "string" ? key : "";
+  }
   getModels(connectionId: string, capability?: Capability): DiscoveredModel[] {
     const models = this.getConnection(connectionId)?.discoveredModels ?? [];
     if (!capability) return models;
@@ -129,6 +133,10 @@ export class AiConfigImpl extends AiConfig {
     const models = await listConnectionModels(c, key ?? "");
     c.discoveredModels = models;
     c.discoveredAt = Date.now();
+    // Prune stars that no longer correspond to a discovered model — drops stale
+    // entries and any corruption (e.g. paths from a mis-resolved `$item` param).
+    const discovered = new Set(models.map((m) => m.id));
+    c.starredModelIds = c.starredModelIds.filter((id) => discovered.has(id));
     await this._persist();
     return models;
   }

@@ -87,7 +87,17 @@ export function buildActionHandlers(ctx: ActionHandlerContext): ConnectionsActio
         headers: headers.length > 0 ? headers : undefined,
         starredModelIds: conn.starredModelIds,
       });
-      await aiConfig.setApiKey(id, (f.apiKey as string) ?? "");
+      // Only write the key when the user actually typed one. A blank field on
+      // re-test means "keep the saved key" — never overwrite a stored secret
+      // with "" (that silently wiped keys after a reload, since the field is
+      // always blank). Require a key only when none is stored yet.
+      const formKey = ((f.apiKey as string) ?? "").trim();
+      if (formKey) {
+        await aiConfig.setApiKey(id, formKey);
+      } else if (!(await aiConfig.hasKey(id))) {
+        setForm({ testing: false, error: "An API key is required." });
+        return;
+      }
       const models = await aiConfig.refreshModels(id);
       if (conn.starredModelIds.length === 0) {
         const seed = applyDefaultStarred(
@@ -95,6 +105,15 @@ export function buildActionHandlers(ctx: ActionHandlerContext): ConnectionsActio
           models.map((m) => m.id),
         );
         if (seed.length > 0) await aiConfig.starModels(id, seed);
+      }
+      // Make the connection immediately usable: if nothing is active yet,
+      // select this connection's first starred model so the chat runtime can
+      // build (the composer lets the user switch later). Without this, a fresh
+      // workspace can't reach a "ready" runtime — the composer only renders
+      // inside a session, but creating one needs an active model.
+      if (!aiConfig.getActive().connectionId) {
+        const firstStar = aiConfig.getConnection(id)?.starredModelIds[0];
+        if (firstStar) await aiConfig.setActive(id, firstStar);
       }
       setForm({ testing: false, error: null, settingsOpen: false });
     } catch (err) {
@@ -130,7 +149,14 @@ export function buildActionHandlers(ctx: ActionHandlerContext): ConnectionsActio
     const id = activeId();
     const conn = aiConfig.getConnection(id);
     if (!conn) return;
-    const modelId = params.modelId as string;
+    // json-render resolves a `$item` action param to the item's state PATH (for
+    // two-way binding), not its value — so `params.modelId` arrives as e.g.
+    // `/persistent/active/models/3/id`. Dereference it to the real model id.
+    const ref = params.modelId as string;
+    const modelId = (typeof ref === "string" && ref.startsWith("/") ? store.get(ref) : ref) as
+      | string
+      | undefined;
+    if (!modelId) return;
     const next = conn.starredModelIds.includes(modelId)
       ? conn.starredModelIds.filter((m) => m !== modelId)
       : [...conn.starredModelIds, modelId];

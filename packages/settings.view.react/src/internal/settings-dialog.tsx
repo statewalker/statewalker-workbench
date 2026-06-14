@@ -49,14 +49,14 @@ export function SettingsDialog(): ReactElement | null {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => settings._setOpen(open)}>
-      <DialogContent className="h-[85vh] max-h-[85vh] w-[90vw] max-w-5xl overflow-hidden p-0 sm:max-w-5xl">
-        <DialogHeader className="border-b p-4 pb-3">
+      <DialogContent className="flex h-[85vh] max-h-[85vh] w-[90vw] max-w-5xl flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
+        <DialogHeader className="shrink-0 border-b p-4 pb-3">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
             Configure providers, models, and other workspace preferences.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex max-h-[70vh]">
+        <div className="flex min-h-0 flex-1">
           <nav className="w-44 shrink-0 border-r bg-muted/20 p-2">
             {sortedTabs.length === 0 ? (
               <p className="px-2 py-1 text-xs text-muted-foreground">

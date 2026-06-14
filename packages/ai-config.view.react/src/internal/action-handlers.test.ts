@@ -109,6 +109,8 @@ describe("connections action handlers", () => {
     expect(ctx.store.get("/ui/form/settingsOpen")).toBe(false);
     expect(ctx.store.get("/ui/form/error")).toBeNull();
     expect(await readConfigRaw(ctx.files)).not.toMatch(/sk-1/);
+    // Auto-selects a default active model so the chat runtime can build.
+    expect(ctx.aiConfig.getActive()).toEqual({ connectionId: id, modelId: "gpt-4o" });
   });
 
   it("connect failure surfaces the error, stays expanded, not connected, clears in-flight", async () => {
@@ -148,6 +150,58 @@ describe("connections action handlers", () => {
     });
     await ctx.h.connectConnection({});
     expect(ctx.store.get("/ui/form/error")).toMatch(/URL is required/);
+    expect(ctx.store.get("/ui/form/testing")).toBe(false);
+  });
+
+  it("re-test with a blank key keeps the saved key (never overwrites with empty)", async () => {
+    ctx.store.set("/ui/newConnectionType", "openai");
+    await ctx.h.addConnection({});
+    const id = ctx.aiConfig.listConnections()[0]?.id ?? "";
+    // First connect with a real key.
+    ctx.store.set("/ui/form", {
+      name: "OpenAI",
+      apiKey: "sk-saved",
+      url: "",
+      headers: [],
+      settingsOpen: true,
+      testing: false,
+      error: null,
+    });
+    stubFetch(okModels(["gpt-4o"]));
+    await ctx.h.connectConnection({});
+    expect(await ctx.secrets.get(apiKeySecretKey(id))).toBe("sk-saved");
+
+    // Re-test with the form key blank (as it is after a reload) — must KEEP the key.
+    ctx.store.set("/ui/form", {
+      name: "OpenAI",
+      apiKey: "",
+      url: "",
+      headers: [],
+      settingsOpen: true,
+      testing: false,
+      error: null,
+    });
+    stubFetch(okModels(["gpt-4o", "gpt-4.1"]));
+    await ctx.h.connectConnection({});
+    expect(await ctx.secrets.get(apiKeySecretKey(id))).toBe("sk-saved");
+    expect(ctx.store.get("/ui/form/error")).toBeNull();
+    expect(ctx.aiConfig.getModels(id).map((m) => m.id)).toContain("gpt-4.1");
+  });
+
+  it("connect requires a key only when none is stored yet", async () => {
+    ctx.store.set("/ui/newConnectionType", "openai");
+    await ctx.h.addConnection({});
+    ctx.store.set("/ui/form", {
+      name: "OpenAI",
+      apiKey: "",
+      url: "",
+      headers: [],
+      settingsOpen: true,
+      testing: false,
+      error: null,
+    });
+    await ctx.h.connectConnection({});
+    expect(ctx.store.get("/ui/form/error")).toMatch(/API key is required/);
     expect(ctx.store.get("/ui/form/testing")).toBe(false);
   });
 
@@ -222,6 +276,21 @@ describe("connections action handlers", () => {
     expect(ctx.aiConfig.getConnection(id)?.starredModelIds).toContain("custom-model");
     await ctx.h.toggleModelStar({ modelId: "custom-model" });
     expect(ctx.aiConfig.getConnection(id)?.starredModelIds).not.toContain("custom-model");
+  });
+
+  it("toggleModelStar dereferences a $item state-path param to the real model id", async () => {
+    // json-render hands a `$item` action param to the handler as the item's
+    // state PATH, not its value — the handler must dereference it.
+    ctx.store.set("/ui/newConnectionType", "openai");
+    await ctx.h.addConnection({});
+    const id = ctx.aiConfig.listConnections()[0]?.id ?? "";
+    ctx.store.set("/persistent/active/models", [{ id: "gpt-4o" }, { id: "gpt-4o-mini" }]);
+
+    await ctx.h.toggleModelStar({ modelId: "/persistent/active/models/1/id" });
+    expect(ctx.aiConfig.getConnection(id)?.starredModelIds).toEqual(["gpt-4o-mini"]);
+    expect(ctx.aiConfig.getConnection(id)?.starredModelIds).not.toContain(
+      "/persistent/active/models/1/id",
+    );
   });
 
   it("addHeader / removeHeader mutate the form headers", async () => {

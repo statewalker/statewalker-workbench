@@ -44,7 +44,12 @@ export function makeConnectionsSpec(): Spec {
     elements: {
       root: {
         type: "Stack",
-        props: { direction: "vertical", gap: "lg", className: "px-4 py-4" },
+        props: {
+          direction: "vertical",
+          gap: "lg",
+          align: "stretch",
+          className: "w-full px-4 py-4",
+        },
         children: ["title", "subtitle", "controlsRow", "activeBody", "emptyState", "confirmDialog"],
       },
 
@@ -90,7 +95,7 @@ export function makeConnectionsSpec(): Spec {
       // ── Active connection body ──────────────────────────────
       activeBody: {
         type: "Stack",
-        props: { direction: "vertical", gap: "lg" },
+        props: { direction: "vertical", gap: "lg", align: "stretch" },
         visible: { $state: "/persistent/active" },
         children: ["bodyHeaderRow", "bodyError", "settings", "modelsSection"],
       },
@@ -172,7 +177,7 @@ export function makeConnectionsSpec(): Spec {
       },
       settingsInner: {
         type: "Stack",
-        props: { direction: "vertical", gap: "md", className: "px-4 py-4" },
+        props: { direction: "vertical", gap: "md", align: "stretch", className: "px-4 py-4" },
         children: ["fName", "fApiKey", "fUrl", "settingsSep", "headersBlock"],
       },
       fName: {
@@ -208,7 +213,7 @@ export function makeConnectionsSpec(): Spec {
       settingsSep: { type: "Separator", props: { orientation: "horizontal" } },
       headersBlock: {
         type: "Stack",
-        props: { direction: "vertical", gap: "sm" },
+        props: { direction: "vertical", gap: "sm", align: "stretch" },
         children: ["headersLabel", "headersList", "addHeaderBtn"],
       },
       headersLabel: {
@@ -220,7 +225,7 @@ export function makeConnectionsSpec(): Spec {
       },
       headersList: {
         type: "Stack",
-        props: { direction: "vertical", gap: "sm" },
+        props: { direction: "vertical", gap: "sm", align: "stretch" },
         repeat: { statePath: "/ui/form/headers" },
         children: ["headerRow"],
       },
@@ -263,14 +268,14 @@ export function makeConnectionsSpec(): Spec {
       // ── Discovered-model list ───────────────────────────────
       modelsSection: {
         type: "Stack",
-        props: { direction: "vertical", gap: "sm" },
+        props: { direction: "vertical", gap: "sm", align: "stretch" },
         visible: { $state: "/persistent/active/connected", eq: true },
         children: ["modelsHeading", "modelsList"],
       },
       modelsHeading: { type: "Heading", props: { text: "Available models", level: "h3" } },
       modelsList: {
         type: "Stack",
-        props: { direction: "vertical", gap: "xs" },
+        props: { direction: "vertical", gap: "xs", align: "stretch" },
         repeat: { statePath: "/persistent/active/models" },
         children: ["modelRow"],
       },
