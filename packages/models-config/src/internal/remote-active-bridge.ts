@@ -1,4 +1,4 @@
-import type { ActiveModel } from "@statewalker/ai-agent-runtime";
+import type { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime";
 import type { AiConfig } from "@statewalker/ai-config";
 
 /**
@@ -37,4 +37,27 @@ export async function applyRemoteActive(
   } catch {
     // Bad/missing key or unbuildable provider — leave ActiveModel untouched.
   }
+}
+
+/**
+ * Single owner of the chat runtime's **empty-state** (`AgentRuntimeAdapter`
+ * `no-providers` / `no-active-model`). Call after every `ActiveModel` projection
+ * (remote via {@link applyRemoteActive}, local via the local-models bridge).
+ *
+ * When a model is active (remote or local), the `AgentRuntimeManager` owns the
+ * published state (`ready` / `error`), so this is a no-op. When nothing is
+ * active, it sets `no-providers` (no AiConfig connections) or `no-active-model`
+ * (connections exist but none selected) so the chat UI shows its placeholder
+ * instead of hanging on the default `loading` spinner. Previously owned by
+ * `ai-providers`' `providers.manager`; moved here so a single fragment owns
+ * both the remote and local projections.
+ */
+export function applyRuntimeEmptyState(
+  aiConfig: AiConfig,
+  activeModel: ActiveModel,
+  adapter: AgentRuntimeAdapter,
+): void {
+  if (activeModel.get()) return;
+  const hasConnections = aiConfig.listConnections().length > 0;
+  adapter._setState({ status: hasConnections ? "no-active-model" : "no-providers" });
 }

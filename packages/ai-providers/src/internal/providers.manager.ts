@@ -1,8 +1,3 @@
-import {
-  ActiveModel,
-  type ActiveModelValue,
-  AgentRuntimeAdapter,
-} from "@statewalker/ai-agent-runtime";
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
@@ -36,20 +31,20 @@ export interface ProvidersManagerOptions {
  *      (with automatic v1→v2→v3→v4 migration).
  *   2. For each Connection, builds a `ProviderDescriptor` and
  *      contributes it to the `providers:remote` slot.
- *   3. Resolves `config.active` against the slot snapshot and writes
- *      `ActiveModel`. Sets `AgentRuntimeAdapter` to `no-providers`
- *      / `no-active-model` when there's no resolvable selection.
  *
- * On `onUnload`: disposes slot contributions, clears `ActiveModel`,
- * resets the adapter to `loading`.
+ * On `onUnload`: disposes slot contributions and resets the config.
+ *
+ * The remote `ActiveModel` pointer and the runtime empty-state are owned by
+ * the AiConfig-driven projection in `models-config` (see
+ * `remote-active-bridge.ts`). This manager persists `providers.json` (including
+ * the `local` section the local-models bridge relies on) but no longer writes
+ * `ActiveModel` or `AgentRuntimeAdapter`.
  */
 export class ProvidersManager {
   private readonly workspace: Workspace;
   private readonly commands: Commands;
   private readonly slots: Slots;
   private readonly providers: Providers;
-  private readonly activeModel: ActiveModel;
-  private readonly adapter: AgentRuntimeAdapter;
   private readonly systemFolder: string;
   private readonly _cleanup: () => Promise<void>;
 
@@ -62,8 +57,6 @@ export class ProvidersManager {
     this.commands = opts.workspace.requireAdapter(Commands);
     this.slots = opts.workspace.requireAdapter(Slots);
     this.providers = opts.workspace.requireAdapter(Providers);
-    this.activeModel = opts.workspace.requireAdapter(ActiveModel);
-    this.adapter = opts.workspace.requireAdapter(AgentRuntimeAdapter);
 
     this.providers._setSystemFolder(this.systemFolder);
     this.providers._attach({
@@ -103,10 +96,7 @@ export class ProvidersManager {
       const config = await loadProvidersConfig(this.workspace.files, this.systemFolder);
       this._applyConfig(config);
     } catch (error) {
-      this.adapter._setState({
-        status: "error",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      console.error("[providers] failed to load providers.json:", error);
     }
   }
 
@@ -122,8 +112,6 @@ export class ProvidersManager {
     }
     this._slotCleanup = [];
     this.providers._setConfig(emptyProvidersConfig);
-    this.activeModel.clear();
-    this.adapter._setState({ status: "loading" });
   }
 
   // ── Imperative API (called by Providers.saveProviders / reload) ──
@@ -140,7 +128,7 @@ export class ProvidersManager {
     this._applyConfig(config);
   }
 
-  // ── Slot + ActiveModel writers ────────────────────────────────
+  // ── Slot + providers.json writers ─────────────────────────────
 
   private _applyConfig(config: ProvidersConfig): void {
     for (const dispose of this._slotCleanup) dispose();
@@ -152,41 +140,22 @@ export class ProvidersManager {
     }
 
     this.providers._setConfig(config);
-    this._applyActiveSelection(config.active);
   }
 
+  /**
+   * Persist the active selection into `providers.json`. The `local` case is
+   * relied upon by the `models-config` local-models bridge, which reads back
+   * `providers.config.active.providerId === "local"` on load. Remote selections
+   * are driven through `AiConfig` and projected to `ActiveModel` elsewhere; this
+   * persistence only keeps `providers.json` in sync.
+   */
   private async _persistActiveSelection(selection: SelectActiveModelPayload): Promise<void> {
-    if (!this._isLoaded) {
-      this._applyActiveSelection(selection);
-      return;
-    }
+    if (!this._isLoaded) return;
     const next: ProvidersConfig = {
       ...this.providers.config,
       active: { providerId: selection.providerId, modelId: selection.modelId },
     };
     await this._saveProviders(next);
-  }
-
-  private _applyActiveSelection(
-    selection: SelectActiveModelPayload | ProvidersConfig["active"],
-  ): void {
-    const { providerId, modelId } = selection;
-    // Local models are owned by the `models-config` fragment: it
-    // writes `ActiveModel { kind: "local" }` and drives activation.
-    // This manager only handles the remote-Connection case.
-    if (providerId === "local") return;
-    const resolved = resolveActive(
-      this.slots.getSnapshot(remoteProvidersSlot).slice(),
-      providerId,
-      modelId,
-    );
-    if (!resolved) {
-      const noProviders = this.slots.getSnapshot(remoteProvidersSlot).length === 0;
-      this.adapter._setState({
-        status: noProviders ? "no-providers" : "no-active-model",
-      });
-    }
-    this.activeModel.set(resolved);
   }
 }
 
@@ -207,24 +176,4 @@ function buildDescriptors(config: ProvidersConfig): ProviderDescriptor[] {
   // Dormant shells (cleared apiKey, no discoveredModels) produce no
   // `providers:remote` contribution. Re-Connect reintroduces them.
   return config.connections.filter(isConnected).map(buildDescriptor);
-}
-
-function resolveActive(
-  descriptors: readonly ProviderDescriptor[],
-  providerId: string | undefined,
-  modelId: string | undefined,
-): ActiveModelValue | null {
-  if (!providerId || !modelId) return null;
-  // `providerId === "local"` is handled by the local-models fragment
-  // by writing `ActiveModel` directly; this fragment only resolves
-  // remote connections.
-  if (providerId === "local") return null;
-  const descriptor = descriptors.find((d) => d.id === providerId);
-  if (!descriptor) return null;
-  return {
-    kind: "remote",
-    providerId,
-    modelId,
-    createProvider: () => descriptor.createProvider(),
-  };
 }

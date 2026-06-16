@@ -1,5 +1,5 @@
 import { composerActionsSlot } from "@repo/chat-mini.chat";
-import { ActiveModel } from "@statewalker/ai-agent-runtime";
+import { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime";
 import { AiConfig } from "@statewalker/ai-config";
 import {
   type LocalModelRef,
@@ -12,7 +12,7 @@ import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";
 import { Slots } from "@statewalker/shared-slots";
 import { getWorkspace } from "@statewalker/workspace.core";
-import { applyRemoteActive } from "../internal/remote-active-bridge.js";
+import { applyRemoteActive, applyRuntimeEmptyState } from "../internal/remote-active-bridge.js";
 import {
   COMPOSER_PICKER_VIEW_KEY,
   MODELS_CONFIG_LOCAL_TAB_ID,
@@ -41,6 +41,7 @@ export default function initModelsConfig(ctx: Record<string, unknown>): () => Pr
   const providers = workspace.requireAdapter(Providers);
   const activeModel = workspace.requireAdapter(ActiveModel);
   const aiConfig = workspace.requireAdapter(AiConfig);
+  const runtimeAdapter = workspace.requireAdapter(AgentRuntimeAdapter);
 
   // Lazy factory — only constructs once the workspace is open and
   // a consumer reaches for the adapter. Avoids touching
@@ -69,6 +70,21 @@ export default function initModelsConfig(ctx: Record<string, unknown>): () => Pr
     }),
   );
 
+  // Project the active selection into `ActiveModel`, then (single owner)
+  // refresh the runtime empty-state. `models-config` owns both the local and
+  // remote projections, so the `no-providers` / `no-active-model` computation
+  // lives here — formerly in `ai-providers`' `providers.manager`.
+  const selectLocal = (modelKey: string | undefined): void => {
+    void applyLocalSelection(workspace, providers, activeModel, modelKey).then(() =>
+      applyRuntimeEmptyState(aiConfig, activeModel, runtimeAdapter),
+    );
+  };
+  const projectRemote = (): void => {
+    void applyRemoteActive(aiConfig, activeModel).then(() =>
+      applyRuntimeEmptyState(aiConfig, activeModel, runtimeAdapter),
+    );
+  };
+
   // Command: select-active-model for the local case. The
   // `ai-providers` listener already claims this command but skips
   // `providerId === "local"`; here we observe-only and react when
@@ -77,7 +93,7 @@ export default function initModelsConfig(ctx: Record<string, unknown>): () => Pr
   register(
     commands.listen(SelectActiveModelCommand, (cmd) => {
       if (cmd.payload.providerId !== "local") return;
-      void applyLocalSelection(workspace, providers, activeModel, cmd.payload.modelId);
+      selectLocal(cmd.payload.modelId);
       // Observe-only: ai-providers' listener resolves the command.
     }),
   );
@@ -97,15 +113,15 @@ export default function initModelsConfig(ctx: Record<string, unknown>): () => Pr
       ) {
         return;
       }
-      void applyLocalSelection(workspace, providers, activeModel, active.modelId);
+      selectLocal(active.modelId);
     }),
   );
 
   // Reactive bridge: project `AiConfig`'s active remote selection into
   // `ActiveModel` (the chat runtime's build pointer). Fires on every
   // `AiConfig` update and on workspace load (persisted selection).
-  register(aiConfig.onUpdate(() => void applyRemoteActive(aiConfig, activeModel)));
-  register(workspace.onLoad(() => void applyRemoteActive(aiConfig, activeModel)));
+  register(aiConfig.onUpdate(projectRemote));
+  register(workspace.onLoad(projectRemote));
 
   return cleanup;
 }

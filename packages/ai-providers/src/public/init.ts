@@ -5,15 +5,13 @@ import { Providers } from "./providers.adapter.js";
 
 /**
  * Logic-fragment init for `providers`. Constructs the `Providers`
- * adapter (data) and the `ProvidersManager` (re-entrant
- * orchestrator). The manager owns reading providers.json,
- * contributing to `providers:remote`, and writing `ActiveModel` —
- * replaces the interim bootstrap that lived in agent-runtime
- * (Wave 4.1).
+ * adapter (data) and the `ProvidersManager` (re-entrant orchestrator
+ * that reads/writes `providers.json` and contributes to
+ * `providers:remote`). It is kept booted as the local-model
+ * persistence store; the remote `ActiveModel` pointer is owned by the
+ * AiConfig-driven projection in `models-config`.
  *
- * Boot order: register AFTER `initAgentRuntime` (this fragment
- * depends on `ActiveModel` and `AgentRuntimeAdapter` adapters being
- * registered). Per ADR 0002 (logic-only), no React imports.
+ * Per ADR 0002 (logic-only), no React imports.
  */
 export default function initProviders(ctx: Record<string, unknown>): () => Promise<void> {
   const workspace = getWorkspace(ctx);

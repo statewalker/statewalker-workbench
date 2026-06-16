@@ -1,9 +1,9 @@
-import { ActiveModel } from "@statewalker/ai-agent-runtime";
+import { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime";
 import { AiConfigImpl } from "@statewalker/ai-config";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { Secrets, Workspace } from "@statewalker/workspace.core";
 import { afterEach, describe, expect, it } from "vitest";
-import { applyRemoteActive } from "./remote-active-bridge.js";
+import { applyRemoteActive, applyRuntimeEmptyState } from "./remote-active-bridge.js";
 
 class FakeSecrets extends Secrets {
   private readonly map = new Map<string, unknown>();
@@ -70,5 +70,43 @@ describe("applyRemoteActive (AiConfig → ActiveModel bridge)", () => {
     const activeModel = new ActiveModel();
     await applyRemoteActive(cfg, activeModel);
     expect(activeModel.get()).toBeNull();
+  });
+});
+
+describe("applyRuntimeEmptyState (single owner of the runtime empty-state)", () => {
+  it("sets no-providers when there are no connections and no active model", async () => {
+    const cfg = await bootConfig();
+    const activeModel = new ActiveModel();
+    const adapter = new AgentRuntimeAdapter();
+    applyRuntimeEmptyState(cfg, activeModel, adapter);
+    expect(adapter.getState().status).toBe("no-providers");
+  });
+
+  it("sets no-active-model when connections exist but none is active", async () => {
+    const cfg = await bootConfig();
+    await cfg.upsertConnection(
+      { id: "c1", type: "openai", name: "OpenAI", starredModelIds: [] },
+      "sk-1",
+    );
+    const activeModel = new ActiveModel();
+    const adapter = new AgentRuntimeAdapter();
+    applyRuntimeEmptyState(cfg, activeModel, adapter);
+    expect(adapter.getState().status).toBe("no-active-model");
+  });
+
+  it("leaves the adapter alone when a local model is active", async () => {
+    const cfg = await bootConfig();
+    const activeModel = new ActiveModel();
+    activeModel.set({
+      kind: "local",
+      providerId: "local",
+      modelId: "smollm2",
+      // biome-ignore lint/suspicious/noExplicitAny: minimal stub for the test
+      createProvider: () => ({}) as any,
+    });
+    const adapter = new AgentRuntimeAdapter();
+    applyRuntimeEmptyState(cfg, activeModel, adapter);
+    // A model is active — the manager owns ready/error; we must not override it.
+    expect(adapter.getState().status).toBe("loading");
   });
 });
