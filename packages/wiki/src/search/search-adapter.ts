@@ -1,10 +1,4 @@
-import type {
-  DocumentPath,
-  EmbedFn,
-  Index,
-  Indexer,
-  SearchRequest,
-} from "@statewalker/indexer-api";
+import type { DocumentPath, Index, Indexer, SearchRequest } from "@statewalker/indexer-api";
 import {
   type FullTextBlock,
   type FulltextQuery,
@@ -15,6 +9,7 @@ import { newVectorAccess, type VectorBlock, type VectorQuery } from "@statewalke
 import { joinPath as concatPath } from "@statewalker/webrun-files";
 import {
   loggerOf,
+  type Project,
   ProjectAdapter,
   ProjectBuilder,
   type RegisteredBuilder,
@@ -44,13 +39,25 @@ export interface SearchBlock {
   embedding?: Float32Array;
 }
 
-/** Maps a source resource (and its project-relative uri) to its indexable blocks. */
-export type SearchBlocksProvider = (resource: Resource, uri: string) => Promise<SearchBlock[]>;
+/**
+ * Maps a source resource (and its project-relative uri) to its indexable blocks.
+ * The embedding `model` + `dimensionality` are passed in (resolved per-project by
+ * the adapter) so the provider can read the matching precomputed-embeddings sidecar.
+ */
+export type SearchBlocksProvider = (
+  resource: Resource,
+  uri: string,
+  model: string,
+  dimensionality: number,
+) => Promise<SearchBlock[]>;
 
 export interface SearchDeps {
-  embed: EmbedFn;
-  model: string;
-  dimensionality: number;
+  /** Per-project query embedder (the adapter stays provider/wiki-agnostic). */
+  embed: (project: Project, text: string) => Promise<Float32Array>;
+  /** Per-project embedding model reference. */
+  model: (project: Project) => string;
+  /** Per-project embedding dimensionality. */
+  dimensionality: (project: Project) => number;
   blocks: SearchBlocksProvider;
 }
 
@@ -100,6 +107,18 @@ export class SearchAdapter extends ProjectAdapter {
   private get opts(): AdapterOptions {
     return this.options as AdapterOptions;
   }
+  /** Embedding model reference, resolved per-project by the injected dep. */
+  private get model(): string {
+    return this.opts.model(this.project);
+  }
+  /** Embedding dimensionality, resolved per-project by the injected dep. */
+  private get dimensionality(): number {
+    return this.opts.dimensionality(this.project);
+  }
+  /** Embed a query through the injected per-project embedder. */
+  private embedQuery(text: string): Promise<Float32Array> {
+    return this.opts.embed(this.project, text);
+  }
   private get systemFolder(): string {
     return DEFAULT_SYSTEM_FOLDER;
   }
@@ -139,16 +158,16 @@ export class SearchAdapter extends ProjectAdapter {
         [FTS_SUB]: { type: "fulltext", language: "en" },
         [VEC_SUB]: {
           type: "vector",
-          dimensionality: this.opts.dimensionality,
-          model: this.opts.model,
+          dimensionality: this.dimensionality,
+          model: this.model,
         },
       },
     });
     // Record model + dimensionality only when the index is first created (the indexing
     // path) — a read-only query that loads an existing index must not write.
     await writeJsonAtomic(this.filesApi, this.configPath(), {
-      model: this.opts.model,
-      dimensionality: this.opts.dimensionality,
+      model: this.model,
+      dimensionality: this.dimensionality,
     });
     return created;
   }
@@ -184,7 +203,7 @@ export class SearchAdapter extends ProjectAdapter {
     await fullTextIndex.deleteDocuments([{ path }]);
     await vectorIndex.deleteDocuments([{ path }]);
 
-    const blocks = await this.opts.blocks(resource, uri);
+    const blocks = await this.opts.blocks(resource, uri, this.model, this.dimensionality);
     if (blocks.length > 0) {
       const ftsBlocks: FullTextBlock[] = blocks.map((b) => ({
         path,
@@ -228,7 +247,7 @@ export class SearchAdapter extends ProjectAdapter {
     }
     if (modes.includes("vector")) {
       vecAccess.setQuery(request, {
-        embeddings: [await this.opts.embed(query.query)],
+        embeddings: [await this.embedQuery(query.query)],
       } satisfies VectorQuery);
     }
 
@@ -243,7 +262,17 @@ export class SearchAdapter extends ProjectAdapter {
       });
       byDoc.set(uri, match);
     }
-    return [...byDoc.values()];
+    const results = [...byDoc.values()];
+    // Authoritative path scoping: the index's `paths` is a best-effort hint (and not
+    // honoured by every mode), so enforce the scope here. A path matches a document
+    // when it equals the uri (exact) or is an ancestor directory prefix.
+    if (query.paths && query.paths.length > 0) {
+      const prefixes = query.paths.map((p) => p.replace(/^\/+|\/+$/g, ""));
+      return results.filter((m) =>
+        prefixes.some((p) => p === "" || m.uri === p || m.uri.startsWith(`${p}/`)),
+      );
+    }
+    return results;
   }
 }
 

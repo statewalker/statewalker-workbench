@@ -127,7 +127,7 @@ describe("reorganizer — incremental LLM topic merge", () => {
 
     const tp = await h.topics();
     expect(tp.map((x) => x.key)).toEqual(["shared"]);
-    expect(tp[0]!.references.map((r) => r.uri).sort()).toEqual(["a.md#shared", "b.md#shared"]);
+    expect(tp[0]?.references.map((r) => r.uri).sort()).toEqual(["a.md#shared", "b.md#shared"]);
     expect(h.t.calls).not.toContain("reorganize-topics");
   });
 
@@ -161,7 +161,7 @@ describe("reorganizer — incremental LLM topic merge", () => {
     expect(h.t.calls).toContain("reorganize-topics");
     const tp = await h.topics();
     expect(tp.map((x) => x.key)).toEqual(["fund-performance"]);
-    expect(tp[0]!.references.map((r) => r.uri).sort()).toEqual([
+    expect(tp[0]?.references.map((r) => r.uri).sort()).toEqual([
       "a.md#fund-performance",
       "b.md#investment-fund-performance",
     ]);
@@ -260,6 +260,6 @@ describe("reorganizer — incremental LLM topic merge", () => {
 
     const tp = await h.topics();
     expect(tp.map((x) => x.key)).toEqual(["fresh"]);
-    expect(tp[0]!.references.map((r) => r.uri)).toEqual(["a.md#fresh"]);
+    expect(tp[0]?.references.map((r) => r.uri)).toEqual(["a.md#fresh"]);
   });
 });

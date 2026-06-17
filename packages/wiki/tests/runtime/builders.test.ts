@@ -14,7 +14,7 @@ import {
   WikiTopicIndex,
   wireWikiProject,
 } from "../../src/index.js";
-import { makeStubLlm } from "../util/stub-llm.js";
+import { makeStubLlm, seedWikiConfig } from "../util/stub-llm.js";
 
 const DIM = 2;
 const embed: EmbedFn = async (text) => {
@@ -95,18 +95,18 @@ describe("wiki builders — incremental behaviour", () => {
     t = tracker();
     t.topicByUri.set("a.md", "alpha");
     t.topicByUri.set("b.md", "bravo");
-    registerWiki(repository, {
-      llm: t.llm,
-      models: { default: "fx-model" },
-      embedModel: "fx",
-      dimensionality: DIM,
-    });
+    registerWiki(repository, { llm: t.llm });
   });
 
   async function openProject() {
     const workspace = repository;
     const project = await workspace.getProject("proj", true);
     if (!project) throw new Error("no project");
+    await seedWikiConfig(project, {
+      models: { default: "fx-model" },
+      embedModel: "fx",
+      dimensionality: DIM,
+    });
     return project;
   }
 
@@ -165,6 +165,25 @@ describe("wiki builders — incremental behaviour", () => {
     expect(await resource?.requireAdapter(WikiPageSummary).get()).toBeUndefined();
     expect(await resource?.requireAdapter(WikiPageMeta).get()).toBeUndefined();
     expect(await project.requireAdapter(WikiTopicIndex).get("bravo")).toBeUndefined();
+  });
+
+  it("prunes a newly-.indexignore'd source and re-indexes it when un-ignored", async () => {
+    const project = await openProject();
+    await scan(project);
+    expect(await project.requireAdapter(WikiTopicIndex).get("bravo")).toBeDefined();
+
+    // Ignore b.md: the next scan drops it from the source set → pruned like a deletion.
+    await writeFile(filesApi, "proj/.indexignore", "b.md\n");
+    await scan(project);
+    const resource = await project.getProjectResource("b.md");
+    expect(await resource?.requireAdapter(WikiPageSummary).get()).toBeUndefined();
+    expect(await project.requireAdapter(WikiTopicIndex).get("bravo")).toBeUndefined();
+
+    // Un-ignore: b.md re-enters the source set and is re-indexed.
+    await writeFile(filesApi, "proj/.indexignore", "");
+    await scan(project);
+    expect((await resource?.requireAdapter(WikiPageSummary).get())?.title).toBe("Bravo.");
+    expect(await project.requireAdapter(WikiTopicIndex).get("bravo")).toBeDefined();
   });
 
   it("dropping a topic on re-ingest updates the global topic index", async () => {

@@ -16,6 +16,8 @@ import { orderEvidence } from "./retrieval.js";
 /** The user's query as supplied to `ask`. */
 export interface QueryRequest {
   question: string;
+  /** Optional retrieval scope: project-relative path prefixes both front-ends honour. */
+  paths?: string[];
 }
 
 /** One distinct subject the prompt decomposes into, re-formulated as a search prompt. */

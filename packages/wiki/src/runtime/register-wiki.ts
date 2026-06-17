@@ -25,8 +25,9 @@ import {
   type LlmApi,
   LlmProjectAdapter,
   type LlmProvider,
-  type StageModelNames,
+  llmOf,
   WikiLlmConfiguration,
+  wikiConfigOf,
 } from "../llm/index.js";
 import { registerQuery } from "../query/index.js";
 import { registerSnapshots } from "../query/snapshots.js";
@@ -36,19 +37,15 @@ import {
   type SearchBlocksProvider,
   searchBuilder,
 } from "../search/index.js";
+import { buildIndexIgnore } from "./index-ignore.js";
+import { WikiNature } from "./wiki-nature.js";
 
 export interface WikiDeps {
-  /** Provider for the generic `LlmProjectAdapter` (production). Omit when `llm` is given. */
+  /** Provider for the generic `LlmProjectAdapter` (production) — typically the
+   * AiConfig provider registry. Omit when `llm` is given. */
   provider?: LlmProvider;
   /** Pre-built LLM adapter (test stub). Takes precedence over `provider`. */
   llm?: LlmApi;
-  /** Stage → model-name map for `WikiLlmConfiguration`. */
-  models: StageModelNames;
-  /** Embedding model name (part of the per-doc embeddings filename + index config). */
-  embedModel: string;
-  /** Embedding dimensionality. */
-  dimensionality: number;
-  corpusPurpose?: string;
   extractors?: ExtractorRegistry;
   clock?: () => string;
 }
@@ -64,25 +61,26 @@ export interface WikiBuildOptions {
  * each section's summary + raw text, with the section's precomputed embedding (read
  * from the Embedder's Arrow sidecar `embeddings.<model>.<dim>.arrow`) as the vector.
  */
-export function wikiSearchBlocks(model: string, dimensionality: number): SearchBlocksProvider {
-  return async (resource: Resource) => {
-    const summary = await resource.getAdapter(WikiPageSummary)?.get();
-    if (!summary) return [];
-    const raw = await resource.requireAdapter(ResourceTextContentCache).getTextContent();
-    const lines = raw.split("\n");
-    const vectors = await resource
-      .getAdapter(WikiPageEmbeddings)
-      ?.getVectors(model, dimensionality);
-    return summary.sections.map((s): SearchBlock => {
-      const rawBlock = lines.slice(s.startLine, s.endLine + 1).join("\n");
-      return {
-        blockId: s.key,
-        text: `${s.summary}\n${rawBlock}`,
-        embedding: vectors?.get(s.key),
-      };
-    });
-  };
-}
+export const wikiSearchBlocks: SearchBlocksProvider = async (
+  resource: Resource,
+  _uri: string,
+  model: string,
+  dimensionality: number,
+) => {
+  const summary = await resource.getAdapter(WikiPageSummary)?.get();
+  if (!summary) return [];
+  const raw = await resource.requireAdapter(ResourceTextContentCache).getTextContent();
+  const lines = raw.split("\n");
+  const vectors = await resource.getAdapter(WikiPageEmbeddings)?.getVectors(model, dimensionality);
+  return summary.sections.map((s): SearchBlock => {
+    const rawBlock = lines.slice(s.startLine, s.endLine + 1).join("\n");
+    return {
+      blockId: s.key,
+      text: `${s.summary}\n${rawBlock}`,
+      embedding: vectors?.get(s.key),
+    };
+  });
+};
 
 /** Build the generic LLM adapter from deps: a supplied stub, else a provider-backed one. */
 function resolveLlm(deps: WikiDeps): LlmApi {
@@ -103,28 +101,26 @@ export function registerWiki(workspace: Workspace, deps: WikiDeps): void {
   const registry = workspace.adaptersRegistry;
   // Core resource adapters (ContentRead/Write/Text), Project, and ProjectBuilder
   // self-host on the workspace model — no registration needed.
-  // Model access (generic) + model configuration (wiki-specific), as project adapters.
+  // Model access (generic) + model configuration (wiki-specific, per-project), as
+  // project adapters. `WikiLlmConfiguration` reads `.project/nature.wiki.json` per
+  // project via its `load()` (driven by `WikiNature`'s entry points).
   registry.register("project", LlmProjectAdapter, () => llm);
   registry.register(
     "project",
     WikiLlmConfiguration,
-    () =>
-      new WikiLlmConfiguration({
-        models: deps.models,
-        embedModel: deps.embedModel,
-        dimensionality: deps.dimensionality,
-        corpusPurpose: deps.corpusPurpose,
-      }),
+    (project) => new WikiLlmConfiguration(project),
   );
+  registry.register("project", WikiNature, (project) => new WikiNature(project));
   // Wiki adapters.
   registerContentExtraction(workspace, { registry: deps.extractors });
   registerKnowledgeAdapters();
+  // Search stays wiki-free: the per-project embedding model + dimensionality + query
+  // embedder are resolved here (where the wiki adapters are known) and injected.
   registerSearch(workspace, {
-    // Search embeds the query through the same LLM adapter the pipeline uses.
-    embed: (text) => llm.embed(text, deps.embedModel),
-    model: deps.embedModel,
-    dimensionality: deps.dimensionality,
-    blocks: wikiSearchBlocks(deps.embedModel, deps.dimensionality),
+    embed: (project, text) => llmOf(project).embed(text, wikiConfigOf(project).embedModel),
+    model: (project) => wikiConfigOf(project).embedModel,
+    dimensionality: (project) => wikiConfigOf(project).dimensionality,
+    blocks: wikiSearchBlocks,
   });
   registerQuery(workspace);
   registerSnapshots(workspace, { clock: deps.clock });
@@ -148,9 +144,11 @@ export function createWikiBuilders(opts: WikiBuildOptions = {}): RegisteredBuild
   ];
 }
 
-/** Attach the wiki builders to a project's `ProjectBuilder` and return it. */
+/** Attach the wiki builders to a project's `ProjectBuilder` and return it. The wiki's
+ * `.indexignore` matcher is injected into the generic source scan (recompiled per run). */
 export function wireWikiProject(project: Project, opts: WikiBuildOptions = {}): ProjectBuilder {
   const builder = project.requireAdapter(ProjectBuilder);
+  builder.configureSourceIgnore(() => buildIndexIgnore(project.workspace.files, project.path));
   for (const b of createWikiBuilders(opts)) builder.registerBuilder(b);
   return builder;
 }

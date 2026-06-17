@@ -9,7 +9,6 @@ import {
 } from "@statewalker/workspace.core";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
-  type EmbedFn,
   registerContentExtraction,
   registerSearch,
   SearchAdapter,
@@ -28,8 +27,6 @@ function vec(text: string): Float32Array {
   });
   return v;
 }
-// Query-time embedder (corpus vectors are precomputed on the blocks below).
-const embed: EmbedFn = async (text) => vec(text);
 
 // Fixture sections per source URI, each with a precomputed embedding (as the
 // Embedder stage would have produced).
@@ -48,7 +45,12 @@ function newRepository() {
   const filesApi = new MemFilesApi({ initialFiles: { "proj/a.md": "# A", "proj/b.md": "# B" } });
   const repository = new Workspace().setFileSystem(filesApi);
   registerContentExtraction(repository);
-  registerSearch(repository, { embed, model: "fixture", dimensionality: DIM, blocks });
+  registerSearch(repository, {
+    embed: async (_project, text) => vec(text),
+    model: () => "fixture",
+    dimensionality: () => DIM,
+    blocks,
+  });
   return repository;
 }
 
@@ -116,9 +118,9 @@ describe("SearchAdapter", () => {
     const repo2 = new Workspace().setFileSystem(filesApi);
     registerContentExtraction(repo2);
     registerSearch(repo2, {
-      embed,
-      model: "fixture",
-      dimensionality: DIM,
+      embed: async (_project, text) => vec(text),
+      model: () => "fixture",
+      dimensionality: () => DIM,
       blocks: async () => {
         throw new Error("block provider must not be called on a loaded index");
       },

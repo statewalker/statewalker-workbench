@@ -2,12 +2,13 @@ import { createDefaultRegistry } from "@statewalker/content-extractors";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { LoggerAdapter, type LoggerLevel, Workspace } from "@statewalker/workspace.core";
 import { stringify as stringifyYaml } from "yaml";
-import { costOf, roundUsd } from "../llm/index.js";
+import { costOf, roundUsd, type WikiConfigData, wikiConfigOf } from "../llm/index.js";
 import type { Answer } from "../query/index.js";
 import { type QueryProgress, WikiQuery } from "../query/index.js";
 import { PinoLoggerAdapter } from "./logger.js";
 import { resolveProvidersFromEnv } from "./providers.js";
 import { registerWiki, type WikiDeps, wireWikiProject } from "./register-wiki.js";
+import { wikiNatureOf } from "./wiki-nature.js";
 
 const LOG_LEVELS: readonly LoggerLevel[] = ["fatal", "error", "warn", "info", "debug", "trace"];
 
@@ -223,7 +224,7 @@ export async function runWikiCli(args: string[], deps: CliDeps): Promise<void> {
   // `scan <project> force` re-runs every stage even when the source hash is unchanged.
   const force = rest.includes("force");
   const wikiDeps: WikiDeps = {
-    ...providers,
+    provider: providers.provider,
     extractors: createDefaultRegistry(),
   };
   registerWiki(workspace, wikiDeps);
@@ -236,6 +237,18 @@ export async function runWikiCli(args: string[], deps: CliDeps): Promise<void> {
     emit({ command, project: projectKey, error: "project not found" });
     return;
   }
+
+  // The per-project model config now lives in `.project/nature.wiki.json` (the same
+  // file the app uses). Seed it from env on first scan; otherwise load the existing
+  // file so the synchronous builders/query resolve their per-project models.
+  const envConfig: WikiConfigData = {
+    models: providers.models,
+    embedModel: providers.embedModel,
+    dimensionality: providers.dimensionality,
+  };
+  const nature = wikiNatureOf(project);
+  if (await nature.exists()) await wikiConfigOf(project).load();
+  else await nature.initialize(envConfig);
 
   switch (command) {
     case "scan": {

@@ -1,6 +1,7 @@
 // Coverage for the generic LlmProjectAdapter (structured generation usage +
 // maxOutputTokens forwarding, embeddings) and the wiki-specific WikiLlmConfiguration
 // stage→model-name resolution.
+import type { Project } from "@statewalker/workspace.core";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { LlmProjectAdapter, type LlmProvider, WikiLlmConfiguration } from "../../src/index.js";
@@ -28,11 +29,13 @@ const outputSchema = z.object({ a: z.string() });
 
 describe("WikiLlmConfiguration — stage→model resolution", () => {
   it("returns the stage model when set, else falls back to default", () => {
-    const cfg = new WikiLlmConfiguration({
-      models: { default: "model-a", summarize: "model-b" },
-      embedModel: "embed-x",
-      dimensionality: 3,
-      corpusPurpose: "purpose",
+    const cfg = new WikiLlmConfiguration({} as unknown as Project, {
+      config: {
+        models: { default: "model-a", summarize: "model-b" },
+        embedModel: "embed-x",
+        dimensionality: 3,
+        corpusPurpose: "purpose",
+      },
     });
     expect(cfg.modelFor("summarize")).toBe("model-b");
     expect(cfg.modelFor("meta")).toBe("model-a");

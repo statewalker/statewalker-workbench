@@ -151,8 +151,8 @@ describe("meta + graph builders", () => {
     expect(meta?.topics.map((t) => t.key)).toEqual(["company-founders"]);
 
     const graph = await resource.requireAdapter(WikiPageGraph).get();
-    expect(graph?.sections[0]!.entities.map((e) => e.value)).toEqual(["Acme"]);
+    expect(graph?.sections[0]?.entities.map((e) => e.value)).toEqual(["Acme"]);
     // The orphan-subject statement ("Ghost") was dropped by validation.
-    expect(graph?.sections[0]!.statements).toEqual([["Acme", "makes", "widgets"]]);
+    expect(graph?.sections[0]?.statements).toEqual([["Acme", "makes", "widgets"]]);
   });
 });

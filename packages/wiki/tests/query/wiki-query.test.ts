@@ -137,7 +137,12 @@ async function buildProject() {
     embedModel: "fixture",
     dimensionality: DIM,
   });
-  registerSearch(repository, { embed, model: "fixture", dimensionality: DIM, blocks });
+  registerSearch(repository, {
+    embed: async (_project, text) => embed(text),
+    model: () => "fixture",
+    dimensionality: () => DIM,
+    blocks,
+  });
   registerQuery(repository);
 
   const workspace = repository;

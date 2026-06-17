@@ -13,8 +13,13 @@ export { QueryProgress } from "./progress.js";
  * adapters (`llmOf` / `wikiConfigOf`); no model deps are injected here.
  */
 export class WikiQuery extends ProjectAdapter {
-  ask(question: string): QueryProgress {
-    return runQuery(this.project, question);
+  /**
+   * Ask a question. An optional `{ paths }` scope (project-relative path prefixes)
+   * restricts retrieval to matching resources on both front-ends; omitting it keeps
+   * the whole-corpus behaviour.
+   */
+  ask(question: string, opts?: { paths?: string[] }): QueryProgress {
+    return runQuery(this.project, question, opts);
   }
 }
 

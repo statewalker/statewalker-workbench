@@ -37,6 +37,7 @@ import {
   readClassIndexes,
   renderFoldSection,
   sectionId,
+  withinScope,
 } from "./retrieval.js";
 import {
   composeInputSchema,
@@ -264,6 +265,7 @@ export const RetrieveTrigger: QueryHandler = async function* (ctx) {
   const llm = llmOf(project);
   const cfg = wikiConfigOf(project);
   const { subjects } = ctx.intent;
+  const paths = ctx.request.paths;
   const search = project.getAdapter(SearchAdapter);
   const metaCache = new Map<string, DocumentMeta | undefined>();
 
@@ -290,11 +292,17 @@ export const RetrieveTrigger: QueryHandler = async function* (ctx) {
   await Promise.all(
     subjects.map(async (subject, i) => {
       const [searchHits, ladderHits] = await Promise.all([
-        search ? hybridSearch(search, subject.prompt) : Promise.resolve([]),
+        search ? hybridSearch(search, subject.prompt, paths) : Promise.resolve([]),
         classLadder(project, llm, cfg, progress, subject.prompt, metaCache),
       ]);
       record(searchHits, "search", i);
-      record(ladderHits, "ladder", i);
+      // The topic ladder descends to whole documents; keep only in-scope sections so
+      // the scope restricts both front-ends, not just hybrid search.
+      record(
+        ladderHits.filter((h) => withinScope(h.uri, paths)),
+        "ladder",
+        i,
+      );
     }),
   );
 

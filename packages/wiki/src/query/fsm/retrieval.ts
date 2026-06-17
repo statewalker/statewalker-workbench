@@ -75,12 +75,25 @@ export async function buildDocTopicCandidates(
   return [...byUri.values()];
 }
 
+/**
+ * Whether `uri` falls under any of `paths` (component-boundary prefix match, the
+ * same semantics the search index applies). An empty/omitted scope matches everything.
+ */
+export function withinScope(uri: string, paths?: string[]): boolean {
+  if (!paths || paths.length === 0) return true;
+  return paths.some((p) => {
+    const prefix = p.replace(/\/+$/, "");
+    return uri === prefix || uri.startsWith(`${prefix}/`);
+  });
+}
+
 /** Mechanical hybrid (FTS + vector) search for one subject prompt → candidate sections. */
 export async function hybridSearch(
   search: SearchAdapter,
   subjectPrompt: string,
+  paths?: string[],
 ): Promise<{ uri: string; sectionKey: string }[]> {
-  const matches = await search.search({ query: subjectPrompt, modes: ["fts", "vector"] });
+  const matches = await search.search({ query: subjectPrompt, modes: ["fts", "vector"], paths });
   const out: { uri: string; sectionKey: string }[] = [];
   for (const m of matches) {
     for (const s of m.sections) out.push({ uri: m.uri, sectionKey: s.sectionKey });

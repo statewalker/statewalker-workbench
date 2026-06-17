@@ -1,10 +1,27 @@
-import type { Workspace } from "@statewalker/workspace.core";
+import type { Project, Workspace } from "@statewalker/workspace.core";
 import {
   type LlmApi,
   LlmProjectAdapter,
   type StageModelNames,
+  type WikiConfigData,
   WikiLlmConfiguration,
+  wikiConfigOf,
 } from "../../src/index.js";
+
+/** Build a stub per-project wiki config from loose options (test defaults). */
+function stubConfig(opts: {
+  models?: StageModelNames;
+  embedModel?: string;
+  dimensionality?: number;
+  corpusPurpose?: string;
+}): WikiConfigData {
+  return {
+    models: opts.models ?? { default: "stub-model" },
+    embedModel: opts.embedModel ?? "fixture",
+    dimensionality: opts.dimensionality ?? 2,
+    corpusPurpose: opts.corpusPurpose,
+  };
+}
 
 export interface StubLlmOptions {
   /** Stands in for structured generation — usually a `switch (spec.name)`. */
@@ -41,17 +58,28 @@ export function makeStubLlm(opts: {
  */
 export function registerStubLlm(repository: Workspace, opts: StubLlmOptions): LlmApi {
   const llm = makeStubLlm(opts);
+  const config = stubConfig(opts);
   repository.adaptersRegistry.register("project", LlmProjectAdapter, () => llm);
+  // Inject the config via `options.config` so the per-project adapter resolves it
+  // synchronously without a file (mirrors how the app seeds defaults).
   repository.adaptersRegistry.register(
     "project",
     WikiLlmConfiguration,
-    () =>
-      new WikiLlmConfiguration({
-        models: opts.models ?? { default: "stub-model" },
-        embedModel: opts.embedModel ?? "fixture",
-        dimensionality: opts.dimensionality ?? 2,
-        corpusPurpose: opts.corpusPurpose,
-      }),
+    (project) => new WikiLlmConfiguration(project, { config }),
   );
   return llm;
+}
+
+/** Write a project's `.project/nature.wiki.json` (and cache it), for tests that go
+ * through the real `registerWiki` (no injected config). */
+export function seedWikiConfig(
+  project: Project,
+  opts: {
+    models?: StageModelNames;
+    embedModel?: string;
+    dimensionality?: number;
+    corpusPurpose?: string;
+  } = {},
+): Promise<void> {
+  return wikiConfigOf(project).write(stubConfig(opts));
 }

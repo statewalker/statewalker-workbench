@@ -11,7 +11,8 @@ export { costOf, type LlmCallCost, roundUsd, sumCosts } from "./pricing.js";
 export {
   type ModelStage,
   type StageModelNames,
-  type WikiLlmConfigOptions,
+  WIKI_NATURE_FILE,
+  type WikiConfigData,
   WikiLlmConfiguration,
   wikiConfigOf,
 } from "./wiki-config.js";

@@ -18,7 +18,7 @@ import {
   WikiTopicIndex,
   wireWikiProject,
 } from "../../src/index.js";
-import { makeStubLlm } from "../util/stub-llm.js";
+import { makeStubLlm, seedWikiConfig } from "../util/stub-llm.js";
 
 const DIM = 2;
 const embed: EmbedFn = async (text) => {
@@ -131,16 +131,16 @@ describe.each(["mem", "node"] as const)("registerWiki end-to-end (%s FilesApi)",
   it("scans a project into a queryable wiki", async () => {
     const filesApi = await makeFilesApi(kind);
     const repository = new Workspace().setFileSystem(filesApi);
-    registerWiki(repository, {
-      llm,
-      models: { default: "fixture-model" },
-      embedModel: "fixture",
-      dimensionality: DIM,
-    });
+    registerWiki(repository, { llm });
 
     const workspace = repository;
     const project = await workspace.getProject("proj", true);
     if (!project) throw new Error("no project");
+    await seedWikiConfig(project, {
+      models: { default: "fixture-model" },
+      embedModel: "fixture",
+      dimensionality: DIM,
+    });
     await writeFile(filesApi, "proj/a.md", "Acme is a company.");
 
     const builder = wireWikiProject(project);

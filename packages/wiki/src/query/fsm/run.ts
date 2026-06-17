@@ -14,10 +14,14 @@ import { QUERY_FSM } from "./query-fsm.js";
  * Returns a `QueryProgress` synchronously; transitions proceed asynchronously and
  * the result surfaces on it (await `progress.complete()`).
  */
-export function runQuery(project: Project, question: string): QueryProgress {
+export function runQuery(
+  project: Project,
+  question: string,
+  opts?: { paths?: string[] },
+): QueryProgress {
   const progress = new QueryProgress();
   const log = loggerOf(project, "QueryFsm");
-  const ctx = new QueryContext(project, { question }, progress);
+  const ctx = new QueryContext(project, { question, paths: opts?.paths }, progress);
   log.info("query start", { question });
   // Trace every state entry (and the event that drove it) so a stall is visible —
   // the last logged state is where the pipeline is stuck.
