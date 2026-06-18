@@ -7,6 +7,7 @@ import { ActiveModel } from "../public/active-model.js";
 import {
   agentMcpConnectionsSlot,
   agentSkillsSlot,
+  agentSystemPromptSlot,
   agentToolsSlot,
 } from "../public/extension-points.js";
 import { AgentRuntimeAdapter } from "../public/runtime-state.js";
@@ -161,6 +162,37 @@ describe("AgentRuntimeManager", () => {
     expect(buildSpy.mock.calls[3]?.[0].mcpServers).toEqual({
       fs: { command: "node", args: [] },
     });
+
+    await manager.close();
+  });
+
+  it("appends agent:system-prompt contributions to the base prompt", async () => {
+    const ws = makeWorkspace();
+    const slots = ws.requireAdapter(Slots);
+    const createAgent = vi.fn((_args: { systemPrompt: string }) => ({}) as Agent);
+    const buildSpy = vi.fn(
+      async (_: BuildRuntimeInput) => ({ createAgent }) as unknown as AgentRuntime,
+    );
+    const manager = new AgentRuntimeManager({ workspace: ws, buildRuntime: buildSpy });
+    const activeModel = ws.requireAdapter(ActiveModel);
+
+    const lastPrompt = (): string => {
+      const args = createAgent.mock.calls.at(-1);
+      if (!args) throw new Error("createAgent was not called");
+      return args[0].systemPrompt;
+    };
+
+    await ws.open();
+    activeModel.set(fakeActiveModel());
+    await vi.runAllTimersAsync();
+    const base = lastPrompt();
+    expect(base.length).toBeGreaterThan(0);
+
+    // A contributed block is appended after the base prompt; no other change.
+    const BLOCK = "Prefer the wiki tools for project questions.";
+    slots.provide(agentSystemPromptSlot, BLOCK);
+    await vi.runAllTimersAsync();
+    expect(lastPrompt()).toBe(`${base}\n\n${BLOCK}`);
 
     await manager.close();
   });

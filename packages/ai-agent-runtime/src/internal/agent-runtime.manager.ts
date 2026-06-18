@@ -7,6 +7,7 @@ import { RebuildAgentCommand } from "../public/commands.js";
 import {
   agentMcpConnectionsSlot,
   agentSkillsSlot,
+  agentSystemPromptSlot,
   agentToolsSlot,
 } from "../public/extension-points.js";
 import { AgentRuntimeAdapter, type RuntimeState } from "../public/runtime-state.js";
@@ -71,6 +72,7 @@ export class AgentRuntimeManager {
   private _toolsSnap: readonly AgentToolContribution[] = [];
   private _skillsSnap: readonly AgentSkillContribution[] = [];
   private _mcpSnap: readonly AgentMcpConnection[] = [];
+  private _promptSnap: readonly string[] = [];
 
   private _cycleCleanup: () => Promise<void> = async () => {};
 
@@ -145,6 +147,12 @@ export class AgentRuntimeManager {
         this._scheduleRebuild();
       }),
     );
+    register(
+      this.slots.observe(agentSystemPromptSlot, (vs) => {
+        this._promptSnap = vs;
+        this._scheduleRebuild();
+      }),
+    );
     register(this.activeModel.onUpdate(() => this._scheduleRebuild()));
 
     // Initial state: `loading` until the first rebuild settles.
@@ -164,6 +172,7 @@ export class AgentRuntimeManager {
     this._toolsSnap = [];
     this._skillsSnap = [];
     this._mcpSnap = [];
+    this._promptSnap = [];
     this.adapter._setState({ status: "loading" });
   }
 
@@ -205,9 +214,14 @@ export class AgentRuntimeManager {
         // Cycle changed under us; discard.
         return;
       }
+      // Fragment-contributed steering blocks are appended to the base prompt; the
+      // session's ContextWindow appends the skills section after this template.
+      const systemPrompt = [DEFAULT_SYSTEM_PROMPT, ...this._promptSnap]
+        .filter((b) => b.trim().length > 0)
+        .join("\n\n");
       const agent = runtime.createAgent({
         name: AGENT_NAME,
-        systemPrompt: DEFAULT_SYSTEM_PROMPT,
+        systemPrompt,
         defaultModel: active.modelId,
       });
       this._publish(generation, {
