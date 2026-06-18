@@ -1,4 +1,5 @@
 import type { EmbedFn } from "@statewalker/indexer-api";
+import { Commands } from "@statewalker/shared-commands";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { type Project, Workspace } from "@statewalker/workspace.core";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -7,6 +8,8 @@ import {
   type DocumentMetaOutput,
   type DocumentSummaryOutput,
   type LlmApi,
+  OpenWikiSiteCommand,
+  type OpenWikiSitePayload,
   registerWiki,
   wikiTocOf,
   wireWikiProject,
@@ -156,5 +159,24 @@ describe("createWikiSiteTools", () => {
       execOpts,
     );
     expect(res.error).toContain("ghost");
+  });
+
+  it("generate_site dispatches wiki:open-site for the generated site", async () => {
+    const tools = createWikiSiteTools(workspace);
+    await tools.save_toc?.execute?.(
+      { wiki: "proj", slug: "themes", markdown: "# Acme\n\n## Founders\nWho founded Acme?\n" },
+      execOpts,
+    );
+    const opened: OpenWikiSitePayload[] = [];
+    const off = workspace.requireAdapter(Commands).listen(OpenWikiSiteCommand, (command) => {
+      opened.push(command.payload);
+      command.resolve();
+      return true;
+    });
+
+    await tools.generate_site?.execute?.({ wiki: "proj", tocSlug: "themes" }, execOpts);
+    await new Promise((resolve) => setTimeout(resolve, 0)); // settle the fire-and-forget dispatch
+    expect(opened).toEqual([{ project: "proj", slug: "themes" }]);
+    off();
   });
 });

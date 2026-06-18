@@ -1,8 +1,10 @@
+import { Commands } from "@statewalker/shared-commands";
 import { joinPath as concatPath } from "@statewalker/webrun-files";
 import type { Project, Workspace } from "@statewalker/workspace.core";
 import { type ToolSet, tool } from "ai";
 import { z } from "zod";
 import { wikiNatureOf } from "../runtime/wiki-nature.js";
+import { OpenWikiSiteCommand } from "./site-commands.js";
 import { SITES_DIR, wikiSiteOf } from "./wiki-site.js";
 import { wikiTocOf } from "./wiki-toc.js";
 
@@ -113,6 +115,16 @@ export function createWikiSiteTools(workspace: Workspace): ToolSet {
           return result;
         }
         result.indexUri = `file://${concatPath(project.path, SITES_DIR, tocSlug, "index.md")}`;
+        // Best-effort: open the freshly generated site in the renderer panel. The
+        // handler lives in `@statewalker/wiki.view.react`; unhandled in headless/CLI.
+        try {
+          void workspace
+            .requireAdapter(Commands)
+            .call(OpenWikiSiteCommand, { project: wiki, slug: tocSlug })
+            .promise.catch(() => {});
+        } catch {
+          /* no Commands adapter — ignore */
+        }
         return result;
       },
     }),
