@@ -153,10 +153,17 @@ export function createWikiBuilders(opts: WikiBuildOptions = {}): RegisteredBuild
   ];
 }
 
+/** Changed sources indexed per scan batch. Each batch traverses the whole pipeline
+ * — so `topics.json`, `outliers.json`, and the search index are dumped — before the
+ * next batch is scanned, making already-indexed documents searchable mid-build. */
+const WIKI_SCAN_BATCH_SIZE = 16;
+
 /** Attach the wiki builders to a project's `ProjectBuilder` and return it. The wiki's
- * `.indexignore` matcher is injected into the generic source scan (recompiled per run). */
+ * `.indexignore` matcher is injected into the generic source scan (recompiled per run).
+ * Source scanning is batched so the global indexes are persisted incrementally. */
 export function wireWikiProject(project: Project, opts: WikiBuildOptions = {}): ProjectBuilder {
   const builder = project.requireAdapter(ProjectBuilder);
+  builder.configureYield({ scanBatchSize: WIKI_SCAN_BATCH_SIZE });
   builder.configureSourceIgnore(() => buildIndexIgnore(project.workspace.files, project.path));
   for (const b of createWikiBuilders(opts)) builder.registerBuilder(b);
   return builder;
