@@ -3,6 +3,7 @@ import {
   type BuildProgress,
   type BuildStatus,
   DEFAULT_SYSTEM_FOLDER,
+  loggerOf,
   type Project,
   ProjectAdapter,
 } from "@statewalker/workspace.core";
@@ -110,6 +111,7 @@ export class WikiNature extends ProjectAdapter {
     const config = this.config;
     const filesApi = this.filesApi;
     const lockPath = this.lockPath();
+    const log = loggerOf(this.project, "WikiScan");
     let stopped = false;
     return {
       run: async function* run(): AsyncGenerator<BuildProgress> {
@@ -117,7 +119,11 @@ export class WikiNature extends ProjectAdapter {
         // Best-effort per-project lease: skip when another writer (tab/CLI) is already
         // indexing this project; otherwise hold + heartbeat the lease for the build.
         const lock = new ScanLock(filesApi, lockPath, { holderId: HOLDER_ID });
-        if (!(await lock.tryAcquire())) return;
+        if (!(await lock.tryAcquire())) {
+          log.debug("scan skipped: lease held by another writer");
+          return;
+        }
+        log.debug("scan started", { holderId: HOLDER_ID, embeddings: config.hasEmbeddings });
         const renew = setInterval(() => void lock.renew(), DEFAULT_RENEW_MS);
         try {
           for await (const progress of builder.run()) {
@@ -127,6 +133,7 @@ export class WikiNature extends ProjectAdapter {
         } finally {
           clearInterval(renew);
           await lock.release();
+          log.debug("scan finished", { stopped });
         }
       },
       status: () => builder.status(),
