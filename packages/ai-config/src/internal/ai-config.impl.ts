@@ -9,6 +9,7 @@ import {
   type DiscoveredModel,
   emptyAiConfigData,
 } from "../public/types.js";
+import { capabilitiesFor } from "./capabilities.js";
 import { listConnectionModels } from "./discovery.js";
 import { buildProvider } from "./provider-build.js";
 import { loadAiConfig, saveAiConfig } from "./store.js";
@@ -71,7 +72,10 @@ export class AiConfigImpl extends AiConfig {
   getModels(connectionId: string, capability?: Capability): DiscoveredModel[] {
     const models = this.getConnection(connectionId)?.discoveredModels ?? [];
     if (!capability) return models;
-    return models.filter((m) => (m.capabilities ?? ["chat"]).includes(capability));
+    // Fall back to id-based inference (mirrors the view layer) when a discovered model
+    // carries no persisted capability tags — so e.g. `text-embedding-*` is recognised as
+    // embedding-capable even if it was discovered before tagging existed.
+    return models.filter((m) => (m.capabilities ?? capabilitiesFor(m.id)).includes(capability));
   }
   async getProvider(connectionId: string): Promise<ProviderV3> {
     const c = this.getConnection(connectionId);
@@ -120,9 +124,11 @@ export class AiConfigImpl extends AiConfig {
     const c = this.getConnection(connectionId);
     if (!c) return;
     await this.secrets.delete(apiKeySecretKey(connectionId));
-    c.discoveredModels = undefined;
-    c.discoveredAt = undefined;
-    c.starredModelIds = [];
+    this.patchConnection(connectionId, {
+      discoveredModels: undefined,
+      discoveredAt: undefined,
+      starredModelIds: [],
+    });
     await this._persist();
   }
 
@@ -131,12 +137,14 @@ export class AiConfigImpl extends AiConfig {
     if (!c) throw new Error(`AiConfig: no connection "${connectionId}"`);
     const key = (await this.secrets.get(apiKeySecretKey(connectionId))) as string | undefined;
     const models = await listConnectionModels(c, key ?? "");
-    c.discoveredModels = models;
-    c.discoveredAt = Date.now();
     // Prune stars that no longer correspond to a discovered model — drops stale
     // entries and any corruption (e.g. paths from a mis-resolved `$item` param).
     const discovered = new Set(models.map((m) => m.id));
-    c.starredModelIds = c.starredModelIds.filter((id) => discovered.has(id));
+    this.patchConnection(connectionId, {
+      discoveredModels: models,
+      discoveredAt: Date.now(),
+      starredModelIds: c.starredModelIds.filter((id) => discovered.has(id)),
+    });
     await this._persist();
     return models;
   }
@@ -147,13 +155,22 @@ export class AiConfigImpl extends AiConfig {
   }
 
   async starModels(connectionId: string, modelIds: string[]): Promise<void> {
-    const c = this.getConnection(connectionId);
-    if (!c) return;
-    c.starredModelIds = modelIds;
+    if (!this.getConnection(connectionId)) return;
+    this.patchConnection(connectionId, { starredModelIds: modelIds });
     await this._persist();
   }
 
   // ── internals ──────────────────────────────────────────────────
+  /** Replace one connection with an updated copy in a NEW `connections` array, so
+   * reactive `listConnections()` readers (`useSyncExternalStore`, which compares the
+   * snapshot by reference) observe the change. In-place mutation would notify but
+   * leave the array reference unchanged, so the chat model picker would not refresh. */
+  private patchConnection(id: string, patch: Partial<Connection>): void {
+    this._data.connections = this._data.connections.map((c) =>
+      c.id === id ? { ...c, ...patch } : c,
+    );
+  }
+
   private async _persist(): Promise<void> {
     await saveAiConfig(this.workspace.files, this.systemFolder, this._data);
     this._notify();

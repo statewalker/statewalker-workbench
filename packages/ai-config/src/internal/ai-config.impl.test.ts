@@ -128,6 +128,43 @@ describe("AiConfigImpl", () => {
     expect(await cfg.hasKey("openai")).toBe(false);
   });
 
+  // The composer model picker reads `listConnections()` through
+  // `useSyncExternalStore`, which bails out on a same-reference snapshot. So the
+  // connection-mutating writers must produce a NEW array + NEW connection object,
+  // or starred/discovered changes never reach the chat UI.
+  it("starModels replaces the connection immutably (new array + object) so reactive readers update", async () => {
+    await cfg.upsertConnection({
+      id: "openai",
+      type: "openai",
+      name: "OpenAI",
+      starredModelIds: ["gpt-4o"],
+    });
+    const before = cfg.listConnections();
+    const beforeConn = before[0];
+
+    await cfg.starModels("openai", ["gpt-4o", "gpt-4.1"]);
+
+    const after = cfg.listConnections();
+    expect(after).not.toBe(before);
+    expect(after[0]).not.toBe(beforeConn);
+    expect(after[0]?.starredModelIds).toEqual(["gpt-4o", "gpt-4.1"]);
+  });
+
+  it("disconnect replaces the connection immutably (new array + object)", async () => {
+    await cfg.upsertConnection({
+      id: "openai",
+      type: "openai",
+      name: "OpenAI",
+      starredModelIds: ["gpt-4o"],
+    });
+    const before = cfg.listConnections();
+    await cfg.disconnect("openai");
+    const after = cfg.listConnections();
+    expect(after).not.toBe(before);
+    expect(after[0]).not.toBe(before[0]);
+    expect(after[0]?.starredModelIds).toEqual([]);
+  });
+
   it("migrates a legacy plaintext apiKey into Secrets on load (one-time)", async () => {
     const files = new MemFilesApi();
     await writeText(
@@ -176,8 +213,9 @@ describe("AiConfigImpl", () => {
       globalThis.fetch = orig;
     }
     expect(cfg.getModels("openai").map((m) => m.id)).toEqual(["gpt-4o", "text-embedding-3"]);
-    // Untagged discovered models default to ["chat"] → present for chat, absent for embedding.
-    expect(cfg.getModels("openai", "chat").length).toBe(2);
-    expect(cfg.getModels("openai", "embedding").length).toBe(0);
+    // Untagged discovered models infer capabilities from their id (mirrors the view layer):
+    // gpt-4o → chat, text-embedding-3 → embedding.
+    expect(cfg.getModels("openai", "chat").map((m) => m.id)).toEqual(["gpt-4o"]);
+    expect(cfg.getModels("openai", "embedding").map((m) => m.id)).toEqual(["text-embedding-3"]);
   });
 });
