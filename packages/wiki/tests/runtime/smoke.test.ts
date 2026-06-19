@@ -13,9 +13,11 @@ import {
   type DocumentSummaryOutput,
   type LlmApi,
   registerWiki,
+  type WikiConfigData,
   WikiPageSummary,
   WikiQuery,
   WikiTopicIndex,
+  wikiConfigOf,
   wireWikiProject,
 } from "../../src/index.js";
 import { makeStubLlm, seedWikiConfig } from "../util/stub-llm.js";
@@ -160,6 +162,41 @@ describe.each(["mem", "node"] as const)("registerWiki end-to-end (%s FilesApi)",
     expect(status.builders.every((b) => b.pending === 0)).toBe(true);
 
     // A query returns a grounded, cited answer.
+    const answer = await project.requireAdapter(WikiQuery).ask("What is Acme?").complete();
+    expect(answer.text).toMatch(/\[\[\/a\.md#intro\]\]/);
+    expect(answer.evidenceCount).toBeGreaterThan(0);
+  });
+});
+
+describe("registerWiki text-only (no embedding model)", () => {
+  it("builds and queries via full-text only, never embedding", async () => {
+    const filesApi = new MemFilesApi();
+    const workspace = new Workspace().setFileSystem(filesApi);
+    // An embedder that throws: proves neither the build nor the query touches the
+    // vector path when no embedding model is configured.
+    const textOnlyLlm = makeStubLlm({
+      generateObject,
+      embed: async () => {
+        throw new Error("embed must not be called when no embedding model is configured");
+      },
+    });
+    registerWiki(workspace, { llm: textOnlyLlm });
+
+    const project = await workspace.getProject("proj", true);
+    if (!project) throw new Error("no project");
+    // Text-only config: no `embedModel` / `dimensionality`.
+    await wikiConfigOf(project).write({ models: { default: "fixture-model" } } as WikiConfigData);
+    await writeFile(filesApi, "proj/a.md", "Acme is a company.");
+
+    const builder = wireWikiProject(project);
+    for await (const _ of builder.run()) {
+      // drain — must complete despite embed() throwing
+    }
+
+    const status = await builder.status();
+    expect(status.builders.every((b) => b.pending === 0)).toBe(true);
+
+    // The full-text-only query still returns a grounded, cited answer.
     const answer = await project.requireAdapter(WikiQuery).ask("What is Acme?").complete();
     expect(answer.text).toMatch(/\[\[\/a\.md#intro\]\]/);
     expect(answer.evidenceCount).toBeGreaterThan(0);

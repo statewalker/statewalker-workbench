@@ -47,17 +47,17 @@ export interface SearchBlock {
 export type SearchBlocksProvider = (
   resource: Resource,
   uri: string,
-  model: string,
-  dimensionality: number,
+  model: string | undefined,
+  dimensionality: number | undefined,
 ) => Promise<SearchBlock[]>;
 
 export interface SearchDeps {
   /** Per-project query embedder (the adapter stays provider/wiki-agnostic). */
   embed: (project: Project, text: string) => Promise<Float32Array>;
-  /** Per-project embedding model reference. */
-  model: (project: Project) => string;
-  /** Per-project embedding dimensionality. */
-  dimensionality: (project: Project) => number;
+  /** Per-project embedding model reference; `undefined` for a text-only (FTS) project. */
+  model: (project: Project) => string | undefined;
+  /** Per-project embedding dimensionality; `undefined` for a text-only (FTS) project. */
+  dimensionality: (project: Project) => number | undefined;
   blocks: SearchBlocksProvider;
 }
 
@@ -108,12 +108,17 @@ export class SearchAdapter extends ProjectAdapter {
     return this.options as AdapterOptions;
   }
   /** Embedding model reference, resolved per-project by the injected dep. */
-  private get model(): string {
+  private get model(): string | undefined {
     return this.opts.model(this.project);
   }
   /** Embedding dimensionality, resolved per-project by the injected dep. */
-  private get dimensionality(): number {
+  private get dimensionality(): number | undefined {
     return this.opts.dimensionality(this.project);
+  }
+  /** Whether this project carries vectors (an embedding model is configured). When
+   * false the index is full-text only and vector queries are skipped. */
+  private get hasVectors(): boolean {
+    return !!this.model;
   }
   /** Embed a query through the injected per-project embedder. */
   private embedQuery(text: string): Promise<Float32Array> {
@@ -152,16 +157,21 @@ export class SearchAdapter extends ProjectAdapter {
     this.indexer = createFlexSearchIndexer({ persistence });
     const existing = await this.indexer.getIndex(INDEX_NAME);
     if (existing) return existing;
+    // A text-only project (no embedding model) gets a full-text sub-index only; the
+    // vector sub-index is created solely when an embedding model + dimensionality exist.
+    const subIndexes: Record<string, unknown> = {
+      [FTS_SUB]: { type: "fulltext", language: "en" },
+    };
+    if (this.model && this.dimensionality != null) {
+      subIndexes[VEC_SUB] = {
+        type: "vector",
+        dimensionality: this.dimensionality,
+        model: this.model,
+      };
+    }
     const created = await this.indexer.createIndex({
       name: INDEX_NAME,
-      subIndexes: {
-        [FTS_SUB]: { type: "fulltext", language: "en" },
-        [VEC_SUB]: {
-          type: "vector",
-          dimensionality: this.dimensionality,
-          model: this.model,
-        },
-      },
+      subIndexes: subIndexes as Parameters<Indexer["createIndex"]>[0]["subIndexes"],
     });
     // Record model + dimensionality only when the index is first created (the indexing
     // path) — a read-only query that loads an existing index must not write.
@@ -197,11 +207,11 @@ export class SearchAdapter extends ProjectAdapter {
   async indexPage(resource: Resource, uri: string): Promise<void> {
     const index = await this.ensureIndex();
     const fullTextIndex = ftsAccess.get(index);
-    const vectorIndex = vecAccess.get(index);
+    const vectorIndex = this.hasVectors ? vecAccess.get(index) : undefined;
 
     const path = toDocumentPath(uri);
     await fullTextIndex.deleteDocuments([{ path }]);
-    await vectorIndex.deleteDocuments([{ path }]);
+    await vectorIndex?.deleteDocuments([{ path }]);
 
     const blocks = await this.opts.blocks(resource, uri, this.model, this.dimensionality);
     if (blocks.length > 0) {
@@ -212,13 +222,14 @@ export class SearchAdapter extends ProjectAdapter {
       }));
       await fullTextIndex.addDocument(ftsBlocks);
 
-      const vecBlocks: VectorBlock[] = blocks
-        .filter((b) => b.embedding)
-        .map((b) => ({ path, blockId: b.blockId, embedding: b.embedding as Float32Array }));
-      if (vecBlocks.length > 0) await vectorIndex.addDocument(vecBlocks);
-
+      if (vectorIndex) {
+        const vecBlocks: VectorBlock[] = blocks
+          .filter((b) => b.embedding)
+          .map((b) => ({ path, blockId: b.blockId, embedding: b.embedding as Float32Array }));
+        if (vecBlocks.length > 0) await vectorIndex.addDocument(vecBlocks);
+        await vectorIndex.flush();
+      }
       await fullTextIndex.flush();
-      await vectorIndex.flush();
     }
     this.dirty = true;
     await this.maybePersist();
@@ -229,7 +240,7 @@ export class SearchAdapter extends ProjectAdapter {
     const index = await this.ensureIndex();
     const path = toDocumentPath(uri);
     await ftsAccess.get(index).deleteDocuments([{ path }]);
-    await vecAccess.get(index).deleteDocuments([{ path }]);
+    if (this.hasVectors) await vecAccess.get(index).deleteDocuments([{ path }]);
     this.dirty = true;
     await this.maybePersist();
   }
@@ -237,7 +248,10 @@ export class SearchAdapter extends ProjectAdapter {
   /** Hybrid (RRF) search, grouped by document. */
   async search(query: SearchQuery): Promise<DocumentMatch[]> {
     const index = await this.ensureIndex();
-    const modes = query.modes ?? ["fts", "vector"];
+    // Drop vector mode when the project has no embeddings (text-only); never embed the
+    // query in that case. Guarantee at least full-text so a vector-only request still works.
+    let modes = (query.modes ?? ["fts", "vector"]).filter((m) => m !== "vector" || this.hasVectors);
+    if (modes.length === 0) modes = ["fts"];
     const request: SearchRequest = { topK: query.topK ?? DEFAULT_TOP_K };
     if (query.paths) request.paths = query.paths.map(toDocumentPath);
     if (modes.includes("fts")) {

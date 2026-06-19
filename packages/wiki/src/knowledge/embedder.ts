@@ -50,6 +50,13 @@ export function embedderBuilder(opts: { force?: boolean } = {}): RegisteredBuild
       async function handleEntry(u: BuilderUpdate): Promise<EmittedUpdate[]> {
         const out: EmittedUpdate[] = [];
         try {
+          // Text-only wiki (no embedding model/dimensionality): skip vector
+          // computation entirely and pass the document straight through so the
+          // SearchIndexer full-text-indexes it.
+          if (model == null || dimensionality == null) {
+            out.push({ signal: EMBEDDED_SIGNAL, uri: u.uri, stamp: u.stamp });
+            return out;
+          }
           const resource = await project.getProjectResource(u.uri);
           const summary = await resource?.requireAdapter(WikiPageSummary).get();
           const hash = await resource?.requireAdapter(ResourceTextContentCache).getRawMeta();

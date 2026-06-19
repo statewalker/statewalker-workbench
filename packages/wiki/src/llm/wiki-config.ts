@@ -26,10 +26,12 @@ export type ModelStage = keyof Omit<StageModelNames, "default">;
 export interface WikiConfigData {
   /** Stage → model-reference URI for text-generation stages. */
   models: StageModelNames;
-  /** Embedding model reference URI (also part of the per-doc embeddings filename + index config). */
-  embedModel: string;
-  /** Embedding dimensionality (frozen once the index is built). */
-  dimensionality: number;
+  /** Embedding model reference URI (also part of the per-doc embeddings filename + index
+   * config). Omitted for a **text-only** wiki: no vectors are produced and search/query
+   * fall back to full-text only. */
+  embedModel?: string;
+  /** Embedding dimensionality (frozen once the index is built). Omitted with `embedModel`. */
+  dimensionality?: number;
   /** Steers stage prompts (summariser detail, what counts as on-corpus, …). */
   corpusPurpose?: string;
 }
@@ -96,12 +98,17 @@ export class WikiLlmConfiguration extends ProjectAdapter {
     return this.data.models[stage] ?? this.data.models.default;
   }
 
-  get embedModel(): string {
+  get embedModel(): string | undefined {
     return this.data.embedModel;
   }
 
-  get dimensionality(): number {
+  get dimensionality(): number | undefined {
     return this.data.dimensionality;
+  }
+
+  /** Whether this wiki indexes with embeddings (vector search) or is full-text only. */
+  get hasEmbeddings(): boolean {
+    return !!this.data.embedModel;
   }
 
   get corpusPurpose(): string | undefined {

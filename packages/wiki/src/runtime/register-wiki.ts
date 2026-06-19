@@ -64,14 +64,18 @@ export interface WikiBuildOptions {
 export const wikiSearchBlocks: SearchBlocksProvider = async (
   resource: Resource,
   _uri: string,
-  model: string,
-  dimensionality: number,
+  model: string | undefined,
+  dimensionality: number | undefined,
 ) => {
   const summary = await resource.getAdapter(WikiPageSummary)?.get();
   if (!summary) return [];
   const raw = await resource.requireAdapter(ResourceTextContentCache).getTextContent();
   const lines = raw.split("\n");
-  const vectors = await resource.getAdapter(WikiPageEmbeddings)?.getVectors(model, dimensionality);
+  // Text-only project: no embedding model → no precomputed vectors to attach.
+  const vectors =
+    model && dimensionality != null
+      ? await resource.getAdapter(WikiPageEmbeddings)?.getVectors(model, dimensionality)
+      : undefined;
   return summary.sections.map((s): SearchBlock => {
     const rawBlock = lines.slice(s.startLine, s.endLine + 1).join("\n");
     return {
@@ -117,7 +121,12 @@ export function registerWiki(workspace: Workspace, deps: WikiDeps): void {
   // Search stays wiki-free: the per-project embedding model + dimensionality + query
   // embedder are resolved here (where the wiki adapters are known) and injected.
   registerSearch(workspace, {
-    embed: (project, text) => llmOf(project).embed(text, wikiConfigOf(project).embedModel),
+    embed: (project, text) => {
+      // Only reached for vector search, which the adapter disables when no model exists.
+      const model = wikiConfigOf(project).embedModel;
+      if (!model) throw new Error("wiki search: no embedding model configured (text-only project)");
+      return llmOf(project).embed(text, model);
+    },
     model: (project) => wikiConfigOf(project).embedModel,
     dimensionality: (project) => wikiConfigOf(project).dimensionality,
     blocks: wikiSearchBlocks,
