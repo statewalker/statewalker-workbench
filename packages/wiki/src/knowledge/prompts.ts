@@ -49,10 +49,20 @@ RULES — these are load-bearing:
    - a one-line reading of what the block SHOWS — its main point or trend (e.g.
      "a table of CO₂ emissions by car: rows are models, columns give engine power
      (kW) and model year, showing emissions fall as year rises and power drops").
+9. NO INTRODUCTORY FRAMING. section.summary opens directly with the content —
+   never with phrases like "This section synthesizes…", "This section describes…",
+   or "The text covers…". The summary IS a simplified / generalised version of the
+   source text, not a description of itself.
+10. Direct citations are NOT forbidden but NOT encouraged. The goal is a compact
+    explanation carrying the main facts of the corresponding block of source text —
+    not a reproduction of it. Prefer paraphrase; quote only when the exact wording
+    is itself the fact.
 
 WHAT NOT TO DO:
 
 - No verbatim raw in section.summary.
+- No introductory or self-referential framing — output the content, not a sentence
+  about the section (rule 9).
 - No transcribing table cells or long numeric runs — describe the block as a
   whole per rule 8 (objects, characteristics + value natures, and its meaning).
 - No editorialising. Don't add commentary the source does not support.
