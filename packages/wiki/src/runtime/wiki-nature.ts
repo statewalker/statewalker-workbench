@@ -11,6 +11,10 @@ import type { QueryProgress } from "../query/index.js";
 import { WikiQuery } from "../query/index.js";
 import { tryReadJson } from "../util/io.js";
 import { type WikiBuildOptions, wireWikiProject } from "./register-wiki.js";
+import { DEFAULT_RENEW_MS, ScanLock } from "./scan-lock.js";
+
+/** Identifies this JS context (tab / CLI process) as a scan-lock holder. One per module load. */
+const HOLDER_ID = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
 /** Thrown when an embedding-model/dimensionality change would invalidate the built index. */
 export class WikiEmbeddingFrozenError extends Error {
@@ -90,17 +94,39 @@ export class WikiNature extends ProjectAdapter {
     await this.config.write(next);
   }
 
+  /** Path to this project's best-effort scan lease file. */
+  private lockPath(): string {
+    return concatPath(
+      this.path.replace(/^\/+|\/+$/g, ""),
+      DEFAULT_SYSTEM_FOLDER,
+      "state",
+      "scan.lock",
+    );
+  }
+
   /** Wire the wiki builders and return a handle with granular run/status/restart controls. */
   scan(opts: WikiBuildOptions = {}): WikiScanHandle {
     const builder = wireWikiProject(this.project, opts);
     const config = this.config;
+    const filesApi = this.filesApi;
+    const lockPath = this.lockPath();
     let stopped = false;
     return {
       run: async function* run(): AsyncGenerator<BuildProgress> {
         await config.load();
-        for await (const progress of builder.run()) {
-          yield progress;
-          if (stopped) return;
+        // Best-effort per-project lease: skip when another writer (tab/CLI) is already
+        // indexing this project; otherwise hold + heartbeat the lease for the build.
+        const lock = new ScanLock(filesApi, lockPath, { holderId: HOLDER_ID });
+        if (!(await lock.tryAcquire())) return;
+        const renew = setInterval(() => void lock.renew(), DEFAULT_RENEW_MS);
+        try {
+          for await (const progress of builder.run()) {
+            yield progress;
+            if (stopped) break;
+          }
+        } finally {
+          clearInterval(renew);
+          await lock.release();
         }
       },
       status: () => builder.status(),

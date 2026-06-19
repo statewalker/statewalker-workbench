@@ -129,6 +129,41 @@ describe("SearchAdapter", () => {
     const results = await project2.requireAdapter(SearchAdapter).search({ query: "alpha" });
     expect(results.find((r) => r.uri === "a.md")).toBeDefined();
   });
+
+  it("a reader reloads when another writer advances the on-disk index", async () => {
+    // Writer indexes into a shared filesystem.
+    const writer = await buildAndSearch();
+    const filesApi = repository.files;
+
+    // A second adapter over the SAME files models another tab/process; it loads the
+    // current index up-front (before the writer adds more).
+    const repo2 = new Workspace().setFileSystem(filesApi);
+    registerContentExtraction(repo2);
+    registerSearch(repo2, {
+      embed: async (_p, text) => vec(text),
+      model: () => "fixture",
+      dimensionality: () => DIM,
+      blocks,
+    });
+    const readerProject = (await repo2.getProject("proj"))!;
+    const readerAdapter = readerProject.requireAdapter(SearchAdapter);
+    expect(
+      (await readerAdapter.search({ query: "charlie", modes: ["fts"] })).length,
+    ).toBeGreaterThan(0);
+
+    // The writer indexes a NEW document after the reader already loaded.
+    const newResource = (await (await repository.getProject("proj"))?.getProjectResource("a.md"))!;
+    SECTIONS["a.md"] = [
+      ...(SECTIONS["a.md"] ?? []),
+      { blockId: "extra", text: "delta freshly added", embedding: vec("delta") },
+    ];
+    await writer.indexPage(newResource, "a.md");
+    await writer.persist();
+
+    // Without the rev-based reload the reader's memoised index would miss "delta".
+    const hits = await readerAdapter.search({ query: "delta", modes: ["fts"] });
+    expect(hits.find((r) => r.uri === "a.md")).toBeDefined();
+  });
 });
 
 describe("SearchAdapter wiki-free contract", () => {

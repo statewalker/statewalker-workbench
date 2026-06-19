@@ -17,7 +17,7 @@ import {
   SOURCES_REMOVED_SIGNAL,
   type Workspace,
 } from "@statewalker/workspace.core";
-import { writeJsonAtomic } from "../util/io.js";
+import { tryReadJson, writeJsonAtomic } from "../util/io.js";
 import { FilesIndexerPersistence } from "./files-persistence.js";
 
 const FTS_SUB = "fts";
@@ -103,6 +103,9 @@ export class SearchAdapter extends ProjectAdapter {
   private dirty = false;
   /** Timestamp (ms) of the last persistence flush. */
   private lastSaveAt = 0;
+  /** The index revision this in-memory copy was loaded at — lets a reader detect that
+   * another writer (tab/CLI) advanced the on-disk index and reload it. */
+  private loadedRev?: number;
 
   private get opts(): AdapterOptions {
     return this.options as AdapterOptions;
@@ -136,6 +139,17 @@ export class SearchAdapter extends ProjectAdapter {
   private configPath(): string {
     return concatPath(this.indexDir(), "search.json");
   }
+  private revPath(): string {
+    return concatPath(this.indexDir(), "search-rev.json");
+  }
+
+  /** Bump the on-disk index revision after a flush so other readers reload; record it
+   * as our own loaded revision so we don't pointlessly reload our just-written index. */
+  private async bumpRev(): Promise<void> {
+    const rev = Date.now();
+    await writeJsonAtomic(this.filesApi, this.revPath(), { rev });
+    this.loadedRev = rev;
+  }
 
   /**
    * Open the project's persisted index (FTS + vector) into memory — loaded from
@@ -147,6 +161,20 @@ export class SearchAdapter extends ProjectAdapter {
     // searches) share ONE open — otherwise they race on creating + persisting the index.
     this.indexReady ??= this.openIndex();
     return this.indexReady;
+  }
+
+  /**
+   * Drop the memoised in-memory index when another writer (a different tab/CLI on the
+   * same folder) has advanced the on-disk revision since we loaded — so the next
+   * `ensureIndex()` re-opens the current index. No-op for the writer (it bumps its own
+   * `loadedRev`) and when nothing has been persisted yet.
+   */
+  private async reloadIfStale(): Promise<void> {
+    const onDisk = (await tryReadJson<{ rev: number }>(this.filesApi, this.revPath()))?.rev;
+    if (onDisk === undefined || onDisk === this.loadedRev) return;
+    this.indexReady = undefined;
+    this.indexer = undefined;
+    this.loadedRev = onDisk;
   }
 
   private async openIndex(): Promise<Index> {
@@ -187,6 +215,7 @@ export class SearchAdapter extends ProjectAdapter {
     if (!this.dirty || !this.indexer) return;
     if (Date.now() - this.lastSaveAt < SAVE_THROTTLE_MS) return;
     await this.indexer.flush();
+    await this.bumpRev();
     this.dirty = false;
     this.lastSaveAt = Date.now();
   }
@@ -195,6 +224,7 @@ export class SearchAdapter extends ProjectAdapter {
   async persist(): Promise<void> {
     if (!this.dirty || !this.indexer) return;
     await this.indexer.flush();
+    await this.bumpRev();
     this.dirty = false;
     this.lastSaveAt = Date.now();
   }
@@ -247,6 +277,7 @@ export class SearchAdapter extends ProjectAdapter {
 
   /** Hybrid (RRF) search, grouped by document. */
   async search(query: SearchQuery): Promise<DocumentMatch[]> {
+    await this.reloadIfStale();
     const index = await this.ensureIndex();
     // Drop vector mode when the project has no embeddings (text-only); never embed the
     // query in that case. Guarantee at least full-text so a vector-only request still works.
