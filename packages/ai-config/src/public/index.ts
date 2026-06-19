@@ -8,4 +8,6 @@ export * from "./connections-spec.js";
 export * from "./constants.js";
 export { seedAiConfigFromEnv } from "./env-seed.js";
 export { default } from "./init.js";
+export * from "./model-reference.js";
+export * from "./provider-registry.js";
 export * from "./types.js";

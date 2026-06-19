@@ -24,6 +24,7 @@
     "@ai-sdk/openai": "catalog:",
     "@ai-sdk/provider": "catalog:",
     "@json-render/core": "0.18.0",
+    "ai": "catalog:",
     "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/webrun-files": "catalog:",
