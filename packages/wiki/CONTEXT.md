@@ -67,6 +67,19 @@ a flat `leaves()` view yields exactly the index topics (retrieval/query consume 
 while `roots()/children()` expose the category hierarchy (the TOC).
 _Avoid_: topic tree (it is a DAG), topic graph.
 
+**Chapter**:
+A named, semantically coherent run of consecutive **sections** within one document,
+carrying its own summary. Chapters may group sub-chapters (recursively), forming the
+**document outline**. A chapter is a *grouping overlay* — sections stay the flat,
+addressable unit (their keys are unchanged); a chapter references its section keys.
+
+**Document outline**:
+A single document's own hierarchy — `document → chapters → … → sections` — built
+bottom-up; the document summary is generated from the top-level chapter summaries.
+Intra-document and structural. Distinct from **WikiToc** (the wiki-level table of
+contents over the topic index, which is cross-document and thematic).
+_Avoid_: TOC (reserved for WikiToc), table of contents.
+
 **Subject**:
 A single search intent the query stage decomposes the user's question into. An
 on-corpus question yields one or more subjects (or the whole question as one when
@@ -86,6 +99,15 @@ A retrieved document section (`uri` + `sectionKey` + title + summary + raw block
 that is filtered for relevance, summarised, and cited when composing an answer.
 Sections are the unit every front-end produces and the unit the answer cites.
 
+**Grounded fact**:
+A single factual statement the summarize stage extracts from a document's
+section(s), carrying the verbatim section citation(s) it rests on. Atomic and
+**single-document** — a fact never merges sections from different documents (that
+prevents cross-document conflation). Cross-document corroboration is composed
+later: an answer **claim** may rest on grounded facts from several documents, each
+independently cited. A fact with no valid citation is dropped.
+_Avoid_: summary (the stage emits grounded facts, not free prose).
+
 ## Relationships
 
 - A **Workspace** contains zero or more **Wikis** (each a **Project**)
@@ -102,3 +124,8 @@ Sections are the unit every front-end produces and the unit the answer cites.
   the ai-sdk `ProviderV3` (runtime), an AiConfig **Connection** (configuration), and
   wiki's internal `LlmProvider` facade (the async→sync bridge). Use "Connection" for
   the configured endpoint.
+- "summarize" names two different stages: the **build-side summarizer** (ingest —
+  raw text → `DocumentSummary` of sections + **document outline**) and the **query-side
+  summarize stage** (answer time — retrieved **sections** → **grounded facts**). They
+  share a verb, not a job; name the stage (build summarizer / query summarize) when
+  ambiguous.
