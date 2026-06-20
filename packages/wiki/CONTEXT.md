@@ -67,6 +67,25 @@ a flat `leaves()` view yields exactly the index topics (retrieval/query consume 
 while `roots()/children()` expose the category hierarchy (the TOC).
 _Avoid_: topic tree (it is a DAG), topic graph.
 
+**Subject**:
+A single search intent the query stage decomposes the user's question into. An
+on-corpus question yields one or more subjects (or the whole question as one when
+none are extracted). Each subject is retrieved independently and the results fused.
+_Avoid_: query, prompt (overloaded).
+
+**Front-end** (retrieval):
+A retrieval strategy that, given a **Subject**, returns candidate document
+**sections** by `(uri, sectionKey)`. Front-ends are interchangeable section
+producers and run in parallel; today there are two — hybrid search (FTS+vector) and
+the topic front-end (over the **topic index**). All on-corpus subjects run *every*
+front-end and the results are fused (recall-first), rather than one being selected.
+_Avoid_: retriever, channel.
+
+**Evidence section**:
+A retrieved document section (`uri` + `sectionKey` + title + summary + raw block)
+that is filtered for relevance, summarised, and cited when composing an answer.
+Sections are the unit every front-end produces and the unit the answer cites.
+
 ## Relationships
 
 - A **Workspace** contains zero or more **Wikis** (each a **Project**)
