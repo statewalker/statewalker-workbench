@@ -1,5 +1,6 @@
 import { Command, Commands, passthrough } from "@statewalker/shared-commands";
 import type { Workspace } from "@statewalker/workspace.core";
+import { reclusterTopics } from "../knowledge/recluster.js";
 import { type WikiAskResult, type WikiSearchResult, wikiAsk, wikiSearch } from "./wiki-ops.js";
 
 /** Input for `wiki:search` — same shape as the `wiki_search` tool. */
@@ -35,18 +36,40 @@ export const WikiAskCommand = Command.async("wiki:ask")
   .label("Wiki: Ask")
   .build();
 
+/** Input for `wiki:recluster-topics` — the wiki project to restructure. */
+export interface WikiReclusterInput {
+  project: string;
+}
+
 /**
- * Register the `wiki:search` / `wiki:ask` command handlers on the workspace `Commands`
- * bus, delegating to the shared `wikiSearch` / `wikiAsk` core. Returning the promise
- * claims the command and settles it. React-free logic; the host adds any UI surface
- * (e.g. menubar items) separately. Returns an unregister function.
+ * `wiki:recluster-topics` — manual structural reorganization of a wiki's topic-index
+ * category hierarchy. On-demand only (never signal-driven); leaves a valid DAG if
+ * interrupted.
+ */
+export const WikiReclusterTopicsCommand = Command.async("wiki:recluster-topics")
+  .input(passthrough<WikiReclusterInput>())
+  .output(passthrough<void>())
+  .label("Wiki: Recluster Topics")
+  .build();
+
+/**
+ * Register the `wiki:search` / `wiki:ask` / `wiki:recluster-topics` command handlers
+ * on the workspace `Commands` bus, delegating to the shared cores. Returning the
+ * promise claims the command and settles it. React-free logic; the host adds any UI
+ * surface (e.g. menubar items) separately. Returns an unregister function.
  */
 export function registerWikiCommands(workspace: Workspace): () => void {
   const commands = workspace.requireAdapter(Commands);
   const offSearch = commands.listen(WikiSearchCommand, (cmd) => wikiSearch(workspace, cmd.payload));
   const offAsk = commands.listen(WikiAskCommand, (cmd) => wikiAsk(workspace, cmd.payload));
+  const offRecluster = commands.listen(WikiReclusterTopicsCommand, async (cmd) => {
+    const projects = await workspace.getProjects();
+    const project = projects.find((p) => p.projectName === cmd.payload.project);
+    if (project) await reclusterTopics(project);
+  });
   return () => {
     offSearch();
     offAsk();
+    offRecluster();
   };
 }

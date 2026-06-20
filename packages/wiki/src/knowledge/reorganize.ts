@@ -1,41 +1,58 @@
 import {
   type BuilderUpdate,
+  type EmittedUpdate,
   loggerOf,
   type Project,
   ProjectBuilder,
   type RegisteredBuilder,
   SOURCES_REMOVED_SIGNAL,
 } from "@statewalker/workspace.core";
-import { type LlmApi, llmOf, wikiConfigOf } from "../llm/index.js";
+import { type LlmApi, llmOf, type WikiLlmConfiguration, wikiConfigOf } from "../llm/index.js";
 import { toBatch } from "../util/batch.js";
+import { DOC_TOPICS_EMBEDDED_SIGNAL } from "./doc-topic-embedder.js";
 import { WikiOutlierIndex, WikiTopicIndex } from "./indexes.js";
-import { META_REMOVED_TOPICS_SIGNAL, META_SIGNAL } from "./meta.js";
+import { META_REMOVED_TOPICS_SIGNAL } from "./meta.js";
 import { WikiPageMeta } from "./page-adapters.js";
 import { pageDirPath } from "./page-paths.js";
-import { fillCorpusPurpose, REORGANIZER_SYSTEM_PROMPT } from "./prompts.js";
 import {
-  type ReorganizeAction,
-  type ReorganizerInput,
-  reorganizeActionsSchema,
-  reorganizerInputSchema,
-} from "./schemas.js";
-import type { ClassReference, DocumentMeta, GlobalOutlier, GlobalTopic } from "./types.js";
+  ATTRIBUTION_SYSTEM_PROMPT,
+  fillCorpusPurpose,
+  REFINE_TOPIC_SYSTEM_PROMPT,
+  SPLIT_CATEGORY_SYSTEM_PROMPT,
+} from "./prompts.js";
+import { type AttributeAction, attributeActionsSchema, attributeInputSchema } from "./schemas.js";
+import { cosine, WikiPageTopicEmbeddings, WikiTopicNodeEmbeddings } from "./topic-embeddings.js";
+import { addRefs, coinLeaf, finalizeIndex, resolveLeaf, rootsOf } from "./topic-graph.js";
+import { applyLocalSplits, embedNodes, toRef } from "./topic-maintenance.js";
+import type {
+  ClassReference,
+  DocumentMeta,
+  GlobalOutlier,
+  TopicIndex,
+  TopicIndexNode,
+  TopicNode,
+} from "./types.js";
+import { isCategory } from "./types.js";
 
 export const REORGANIZE_BUILDER_ID = "IndexReorganizer";
 export const PRUNE_BUILDER_ID = "IndexPruner";
+/** Emitted (project-wide) after the topic DAG changes; drives automatic cleanup. */
+export const TOPIC_TREE_SIGNAL = "topic-tree";
 
 /** Orphaned artifact directories pruned in parallel per batch. */
 const PRUNE_BATCH_SIZE = 16;
 
 /**
- * Max leftover candidates placed per LLM reorganize round, so a large rebuild
- * (e.g. a from-empty index where every topic is a leftover) stays within the
- * model's context window. The growing index is carried forward between rounds,
- * so splitting candidates across rounds preserves cross-batch consolidation.
+ * Max document-topic candidates placed per attribution LLM round, so a large
+ * rebuild stays within the model's context window. The growing index is carried
+ * forward between rounds (coined nodes become candidates for later batches).
  */
-export const REORGANIZE_BATCH_SIZE = 32;
+export const ATTRIBUTE_BATCH_SIZE = 32;
 
-/** A leftover per-doc topic group (one distinct new key) the LLM must place. */
+/** Embedding-nearest index nodes proposed to the LLM per candidate. */
+const CANDIDATE_K = 8;
+
+/** A leftover per-doc topic group (one distinct key) attribution must place. */
 interface CandidateGroup {
   key: string;
   name: string;
@@ -50,25 +67,7 @@ function refDocUri(refUri: string): string {
   return i === -1 ? refUri : refUri.slice(0, i);
 }
 
-/** Kebab-case slug for a coined global topic key, derived from its name. */
-function slugify(s: string): string {
-  return (
-    s
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "topic"
-  );
-}
-
-/** Append `refs` to a class's references, skipping uris already present. */
-function addRefs(item: { references: ClassReference[] }, refs: string[]): void {
-  for (const uri of refs) {
-    if (!item.references.some((r) => r.uri === uri)) item.references.push({ uri });
-  }
-}
-
-/** Strip every reference contributed by `docUris`; keeps now-empty classes. */
+/** Strip every reference contributed by `docUris` (keeps now-empty classes). */
 function removeDocRefs<T extends { references: ClassReference[] }>(
   items: T[],
   docUris: ReadonlySet<string>,
@@ -87,70 +86,105 @@ function pruneEmptyAndSort<T extends { key: string; references: ClassReference[]
 }
 
 /**
- * Apply the LLM's reorganize actions to the working topic map, coining a
- * fallback global for any leftover group the actions did not place.
+ * Apply a batch's attribution actions, returning the index topics coined this
+ * batch (for inline embedding). Candidates the actions leave uncovered are coined
+ * by the coverage backstop so every document topic lands on ≥1 index topic.
  */
-function applyActions(
-  byKey: Map<string, GlobalTopic>,
-  actions: ReorganizeAction[],
-  leftovers: CandidateGroup[],
-): void {
-  // Refs travel by candidate `key`, not over the wire: the LLM names which
-  // candidate keys an action covers, and the runtime reattaches their refs here.
-  const byCandidateKey = new Map(leftovers.map((g) => [g.key, g]));
+function applyAttribution(
+  index: TopicIndex,
+  actions: AttributeAction[],
+  batch: CandidateGroup[],
+): TopicIndexNode[] {
+  const byKey = new Map(batch.map((g) => [g.key, g]));
   const covered = new Set<string>();
-  const refsOf = (keys: string[]) => keys.flatMap((k) => byCandidateKey.get(k)?.refs ?? []);
-  const coin = (key: string, name: string, description: string, refs: string[]) => {
-    const existing = byKey.get(key);
-    if (existing) addRefs(existing, refs);
-    else byKey.set(key, { key, name, description, references: refs.map((uri) => ({ uri })) });
-  };
-
+  const coined: TopicIndexNode[] = [];
   for (const action of actions) {
-    if (action.kind === "match-existing") {
-      const target = byKey.get(action.globalKey);
-      if (!target) continue; // unknown key → leave uncovered for fallback coining
-      addRefs(target, refsOf(action.candidateKeys));
-      for (const k of action.candidateKeys) covered.add(k);
-    } else if (action.kind === "extend-existing") {
-      const target = byKey.get(action.globalKey);
-      if (!target) continue;
-      const facet = action.descriptionExtension.trim();
-      if (facet) target.description = target.description ? `${target.description} ${facet}` : facet;
-      addRefs(target, refsOf(action.candidateKeys));
-      for (const k of action.candidateKeys) covered.add(k);
+    const g = byKey.get(action.candidateKey);
+    if (!g) continue;
+    if (action.kind === "attach") {
+      let any = false;
+      for (const nk of action.nodeKeys) {
+        const leaf = resolveLeaf(index, nk);
+        if (leaf) {
+          addRefs(leaf, g.refs);
+          if (!leaf.description && g.description) leaf.description = g.description;
+          any = true;
+        }
+      }
+      if (any) covered.add(g.key); // unresolved nodeKeys → fall through to backstop
     } else {
-      coin(slugify(action.name), action.name, action.description, refsOf(action.candidateKeys));
-      for (const k of action.candidateKeys) covered.add(k);
+      coined.push(
+        coinLeaf(
+          index,
+          { key: g.key, name: action.name, description: action.description },
+          g.refs,
+          action.parentKey,
+        ),
+      );
+      covered.add(g.key);
     }
   }
-
-  // Coverage backstop: coin any leftover candidate no action placed (mirrors the
-  // prompt's promise that the runtime recovers unplaced candidates).
-  for (const g of leftovers) {
-    if (!covered.has(g.key)) coin(g.key, g.name, g.description, g.refs);
+  for (const g of batch) {
+    if (!covered.has(g.key)) coined.push(coinLeaf(index, g, g.refs));
   }
+  return coined;
 }
 
-/** Incrementally fold the touched documents' topics into the existing index. */
-async function reorganizeTopics(
+/** Choose the LLM-facing option set for a batch: embedding-NN nodes, else root categories. */
+function selectOptions(
+  index: TopicIndex,
+  nodeVecs: Map<string, Float32Array>,
+  candVecs: Map<string, Float32Array>,
+  batch: CandidateGroup[],
+  hasEmbeddings: boolean,
+): ReturnType<typeof toRef>[] {
+  const keys = new Set<string>();
+  if (hasEmbeddings && nodeVecs.size) {
+    const entries = [...nodeVecs];
+    for (const g of batch) {
+      const cv = candVecs.get(g.key);
+      if (!cv) continue;
+      const nearest = entries
+        .map(([k, v]) => [k, cosine(cv, v)] as const)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, CANDIDATE_K);
+      for (const [k] of nearest) keys.add(k);
+    }
+  } else {
+    // Bounded root-descent: propose only the root categories to nest under.
+    for (const node of rootsOf(index)) if (isCategory(node)) keys.add(node.key);
+  }
+  return [...keys]
+    .map((k) => index.nodes[k])
+    .filter((n): n is TopicNode => !!n)
+    .map(toRef);
+}
+
+/**
+ * Attribute the touched documents' topics onto the index DAG: strip their prior
+ * references, key/alias fast-path, then embedding-candidate retrieval + LLM
+ * adjudication per batch (coverage backstop coins any leftover), then local
+ * in-place splits. Coined/new nodes are embedded inline into the project node
+ * store so they are attribution candidates in the same cycle.
+ */
+async function attributeTopics(
   project: Project,
   metas: Map<string, DocumentMeta>,
   touched: ReadonlySet<string>,
   llm: LlmApi,
-  model: string,
-  system: string,
+  cfg: WikiLlmConfiguration,
   generated: string,
-): Promise<number> {
-  const index = await project.requireAdapter(WikiTopicIndex).read();
-  // Strip touched docs' refs but keep now-empty topics so a re-ingest that still
-  // declares the same key folds back into the SAME global (stable keys).
-  const byKey = new Map<string, GlobalTopic>(
-    removeDocRefs(index.topics, touched).map((t) => [
-      t.key,
-      { ...t, references: [...t.references] },
-    ]),
-  );
+): Promise<{ leftovers: number }> {
+  const indexAdapter = project.requireAdapter(WikiTopicIndex);
+  const index = await indexAdapter.read();
+
+  // Strip touched docs' refs from every leaf (keep now-empty leaves so a re-ingest
+  // declaring the same key folds back into the SAME node — stable keys).
+  for (const node of Object.values(index.nodes)) {
+    if (node.kind === "topic") {
+      node.references = node.references.filter((r) => !touched.has(refDocUri(r.uri)));
+    }
+  }
 
   // Group the touched docs' candidate topics by key.
   const groups = new Map<string, CandidateGroup>();
@@ -168,62 +202,81 @@ async function reorganizeTopics(
     }
   }
 
-  // Mechanical exact-key pre-merge; whatever doesn't match becomes a leftover.
+  // Embedding setup: index-node vectors (whole, small) + the touched docs' topic
+  // vectors. Absent embed model → degraded key/alias + root-descent attribution.
+  const model = cfg.embedModel;
+  const dim = cfg.dimensionality;
+  const hasEmbeddings = !!model && dim != null;
+  const nodeStore = project.requireAdapter(WikiTopicNodeEmbeddings);
+  const nodeVecs = hasEmbeddings ? await nodeStore.getVectors(model!, dim!) : new Map();
+  const candVecs = new Map<string, Float32Array>();
+  if (hasEmbeddings) {
+    for (const uri of touched) {
+      const resource = await project.getProjectResource(uri);
+      const vecs = await resource?.requireAdapter(WikiPageTopicEmbeddings).getVectors(model!, dim!);
+      if (vecs) for (const [k, v] of vecs) if (!candVecs.has(k)) candVecs.set(k, v);
+    }
+  }
+
+  // Fast path: exact key/alias match attaches mechanically (no LLM).
   const leftovers: CandidateGroup[] = [];
   for (const g of groups.values()) {
-    const existing = byKey.get(g.key);
-    if (existing) {
-      addRefs(existing, g.refs);
-      if (!existing.description && g.description) existing.description = g.description;
+    const leaf = resolveLeaf(index, g.key);
+    if (leaf) {
+      addRefs(leaf, g.refs);
+      if (!leaf.description && g.description) leaf.description = g.description;
     } else {
       leftovers.push(g);
     }
   }
 
-  // LLM rounds in batches, carrying the growing index forward between rounds so a
-  // candidate consolidates against a global coined in an earlier batch and each
-  // call's input stays within the model's context window. A round runs only when
-  // there is something to decide: existing topics to match against, or ≥2 leftovers
-  // in the batch that might be the same new class. A lone leftover against a
-  // still-empty index can only be new, so it is coined mechanically.
-  for await (const batch of toBatch(leftovers, REORGANIZE_BATCH_SIZE)) {
-    let actions: ReorganizeAction[] = [];
-    if (byKey.size > 0 || batch.length > 1) {
-      const input: ReorganizerInput = {
-        existingTopics: [...byKey.values()].map((t) => ({
-          key: t.key,
-          name: t.name,
-          description: t.description,
-        })),
-        candidates: batch.map((g) => ({
-          key: g.key,
-          name: g.name,
-          description: g.description,
-        })),
-      };
+  const attributeSystem = fillCorpusPurpose(ATTRIBUTION_SYSTEM_PROMPT, cfg.corpusPurpose);
+  for await (const batch of toBatch(leftovers, ATTRIBUTE_BATCH_SIZE)) {
+    const options = selectOptions(index, nodeVecs, candVecs, batch, hasEmbeddings);
+    let actions: AttributeAction[] = [];
+    // A round runs only when there is something to decide (options to attach/nest
+    // to). With no options every leftover can only be coined — do it mechanically.
+    if (options.length > 0) {
       const { output } = await llm.generateObject({
-        name: "reorganize-topics",
+        name: "attribute-topics",
         description:
-          "Place leftover per-document topics into the global topic index: match an existing topic, extend one, or coin a new one.",
-        model,
-        system,
-        input,
-        inputSchema: reorganizerInputSchema,
-        outputSchema: reorganizeActionsSchema,
+          "Attach each document-topic candidate to one or more index topics, or coin a new index topic (optionally nested under a category).",
+        model: cfg.modelFor("reorganize"),
+        system: attributeSystem,
+        input: {
+          candidates: batch.map((g) => ({ key: g.key, name: g.name, description: g.description })),
+          options,
+        },
+        inputSchema: attributeInputSchema,
+        outputSchema: attributeActionsSchema,
       });
       actions = output.actions;
     }
-    applyActions(byKey, actions, batch);
+    const coined = applyAttribution(index, actions, batch);
+    if (hasEmbeddings) await embedNodes(llm, model!, coined, nodeVecs);
   }
 
-  const topics = pruneEmptyAndSort([...byKey.values()]);
-  await project.requireAdapter(WikiTopicIndex).write({ generated, topics });
-  return leftovers.length;
+  // Local in-place splits keep categories/leaves bounded.
+  const splitSystem = fillCorpusPurpose(SPLIT_CATEGORY_SYSTEM_PROMPT, cfg.corpusPurpose);
+  const refineSystem = fillCorpusPurpose(REFINE_TOPIC_SYSTEM_PROMPT, cfg.corpusPurpose);
+  const created = await applyLocalSplits(index, llm, cfg, splitSystem, refineSystem);
+  if (hasEmbeddings) await embedNodes(llm, model!, created, nodeVecs);
+
+  finalizeIndex(index);
+  index.generated = generated;
+  await indexAdapter.write(index);
+
+  // Persist node vectors for the surviving nodes only (drop pruned/stale entries).
+  if (hasEmbeddings) {
+    for (const k of [...nodeVecs.keys()]) if (!index.nodes[k]) nodeVecs.delete(k);
+    await nodeStore.write(model!, dim!, nodeVecs);
+  }
+  return { leftovers: leftovers.length };
 }
 
 /**
  * Incrementally fold the touched documents' outliers into the outlier index.
- * Mechanical only (merge by `globalClass ?? key`); no LLM round.
+ * Mechanical only (merge by `globalClass ?? key`); no LLM round. Stays flat.
  */
 async function reorganizeOutliers(
   project: Project,
@@ -271,50 +324,44 @@ async function readTouchedMetas(
 }
 
 /**
- * The reorganizer: on any meta change, removed declaration, or removed source,
- * drains those updates and folds only the touched documents' topics/outliers
- * into the existing global indexes. Each touched document's prior references are
- * pruned first; topic candidates that don't exact-key-match an existing index
- * topic go through one LLM round (match-existing / extend-existing / new-global)
- * so semantically-equal classes consolidate instead of duplicating.
+ * The reorganizer: on any document-topics-embedded change, removed declaration, or
+ * removed source, drains those updates and attributes only the touched documents'
+ * topics onto the global topic DAG (and folds outliers). Each touched document's
+ * prior references are stripped first; candidates that don't key/alias match go
+ * through embedding-candidate retrieval + an LLM adjudication round, then local
+ * in-place splits keep nodes bounded. Emits `topic-tree` so cleanup can run.
  */
 export function reorganizeBuilder(): RegisteredBuilder {
-  const inputs = [META_SIGNAL, META_REMOVED_TOPICS_SIGNAL, SOURCES_REMOVED_SIGNAL];
+  const inputs = [DOC_TOPICS_EMBEDDED_SIGNAL, META_REMOVED_TOPICS_SIGNAL, SOURCES_REMOVED_SIGNAL];
   return {
     id: REORGANIZE_BUILDER_ID,
     inputs,
-    outputs: [],
-    // biome-ignore lint/correctness/useYield: rebuilds a global artifact; emits no signal
+    outputs: [TOPIC_TREE_SIGNAL],
     async *handler(project) {
       const builder = project.requireAdapter(ProjectBuilder);
       const log = loggerOf(project, REORGANIZE_BUILDER_ID);
       const llm = llmOf(project);
       const cfg = wikiConfigOf(project);
-      const system = fillCorpusPurpose(REORGANIZER_SYSTEM_PROMPT, cfg.corpusPurpose);
       const pending: BuilderUpdate[] = [];
       const touched = new Set<string>();
+      let stamp = 0;
       for (const signal of inputs) {
         for await (const u of builder.readUpdates({ signal, cell: REORGANIZE_BUILDER_ID })) {
           pending.push(u);
           touched.add(refDocUri(u.uri));
+          stamp = Math.max(stamp, u.stamp);
         }
       }
       if (pending.length > 0) {
-        // Reorganize first; only then mark the inputs handled, so an interrupted
-        // run re-triggers the reorganization rather than silently skipping it.
+        // Attribute first; only then mark the inputs handled, so an interrupted run
+        // re-triggers attribution rather than silently skipping it.
         const metas = await readTouchedMetas(project, touched);
         const generated = new Date().toISOString();
-        const leftovers = await reorganizeTopics(
-          project,
-          metas,
-          touched,
-          llm,
-          cfg.modelFor("reorganize"),
-          system,
-          generated,
-        );
+        const { leftovers } = await attributeTopics(project, metas, touched, llm, cfg, generated);
         await reorganizeOutliers(project, metas, touched, generated);
         log.info("reorganized indexes", { touched: touched.size, leftovers });
+        const emitted: EmittedUpdate = { signal: TOPIC_TREE_SIGNAL, uri: "topics.json", stamp };
+        yield emitted;
         for (const u of pending) await u.handled();
       }
       await builder.yieldControl();

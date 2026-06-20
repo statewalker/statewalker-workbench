@@ -5,6 +5,7 @@ import {
   contentBuilder,
   type DocumentMetaOutput,
   type DocumentSummaryOutput,
+  docTopicEmbedderBuilder,
   type LlmApi,
   metaBuilder,
   pruneBuilder,
@@ -61,6 +62,7 @@ describe("reorganizer + pruner", () => {
     builder.registerBuilder(contentBuilder());
     builder.registerBuilder(summarizeBuilder());
     builder.registerBuilder(metaBuilder());
+    builder.registerBuilder(docTopicEmbedderBuilder());
     builder.registerBuilder(reorganizeBuilder());
     builder.registerBuilder(pruneBuilder());
 
@@ -70,7 +72,9 @@ describe("reorganizer + pruner", () => {
 
     // Both docs declared `company-founders` → one global topic, referencing each
     // document's specific topic declaration (`<uri>#<topicKey>`).
-    const topic = await project.requireAdapter(WikiTopicIndex).get("company-founders");
+    const topic = (await project.requireAdapter(WikiTopicIndex).get("company-founders")) as
+      | { references: { uri: string }[] }
+      | undefined;
     expect(topic?.references.map((r) => r.uri).sort()).toEqual([
       "a.md#company-founders",
       "b.md#company-founders",
@@ -82,7 +86,9 @@ describe("reorganizer + pruner", () => {
       // drain
     }
 
-    const after = await project.requireAdapter(WikiTopicIndex).get("company-founders");
+    const after = (await project.requireAdapter(WikiTopicIndex).get("company-founders")) as
+      | { references: { uri: string }[] }
+      | undefined;
     expect(after?.references.map((r) => r.uri)).toEqual(["a.md#company-founders"]);
   });
 });

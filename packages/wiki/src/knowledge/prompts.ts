@@ -163,40 +163,93 @@ predicate strings rather than coining near-duplicates.
 
 corpus purpose (frames what's worth keeping): ${CORPUS_PURPOSE_PLACEHOLDER}`;
 
-/** Global topic reorganization prompt (lifted from wiki-runtime). */
-export const REORGANIZER_SYSTEM_PROMPT = `You re-organize per-document topic
-forward-declarations into a global topic index.
+/** Attribution prompt: place per-document topic candidates onto the index DAG. */
+export const ATTRIBUTION_SYSTEM_PROMPT = `You place per-document topic
+forward-declarations onto a global topic index organised as a hierarchy of
+CATEGORIES (groupings) over INDEX TOPICS (leaves that aggregate document
+references).
 
-You receive the current global topics (each as key + name + description) and a
-list of leftover CANDIDATE topic groups that the mechanical exact-key pre-merge
-did NOT already absorb. Each candidate has a stable 'key' (a slug); you decide
-purely from names + descriptions, and the runtime reattaches each candidate's
-document references by that key. Decide ONE action per candidate group, naming
-the candidate(s) it covers in 'candidateKeys':
+You receive CANDIDATE topic groups (each a stable 'key' + name + description that
+the mechanical key/alias match did NOT already absorb) and a small set of OPTION
+nodes — the embedding-nearest existing index nodes. You decide purely from names +
+descriptions; the runtime reattaches each candidate's document references by key.
+Decide ONE action per candidate, naming it in 'candidateKey':
 
-- match-existing — the candidate means the same class as an existing global
-  topic. List its 'key' in 'candidateKeys' under that global's 'globalKey'.
-- extend-existing — the candidate overlaps an existing global but adds a facet
-  the description does not yet cover. List its 'candidateKeys' AND propose a
-  one-sentence descriptionExtension. The runtime APPENDS extensions; it never
-  rewrites existing descriptions.
-- new-global — the candidate fits no existing global. Coin a new global topic
-  with a GENERIC, reusable 'name' and a one-line 'description', seeded with the
-  candidate's 'candidateKeys'. This is the LAST resort.
+- attach — the candidate means the same class as one (or several) existing INDEX
+  TOPICS. List their key(s) in 'nodeKeys'. List several only when the candidate
+  genuinely spans multiple classes.
+- coin — the candidate fits no existing index topic. Coin a new one with a
+  GENERIC, reusable 'name' and one-line 'description'. Optionally set 'parentKey'
+  to an existing CATEGORY option to nest it where it belongs. This is the last resort.
 
 RULES — these are load-bearing:
 
-1. Be conservative. Prefer match-existing over new-global whenever meanings
-   overlap. Coining a new global is the last resort. Treat near-duplicates
-   ("Fund performance" vs "Investment fund performance") as the SAME class.
-2. Generic names ONLY. "Company founders", not "Acme founders". Document-specific
-   identity lives in per-doc brief text, never as a global class name.
-3. Do NOT rewrite existing descriptions. If one is wrong or partial, use
-   extend-existing with the corrected facet as descriptionExtension.
-4. You MAY group several candidates into ONE new-global by listing all their
-   'candidateKeys' together — do this when two leftovers are the same new class.
-5. EVERY candidate group MUST be covered by exactly one action. Do not invent
-   globalKeys that were not supplied; the runtime coins a fallback global for any
-   candidate you leave unplaced, so make that recovery unnecessary.
+1. Be conservative. Prefer attach over coin whenever meanings overlap. Treat
+   near-duplicates ("Fund performance" vs "Investment fund performance") as the
+   SAME class and attach.
+2. Only ever 'attach' to options whose kind is "topic" (an index topic). To place
+   under a grouping, 'coin' with that category's key as 'parentKey'.
+3. Generic names ONLY. "Company founders", not "Acme founders".
+4. EVERY candidate MUST be covered by exactly one action. The runtime coins a
+   fallback index topic for any candidate you leave unplaced, so make that
+   recovery unnecessary.
 
 corpus purpose (frames what counts as the same class): ${CORPUS_PURPOSE_PLACEHOLDER}`;
+
+/** Category fan-out split prompt: partition an over-large category's children. */
+export const SPLIT_CATEGORY_SYSTEM_PROMPT = `You refine a global topic index. A
+CATEGORY has accumulated too many direct children. Partition its children into a
+few coherent SUB-CATEGORIES so the category's direct fan-out drops.
+
+You receive the category and its children (each key + name + description). Return
+sub-categories, each with a GENERIC name, a one-line description, and the keys of
+the children it groups. Every child key you list MUST be one of the supplied
+children. Leave a child out to keep it directly under the parent.
+
+This is HEURISTIC, not mandatory: if the children do NOT fall into honest
+sub-groupings, return an EMPTY list and the category is left as-is. Never
+fabricate groupings just to reduce fan-out.
+
+corpus purpose (frames natural groupings): ${CORPUS_PURPOSE_PLACEHOLDER}`;
+
+/** Index-topic refinement prompt: split an over-large leaf into sub-themes. */
+export const REFINE_TOPIC_SYSTEM_PROMPT = `You refine a global topic index. An
+INDEX TOPIC has accumulated too many document references and has become coarse.
+Cluster its member references into finer SUB-THEMES; the runtime promotes the
+topic to a category whose children are those sub-themes.
+
+You receive the topic plus its MEMBERS (each a synthetic 'id' + the contributing
+document topic's name + brief). Return sub-themes, each with a GENERIC name, a
+one-line description, and the member 'id's it groups. Every id you list MUST be a
+supplied member id; partition the members so each lands in exactly one sub-theme.
+
+This is HEURISTIC: if the members show no honest sub-themes (they really are one
+class), return an EMPTY list and the topic is left as a single oversized leaf. An
+honest big leaf beats fabricated sub-topics.
+
+corpus purpose (frames natural sub-themes): ${CORPUS_PURPOSE_PLACEHOLDER}`;
+
+/** Cleanup merge prompt: adjudicate a near-duplicate index-topic cluster. */
+export const MERGE_TOPICS_SYSTEM_PROMPT = `You clean up a global topic index. You
+receive a small CLUSTER of index topics that are vector-nearest neighbours and may
+denote the SAME class under different names or scattered under different
+categories.
+
+Return the merges to apply. For each genuine duplicate group, pick a 'canonicalKey'
+from the cluster, give the merged topic a canonical 'name' and 'description', and
+list the other cluster keys to fold into it as 'absorbedKeys' (the runtime unions
+their references + parents and records the absorbed keys as aliases).
+
+Be conservative: only merge topics that truly mean the same class. If the cluster
+holds DISTINCT classes that merely sound similar, return an EMPTY merges list.
+
+corpus purpose (frames what counts as the same class): ${CORPUS_PURPOSE_PLACEHOLDER}`;
+
+/** Recluster prompt: name a category over a bounded cluster of index topics. */
+export const RECLUSTER_SYSTEM_PROMPT = `You restructure a global topic index. You
+receive a bounded CLUSTER of index topics that belong together. Name the single
+CATEGORY that best groups them: a GENERIC 'name' and a one-line 'description'
+covering what the cluster has in common. Do not invent sub-structure; just name
+the grouping.
+
+corpus purpose (frames natural groupings): ${CORPUS_PURPOSE_PLACEHOLDER}`;

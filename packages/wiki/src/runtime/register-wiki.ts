@@ -8,6 +8,7 @@ import {
 } from "@statewalker/workspace.core";
 import { contentBuilder, registerContentExtraction } from "../content/index.js";
 import {
+  docTopicEmbedderBuilder,
   EMBEDDED_SIGNAL,
   embedderBuilder,
   metaBuilder,
@@ -15,6 +16,7 @@ import {
   registerKnowledgeAdapters,
   reorganizeBuilder,
   summarizeBuilder,
+  topicCleanupBuilder,
 } from "../knowledge/index.js";
 import {
   ResourceTextContentCache,
@@ -147,7 +149,11 @@ export function createWikiBuilders(opts: WikiBuildOptions = {}): RegisteredBuild
     // that nothing downstream (retrieval, indexes) consumes. The builder lives on
     // in `graphBuilder` (still unit-tested) for re-enabling — just drop it here.
     embedderBuilder({ force }),
+    // Embed each document's topics, then attribute them onto the topic DAG, then
+    // automatically clean up scattered near-duplicate index topics.
+    docTopicEmbedderBuilder({ force }),
     reorganizeBuilder(),
+    topicCleanupBuilder(),
     pruneBuilder(),
     searchBuilder({ inputSignal: EMBEDDED_SIGNAL }),
   ];

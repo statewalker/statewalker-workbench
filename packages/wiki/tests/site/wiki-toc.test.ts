@@ -57,26 +57,44 @@ describe("WikiToc", () => {
     expect(await wikiTocOf(project).read("missing")).toBeUndefined();
   });
 
-  it("suggest() drafts a starter TOC from the topic index", async () => {
+  it("suggest() drafts a starter TOC nesting index topics under categories", async () => {
     const project = await makeProject();
+    // A category over one index topic, plus a bare root index topic.
     await project.requireAdapter(WikiTopicIndex).write({
       generated: "",
-      topics: [
-        {
+      roots: ["people", "products"],
+      nodes: {
+        people: {
+          kind: "category",
+          key: "people",
+          name: "People",
+          description: "Who is involved.",
+          childKeys: ["founders"],
+        },
+        founders: {
+          kind: "topic",
           key: "founders",
           name: "Company founders",
           description: "Who founded it.",
           references: [],
         },
-        { key: "products", name: "Products", description: "", references: [] },
-      ],
+        products: {
+          kind: "topic",
+          key: "products",
+          name: "Products",
+          description: "",
+          references: [],
+        },
+      },
     });
 
     const md = await wikiTocOf(project).suggest();
     const entries = parseToc(md);
-    expect(entries.map((e) => e.title)).toEqual(["Company founders", "Products"]);
-    // Description becomes the prompt; empty descriptions get a sensible default.
-    expect(entries[0]?.prompt).toBe("Who founded it.");
+    // `People` is a category heading with `Company founders` nested beneath it;
+    // `Products` (a bare root index topic) is a top-level heading.
+    expect(entries.map((e) => e.title)).toEqual(["People", "Products"]);
+    expect(entries[0]?.children?.map((c) => c.title)).toEqual(["Company founders"]);
+    expect(entries[0]?.children?.[0]?.prompt).toBe("Who founded it.");
     expect(entries[1]?.prompt).toContain("Products");
   });
 });
