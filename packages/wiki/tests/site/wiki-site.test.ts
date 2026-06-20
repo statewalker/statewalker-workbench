@@ -44,7 +44,7 @@ const META: DocumentMetaOutput = {
   outliers: [],
 };
 
-const MARKER_RE = /\[\[(\/[^\]]+)\]\]/g;
+const REF_RE = /ref="([^"]+)"/g;
 
 const generateObject: LlmApi["generateObject"] = async (spec) => {
   const usage = { inputTokens: 0, outputTokens: 0 };
@@ -78,16 +78,13 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
     }
     case "summarize-batch": {
       const sections = (spec.input as { sections: string }).sections;
-      const markers = [...sections.matchAll(MARKER_RE)].map((m) => m[0]).join(" ");
-      return out({ text: `facts ${markers}`.trim() });
+      const refs = [...sections.matchAll(REF_RE)].map((m) => m[1]);
+      return out({ facts: refs.map((r) => ({ statement: "fact", citations: [r] })) });
     }
     case "compose-answer": {
-      const text = (spec.input as { summaries: { text: string }[] }).summaries
-        .map((s) => s.text)
-        .join(" ");
-      const claims = [...text.matchAll(MARKER_RE)].map((m) => ({
+      const claims = (spec.input as { facts: { statement: string; citations: string[] }[] }).facts.map((m) => ({
         statement: "fact",
-        citations: [m[1]],
+        citations: m.citations,
       }));
       return out({ claims, suggestions: [], sufficient: true, missing: null });
     }

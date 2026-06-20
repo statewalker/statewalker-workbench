@@ -137,21 +137,34 @@ export const summarizeInputSchema = z.object({
   sections: z.string(),
 });
 export const summarizeSchema = z.object({
-  text: z
-    .string()
+  facts: z
+    .array(
+      z.object({
+        statement: z
+          .string()
+          .describe(
+            "One self-contained fact, serving the question and drawn from a SINGLE document's section(s).",
+          ),
+        citations: z
+          .array(z.string())
+          .describe(
+            "The section `ref` value(s), verbatim, this fact rests on — ALL from the same document; at least one.",
+          ),
+      }),
+    )
     .describe(
-      "A dense, fact-only summary of this batch serving the question, keeping every [[<uri>#<section>]] marker.",
+      "Atomic, single-document grounded facts relevant to the question. State nothing not supported by a cited section.",
     ),
 });
 
 // ── Respond ──────────────────────────────────────────────────────────────────
 export const composeInputSchema = z.object({
   question: z.string(),
-  summaries: z.array(
+  /** The grounded facts (each a single-document statement + its section citations) to compose from. */
+  facts: z.array(
     z.object({
-      text: z.string(),
-      /** The `[[/path#section]]` markers grounding this summary — the citations the answer may use. */
-      refs: z.array(z.string()),
+      statement: z.string(),
+      citations: z.array(z.string()),
     }),
   ),
 });

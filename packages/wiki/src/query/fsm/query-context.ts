@@ -34,10 +34,10 @@ export interface IntentResult {
   offCorpusReason?: string;
 }
 
-/** A rolling summary: prose plus the `[[uri#section]]` chapter refs it preserves. */
-export interface Summary {
-  text: string;
-  refs: string[];
+/** A grounded fact: a single-document statement plus the verbatim section refs it rests on. */
+export interface GroundedFact {
+  statement: string;
+  citations: string[];
 }
 
 /** One subject's relevant evidence sections, document-ordered, after the section filter. */
@@ -85,7 +85,7 @@ export class QueryContext {
   #evidence: EvidenceSection[] = [];
   /** THIS tier's newly-selected sections grouped by subject (set by SelectSections; folded by Summarize). */
   #groups: SubjectGroup[] = [];
-  #summaries: Summary[] = [];
+  #facts: GroundedFact[] = [];
   #answer: Answer = EMPTY_ANSWER;
 
   get intent(): IntentResult {
@@ -126,12 +126,12 @@ export class QueryContext {
     this.progress.evidence = this.#evidence;
   }
 
-  get summaries(): Summary[] {
-    return this.#summaries;
+  get facts(): GroundedFact[] {
+    return this.#facts;
   }
-  /** Append this tier's fresh summaries to the rolling list. */
-  addSummaries(summaries: Summary[]): void {
-    this.#summaries = [...this.#summaries, ...summaries];
+  /** Append this tier's fresh grounded facts to the accumulated list. */
+  addFacts(facts: GroundedFact[]): void {
+    this.#facts = [...this.#facts, ...facts];
   }
 
   get answer(): Answer {

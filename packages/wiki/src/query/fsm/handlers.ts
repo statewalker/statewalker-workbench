@@ -15,7 +15,7 @@ import {
   SUMMARIZE_PROMPT,
   TOPIC_SELECT_PROMPT,
 } from "./prompts.js";
-import type { Candidate, QueryContext, SubjectGroup } from "./query-context.js";
+import type { Candidate, GroundedFact, QueryContext, SubjectGroup } from "./query-context.js";
 import type { QueryHandler } from "./query-fsm.js";
 import {
   aggregateClasses,
@@ -23,11 +23,12 @@ import {
   evidenceFor,
   type FilterSection,
   filterCitations,
+  filterGroundedFacts,
   hybridSearch,
   orderEvidence,
   packFilterBatches,
   readClassIndexes,
-  renderFoldSection,
+  renderDocumentBlock,
   sectionId,
   withinScope,
 } from "./retrieval.js";
@@ -450,10 +451,10 @@ export const SelectSectionsTrigger: QueryHandler = async function* (ctx) {
 
 /**
  * Batch summarization: split THIS tier's selected sections into batches (bounded by
- * section count and raw-content size), summarize each batch into one dense, fact-only
- * summary in a SEPARATE call, and run the batches in parallel (≤ SUMMARIZE_CONCURRENCY
- * at once). Appends the fresh summaries to the prior tiers' via `ctx.addSummaries`;
- * yields `summarized`.
+ * section count and raw-content size), and in a SEPARATE call per batch (≤ SUMMARIZE_CONCURRENCY
+ * in parallel) extract single-document grounded facts — sections rendered grouped by document so
+ * facts stay within document boundaries. Facts are mechanically grounded (citations must be in the
+ * batch; cross-document facts dropped) and appended via `ctx.addFacts`; yields `summarized`.
  */
 export const SummarizeTrigger: QueryHandler = async function* (ctx) {
   const { project, request: req, progress } = ctx;
@@ -478,19 +479,33 @@ export const SummarizeTrigger: QueryHandler = async function* (ctx) {
   log.info("summarize batches", { sections: sections.length, batches: batches.length });
   const startedAt = Date.now();
   const results = await mapLimit(batches, SUMMARIZE_CONCURRENCY, async (batch, b) => {
-    const refs: string[] = [];
-    const rendered = batch
-      .map((ev) => {
-        const canonical = toCanonical({ key, path: ev.uri, section: ev.sectionKey }, key);
-        refs.push(canonical);
-        return renderFoldSection({
-          marker: `[[${canonical}]]`,
-          title: ev.title,
-          description: ev.summary,
-          raw: ev.rawBlock,
-        });
-      })
-      .join("\n\n");
+    // Group the batch's sections by document, render a title+summary header per document with its
+    // sections nested, and track each section ref's document for the single-document fact check.
+    const byDoc = new Map<string, EvidenceSection[]>();
+    for (const ev of batch) {
+      const list = byDoc.get(ev.uri) ?? [];
+      list.push(ev);
+      byDoc.set(ev.uri, list);
+    }
+    const refToUri = new Map<string, string>();
+    const docBlocks: string[] = [];
+    for (const [uri, evs] of byDoc) {
+      const pageSummary = await (await project.getProjectResource(uri))
+        ?.getAdapter(WikiPageSummary)
+        ?.get();
+      const sections = evs.map((ev) => {
+        const ref = toCanonical({ key, path: ev.uri, section: ev.sectionKey }, key);
+        refToUri.set(ref, ev.uri);
+        return { ref, title: ev.title, description: ev.summary, raw: ev.rawBlock };
+      });
+      docBlocks.push(
+        renderDocumentBlock({
+          title: pageSummary?.title ?? uri,
+          summary: pageSummary?.summary ?? "",
+          sections,
+        }),
+      );
+    }
     const { output, usage } = await timedGenerate(
       llm,
       log,
@@ -498,17 +513,19 @@ export const SummarizeTrigger: QueryHandler = async function* (ctx) {
       {
         name: "summarize-batch",
         description:
-          "Summarize a batch of sections into one dense, question-relevant summary; keep every marker.",
+          "Extract atomic, single-document grounded facts relevant to the question; cite each fact's section ref(s).",
         model: cfg.modelFor("query"),
         system: SUMMARIZE_PROMPT,
-        input: { question: req.question, sections: rendered },
+        input: { question: req.question, sections: docBlocks.join("\n\n") },
         inputSchema: summarizeInputSchema,
         outputSchema: summarizeSchema,
         strict: true,
       },
       { batch: b + 1, of: batches.length, sections: batch.length },
     );
-    return { summary: { text: output.text, refs }, usage };
+    // Mechanical grounding: drop uncited facts and cross-document facts (no conflation).
+    const facts: GroundedFact[] = filterGroundedFacts(output.facts, refToUri);
+    return { facts, usage };
   });
   logBatchTotals(
     log,
@@ -518,7 +535,7 @@ export const SummarizeTrigger: QueryHandler = async function* (ctx) {
     results.map((r) => r.usage),
   );
 
-  ctx.addSummaries(results.map((r) => r.summary));
+  ctx.addFacts(results.flatMap((r) => r.facts));
   yield "summarized";
 };
 
@@ -528,7 +545,7 @@ function tierRemaining(ctx: QueryContext): boolean {
 }
 
 /**
- * Compose the grounded, cited answer from the rolling summaries and judge whether the
+ * Compose the grounded, cited answer from the grounded facts and judge whether the
  * gathered evidence actually answers the prompt. Sufficient → `answered`. Insufficient
  * with a lower retrieval tier still available → `insufficient` (escalate: re-enter
  * SelectSections). Insufficient with nothing left → accept the best-effort answer and
@@ -539,19 +556,19 @@ export const RespondTrigger: QueryHandler = async function* (ctx) {
   const llm = llmOf(project);
   const cfg = wikiConfigOf(project);
   const log = loggerOf(project, "QueryFsm");
-  const summaries = ctx.summaries;
+  const facts = ctx.facts;
   const evidence = ctx.evidence;
 
   const { output: composed } = await timedGenerate(llm, log, progress, {
     name: "compose-answer",
     description:
-      "Answer the prompt as individually-cited claims from the rolling summaries, and report whether the evidence sufficed.",
+      "Answer the prompt as individually-cited claims from the grounded facts, and report whether the evidence sufficed.",
     // The final answer uses the ADVANCED model; sections were pre-selected by the weak `queryFast`.
     model: cfg.modelFor("queryStrong"),
     system: COMPOSE_PROMPT,
     input: {
       question: req.question,
-      summaries: summaries.map((s) => ({ text: s.text, refs: s.refs })),
+      facts: facts.map((f) => ({ statement: f.statement, citations: f.citations })),
     },
     inputSchema: composeInputSchema,
     outputSchema: composeSchema,

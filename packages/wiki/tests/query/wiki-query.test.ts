@@ -51,7 +51,7 @@ const META: DocumentMetaOutput = {
   outliers: [],
 };
 
-const MARKER_RE = /\[\[(\/[^\]]+)\]\]/g;
+const REF_RE = /ref="([^"]+)"/g;
 
 // Per-test controls + observations.
 interface Intent {
@@ -105,17 +105,14 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
       const sections = (spec.input as { sections: string }).sections;
       foldSections.push(sections);
       // Keep every marker in the batch so citations propagate to compose.
-      const markers = [...sections.matchAll(MARKER_RE)].map((m) => m[0]).join(" ");
-      return out({ text: `facts ${markers}`.trim() });
+      const refs = [...sections.matchAll(REF_RE)].map((m) => m[1]);
+      return out({ facts: refs.map((r) => ({ statement: "fact", citations: [r] })) });
     }
     case "compose-answer": {
-      const text = (spec.input as { summaries: { text: string }[] }).summaries
-        .map((s) => s.text)
-        .join(" ");
       // One grounded claim per marker found in the summaries' text.
-      const claims = [...text.matchAll(MARKER_RE)].map((m) => ({
+      const claims = (spec.input as { facts: { statement: string; citations: string[] }[] }).facts.map((m) => ({
         statement: "fact",
-        citations: [m[1]],
+        citations: m.citations,
       }));
       const sufficient = (calls["compose-answer"] ?? 0) > sufficientAfter;
       return out({ claims, suggestions: [], sufficient, missing: sufficient ? null : "more" });

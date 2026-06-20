@@ -219,25 +219,51 @@ export function filterCitations(
 }
 
 /**
- * Render one rolling-summarize fold's input as separate XML tags: the previous
- * rolling summary (omitted on the first fold), the section title, its prior
- * narrative description, and the section's raw content (by line range).
+ * Render one document's slice of a summarize batch: a `<document>` block carrying the
+ * document title + summary header, with its sections nested. Each section is tagged with
+ * its `ref` (the citation token the summarizer must cite) plus its title, prior narrative
+ * description, and raw content. Grouping by document gives the summarizer the provenance it
+ * needs to keep facts single-document and prevents cross-document conflation.
  */
-export function renderFoldSection(input: {
-  previousSummary?: string;
-  marker: string;
+export function renderDocumentBlock(input: {
   title: string;
-  description: string;
-  raw: string;
+  summary: string;
+  sections: { ref: string; title: string; description: string; raw: string }[];
 }): string {
-  const parts: string[] = [];
-  if (input.previousSummary && input.previousSummary.length > 0) {
-    parts.push(`<previous_summary>\n${input.previousSummary}\n</previous_summary>`);
+  const parts: string[] = [
+    `<document title="${input.title}">`,
+    `<document_summary>\n${input.summary}\n</document_summary>`,
+  ];
+  for (const s of input.sections) {
+    parts.push(
+      `<section ref="${s.ref}">`,
+      `<section_title>\n${s.title}\n</section_title>`,
+      `<section_description>\n${s.description}\n</section_description>`,
+      `<raw_content>\n${s.raw}\n</raw_content>`,
+      "</section>",
+    );
   }
-  parts.push(`<section_title marker="${input.marker}">\n${input.title}\n</section_title>`);
-  parts.push(`<section_description>\n${input.description}\n</section_description>`);
-  parts.push(`<raw_content>\n${input.raw}\n</raw_content>`);
+  parts.push("</document>");
   return parts.join("\n");
+}
+
+/**
+ * Mechanically ground a summarize batch's returned facts: keep only citations supplied in the
+ * batch (`refToUri` maps section ref → its document uri), drop a fact left with no valid citation,
+ * and drop any fact whose citations span more than one document — so a cross-document conflation
+ * cannot survive as a fact. Returns the surviving `{ statement, citations }` facts.
+ */
+export function filterGroundedFacts(
+  rawFacts: { statement: string; citations: string[] }[],
+  refToUri: ReadonlyMap<string, string>,
+): { statement: string; citations: string[] }[] {
+  const out: { statement: string; citations: string[] }[] = [];
+  for (const f of rawFacts) {
+    const citations = f.citations.filter((c) => refToUri.has(c));
+    const docs = new Set(citations.map((c) => refToUri.get(c)));
+    if (citations.length > 0 && docs.size === 1) out.push({ statement: f.statement, citations });
+  }
+  return out;
 }
 
 /** A candidate section as offered to the relevance filter (no raw content — title + summary only). */

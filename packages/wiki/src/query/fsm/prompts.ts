@@ -49,21 +49,27 @@ title/summary must indicate it bears on the prompt; drop sections that are only 
 or merely from a relevant document. Return an empty array when none in this batch qualify. Selection
 only — do not answer the prompt.`;
 
-export const SUMMARIZE_PROMPT = `You summarize wiki sections for a question. You receive the question
-and a BATCH of sections, each presented in XML tags: <section_title> (carrying its [[marker]]),
-<section_description> (a prior narrative summary), and <raw_content> (the section's original text).
-Produce ONE dense summary containing ONLY facts relevant to the question, grounded in the
-<raw_content> of these sections, and discarding content unrelated to the question. Carry every
-[[<uri>#<section>]] marker for a section that contributes a fact. Do not answer the question — only
-summarize.`;
+export const SUMMARIZE_PROMPT = `You extract grounded facts from wiki documents for a question. You
+receive the question and a batch of SOURCE DOCUMENTS, each as <document title="…"> with a
+<document_summary> and its <section ref="…"> blocks (each carrying <section_title>,
+<section_description>, and <raw_content>).
 
-export const COMPOSE_PROMPT = `Answer the question grounded ONLY in the supplied rolling summaries.
-Each summary comes with a \`refs\` list — the section citations it is grounded in. Return the answer as
-\`claims\`: an ordered list where each claim has a \`statement\` (a sentence or bullet; markdown such as
-**bold** or a "- " prefix is fine) and a \`citations\` array. Each claim's \`citations\` MUST contain one
-or more refs drawn VERBATIM from the \`refs\` of the summaries that claim rests on. Every claim must be
-citable: if you cannot cite a statement from the supplied refs, OMIT that claim — never emit a claim
-with an empty citations array, and never invent or alter refs. Then judge sufficiency: set
-\`sufficient\` true if the summaries fully and confidently answer the question; set it false when key
-information needed to answer is absent and name the missing piece in \`missing\` (this triggers a wider
-evidence search; use null when sufficient).`;
+Return \`facts\`: atomic statements that bear on the question, each grounded in the <raw_content> of
+the section(s) it cites. RULES — load-bearing:
+1. Every fact MUST cite ≥1 section \`ref\` VERBATIM. State nothing you cannot ground in a supplied
+   section's raw content — no outside or "common-sense" knowledge.
+2. A single fact MUST draw only on sections of ONE document — NEVER merge content across documents.
+   When two documents say related things, emit a SEPARATE fact per document.
+3. Keep only facts relevant to the question; discard the rest. Do NOT answer the question — only
+   extract facts.`;
+
+export const COMPOSE_PROMPT = `Answer the question grounded ONLY in the supplied grounded facts. Each
+fact carries a \`citations\` list — the section refs it rests on. Return the answer as \`claims\`: an
+ordered list where each claim has a \`statement\` (a sentence or bullet; markdown such as **bold** or a
+"- " prefix is fine) and a \`citations\` array. Each claim's \`citations\` MUST contain one or more refs
+drawn VERBATIM from the \`citations\` of the facts that claim rests on; a claim MAY combine facts from
+different documents (each still cited). Every claim must be citable: if you cannot cite a statement
+from the supplied facts, OMIT that claim — never emit a claim with an empty citations array, and never
+invent or alter refs. Then judge sufficiency: set \`sufficient\` true if the facts fully and confidently
+answer the question; set it false when key information needed to answer is absent and name the missing
+piece in \`missing\` (this triggers a wider evidence search; use null when sufficient).`;
