@@ -124,16 +124,25 @@ export class WikiToc extends ProjectAdapter {
     }
   }
 
-  /** Draft a starter TOC markdown from the wiki's topic index (topic → page). */
+  /**
+   * Draft a starter TOC markdown from the wiki's topic index, nesting index topics
+   * under their category headings (`##` categories, `###` topics). A bare root index
+   * topic (no category) renders as a top-level `##` entry.
+   */
   async suggest(): Promise<string> {
-    const topics = this.project.requireAdapter(WikiTopicIndex);
+    const index = this.project.requireAdapter(WikiTopicIndex);
     const lines = ["# Suggested table of contents", ""];
-    for await (const topic of topics.list()) {
-      lines.push(
-        `## ${topic.name}`,
-        topic.description?.trim() || `Summarize what the wiki says about ${topic.name}.`,
-        "",
-      );
+    const promptFor = (node: { name: string; description: string }): string =>
+      node.description.trim() || `Summarize what the wiki says about ${node.name}.`;
+    for (const root of await index.roots()) {
+      if (root.kind === "category") {
+        lines.push(`## ${root.name}`, promptFor(root), "");
+        for (const child of await index.children(root.key)) {
+          lines.push(`### ${child.name}`, promptFor(child), "");
+        }
+      } else {
+        lines.push(`## ${root.name}`, promptFor(root), "");
+      }
     }
     return lines.join("\n");
   }

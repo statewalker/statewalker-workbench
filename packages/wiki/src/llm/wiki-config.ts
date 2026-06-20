@@ -34,7 +34,16 @@ export interface WikiConfigData {
   dimensionality?: number;
   /** Steers stage prompts (summariser detail, what counts as on-corpus, …). */
   corpusPurpose?: string;
+  /** Topic-index category fan-out `B`: a category with more direct children is split. */
+  topicFanout?: number;
+  /** Topic-index leaf cap `R`: an index topic with more references is refined. */
+  topicLeafCap?: number;
 }
+
+/** Default category fan-out `B` — a category over this many children is split. */
+export const DEFAULT_TOPIC_FANOUT = 10;
+/** Default index-topic reference cap `R` — a leaf over this many refs is refined. */
+export const DEFAULT_TOPIC_LEAF_CAP = 25;
 
 /** The wiki nature's marker / config file, under the project system folder. */
 export const WIKI_NATURE_FILE = "nature.wiki.json";
@@ -113,6 +122,16 @@ export class WikiLlmConfiguration extends ProjectAdapter {
 
   get corpusPurpose(): string | undefined {
     return this.data.corpusPurpose;
+  }
+
+  /** Category fan-out `B` (split threshold), falling back to the default. */
+  get topicFanout(): number {
+    return this.data.topicFanout ?? DEFAULT_TOPIC_FANOUT;
+  }
+
+  /** Index-topic reference cap `R` (refine threshold), falling back to the default. */
+  get topicLeafCap(): number {
+    return this.data.topicLeafCap ?? DEFAULT_TOPIC_LEAF_CAP;
   }
 }
 

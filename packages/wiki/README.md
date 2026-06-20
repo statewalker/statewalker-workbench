@@ -28,7 +28,7 @@ Internally the root barrel (`src/index.ts`) re-exports these modules; the groupi
 |---|---|
 | `uri` | `WikiRef`, `parseWikiUri`, `normalizeWikiUri`, `toCanonical`, `formatCitation`, `parseCitation`, `isCrossWiki`, `validateWikiPath`, `assertWikiKey`, `WIKI_KEY_RE`, error classes (`InvalidWikiPathError`, `WikiKeyError`, `CrossWikiRefError`), and `openWiki`. |
 | `content` | `ContentAdapter` + `contentBuilder` + `registerContentExtraction` — mime-aware text extraction (wiki-free). |
-| `knowledge` | The build-stage builders (`summarizeBuilder`, `metaBuilder`, `embedderBuilder`, `reorganizeBuilder`, `pruneBuilder`, `graphBuilder`), per-page adapters (`ResourceTextContentCache`, `WikiPageSummary`, `WikiPageMeta`, `WikiPageEmbeddings`, `WikiPageGraph`), global indexes (`WikiTopicIndex`, `WikiOutlierIndex`), Zod schemas, prompts, page-path helpers, and the artifact types. |
+| `knowledge` | The build-stage builders (`summarizeBuilder`, `metaBuilder`, `embedderBuilder`, `docTopicEmbedderBuilder`, `reorganizeBuilder`, `topicCleanupBuilder`, `pruneBuilder`, `graphBuilder`), the manual `reclusterTopics` op, per-page adapters (`ResourceTextContentCache`, `WikiPageSummary`, `WikiPageMeta`, `WikiPageEmbeddings`, `WikiPageTopicEmbeddings`, `WikiPageGraph`), global indexes (`WikiTopicIndex` — the topic DAG, `WikiOutlierIndex`, `WikiTopicNodeEmbeddings`), Zod schemas, prompts, page-path helpers, and the artifact types. |
 | `llm` | `LlmProjectAdapter` / `LlmApi` (generic Vercel-AI-SDK access), `WikiLlmConfiguration` (stage → model-name policy), `llmOf` / `wikiConfigOf` resolvers, and pricing helpers (`costOf`, `sumCosts`, `roundUsd`). |
 | `search` | `SearchAdapter` + `searchBuilder` + `registerSearch` — project-level hybrid (FTS + vector) search (wiki-free). |
 | `query` | `WikiQuery` (the `ask(question)` adapter), `QueryProgress` (observable run), `Answer` / `EvidenceSection` / `AnswerTopic` types, and `WikiSnapshotsAdapter` (frozen saved answers/reports). |
@@ -84,9 +84,12 @@ console.log(answer.text, answer.citations);
 ### Pipeline data flow
 
 ```
-sources ─▶ Extractor ─▶ Summarizer ─▶ MetaExtractor ──▶ IndexReorganizer (topics/outliers)
-              (content)   (summarized)      (meta)            │
-                              │                               └─▶ IndexPruner (on removal)
+sources ─▶ Extractor ─▶ Summarizer ─▶ MetaExtractor ─▶ DocTopicEmbedder ─▶ IndexReorganizer
+              (content)   (summarized)      (meta)      (doc-topics-embedded)   (topic DAG + outliers)
+                              │                                                  │      │
+                              │                            (on removal) IndexPruner ◀───┤
+                              │                                       TopicCleanup ◀────┘
+                              │                                      (merge near-dups; topic-tree)
                               └─▶ Embedder ─▶ SearchIndexer ─▶ wiki-search index (FTS + vector)
                                   (embedded)
 
@@ -114,7 +117,9 @@ const vectors = await resource!
   .requireAdapter(WikiPageEmbeddings)
   .getVectors("text-embedding-3-small", 1536); // Map<sectionKey, Float32Array>
 
-for await (const topic of project.requireAdapter(WikiTopicIndex).list()) {
+// `leaves()` is the flat index-topic view (retrieval/CLI iterate it unchanged);
+// `roots()` / `children(key)` expose the category hierarchy.
+for await (const topic of project.requireAdapter(WikiTopicIndex).leaves()) {
   console.log(topic.key, topic.name, topic.references.length);
 }
 ```
@@ -175,7 +180,7 @@ Flags: `--format <none|json|yaml>` (data channel; default `json`), `--log-level 
 
 ### Architectural decisions
 
-- **Everything is a workspace adapter.** Per-page artifacts are `ResourceAdapter`s (`WikiPageSummary`, `WikiPageMeta`, `WikiPageEmbeddings`, `ResourceTextContentCache`); project-wide concerns are `ProjectAdapter`s (`WikiTopicIndex`, `WikiOutlierIndex`, `SearchAdapter`, `WikiQuery`, `WikiSnapshotsAdapter`); model access is the generic `LlmProjectAdapter` and model *policy* the wiki-specific `WikiLlmConfiguration`. Concrete adapter classes self-host on their handle, so most need no explicit registration — `registerKnowledgeAdapters` / `registerQuery` are intentional no-ops kept for composition-root symmetry.
+- **Everything is a workspace adapter.** Per-page artifacts are `ResourceAdapter`s (`WikiPageSummary`, `WikiPageMeta`, `WikiPageEmbeddings`, `WikiPageTopicEmbeddings`, `ResourceTextContentCache`); project-wide concerns are `ProjectAdapter`s (`WikiTopicIndex`, `WikiTopicNodeEmbeddings`, `WikiOutlierIndex`, `SearchAdapter`, `WikiQuery`, `WikiSnapshotsAdapter`); model access is the generic `LlmProjectAdapter` and model *policy* the wiki-specific `WikiLlmConfiguration`. Concrete adapter classes self-host on their handle, so most need no explicit registration — `registerKnowledgeAdapters` / `registerQuery` are intentional no-ops kept for composition-root symmetry.
 - **Generic-vs-wiki LLM split.** `LlmProjectAdapter` is a provider-agnostic Vercel-AI-SDK wrapper (`generateObject`, `generateText`/`streamText`, `embed`/`embedBatch`); which model each *stage* uses is policy that lives in `WikiLlmConfiguration.modelFor(stage)`, falling back to `default`. Tests register an `LlmApi` stub under the `LlmProjectAdapter` key — no provider needed.
 - **Composition root reads the environment; adapters never do.** `registerWiki` takes a `provider`/`llm`, model names, and embedding config and injects them; `resolveProvidersFromEnv` is the only env reader, used by the CLI boundary.
 - **Two adapters are wiki-free by contract.** `ContentAdapter` and `SearchAdapter` reference no wiki types — content (and its precomputed embeddings) flows into search through an injected `SearchBlocksProvider` (`wikiSearchBlocks`), so both can be extracted to standalone packages.
@@ -186,7 +191,13 @@ Flags: `--format <none|json|yaml>` (data channel; default `json`), `--log-level 
 
 - **Hash-gated incremental builds.** Each source's raw text is cached (`raw.txt` + `raw.meta.json`) with the SHA-256 of the original bytes. Summarizer/Meta/Embedder compare that hash against the `sourceHash` stamped on their last artifact and skip the LLM call when unchanged — but still emit their output signal on a hash-skip, so invalidating one stage re-feeds downstream without re-running upstream LLM stages.
 - **Section embeddings in Arrow sidecars.** Per-document embeddings split metadata (`embeddings.<model>.<dim>.json`) from the dense vectors (`embeddings.<model>.<dim>.arrow`, a `FixedSizeList<Float32>[dim]` column via `@uwdata/flechette`) — JSON float arrays are too large. Model + dimensionality are in the filename so switching models never collides. The Arrow file is written first and the JSON marker last, so a crash never leaves metadata pointing at missing vectors.
-- **Incremental index reorganization with a single LLM round.** On any meta change, removed declaration, or removed source, the reorganizer strips the touched documents' references (keeping now-empty classes so a re-ingest folds back into the *same* stable key), exact-key pre-merges candidate topics mechanically, and sends only the leftovers through one `generateObject` round (match-existing / extend-existing / coin-new) — with a coverage backstop coining any unplaced leftover. The LLM round is skipped entirely when there is nothing to decide (≤1 leftover against an empty index). Outliers merge mechanically by `globalClass ?? key`, no LLM.
+- **The topic index is a bounded-fan-out DAG.** `WikiTopicIndex` stores `{ roots, nodes }` where each node is either a *category* (internal, `childKeys`, no refs) or an *index topic* (leaf, `references`, no children). A leaf may have several parent categories and a document reference may sit under several leaves (many-to-many, acyclic). The flat `leaves()` view *is* the former global-topic list, so retrieval and the CLI iterate it unchanged; `roots()`/`children()` expose the hierarchy and back `wiki-toc`'s `suggest()`. A legacy flat `{ topics: [] }` artifact is lifted to a DAG on read (every former topic an index topic under `roots`) — no migration tooling.
+
+- **Semantic attribution scales by construction — no LLM call sees the whole index.** On any document-topics-embedded change, removed declaration, or removed source, the reorganizer strips the touched documents' references (keeping now-empty leaves so a re-ingest folds back into the *same* stable key) and attributes each document topic: a key/alias match attaches mechanically (no LLM); otherwise the document topic's embedding retrieves a small candidate set of index nodes and one bounded `generateObject` round adjudicates (attach to ≥1 index topic / coin under a category); a coverage backstop coins any leftover so every document topic lands on ≥1 index topic. With no embed model it degrades to key/alias match + bounded root-descent. Candidates are batched (`ATTRIBUTE_BATCH_SIZE`) so a large rebuild never overflows the context window. Document-topic vectors come from the `sourceHash`-gated `DocTopicEmbedder`; index-node vectors are maintained inline by the writers into a project-level store so a coined node is an attribution candidate in the same cycle.
+
+- **Local in-place splits keep nodes bounded.** A category over the fan-out `B` (`topicFanout`) is split into sub-categories; an index topic over the reference cap `R` (`topicLeafCap`) is refined and promoted in place to a category partitioning its references. Both are heuristic — declined (node left oversized) when the LLM finds no honest sub-grouping.
+
+- **Three maintenance tiers.** (1) incremental attribution + local splits per ingest; (2) automatic `TopicCleanup` (on `topic-tree`) merges scattered near-duplicate index topics — mechanical vector-NN finds the clusters with no context limit and the LLM only adjudicates small candidate sets, unioning references + parents and recording absorbed keys as aliases — then refines any leaf a merge left overgrown; (3) the manual `reclusterTopics` (`wiki:recluster-topics` command) regroups the category hierarchy, leaving a valid acyclic DAG if interrupted. Outliers stay flat and merge mechanically by `globalClass ?? key`, no LLM.
 - **Hybrid search + RRF.** The `wiki-search` FlexSearch index holds an FTS sub-index (section summary + raw text) and a vector sub-index (the precomputed section embedding); results are fused (RRF) and grouped by document. The index is persisted incrementally under `index/search/` (throttled to once per 2 s, forced on drain) and loaded as-is on query — no query-time corpus re-embedding.
 - **Tiered retrieval router.** `IntentDetection → Retrieve → SelectSections → Summarize → Respond → Verify → Response`, with `NegativeResponse` reachable from intent (off-corpus), retrieve (no candidates), and select (filter kept nothing). `Retrieve` runs the mechanical hybrid search and the LLM topic/doc-topic class ladder in parallel per subject, merged into one evidence pool; `SelectSections` consumes retrieval tiers (intersection first) and is re-entered to escalate when `Respond` judges the evidence insufficient; `Verify` mechanically drops any claimed citation that does not resolve to a retrieved `(uri, sectionKey)`.
 

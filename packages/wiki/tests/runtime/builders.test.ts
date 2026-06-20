@@ -61,10 +61,18 @@ function tracker() {
         return out({
           sections: [{ sectionKey: "s", entities: [], statements: [], relations: [] }],
         });
-      case "reorganize-topics":
-        // No semantic merges — the reorganizer's fallback coins each leftover
-        // by its own key, preserving the mechanical exact-key behaviour.
+      case "attribute-topics":
+        // No semantic attach — the backstop coins each leftover by its own key,
+        // preserving the mechanical exact-key behaviour.
         return out({ actions: [] });
+      case "split-category":
+        return out({ subcategories: [] });
+      case "refine-topic":
+        return out({ subthemes: [] });
+      case "merge-topics":
+        return out({ merges: [] });
+      case "name-category":
+        return out({ name: "Cat", description: "d" });
       default:
         throw new Error(`unexpected ${spec.name}`);
     }
@@ -154,7 +162,11 @@ describe("wiki builders — incremental behaviour", () => {
     const project = await openProject();
     await scan(project);
     expect(
-      (await project.requireAdapter(WikiTopicIndex).get("bravo"))?.references.map((r) => r.uri),
+      (
+        (await project.requireAdapter(WikiTopicIndex).get("bravo")) as
+          | { references: { uri: string }[] }
+          | undefined
+      )?.references.map((r) => r.uri),
     ).toEqual(["b.md#bravo"]);
 
     await filesApi.remove("proj/b.md");

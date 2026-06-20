@@ -5,6 +5,7 @@ import {
   contentBuilder,
   type DocumentMetaOutput,
   type DocumentSummaryOutput,
+  docTopicEmbedderBuilder,
   type EmbedFn,
   type LlmApi,
   metaBuilder,
@@ -152,6 +153,7 @@ async function buildProject() {
   builder.registerBuilder(contentBuilder());
   builder.registerBuilder(summarizeBuilder());
   builder.registerBuilder(metaBuilder());
+  builder.registerBuilder(docTopicEmbedderBuilder());
   builder.registerBuilder(reorganizeBuilder());
   builder.registerBuilder(searchBuilder({ inputSignal: "summarized" }));
   for await (const _ of builder.run()) {

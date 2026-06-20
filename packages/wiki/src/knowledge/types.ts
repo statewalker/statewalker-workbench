@@ -145,9 +145,60 @@ export interface GlobalOutlier {
   references: ClassReference[];
 }
 
+/**
+ * The global topic index as a bounded-fan-out DAG of two node kinds.
+ *
+ * A **category** ({@link TopicCategory}) is an internal node: it groups child
+ * nodes by `childKeys` and carries no document references. An **index topic**
+ * ({@link TopicIndexNode}) is a leaf: it aggregates per-document topic
+ * references and has no children — its set is exactly the former flat
+ * {@link GlobalTopic} list, so retrieval/CLI iterate `leaves()` unchanged.
+ *
+ * An index topic MAY be a child of more than one category and a document
+ * reference MAY appear under more than one index topic (many-to-many); the
+ * graph stays acyclic. Stored as an adjacency map `{ roots, nodes }` (never a
+ * nested tree, which would duplicate multi-parent nodes).
+ */
+export interface TopicCategory {
+  kind: "category";
+  key: string;
+  name: string;
+  description: string;
+  /** Child node keys (categories and/or index topics). Bounded by fan-out `B`. */
+  childKeys: string[];
+  /** Absorbed keys this category answers to (from promotions/merges). */
+  aliases?: string[];
+}
+
+export interface TopicIndexNode {
+  kind: "topic";
+  key: string;
+  name: string;
+  description: string;
+  /** Per-document topic references this leaf aggregates. Bounded by cap `R`. */
+  references: ClassReference[];
+  /** Absorbed keys this index topic answers to (from merges). */
+  aliases?: string[];
+}
+
+export type TopicNode = TopicCategory | TopicIndexNode;
+
 export interface TopicIndex {
   generated: string;
-  topics: GlobalTopic[];
+  /** Top-level node keys (categories and/or bare index topics). */
+  roots: string[];
+  /** Adjacency map: every node by its stable `key`. */
+  nodes: Record<string, TopicNode>;
+}
+
+/** Narrowing guard: a category (internal node with `childKeys`). */
+export function isCategory(node: TopicNode): node is TopicCategory {
+  return node.kind === "category";
+}
+
+/** Narrowing guard: an index topic (leaf with `references`). */
+export function isIndexTopic(node: TopicNode): node is TopicIndexNode {
+  return node.kind === "topic";
 }
 
 export interface OutlierIndex {

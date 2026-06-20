@@ -33,7 +33,7 @@ export async function readClassIndexes(
 ): Promise<{ topics: Map<string, GlobalTopic>; outliers: Map<string, GlobalOutlier> }> {
   const topics = new Map<string, GlobalTopic>();
   const outliers = new Map<string, GlobalOutlier>();
-  for await (const t of project.requireAdapter(WikiTopicIndex).list()) topics.set(t.key, t);
+  for await (const t of project.requireAdapter(WikiTopicIndex).leaves()) topics.set(t.key, t);
   for await (const o of project.requireAdapter(WikiOutlierIndex).list()) outliers.set(o.key, o);
   return { topics, outliers };
 }

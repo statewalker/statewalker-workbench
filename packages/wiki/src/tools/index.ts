@@ -3,6 +3,8 @@ export {
   registerWikiCommands,
   WikiAskCommand,
   type WikiAskInput,
+  type WikiReclusterInput,
+  WikiReclusterTopicsCommand,
   WikiSearchCommand,
   type WikiSearchInput,
 } from "./wiki-commands.js";

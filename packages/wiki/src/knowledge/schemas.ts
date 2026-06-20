@@ -218,104 +218,215 @@ export const graphExtractorInputSchema = z
   })
   .describe("Input to the per-section graph extraction call. Returns DocumentGraph.");
 
-// ── Reorganizer (LLM topic merge) ────────────────────────────────────────────
-// Ported from wiki-runtime's reorganizeActionsSchema / reorganizerInputSchema.
-// Candidates are addressed by `key`: actions name the candidate keys they cover
-// and the runtime reattaches each candidate's document references locally, so the
-// (potentially large) per-doc URI lists never travel through the LLM call.
+// ── Attribution (place document topics onto the index DAG) ───────────────────
+// Candidates and index nodes are addressed by `key`: actions name the candidate
+// and node keys they cover and the runtime reattaches each candidate's document
+// references locally, so the (potentially large) per-doc URI lists never travel
+// through the LLM call. The LLM sees only an embedding-bounded option set, never
+// the whole index.
 
-const candidateKeysSchema = z
-  .array(z.string().min(1))
-  .min(1)
-  .describe("Candidate `key` slug(s) this action covers (≥2 only to merge same-class leftovers).");
+const nodeRefSchema = z
+  .object({
+    key: z.string().describe("Index-node key slug."),
+    name: z.string(),
+    description: z.string(),
+    kind: z.enum(["category", "topic"]).describe("category = grouping; topic = index leaf."),
+  })
+  .describe("One candidate index node the LLM may attach to or nest under.");
 
-export const reorganizeActionSchema = z
+const attributeCandidateSchema = z
+  .object({
+    key: z.string().describe("Document-topic candidate key slug (not necessarily in the index)."),
+    name: z.string(),
+    description: z.string().describe("Abstract one-line definition (may be empty)."),
+  })
+  .describe("One per-document topic group to place onto the index.");
+
+export const attributeInputSchema = z
+  .object({
+    candidates: z
+      .array(attributeCandidateSchema)
+      .describe("Per-document topic groups to place. Decide exactly one action per candidate."),
+    options: z
+      .array(nodeRefSchema)
+      .describe(
+        "Embedding-nearest index nodes proposed as attach/nest targets. May be empty (coin new).",
+      ),
+  })
+  .describe("Input to the attribution round. Returns AttributeActions.");
+
+export const attributeActionSchema = z
   .discriminatedUnion("kind", [
     z
       .object({
-        kind: z.literal("match-existing"),
-        globalKey: z
-          .string()
-          .min(1)
-          .describe("Existing global topic key slug to record the candidate under."),
-        candidateKeys: candidateKeysSchema,
-      })
-      .describe(
-        "The candidate matches an existing global topic. Prefer this over coining a new one.",
-      ),
-    z
-      .object({
-        kind: z.literal("extend-existing"),
-        globalKey: z.string().min(1).describe("Existing global topic key to extend."),
-        descriptionExtension: z
-          .string()
+        kind: z.literal("attach"),
+        candidateKey: z.string().min(1).describe("The candidate this action covers."),
+        nodeKeys: z
+          .array(z.string().min(1))
           .min(1)
           .describe(
-            "One sentence appended to the existing description; the original is preserved verbatim.",
+            "Existing index-TOPIC key(s) the candidate means the same class as. List several when the candidate genuinely spans multiple index topics.",
           ),
-        candidateKeys: candidateKeysSchema,
       })
       .describe(
-        "The candidate overlaps an existing global but adds a facet its description lacks.",
+        "The candidate matches one or more existing index topics. Prefer this over coining.",
       ),
     z
       .object({
-        kind: z.literal("new-global"),
+        kind: z.literal("coin"),
+        candidateKey: z.string().min(1).describe("The candidate this action covers."),
         name: z
           .string()
           .min(1)
-          .describe("Generic, reusable global topic name. NEVER instance-specific."),
+          .describe("Generic, reusable index-topic name. NEVER instance-specific."),
         description: z
           .string()
           .min(1)
-          .describe("One-line generic description for the new global topic."),
-        candidateKeys: candidateKeysSchema,
+          .describe("One-line generic description for the new index topic."),
+        parentKey: z
+          .string()
+          .optional()
+          .describe(
+            "Optional CATEGORY key to nest the new index topic under (descend into the best-fitting category). Omit to place at the root.",
+          ),
       })
-      .describe("The candidate fits no existing global — coin a new one. Last resort."),
+      .describe("The candidate fits no existing index topic — coin a new one. Last resort."),
   ])
-  .describe("One reorganization decision for a leftover candidate topic group.");
+  .describe("One attribution decision for a document-topic candidate.");
 
-export const reorganizeActionsSchema = z
+export const attributeActionsSchema = z
   .object({
     actions: z
-      .array(reorganizeActionSchema)
-      .describe("One action per leftover candidate group. May be empty."),
+      .array(attributeActionSchema)
+      .describe("One action per candidate. May be empty (runtime coins a fallback for each)."),
   })
-  .describe(
-    "Output of the LLM reorganize round; drives mechanical updates to the global topic index.",
-  );
+  .describe("Output of the attribution round; drives mechanical updates to the index DAG.");
 
-export const reorganizerCandidateSchema = z
-  .object({
-    key: z.string().describe("Candidate's per-doc key slug (not yet in the global index)."),
-    name: z.string().describe("Candidate's name."),
-    description: z.string().describe("Candidate's abstract description (may be empty)."),
-  })
-  .describe("One leftover per-doc topic group the reorganizer must place in the global index.");
+// ── Category fan-out split (a category with > B children) ─────────────────────
 
-export const reorganizerExistingTopicSchema = z
+export const splitCategoryInputSchema = z
   .object({
-    key: z.string(),
-    name: z.string(),
-    description: z.string(),
+    category: nodeRefSchema.describe("The over-capacity category to split."),
+    children: z
+      .array(nodeRefSchema)
+      .describe("Its direct children, to partition into sub-categories."),
   })
-  .describe("Existing global topic entry the reorganizer may match against or extend.");
+  .describe("Input to a category fan-out split. Returns SplitCategoryOutput.");
 
-export const reorganizerInputSchema = z
+export const splitCategoryOutputSchema = z
   .object({
-    existingTopics: z
-      .array(reorganizerExistingTopicSchema)
-      .describe("Current global topics — preferred targets for match / extend actions."),
-    candidates: z
-      .array(reorganizerCandidateSchema)
-      .describe("Leftover per-doc topic groups not absorbed by the exact-key pre-merge."),
+    subcategories: z
+      .array(
+        z.object({
+          name: z.string().min(1).describe("Generic sub-category name."),
+          description: z.string().min(1).describe("One-line sub-category description."),
+          childKeys: z
+            .array(z.string().min(1))
+            .min(1)
+            .describe("Keys of the parent's children grouped under this sub-category."),
+        }),
+      )
+      .describe(
+        "Sub-categories partitioning the children. Empty array = decline (no honest grouping).",
+      ),
   })
-  .describe("Input to the LLM reorganize round. Returns ReorganizeActions.");
+  .describe("Output of a category fan-out split.");
+
+// ── Index-topic refinement (a leaf with > R references) ──────────────────────
+// References are presented URI-free as members with synthetic `id`s; the runtime
+// maps the chosen ids back to document reference URIs.
+
+export const refineTopicInputSchema = z
+  .object({
+    topic: nodeRefSchema.describe("The over-capacity index topic to refine."),
+    members: z
+      .array(
+        z.object({
+          id: z.string().describe("Synthetic member id (maps back to a reference)."),
+          name: z.string().describe("Contributing document topic's name."),
+          brief: z.string().describe("Contributing document topic's brief (may be empty)."),
+        }),
+      )
+      .describe("The leaf's references as members, to cluster into sub-themes."),
+  })
+  .describe("Input to an index-topic refinement. Returns RefineTopicOutput.");
+
+export const refineTopicOutputSchema = z
+  .object({
+    subthemes: z
+      .array(
+        z.object({
+          name: z.string().min(1).describe("Generic sub-theme (child index-topic) name."),
+          description: z.string().min(1).describe("One-line sub-theme description."),
+          memberIds: z
+            .array(z.string().min(1))
+            .min(1)
+            .describe("Member ids partitioned into this sub-theme."),
+        }),
+      )
+      .describe(
+        "Sub-themes partitioning the members. Empty array = decline (no honest sub-themes).",
+      ),
+  })
+  .describe("Output of an index-topic refinement.");
+
+// ── Cleanup merge (a small NN cluster of near-duplicate index topics) ────────
+
+export const mergeClusterInputSchema = z
+  .object({
+    cluster: z
+      .array(nodeRefSchema)
+      .min(2)
+      .describe("A small vector-nearest-neighbour cluster of possibly-duplicate index topics."),
+  })
+  .describe("Input to a cleanup merge adjudication. Returns MergeOutput.");
+
+export const mergeOutputSchema = z
+  .object({
+    merges: z
+      .array(
+        z.object({
+          canonicalKey: z.string().min(1).describe("Surviving index-topic key from the cluster."),
+          name: z.string().min(1).describe("Canonical name for the merged index topic."),
+          description: z.string().min(1).describe("Canonical one-line description."),
+          absorbedKeys: z
+            .array(z.string().min(1))
+            .min(1)
+            .describe("Other cluster keys folded into the canonical one (recorded as aliases)."),
+        }),
+      )
+      .describe(
+        "Merges to apply. Empty array = the cluster holds distinct classes; merge nothing.",
+      ),
+  })
+  .describe("Output of a cleanup merge adjudication.");
+
+// ── Recluster (name a category over a bounded cluster of index topics) ────────
+
+export const nameCategoryInputSchema = z
+  .object({
+    topics: z
+      .array(nodeRefSchema)
+      .min(1)
+      .describe("A bounded cluster of index topics to group under one named category."),
+  })
+  .describe("Input to a recluster category-naming call. Returns NameCategoryOutput.");
+
+export const nameCategoryOutputSchema = z
+  .object({
+    name: z.string().min(1).describe("Generic category name covering the cluster."),
+    description: z.string().min(1).describe("One-line category description."),
+  })
+  .describe("Output of a recluster category-naming call.");
 
 export type DocumentSummaryOutput = z.infer<typeof documentSummarySchema>;
 export type SummarizerInput = z.infer<typeof summarizerInputSchema>;
 export type DocumentMetaOutput = z.infer<typeof documentMetaSchema>;
 export type DocumentGraphOutput = z.infer<typeof documentGraphSchema>;
-export type ReorganizeActions = z.infer<typeof reorganizeActionsSchema>;
-export type ReorganizeAction = ReorganizeActions["actions"][number];
-export type ReorganizerInput = z.infer<typeof reorganizerInputSchema>;
+export type AttributeActions = z.infer<typeof attributeActionsSchema>;
+export type AttributeAction = AttributeActions["actions"][number];
+export type AttributeInput = z.infer<typeof attributeInputSchema>;
+export type SplitCategoryOutput = z.infer<typeof splitCategoryOutputSchema>;
+export type RefineTopicOutput = z.infer<typeof refineTopicOutputSchema>;
+export type MergeOutput = z.infer<typeof mergeOutputSchema>;
+export type NameCategoryOutput = z.infer<typeof nameCategoryOutputSchema>;

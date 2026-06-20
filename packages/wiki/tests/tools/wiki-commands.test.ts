@@ -6,6 +6,7 @@ import {
   createWikiTools,
   registerWikiCommands,
   WikiAskCommand,
+  WikiReclusterTopicsCommand,
   WikiSearchCommand,
   wikiAsk,
   wikiSearch,
@@ -46,6 +47,17 @@ describe("wiki commands", () => {
     });
     expect(viaCommand).toEqual(viaCore);
     expect(viaCommand.answers.map((a) => a.project).sort()).toEqual(["a", "b"]);
+    off();
+  });
+
+  it("wiki:recluster-topics is registered and resolves (no-op for an unknown project)", async () => {
+    const workspace = await buildMultiWikiWorkspace();
+    const off = registerWikiCommands(workspace);
+    const commands = workspace.requireAdapter(Commands);
+    // The handler claims the command and settles it; an unknown project is a no-op.
+    await expect(
+      commands.call(WikiReclusterTopicsCommand, { project: "no-such-wiki" }).promise,
+    ).resolves.toBeUndefined();
     off();
   });
 
