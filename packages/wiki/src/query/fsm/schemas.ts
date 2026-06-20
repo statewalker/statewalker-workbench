@@ -57,6 +57,46 @@ export const topicSelectSchema = z
     "Selected topic + outlier class keys for one subject, drawn only from the supplied lists.",
   );
 
+// ── TopicDescent (score one bounded batch of DAG nodes for a subject) ─────────
+export const topicDescentInputSchema = z.object({
+  subject: z.string().describe("The subject being routed."),
+  nodes: z
+    .array(
+      z.object({
+        key: z.string(),
+        name: z.string(),
+        description: z.string().optional(),
+        kind: z.enum(["category", "topic"]).describe("category = grouping; topic = index leaf."),
+        children: z
+          .array(availableClassSchema)
+          .describe("A category's direct child nodes; empty for an index topic (leaf)."),
+      }),
+    )
+    .describe("The current descent frontier — a bounded batch of index nodes to score."),
+});
+export const topicDescentSchema = z
+  .object({
+    nodes: z
+      .array(
+        z.object({
+          key: z.string().describe("A node key drawn verbatim from the supplied nodes."),
+          relevance: z
+            .number()
+            .int()
+            .min(0)
+            .max(2)
+            .describe("relevant = 2 / maybe = 1 / non-relevant = 0. Score-0 nodes are pruned."),
+          descendKeys: z
+            .array(z.string())
+            .describe(
+              "For a relevant CATEGORY, the child keys (verbatim) worth descending into; empty for an index topic or a category not worth descending.",
+            ),
+        }),
+      )
+      .describe("A relevance verdict for every supplied node."),
+  })
+  .describe("Per-node relevance scores and which children to descend. Selection only.");
+
 // ── SectionFilter (relevance filter over one token-bounded, doc-grouped batch) ─
 export const sectionFilterInputSchema = z.object({
   question: z.string().describe("The full original prompt."),

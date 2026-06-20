@@ -31,6 +31,16 @@ questions about anomalies, exceptions, disagreements, or surprises, and include 
 outliers otherwise. When nothing plausibly matches, return empty arrays. Selection only — do not
 answer the subject.`;
 
+export const TOPIC_DESCENT_PROMPT = `You route a subject through a topic index organised as a
+bounded-fan-out DAG of categories (groupings) over index topics (leaves). You receive the subject and
+the CURRENT FRONTIER — a batch of nodes, each with its key, name, description, kind, and (for a
+category) its direct children. For EVERY node return a relevance score for the subject:
+relevant = 2 / maybe = 1 / non-relevant = 0. Score 0 prunes the node — it and its subtree are
+dropped, so do not score 0 for a plausibly-related grouping. For a CATEGORY you score > 0, also return
+\`descendKeys\`: the child keys (verbatim) worth descending into — be inclusive, since a child omitted
+here can never contribute. For an index topic (leaf), or a category not worth opening, leave
+\`descendKeys\` empty. Selection only — do not answer the subject.`;
+
 export const SECTION_SELECT_PROMPT = `You filter candidate wiki sections for relevance to a prompt. You
 receive the full original prompt and a batch of candidate sections grouped by their source document
 (document title, then each section's URI, title, and summary). Return the URIs — verbatim — of the

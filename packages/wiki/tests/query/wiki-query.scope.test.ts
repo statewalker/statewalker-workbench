@@ -68,15 +68,19 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
       return out(META);
     case "intent-detection":
       return out({ onCorpus: true, subjects: [{ prompt: "Who founded Acme?" }] });
-    case "topic-select": {
-      const input = spec.input as {
-        availableTopics: { key: string }[];
-        availableOutliers: { key: string }[];
-      };
+    case "topic-descent": {
+      const nodes = (spec.input as { nodes: { key: string; children: { key: string }[] }[] }).nodes;
       return out({
-        topicKeys: input.availableTopics.map((t) => t.key),
-        outlierKeys: input.availableOutliers.map((o) => o.key),
+        nodes: nodes.map((n) => ({
+          key: n.key,
+          relevance: 2,
+          descendKeys: n.children.map((c) => c.key),
+        })),
       });
+    }
+    case "outlier-select": {
+      const outliers = (spec.input as { availableOutliers: { key: string }[] }).availableOutliers;
+      return out({ topicKeys: [], outlierKeys: outliers.map((o) => o.key) });
     }
     case "section-select": {
       const docs = (spec.input as { documents: { sections: { uri: string }[] }[] }).documents;

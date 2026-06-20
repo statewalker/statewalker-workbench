@@ -68,16 +68,20 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
         onCorpus: true,
         subjects: [{ prompt: (spec.input as { question: string }).question }],
       });
-    case "topic-select": {
-      // Keep every available class (the corpus is tiny); grounding narrows later.
-      const input = spec.input as {
-        availableTopics: { key: string }[];
-        availableOutliers: { key: string }[];
-      };
+    case "topic-descent": {
+      // Keep every frontier node (the corpus is tiny); grounding narrows later.
+      const nodes = (spec.input as { nodes: { key: string; children: { key: string }[] }[] }).nodes;
       return out({
-        topicKeys: input.availableTopics.map((t) => t.key),
-        outlierKeys: input.availableOutliers.map((o) => o.key),
+        nodes: nodes.map((n) => ({
+          key: n.key,
+          relevance: 2,
+          descendKeys: n.children.map((c) => c.key),
+        })),
       });
+    }
+    case "outlier-select": {
+      const outliers = (spec.input as { availableOutliers: { key: string }[] }).availableOutliers;
+      return out({ topicKeys: [], outlierKeys: outliers.map((o) => o.key) });
     }
     case "section-select": {
       // Keep every candidate section in the batch.

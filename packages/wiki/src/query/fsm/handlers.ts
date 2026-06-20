@@ -1,21 +1,13 @@
 import { loggerOf, type Project } from "@statewalker/workspace.core";
+import { WikiTopicIndex } from "../../knowledge/indexes.js";
 import { WikiPageSummary } from "../../knowledge/page-adapters.js";
 import type { DocumentMeta } from "../../knowledge/types.js";
-import {
-  costOf,
-  type GenerateObjectSpec,
-  type LlmApi,
-  type LlmCallUsage,
-  llmOf,
-  roundUsd,
-  sumCosts,
-  type WikiLlmConfiguration,
-  wikiConfigOf,
-} from "../../llm/index.js";
+import { type LlmApi, llmOf, type WikiLlmConfiguration, wikiConfigOf } from "../../llm/index.js";
 import { SearchAdapter } from "../../search/index.js";
 import { toCanonical } from "../../uri/wiki-uri.js";
 import { mapLimit } from "../../util/batch.js";
 import type { EvidenceSection, QueryProgress } from "../progress.js";
+import { logBatchTotals, timedGenerate } from "./llm-call.js";
 import {
   COMPOSE_PROMPT,
   INTENT_DETECTION_PROMPT,
@@ -51,6 +43,7 @@ import {
   topicSelectInputSchema,
   topicSelectSchema,
 } from "./schemas.js";
+import { topicDescent } from "./topic-descent.js";
 
 /** Char budget per relevance-filter batch (token-window proxy at ~4 chars/token). */
 const FILTER_CHAR_BUDGET = 16_000;
@@ -97,63 +90,6 @@ function tierOfScore(score: number): number {
   return i === -1 ? TIER_SCORES.length - 1 : i;
 }
 
-type QueryLog = ReturnType<typeof loggerOf>;
-
-/** Run one structured-generation call: record it on `progress`, log model/latency/tokens/cost. */
-async function timedGenerate<I, O>(
-  llm: LlmApi,
-  log: QueryLog,
-  progress: QueryProgress,
-  spec: GenerateObjectSpec<I, O>,
-  extra?: Record<string, unknown>,
-): Promise<{ output: O; usage: LlmCallUsage }> {
-  const startedAt = Date.now();
-  const res = await llm.generateObject(spec);
-  const ms = Date.now() - startedAt;
-  const cost = costOf(spec.model, res.usage);
-  progress.recordLlmCall({
-    name: spec.name,
-    model: spec.model,
-    ms,
-    inputTokens: res.usage.inputTokens,
-    outputTokens: res.usage.outputTokens,
-  });
-  log.info("llm call", {
-    name: spec.name,
-    model: spec.model,
-    ms,
-    inputTokens: res.usage.inputTokens,
-    outputTokens: res.usage.outputTokens,
-    inputUsd: roundUsd(cost.inputUsd),
-    outputUsd: roundUsd(cost.outputUsd),
-    totalUsd: roundUsd(cost.totalUsd),
-    ...extra,
-  });
-  return res;
-}
-
-/** Log a per-batch rollup: call count, wall-clock, summed token usage, and summed USD cost. */
-function logBatchTotals(
-  log: QueryLog,
-  name: string,
-  model: string,
-  startedAt: number,
-  usages: LlmCallUsage[],
-): void {
-  const cost = sumCosts(usages.map((u) => costOf(model, u)));
-  log.info("llm batch totals", {
-    name,
-    model,
-    calls: usages.length,
-    ms: Date.now() - startedAt,
-    inputTokens: usages.reduce((s, u) => s + u.inputTokens, 0),
-    outputTokens: usages.reduce((s, u) => s + u.outputTokens, 0),
-    inputUsd: roundUsd(cost.inputUsd),
-    outputUsd: roundUsd(cost.outputUsd),
-    totalUsd: roundUsd(cost.totalUsd),
-  });
-}
-
 /** Render answer claims to prose: each statement followed by its `[[ref]]` citations. Partial-safe
  * (fields may be missing mid-stream); skips empty entries. */
 function renderClaims(
@@ -177,15 +113,19 @@ const toClass = (c: { key: string; name: string; description?: string }) => ({
 
 /**
  * Classify on/off-corpus and decompose the prompt into distinct search subjects.
- * The vault's class vocabulary is supplied so subjects use the corpus's wording.
- * Sets `ctx.intent`; yields `onCorpus` | `offCorpus`.
+ * The corpus vocabulary supplied is the topic index's ROOT CATEGORIES (the thematic
+ * skeleton, bounded by fan-out) plus the flat outliers — not the whole topic list,
+ * which on a large DAG is the same context-window risk the build side removed. Deep
+ * topic specifics are the per-subject descent's job. Sets `ctx.intent`; yields
+ * `onCorpus` | `offCorpus`.
  */
 export const IntentDetectionTrigger: QueryHandler = async function* (ctx) {
   const { project, request: req, progress } = ctx;
   const llm = llmOf(project);
   const cfg = wikiConfigOf(project);
   const log = loggerOf(project, "QueryFsm");
-  const { topics, outliers } = await readClassIndexes(project);
+  const { outliers } = await readClassIndexes(project);
+  const categories = await project.requireAdapter(WikiTopicIndex).roots();
 
   const { output } = await timedGenerate(llm, log, progress, {
     name: "intent-detection",
@@ -195,7 +135,7 @@ export const IntentDetectionTrigger: QueryHandler = async function* (ctx) {
     system: INTENT_DETECTION_PROMPT,
     input: {
       question: req.question,
-      availableTopics: [...topics.values()].map(toClass),
+      availableTopics: categories.map(toClass),
       availableOutliers: [...outliers.values()].map(toClass),
     },
     inputSchema: intentDetectionInputSchema,
@@ -215,10 +155,53 @@ export const IntentDetectionTrigger: QueryHandler = async function* (ctx) {
 };
 
 /**
- * The LLM topic class ladder for one subject: select relevant global classes,
- * resolve them to per-document topic candidates, and descend to every section
- * those topics span. Precision is deferred to the section-relevance filter in
- * `SelectSections` — this front-end is recall-only.
+ * Flat outlier selection for one subject: the topic index is a DAG (descended by
+ * `topicDescent`), but outliers stay a short flat list, so one exhaustive select
+ * call picks the relevant outlier classes and resolves them to candidate sections.
+ * Recall-only — precision is deferred to the section-relevance filter.
+ */
+async function outlierSelect(
+  project: Project,
+  llm: LlmApi,
+  cfg: WikiLlmConfiguration,
+  progress: QueryProgress,
+  subjectPrompt: string,
+  metaCache: Map<string, DocumentMeta | undefined>,
+): Promise<{ uri: string; sectionKey: string }[]> {
+  const { outliers } = await readClassIndexes(project);
+  if (outliers.size === 0) return [];
+
+  const { output: sel } = await timedGenerate(llm, loggerOf(project, "QueryFsm"), progress, {
+    name: "outlier-select",
+    description: "Exhaustively select relevant outlier class keys for the subject.",
+    model: cfg.modelFor("query"),
+    system: TOPIC_SELECT_PROMPT,
+    input: {
+      subject: subjectPrompt,
+      availableTopics: [],
+      availableOutliers: [...outliers.values()].map(toClass),
+    },
+    inputSchema: topicSelectInputSchema,
+    outputSchema: topicSelectSchema,
+    strict: true,
+  });
+
+  const selOutliers = sel.outlierKeys.map((k) => outliers.get(k)).filter((o) => o !== undefined);
+  const candidates = await buildDocTopicCandidates(
+    project,
+    selOutliers,
+    (m) => m.outliers,
+    metaCache,
+  );
+  return candidates.flatMap((c) => c.sectionKeys.map((sk) => ({ uri: c.baseUri, sectionKey: sk })));
+}
+
+/**
+ * The topic/outlier front-end for one subject: topics via embedding-seeded scored
+ * DAG descent ({@link topicDescent}), outliers via flat selection. Both expand to
+ * `{ uri, sectionKey }` candidate sections through the same per-document reference
+ * chain, so the section-emission boundary (and the downstream fusion + tiers) is
+ * unchanged. Recall-only — precision is deferred to `SelectSections`.
  */
 async function classLadder(
   project: Project,
@@ -228,31 +211,11 @@ async function classLadder(
   subjectPrompt: string,
   metaCache: Map<string, DocumentMeta | undefined>,
 ): Promise<{ uri: string; sectionKey: string }[]> {
-  const { topics, outliers } = await readClassIndexes(project);
-  if (topics.size === 0 && outliers.size === 0) return [];
-
-  const { output: sel } = await timedGenerate(llm, loggerOf(project, "QueryFsm"), progress, {
-    name: "topic-select",
-    description: "Exhaustively select relevant topic + outlier class keys for the subject.",
-    model: cfg.modelFor("query"),
-    system: TOPIC_SELECT_PROMPT,
-    input: {
-      subject: subjectPrompt,
-      availableTopics: [...topics.values()].map(toClass),
-      availableOutliers: [...outliers.values()].map(toClass),
-    },
-    inputSchema: topicSelectInputSchema,
-    outputSchema: topicSelectSchema,
-    strict: true,
-  });
-
-  const selTopics = sel.topicKeys.map((k) => topics.get(k)).filter((t) => t !== undefined);
-  const selOutliers = sel.outlierKeys.map((k) => outliers.get(k)).filter((o) => o !== undefined);
-  const candidates = [
-    ...(await buildDocTopicCandidates(project, selTopics, (m) => m.topics, metaCache)),
-    ...(await buildDocTopicCandidates(project, selOutliers, (m) => m.outliers, metaCache)),
-  ];
-  return candidates.flatMap((c) => c.sectionKeys.map((sk) => ({ uri: c.baseUri, sectionKey: sk })));
+  const [topicHits, outlierHits] = await Promise.all([
+    topicDescent(project, llm, cfg, progress, subjectPrompt, metaCache),
+    outlierSelect(project, llm, cfg, progress, subjectPrompt, metaCache),
+  ]);
+  return [...topicHits, ...outlierHits];
 }
 
 /**

@@ -60,7 +60,8 @@ interface Intent {
   offCorpusReason?: string;
 }
 let intent: Intent;
-let selectedTopicKeys: ((available: string[]) => string[]) | undefined;
+/** Which descent-frontier node keys score relevant (=2); others score 0. Default: all. */
+let relevantNodeKeys: ((available: string[]) => string[]) | undefined;
 let calls: Record<string, number>;
 let foldSections: string[];
 /** Compose reports "sufficient" only after this many compose calls (0 = always sufficient). */
@@ -77,17 +78,23 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
       return out(META);
     case "intent-detection":
       return out(intent);
-    case "topic-select": {
-      const input = spec.input as {
-        availableTopics: { key: string }[];
-        availableOutliers: { key: string }[];
-      };
-      const topicKeys = input.availableTopics.map((t) => t.key);
-      const outlierKeys = input.availableOutliers.map((o) => o.key);
+    case "topic-descent": {
+      const nodes = (spec.input as { nodes: { key: string; children: { key: string }[] }[] }).nodes;
+      const keys = nodes.map((n) => n.key);
+      const relevant = new Set(relevantNodeKeys ? relevantNodeKeys(keys) : keys);
       return out({
-        topicKeys: selectedTopicKeys ? selectedTopicKeys(topicKeys) : topicKeys,
-        outlierKeys,
+        nodes: nodes.map((n) => ({
+          key: n.key,
+          relevance: relevant.has(n.key) ? 2 : 0,
+          descendKeys: relevant.has(n.key) ? n.children.map((c) => c.key) : [],
+        })),
       });
+    }
+    case "outlier-select": {
+      const outlierKeys = (
+        spec.input as { availableOutliers: { key: string }[] }
+      ).availableOutliers.map((o) => o.key);
+      return out({ topicKeys: [], outlierKeys });
     }
     case "section-select": {
       // Keep every candidate section in the batch.
@@ -167,7 +174,7 @@ describe("WikiQuery — FSM-driven retrieval", () => {
 
   beforeEach(async () => {
     intent = { onCorpus: true, subjects: [{ prompt: "Who founded Acme?" }] };
-    selectedTopicKeys = undefined;
+    relevantNodeKeys = undefined;
     calls = {};
     foldSections = [];
     sufficientAfter = 0;
@@ -197,8 +204,9 @@ describe("WikiQuery — FSM-driven retrieval", () => {
       subjects: [{ prompt: "Who founded Acme?" }, { prompt: "What is Acme?" }],
     };
     await project.requireAdapter(WikiQuery).ask("Acme + founders").complete();
-    // The class ladder runs once per subject; the relevance filter runs once over the pool.
-    expect(calls["topic-select"]).toBe(2);
+    // The topic descent runs once per subject (one bounded level here); the relevance
+    // filter runs once over the pooled candidates.
+    expect(calls["topic-descent"]).toBe(2);
     expect(calls["section-select"]).toBe(1);
   });
 
@@ -234,7 +242,7 @@ describe("WikiQuery — FSM-driven retrieval", () => {
   });
 
   it("returns a terminal negative answer when there is no evidence", async () => {
-    selectedTopicKeys = () => []; // class ladder yields nothing
+    relevantNodeKeys = () => []; // descent prunes every node → no topic sections
     intent = { onCorpus: true, subjects: [{ prompt: "quizzaciously unrelated xyzzy" }] };
     const answer = await project.requireAdapter(WikiQuery).ask("Unrelated?").complete();
     expect(answer.evidenceCount).toBe(0);
@@ -248,7 +256,7 @@ describe("WikiQuery — FSM-driven retrieval", () => {
     const answer = await project.requireAdapter(WikiQuery).ask("How do I bake bread?").complete();
     expect(answer.evidenceCount).toBe(0);
     expect(answer.text).toMatch(/outside the wiki/i);
-    expect(calls["topic-select"]).toBeUndefined(); // retrieval never ran
+    expect(calls["topic-descent"]).toBeUndefined(); // retrieval never ran
   });
 
   it("notifies onChange listeners and records stages as the run progresses", async () => {
