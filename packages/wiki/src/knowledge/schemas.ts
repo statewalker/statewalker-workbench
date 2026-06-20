@@ -220,7 +220,14 @@ export const graphExtractorInputSchema = z
 
 // ── Reorganizer (LLM topic merge) ────────────────────────────────────────────
 // Ported from wiki-runtime's reorganizeActionsSchema / reorganizerInputSchema.
-// Candidates are grouped by key, so every action carries a `perDocUris` array.
+// Candidates are addressed by `key`: actions name the candidate keys they cover
+// and the runtime reattaches each candidate's document references locally, so the
+// (potentially large) per-doc URI lists never travel through the LLM call.
+
+const candidateKeysSchema = z
+  .array(z.string().min(1))
+  .min(1)
+  .describe("Candidate `key` slug(s) this action covers (≥2 only to merge same-class leftovers).");
 
 export const reorganizeActionSchema = z
   .discriminatedUnion("kind", [
@@ -231,10 +238,7 @@ export const reorganizeActionSchema = z
           .string()
           .min(1)
           .describe("Existing global topic key slug to record the candidate under."),
-        perDocUris: z
-          .array(z.string().min(1))
-          .min(1)
-          .describe("'<uri>#<per-doc-topic-key>' references to record under the existing global."),
+        candidateKeys: candidateKeysSchema,
       })
       .describe(
         "The candidate matches an existing global topic. Prefer this over coining a new one.",
@@ -249,10 +253,7 @@ export const reorganizeActionSchema = z
           .describe(
             "One sentence appended to the existing description; the original is preserved verbatim.",
           ),
-        perDocUris: z
-          .array(z.string().min(1))
-          .min(1)
-          .describe("'<uri>#<per-doc-topic-key>' references to record under the extended global."),
+        candidateKeys: candidateKeysSchema,
       })
       .describe(
         "The candidate overlaps an existing global but adds a facet its description lacks.",
@@ -268,10 +269,7 @@ export const reorganizeActionSchema = z
           .string()
           .min(1)
           .describe("One-line generic description for the new global topic."),
-        perDocUris: z
-          .array(z.string().min(1))
-          .min(1)
-          .describe("'<uri>#<per-doc-topic-key>' references that seed the new global topic."),
+        candidateKeys: candidateKeysSchema,
       })
       .describe("The candidate fits no existing global — coin a new one. Last resort."),
   ])
@@ -292,10 +290,6 @@ export const reorganizerCandidateSchema = z
     key: z.string().describe("Candidate's per-doc key slug (not yet in the global index)."),
     name: z.string().describe("Candidate's name."),
     description: z.string().describe("Candidate's abstract description (may be empty)."),
-    perDocUris: z
-      .array(z.string().min(1))
-      .min(1)
-      .describe("'<uri>#<key>' references this candidate group carries."),
   })
   .describe("One leftover per-doc topic group the reorganizer must place in the global index.");
 

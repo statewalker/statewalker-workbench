@@ -169,18 +169,20 @@ forward-declarations into a global topic index.
 
 You receive the current global topics (each as key + name + description) and a
 list of leftover CANDIDATE topic groups that the mechanical exact-key pre-merge
-did NOT already absorb. Each candidate carries the per-document references it
-contributes. Decide ONE action per candidate group:
+did NOT already absorb. Each candidate has a stable 'key' (a slug); you decide
+purely from names + descriptions, and the runtime reattaches each candidate's
+document references by that key. Decide ONE action per candidate group, naming
+the candidate(s) it covers in 'candidateKeys':
 
 - match-existing — the candidate means the same class as an existing global
-  topic. Record the candidate's perDocUris under that global's 'globalKey'.
+  topic. List its 'key' in 'candidateKeys' under that global's 'globalKey'.
 - extend-existing — the candidate overlaps an existing global but adds a facet
-  the description does not yet cover. Record the perDocUris AND propose a
+  the description does not yet cover. List its 'candidateKeys' AND propose a
   one-sentence descriptionExtension. The runtime APPENDS extensions; it never
   rewrites existing descriptions.
 - new-global — the candidate fits no existing global. Coin a new global topic
   with a GENERIC, reusable 'name' and a one-line 'description', seeded with the
-  candidate's perDocUris. This is the LAST resort.
+  candidate's 'candidateKeys'. This is the LAST resort.
 
 RULES — these are load-bearing:
 
@@ -192,7 +194,7 @@ RULES — these are load-bearing:
 3. Do NOT rewrite existing descriptions. If one is wrong or partial, use
    extend-existing with the corrected facet as descriptionExtension.
 4. You MAY group several candidates into ONE new-global by listing all their
-   perDocUris together — do this when two leftovers are the same new class.
+   'candidateKeys' together — do this when two leftovers are the same new class.
 5. EVERY candidate group MUST be covered by exactly one action. Do not invent
    globalKeys that were not supplied; the runtime coins a fallback global for any
    candidate you leave unplaced, so make that recovery unnecessary.

@@ -14,6 +14,7 @@ import {
   summarizeBuilder,
   WikiTopicIndex,
 } from "../../src/index.js";
+import { REORGANIZE_BATCH_SIZE } from "../../src/knowledge/reorganize.js";
 import { registerStubLlm } from "../util/stub-llm.js";
 
 interface TopicDecl {
@@ -23,7 +24,7 @@ interface TopicDecl {
 }
 
 type ReorganizeFn = (input: {
-  candidates: { key: string; name: string; description: string; perDocUris: string[] }[];
+  candidates: { key: string; name: string; description: string }[];
 }) => ReorganizeActions;
 
 /** A controllable LLM stub: per-uri topic declarations + a settable reorganize decision. */
@@ -150,7 +151,7 @@ describe("reorganizer — incremental LLM topic merge", () => {
         {
           kind: "match-existing",
           globalKey: "fund-performance",
-          perDocUris: input.candidates.flatMap((c) => c.perDocUris),
+          candidateKeys: input.candidates.map((c) => c.key),
         },
       ],
     }));
@@ -183,7 +184,7 @@ describe("reorganizer — incremental LLM topic merge", () => {
           kind: "new-global",
           name: "Weather data",
           description: "Atmospheric readings.",
-          perDocUris: input.candidates.flatMap((c) => c.perDocUris),
+          candidateKeys: input.candidates.map((c) => c.key),
         },
       ],
     }));
@@ -213,7 +214,7 @@ describe("reorganizer — incremental LLM topic merge", () => {
           kind: "extend-existing",
           globalKey: "fund-performance",
           descriptionExtension: "Adds IRR detail.",
-          perDocUris: input.candidates.flatMap((c) => c.perDocUris),
+          candidateKeys: input.candidates.map((c) => c.key),
         },
       ],
     }));
@@ -261,5 +262,22 @@ describe("reorganizer — incremental LLM topic merge", () => {
     const tp = await h.topics();
     expect(tp.map((x) => x.key)).toEqual(["fresh"]);
     expect(tp[0]?.references.map((r) => r.uri)).toEqual(["a.md#fresh"]);
+  });
+
+  it("splits a large leftover set across multiple reorganize rounds (context-window safety)", async () => {
+    const n = REORGANIZE_BATCH_SIZE + 5;
+    const decls = Array.from({ length: n }, (_, i) => ({
+      key: `topic-${i}`,
+      name: `Topic ${i}`,
+      description: "d",
+    }));
+    h.t.topicsByUri.set("a.md", decls);
+    h.t.setReorganize(() => ({ actions: [] })); // fallback coins each candidate by its key
+    await h.write("proj/a.md", "alpha");
+    await h.run();
+
+    const reorgCalls = h.t.calls.filter((c) => c === "reorganize-topics").length;
+    expect(reorgCalls).toBeGreaterThan(1);
+    expect((await h.topics()).length).toBe(n);
   });
 });

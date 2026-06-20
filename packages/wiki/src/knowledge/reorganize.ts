@@ -27,6 +27,14 @@ export const PRUNE_BUILDER_ID = "IndexPruner";
 /** Orphaned artifact directories pruned in parallel per batch. */
 const PRUNE_BATCH_SIZE = 16;
 
+/**
+ * Max leftover candidates placed per LLM reorganize round, so a large rebuild
+ * (e.g. a from-empty index where every topic is a leftover) stays within the
+ * model's context window. The growing index is carried forward between rounds,
+ * so splitting candidates across rounds preserves cross-batch consolidation.
+ */
+export const REORGANIZE_BATCH_SIZE = 32;
+
 /** A leftover per-doc topic group (one distinct new key) the LLM must place. */
 interface CandidateGroup {
   key: string;
@@ -87,7 +95,11 @@ function applyActions(
   actions: ReorganizeAction[],
   leftovers: CandidateGroup[],
 ): void {
+  // Refs travel by candidate `key`, not over the wire: the LLM names which
+  // candidate keys an action covers, and the runtime reattaches their refs here.
+  const byCandidateKey = new Map(leftovers.map((g) => [g.key, g]));
   const covered = new Set<string>();
+  const refsOf = (keys: string[]) => keys.flatMap((k) => byCandidateKey.get(k)?.refs ?? []);
   const coin = (key: string, name: string, description: string, refs: string[]) => {
     const existing = byKey.get(key);
     if (existing) addRefs(existing, refs);
@@ -98,26 +110,25 @@ function applyActions(
     if (action.kind === "match-existing") {
       const target = byKey.get(action.globalKey);
       if (!target) continue; // unknown key → leave uncovered for fallback coining
-      addRefs(target, action.perDocUris);
-      for (const r of action.perDocUris) covered.add(r);
+      addRefs(target, refsOf(action.candidateKeys));
+      for (const k of action.candidateKeys) covered.add(k);
     } else if (action.kind === "extend-existing") {
       const target = byKey.get(action.globalKey);
       if (!target) continue;
       const facet = action.descriptionExtension.trim();
       if (facet) target.description = target.description ? `${target.description} ${facet}` : facet;
-      addRefs(target, action.perDocUris);
-      for (const r of action.perDocUris) covered.add(r);
+      addRefs(target, refsOf(action.candidateKeys));
+      for (const k of action.candidateKeys) covered.add(k);
     } else {
-      coin(slugify(action.name), action.name, action.description, action.perDocUris);
-      for (const r of action.perDocUris) covered.add(r);
+      coin(slugify(action.name), action.name, action.description, refsOf(action.candidateKeys));
+      for (const k of action.candidateKeys) covered.add(k);
     }
   }
 
-  // Coverage backstop: coin any leftover ref no action placed (mirrors the
+  // Coverage backstop: coin any leftover candidate no action placed (mirrors the
   // prompt's promise that the runtime recovers unplaced candidates).
   for (const g of leftovers) {
-    const missing = g.refs.filter((r) => !covered.has(r));
-    if (missing.length > 0) coin(g.key, g.name, g.description, missing);
+    if (!covered.has(g.key)) coin(g.key, g.name, g.description, g.refs);
   }
 }
 
@@ -169,37 +180,41 @@ async function reorganizeTopics(
     }
   }
 
-  // LLM round — only when there is something to decide: existing topics to match
-  // against, or ≥2 leftovers that might be the same new class. A lone leftover
-  // against an empty index can only be new, so coin it mechanically.
-  let actions: ReorganizeAction[] = [];
-  if (leftovers.length > 0 && (byKey.size > 0 || leftovers.length > 1)) {
-    const input: ReorganizerInput = {
-      existingTopics: [...byKey.values()].map((t) => ({
-        key: t.key,
-        name: t.name,
-        description: t.description,
-      })),
-      candidates: leftovers.map((g) => ({
-        key: g.key,
-        name: g.name,
-        description: g.description,
-        perDocUris: g.refs,
-      })),
-    };
-    const { output } = await llm.generateObject({
-      name: "reorganize-topics",
-      description:
-        "Place leftover per-document topics into the global topic index: match an existing topic, extend one, or coin a new one.",
-      model,
-      system,
-      input,
-      inputSchema: reorganizerInputSchema,
-      outputSchema: reorganizeActionsSchema,
-    });
-    actions = output.actions;
+  // LLM rounds in batches, carrying the growing index forward between rounds so a
+  // candidate consolidates against a global coined in an earlier batch and each
+  // call's input stays within the model's context window. A round runs only when
+  // there is something to decide: existing topics to match against, or ≥2 leftovers
+  // in the batch that might be the same new class. A lone leftover against a
+  // still-empty index can only be new, so it is coined mechanically.
+  for await (const batch of toBatch(leftovers, REORGANIZE_BATCH_SIZE)) {
+    let actions: ReorganizeAction[] = [];
+    if (byKey.size > 0 || batch.length > 1) {
+      const input: ReorganizerInput = {
+        existingTopics: [...byKey.values()].map((t) => ({
+          key: t.key,
+          name: t.name,
+          description: t.description,
+        })),
+        candidates: batch.map((g) => ({
+          key: g.key,
+          name: g.name,
+          description: g.description,
+        })),
+      };
+      const { output } = await llm.generateObject({
+        name: "reorganize-topics",
+        description:
+          "Place leftover per-document topics into the global topic index: match an existing topic, extend one, or coin a new one.",
+        model,
+        system,
+        input,
+        inputSchema: reorganizerInputSchema,
+        outputSchema: reorganizeActionsSchema,
+      });
+      actions = output.actions;
+    }
+    applyActions(byKey, actions, batch);
   }
-  applyActions(byKey, actions, leftovers);
 
   const topics = pruneEmptyAndSort([...byKey.values()]);
   await project.requireAdapter(WikiTopicIndex).write({ generated, topics });
