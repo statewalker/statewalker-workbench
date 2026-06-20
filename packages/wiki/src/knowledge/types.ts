@@ -27,6 +27,22 @@ export interface SectionSummary {
   summary: string;
 }
 
+/**
+ * One node of a document outline: a chapter grouping a coherent run of sections, or
+ * (recursively) sub-chapters. A grouping overlay — sections remain the flat, addressable,
+ * citable unit; a chapter references its members by key and is NEVER a citation target.
+ */
+export interface ChapterNode {
+  /** Stable, document-order key; for re-ingest stability only, not cited. */
+  key: string;
+  title: string;
+  summary: string;
+  /** Leaf chapter: the section keys it groups (mutually exclusive with `children`). */
+  sectionKeys?: string[];
+  /** Internal chapter: sub-chapters (recursion; mutually exclusive with `sectionKeys`). */
+  children?: ChapterNode[];
+}
+
 /** The L2 narrative summary of a single source. */
 export interface DocumentSummary {
   uri: string;
@@ -34,10 +50,12 @@ export interface DocumentSummary {
   /** SHA-256 of the source this summary was derived from (see {@link RawMeta}). */
   sourceHash: string;
   title: string;
-  /** Document-level abstract (1–3 sentences). */
+  /** Document-level abstract, derived from the top-level chapter summaries. */
   summary: string;
-  /** Between 1 and ~15 sections in normal documents. */
+  /** The flat, addressable, citable sections covering the whole document. */
   sections: SectionSummary[];
+  /** The document outline: top-level chapters grouping the sections (overlay; never cited). */
+  outline: ChapterNode[];
 }
 
 // ── Section embeddings (Embedder) ──────────────────────────────────────────

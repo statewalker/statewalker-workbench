@@ -73,7 +73,29 @@ WHAT NOT TO DO:
 corpus purpose (steers level of detail per section): ${CORPUS_PURPOSE_PLACEHOLDER}
 
 On-corpus details get more space; off-corpus or tangential details get a
-one-line mention.`;
+one-line mention.
+
+BLOCKS: you may receive only a BLOCK of a longer document — a contiguous slice of
+numbered lines, not necessarily the whole source. Section the lines you are given,
+using their ABSOLUTE line numbers in [startLine, endLine]. When 'previousSection' is
+supplied, it summarises the section immediately before this block — use it for
+continuity, but do NOT re-output it. The final block's last section may run to the
+document end; an interior block's trailing lines may be re-summarised in a later block.`;
+
+/** Document-outline chapter aggregation prompt: group consecutive members into chapters. */
+export const AGGREGATE_CHAPTERS_SYSTEM_PROMPT = `You organise a document's parts into a
+clean outline. You receive an ordered list of MEMBERS — either sections or already-formed
+sub-chapters — each with a key, title, and summary. Group them into CHAPTERS: each chapter
+is a semantically coherent, CONTIGUOUS run of members (never reorder; never split a member).
+
+RULES — load-bearing:
+1. Every member MUST belong to exactly one chapter; chapters partition the members in order.
+2. 'memberKeys' lists the grouped members' keys VERBATIM, contiguous in the given order.
+3. 'summary' is a 1–2 sentence synthesis of the chapter's members — not a list of them.
+4. Aim for a handful of chapters; group finely-related members together rather than making
+   one chapter per member.
+
+corpus purpose (frames coherence): ${CORPUS_PURPOSE_PLACEHOLDER}`;
 
 /** Topic + outlier class extraction prompt (lifted from wiki-runtime). */
 export const META_EXTRACTOR_SYSTEM_PROMPT = `You are the topic + outlier

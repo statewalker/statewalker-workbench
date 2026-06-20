@@ -38,12 +38,16 @@ export interface WikiConfigData {
   topicFanout?: number;
   /** Topic-index leaf cap `R`: an index topic with more references is refined. */
   topicLeafCap?: number;
+  /** Document-outline chapter fan-out: a level with more chapters is re-aggregated into super-chapters. */
+  documentChapterFanout?: number;
 }
 
 /** Default category fan-out `B` — a category over this many children is split. */
 export const DEFAULT_TOPIC_FANOUT = 10;
 /** Default index-topic reference cap `R` — a leaf over this many refs is refined. */
 export const DEFAULT_TOPIC_LEAF_CAP = 25;
+/** Default document-outline chapter fan-out — a level over this many chapters is re-aggregated. */
+export const DEFAULT_DOCUMENT_CHAPTER_FANOUT = 8;
 
 /** The wiki nature's marker / config file, under the project system folder. */
 export const WIKI_NATURE_FILE = "nature.wiki.json";
@@ -132,6 +136,11 @@ export class WikiLlmConfiguration extends ProjectAdapter {
   /** Index-topic reference cap `R` (refine threshold), falling back to the default. */
   get topicLeafCap(): number {
     return this.data.topicLeafCap ?? DEFAULT_TOPIC_LEAF_CAP;
+  }
+
+  /** Document-outline chapter fan-out (re-aggregate threshold), falling back to the default. */
+  get documentChapterFanout(): number {
+    return this.data.documentChapterFanout ?? DEFAULT_DOCUMENT_CHAPTER_FANOUT;
   }
 }
 

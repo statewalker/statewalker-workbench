@@ -65,10 +65,56 @@ export const summarizerInputSchema = z
     rawLines: z
       .array(rawLineSchema)
       .describe(
-        "The document's raw text as numbered lines. Section ranges reference these numbers.",
+        "This BLOCK of the document's raw text as numbered lines (absolute line numbers). Section ranges reference these numbers.",
+      ),
+    previousSection: z
+      .string()
+      .optional()
+      .describe(
+        "Summary of the last section already finalized before this block (rolling context); absent for the first block.",
       ),
   })
-  .describe("Summarizer input: a document's numbered raw lines.");
+  .describe(
+    "Summarizer input: one block of a document's numbered raw lines, plus rolling context.",
+  );
+
+// ── Chapter aggregation (sections → chapters → super-chapters) ────────────────
+export const aggregateChaptersInputSchema = z
+  .object({
+    members: z
+      .array(
+        z.object({
+          key: z.string().describe("A section or sub-chapter key, verbatim."),
+          title: z.string(),
+          summary: z.string(),
+        }),
+      )
+      .describe("Consecutive sections or sub-chapters, in document order, to group into chapters."),
+  })
+  .describe("Input to a chapter-aggregation round.");
+
+export const aggregateChaptersSchema = z
+  .object({
+    chapters: z
+      .array(
+        z.object({
+          title: z.string().describe("Chapter title — the theme of its members."),
+          summary: z
+            .string()
+            .describe("1–2 sentence chapter summary, synthesised from its members' summaries."),
+          memberKeys: z
+            .array(z.string())
+            .min(1)
+            .describe(
+              "The member keys (verbatim) this chapter groups — a contiguous run in document order.",
+            ),
+        }),
+      )
+      .describe(
+        "Chapters grouping ALL supplied members into coherent, contiguous runs (every member in exactly one chapter).",
+      ),
+  })
+  .describe("One chapter-aggregation round: a coherent grouping of the supplied members.");
 
 // ── Meta (topics + outliers) ─────────────────────────────────────────────────
 // Lenient on purpose: no `.min(1)` on fields, and the top-level arrays default to
