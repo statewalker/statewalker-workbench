@@ -44,9 +44,33 @@ resolves into a runtime model. Serialized as the URI `connectionId:modelId` (spl
 on the first colon). Wiki holds one Model Reference per **Stage** plus one for
 embeddings. See `ai-config/docs/adr/0001-model-reference-uri.md`.
 
+**Document topic**:
+A topic a single document declares (per-document, from the meta stage). Covered by
+that document; carries a per-doc key, name, description, and brief.
+_Avoid_: tag, label.
+
+**Index topic**:
+A global topic class that aggregates **document topics** of the same class, holding
+references to them (`<docUri>#<perDocKey>`). A *leaf* of the topic index. = the
+former `GlobalTopic`.
+_Avoid_: topic node, leaf (use only for the structural discriminant).
+
+**Category**:
+An internal node of the topic index grouping **index topics** and sub-categories.
+Carries no document references. Born only from splits/recluster, never from attribution.
+
+**Topic index**:
+The wiki's global topic catalogue, organised as a bounded-fan-out **DAG** (not a tree):
+an **index topic** may have several parent **categories**, and a **document topic** may be
+attached to several index topics. Reached through the `WikiTopicIndex` project adapter;
+a flat `leaves()` view yields exactly the index topics (retrieval/query consume this),
+while `roots()/children()` expose the category hierarchy (the TOC).
+_Avoid_: topic tree (it is a DAG), topic graph.
+
 ## Relationships
 
 - A **Workspace** contains zero or more **Wikis** (each a **Project**)
+- A **Topic index** belongs to one **Wiki**; its **index topics** aggregate **document topics**, and its **categories** group index topics into a DAG (every document topic attached to ≥1 index topic)
 - A **Wiki** has one wiki configuration binding each **Stage** to a **Model Reference**
 - **AiConfig** resolves a **Model Reference** to a runtime model via its **Connection**
 - **Chat** uses the **Active Selection**; **Wiki** uses its own per-Stage references — they share only AiConfig's Connections and keys
