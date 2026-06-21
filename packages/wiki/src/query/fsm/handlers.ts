@@ -50,9 +50,16 @@ import { topicDescent } from "./topic-descent.js";
 /** Char budget per relevance-filter batch (token-window proxy at ~4 chars/token). */
 const FILTER_CHAR_BUDGET = 16_000;
 
-/** Summarization batching: sections per batch, char ceiling per batch, and max parallel calls. */
+/** Summarization batching: sections per batch and max parallel calls. */
 const SUMMARIZE_BATCH_SIZE = 4;
-const SUMMARIZE_CHAR_BUDGET = 24_000;
+/** Total characters one summarize call may use — raw content + section/document summaries +
+ * the instructions (system prompt) + the question. The per-batch section-content budget is this
+ * minus the fixed instruction + question reserve (computed per query). */
+const SUMMARIZE_BATCH_CHARS = 24_000;
+/** Floor for the section-content budget once instructions + question are reserved. */
+const SUMMARIZE_MIN_CONTENT_CHARS = 4_000;
+/** Per-section XML scaffolding (tags + ref) charged on top of a section's raw + summary + title. */
+const SECTION_TAG_CHARS = 200;
 const SUMMARIZE_CONCURRENCY = 5;
 
 /** Pack sections into batches bounded by both a section count and a raw-content char ceiling. */
@@ -65,7 +72,7 @@ function batchSections(
   let cur: EvidenceSection[] = [];
   let chars = 0;
   for (const ev of sections) {
-    const cost = ev.rawBlock.length + ev.summary.length + ev.title.length + 64;
+    const cost = ev.rawBlock.length + ev.summary.length + ev.title.length + SECTION_TAG_CHARS;
     if (cur.length > 0 && (cur.length >= maxCount || chars + cost > maxChars)) {
       batches.push(cur);
       cur = [];
@@ -476,8 +483,16 @@ export const SummarizeTrigger: QueryHandler = async function* (ctx) {
     }
   }
 
-  const batches = batchSections(sections, SUMMARIZE_BATCH_SIZE, SUMMARIZE_CHAR_BUDGET);
-  log.info("summarize batches", { sections: sections.length, batches: batches.length });
+  // Reserve room for the fixed per-call overhead (instructions + the question + <sources> scaffold)
+  // so the section content plus the prompt stays within the call budget.
+  const reserve = SUMMARIZE_PROMPT.length + req.question.length + 512;
+  const contentBudget = Math.max(SUMMARIZE_MIN_CONTENT_CHARS, SUMMARIZE_BATCH_CHARS - reserve);
+  const batches = batchSections(sections, SUMMARIZE_BATCH_SIZE, contentBudget);
+  log.info("summarize batches", {
+    sections: sections.length,
+    batches: batches.length,
+    contentBudget,
+  });
   const startedAt = Date.now();
   const results = await mapLimit(batches, SUMMARIZE_CONCURRENCY, async (batch, b) => {
     // Group the batch's sections by document, render a title+summary header per document with its
@@ -540,10 +555,12 @@ export const SummarizeTrigger: QueryHandler = async function* (ctx) {
       {
         name: "summarize-batch",
         description:
-          "Extract atomic, single-document grounded facts relevant to the question; cite each fact's section ref(s).",
+          "Extract question-specific, single-document grounded facts from the raw content; cite each fact's section ref(s).",
         model: cfg.modelFor("query"),
         system: SUMMARIZE_PROMPT,
-        input: { question: req.question, sections: docBlocks.join("\n\n") },
+        input: {
+          request: `<question>\n${req.question}\n</question>\n\n<sources>\n${docBlocks.join("\n\n")}\n</sources>`,
+        },
         inputSchema: summarizeInputSchema,
         outputSchema: summarizeSchema,
         strict: true,

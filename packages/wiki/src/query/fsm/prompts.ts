@@ -49,21 +49,32 @@ title/summary must indicate it bears on the prompt; drop sections that are only 
 or merely from a relevant document. Return an empty array when none in this batch qualify. Selection
 only — do not answer the prompt.`;
 
-export const SUMMARIZE_PROMPT = `You extract grounded facts from wiki documents for a question. You
-receive the question and a batch of SOURCE DOCUMENTS, each as <document title="…"> with a
-<document_summary>; its sections may be grouped under <chapter title="…"> blocks (with a
-<chapter_summary>) that give intra-document context. Each <section ref="…"> carries a
-<section_title>, <section_description>, and <raw_content>. Use the document and chapter summaries
-only as CONTEXT — never as a source of facts; facts come from <raw_content>.
+export const SUMMARIZE_PROMPT = `You extract question-specific grounded facts from wiki documents.
 
-Return \`facts\`: atomic statements that bear on the question, each grounded in the <raw_content> of
-the section(s) it cites. RULES — load-bearing:
-1. Every fact MUST cite ≥1 section \`ref\` VERBATIM. State nothing you cannot ground in a supplied
-   section's raw content — no outside or "common-sense" knowledge.
+The input is ONE XML payload with these parts — use each part for its stated role ONLY:
+- <question> … </question> — the user's prompt. Extract only content that helps answer it.
+- <sources> … </sources> — the documents to mine, each a <document title="…"> containing:
+  - <document_summary> — the document's overall summary. CONTEXT/navigation ONLY.
+  - <chapter title="…"> with <chapter_summary> — an optional intra-document grouping. CONTEXT ONLY.
+  - <section ref="…"> — a retrieved section, carrying:
+    - <section_title> — the section's title. CONTEXT ONLY.
+    - <section_summary> — the section's pre-existing generic summary. CONTEXT ONLY — it may OMIT
+      specifics the question needs, so it is a guide, never the source of a fact.
+    - <raw_content> — the section's ORIGINAL TEXT. This is the ONLY source of facts and citations.
+
+Return \`facts\`: question-specific statements, each grounded in <raw_content>. A statement should be
+information-rich — capture the concrete specifics the question needs (full entity names, numbers,
+dates, relationships) that the generic summaries may omit. Together the facts are the question's
+grounded summary.
+
+RULES — load-bearing:
+1. Every fact MUST cite ≥1 section \`ref\` VERBATIM, and every word of it MUST be supported by the
+   cited section(s)' <raw_content>. Never use a summary, a title, or outside / "common-sense"
+   knowledge as the source of a fact.
 2. A single fact MUST draw only on sections of ONE document — NEVER merge content across documents.
    When two documents say related things, emit a SEPARATE fact per document.
-3. Keep only facts relevant to the question; discard the rest. Do NOT answer the question — only
-   extract facts.`;
+3. Keep only facts relevant to <question>; discard the rest. Do NOT answer the question — only
+   extract its grounded facts.`;
 
 export const COMPOSE_PROMPT = `Answer the question grounded ONLY in the supplied grounded facts. Each
 fact carries a \`citations\` list — the section refs it rests on. Return the answer as \`claims\`: an

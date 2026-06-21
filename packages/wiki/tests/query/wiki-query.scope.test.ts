@@ -87,7 +87,7 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
       return out({ relevantUris: docs.flatMap((d) => d.sections.map((s) => s.uri)) });
     }
     case "summarize-batch": {
-      const sections = (spec.input as { sections: string }).sections;
+      const sections = (spec.input as { request: string }).request;
       const refs = [...sections.matchAll(REF_RE)].map((m) => m[1]);
       return out({ facts: refs.map((r) => ({ statement: "fact", citations: [r] })) });
     }

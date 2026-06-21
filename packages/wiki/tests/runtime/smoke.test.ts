@@ -90,7 +90,7 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
     }
     case "summarize-batch": {
       // Carry every marker in the batch into the summary so citations propagate.
-      const sections = (spec.input as { sections: string }).sections;
+      const sections = (spec.input as { request: string }).request;
       const refs = [...sections.matchAll(REF_RE)].map((m) => m[1]);
       return out({ facts: refs.map((r) => ({ statement: "fact", citations: [r] })) });
     }

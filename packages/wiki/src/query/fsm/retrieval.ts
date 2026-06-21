@@ -275,7 +275,7 @@ export function renderDocumentBlock(input: {
       parts.push(
         `<section ref="${s.ref}">`,
         `<section_title>\n${s.title}\n</section_title>`,
-        `<section_description>\n${s.description}\n</section_description>`,
+        `<section_summary>\n${s.description}\n</section_summary>`,
         `<raw_content>\n${s.raw}\n</raw_content>`,
         "</section>",
       );

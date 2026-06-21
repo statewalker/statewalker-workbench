@@ -102,7 +102,7 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
       return out({ relevantUris: docs.flatMap((d) => d.sections.map((s) => s.uri)) });
     }
     case "summarize-batch": {
-      const sections = (spec.input as { sections: string }).sections;
+      const sections = (spec.input as { request: string }).request;
       foldSections.push(sections);
       // Keep every marker in the batch so citations propagate to compose.
       const refs = [...sections.matchAll(REF_RE)].map((m) => m[1]);
@@ -110,7 +110,9 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
     }
     case "compose-answer": {
       // One grounded claim per marker found in the summaries' text.
-      const claims = (spec.input as { facts: { statement: string; citations: string[] }[] }).facts.map((m) => ({
+      const claims = (
+        spec.input as { facts: { statement: string; citations: string[] }[] }
+      ).facts.map((m) => ({
         statement: "fact",
         citations: m.citations,
       }));
@@ -221,12 +223,17 @@ describe("WikiQuery — FSM-driven retrieval", () => {
     expect(keys.some((c) => c.includes("#intro"))).toBe(true);
   });
 
-  it("summarizes in batches exposing the section XML tags, with no rolling state", async () => {
+  it("summarizes in batches with the prompt, summaries, and raw text in separate XML tags", async () => {
     await project.requireAdapter(WikiQuery).ask("Who founded Acme?").complete();
     expect(foldSections.length).toBeGreaterThan(0);
     for (const batch of foldSections) {
+      // The user's prompt and the sources are separate parts.
+      expect(batch).toContain("<question>");
+      expect(batch).toContain("Who founded Acme?");
+      expect(batch).toContain("<sources>");
+      // Each section exposes title + summary + raw text as distinct tags.
       expect(batch).toContain("<section_title");
-      expect(batch).toContain("<section_description>");
+      expect(batch).toContain("<section_summary>");
       expect(batch).toContain("<raw_content>");
       // Batch summarization is stateless — no carried-over rolling summary.
       expect(batch).not.toContain("<previous_summary>");

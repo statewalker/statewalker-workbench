@@ -129,12 +129,14 @@ export const sectionFilterSchema = z
   })
   .describe("The relevant section URIs in this batch. Selection only — do not answer the prompt.");
 
-// ── Summarize (one batch of sections → one summary, batches run in parallel) ──
+// ── Summarize (one batch of sections → grounded facts, batches run in parallel) ──
 export const summarizeInputSchema = z.object({
-  /** The original prompt; only facts relevant to it are kept. */
-  question: z.string(),
-  /** XML-tagged batch: one <section_title>/<section_description>/<raw_content> block per section. */
-  sections: z.string(),
+  /**
+   * One XML payload: a `<question>` block (the user's prompt) followed by a `<sources>` block of
+   * `<document>` entries — each with a `<document_summary>`, optional `<chapter>` groupings, and
+   * `<section ref="…">` blocks carrying `<section_title>`, `<section_summary>`, and `<raw_content>`.
+   */
+  request: z.string(),
 });
 export const summarizeSchema = z.object({
   facts: z
