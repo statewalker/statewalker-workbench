@@ -58,12 +58,15 @@ interface Intent {
   onCorpus: boolean;
   subjects: { prompt: string }[];
   offCorpusReason?: string;
+  language?: string;
 }
 let intent: Intent;
 /** Which descent-frontier node keys score relevant (=2); others score 0. Default: all. */
 let relevantNodeKeys: ((available: string[]) => string[]) | undefined;
 let calls: Record<string, number>;
 let foldSections: string[];
+/** The `language` the compose stage was asked to answer in (captured from its input). */
+let composeLanguage: string | undefined;
 /** Compose reports "sufficient" only after this many compose calls (0 = always sufficient). */
 let sufficientAfter: number;
 
@@ -109,6 +112,7 @@ const generateObject: LlmApi["generateObject"] = async (spec) => {
       return out({ facts: refs.map((r) => ({ statement: "fact", citations: [r] })) });
     }
     case "compose-answer": {
+      composeLanguage = (spec.input as { language: string }).language;
       // One grounded claim per marker found in the summaries' text.
       const claims = (
         spec.input as { facts: { statement: string; citations: string[] }[] }
@@ -176,8 +180,21 @@ describe("WikiQuery — FSM-driven retrieval", () => {
     relevantNodeKeys = undefined;
     calls = {};
     foldSections = [];
+    composeLanguage = undefined;
     sufficientAfter = 0;
     project = await buildProject();
+  });
+
+  it("composes the answer in the request's detected language", async () => {
+    intent = { onCorpus: true, subjects: [{ prompt: "Qui a fondé Acme ?" }], language: "French" };
+    await project.requireAdapter(WikiQuery).ask("Qui a fondé Acme ?").complete();
+    expect(composeLanguage).toBe("French");
+  });
+
+  it("falls back to English when intent detection reports no language", async () => {
+    // The default intent stub returns no `language`; the handler must default to English.
+    await project.requireAdapter(WikiQuery).ask("Who founded Acme?").complete();
+    expect(composeLanguage).toBe("English");
   });
 
   it("returns a QueryProgress synchronously and resolves a cited answer", async () => {

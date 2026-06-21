@@ -31,8 +31,15 @@ export const intentDetectionSchema = z
       .describe(
         "The distinct subjects the prompt decomposes into, each re-formulated as a standalone search prompt. PRESERVE named entities and specific terms (proper nouns, organisations, people, places, tickers) verbatim — they drive full-text retrieval. Use one subject for a single-subject prompt.",
       ),
+    language: z
+      .string()
+      .describe(
+        'The language the prompt is written in, as its English name (e.g. "English", "French", "Japanese") — the answer is written in it. Use "English" when the language cannot be determined.',
+      ),
   })
-  .describe("On/off-corpus classification plus subject decomposition. Does NOT answer the prompt.");
+  .describe(
+    "On/off-corpus classification, subject decomposition, and request language. Does NOT answer the prompt.",
+  );
 
 // ── TopicSelect (per subject) ────────────────────────────────────────────────
 export const topicSelectInputSchema = z.object({
@@ -162,6 +169,8 @@ export const summarizeSchema = z.object({
 // ── Respond ──────────────────────────────────────────────────────────────────
 export const composeInputSchema = z.object({
   question: z.string(),
+  /** English name of the language the answer must be written in (the request's language). */
+  language: z.string(),
   /** The grounded facts (each a single-document statement + its section citations) to compose from. */
   facts: z.array(
     z.object({

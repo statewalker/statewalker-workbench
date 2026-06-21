@@ -159,6 +159,8 @@ export const IntentDetectionTrigger: QueryHandler = async function* (ctx) {
     onCorpus: output.onCorpus,
     subjects: output.onCorpus ? subjects : [],
     offCorpusReason: output.offCorpusReason ?? undefined,
+    // The answer is composed in the request's language; English when undetectable.
+    language: output.language?.trim() || "English",
   });
   yield output.onCorpus ? "onCorpus" : "offCorpus";
 };
@@ -612,6 +614,7 @@ export const RespondTrigger: QueryHandler = async function* (ctx) {
     system: COMPOSE_PROMPT,
     input: {
       question: req.question,
+      language: ctx.intent.language,
       facts: facts.map((f) => ({ statement: f.statement, citations: f.citations })),
     },
     inputSchema: composeInputSchema,

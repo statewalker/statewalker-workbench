@@ -26,12 +26,14 @@ export interface Subject {
   prompt: string;
 }
 
-/** IntentDetection output: on/off-corpus plus the decomposed subjects. */
+/** IntentDetection output: on/off-corpus, the decomposed subjects, and the request language. */
 export interface IntentResult {
   onCorpus: boolean;
   subjects: Subject[];
   /** Why the prompt was judged off-corpus (when `onCorpus` is false). */
   offCorpusReason?: string;
+  /** English name of the language the prompt is written in; the answer is composed in it. */
+  language: string;
 }
 
 /** A grounded fact: a single-document statement plus the verbatim section refs it rests on. */
@@ -58,7 +60,7 @@ export interface Candidate {
   subjects: number[];
 }
 
-const EMPTY_INTENT: IntentResult = { onCorpus: false, subjects: [] };
+const EMPTY_INTENT: IntentResult = { onCorpus: false, subjects: [], language: "English" };
 const EMPTY_ANSWER: Answer = {
   text: "",
   citations: [],

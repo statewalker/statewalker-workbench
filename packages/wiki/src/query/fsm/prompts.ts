@@ -20,7 +20,11 @@ When on-corpus, decompose the prompt into its distinct SUBJECTS, each re-formula
 search prompt. PRESERVE every specific term and named entity (proper nouns, organisations, people,
 places, tickers) VERBATIM in the subject — these are the search terms that drive full-text retrieval;
 never paraphrase them away. Align the surrounding wording with the corpus where natural, but keep the
-named entities intact. A single-subject prompt yields exactly one subject. Do NOT answer the prompt.`;
+named entities intact. A single-subject prompt yields exactly one subject. Do NOT answer the prompt.
+
+Also DETECT the language the user wrote the prompt in and return its English name in \`language\` (e.g.
+"English", "French", "Japanese") — the final answer will be written in it. Use "English" when the
+language cannot be determined. Write \`offCorpusReason\`, when set, in that same language.`;
 
 export const TOPIC_SELECT_PROMPT = `You select the topic and outlier classes worth searching for a
 subject. You receive the subject and the corpus's topic + outlier classes, each as
@@ -85,10 +89,13 @@ RULES — load-bearing:
 1. ANSWER THE QUESTION, NOTHING ELSE. Every claim must directly help answer THIS question. Include
    only the information the question asks for — no background, no related-but-unasked detail, no
    preamble or conclusion. If the question is narrow, the answer is short. When in doubt, leave it out.
-2. NO INVENTION. Every claim's content MUST come from the supplied facts — do not add, infer beyond,
+2. LANGUAGE. Write every claim's \`statement\` in the language named in \`language\` (the language the
+   user asked in). Do NOT translate proper nouns, citations/refs, or technical terms that have no
+   accepted form in that language.
+3. NO INVENTION. Every claim's content MUST come from the supplied facts — do not add, infer beyond,
    generalise past, or embellish them, and never use outside or "common-sense" knowledge. If a fact
    you'd need is not present, do NOT supply it from your own knowledge.
-3. EVERY CLAIM CITED. Each claim's \`citations\` MUST contain one or more refs drawn VERBATIM from the
+4. EVERY CLAIM CITED. Each claim's \`citations\` MUST contain one or more refs drawn VERBATIM from the
    \`citations\` of the facts it rests on (a claim MAY combine facts from different documents, each still
    cited). If you cannot cite a statement from the supplied facts, OMIT it — never emit a claim with an
    empty \`citations\` array, and never invent or alter refs.
