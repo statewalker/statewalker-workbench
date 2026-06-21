@@ -1,5 +1,5 @@
 import { useChatPanelContext } from "@repo/chat-mini.chat-react";
-import { AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime";
+import { AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime.core";
 import { AiConfig, ConfigureAiCommand, type Connection } from "@statewalker/ai-config";
 import { capabilitiesFor } from "@statewalker/models-config";
 import { Commands } from "@statewalker/shared-commands";

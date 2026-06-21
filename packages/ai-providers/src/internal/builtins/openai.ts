@@ -1,4 +1,4 @@
-import { createDefaultCatalog } from "@statewalker/ai-agent/models";
+import { createDefaultCatalog } from "@statewalker/ai-agent.core/models";
 import { createRemoteProvider } from "../../public/create-remote-provider.js";
 import type { Connection } from "../../public/providers-store.js";
 import type { ProviderDescriptor, ProviderModelInfo } from "../../public/types.js";

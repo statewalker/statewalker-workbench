@@ -2,7 +2,7 @@ import type { ProviderV3 } from "@ai-sdk/provider";
 import {
   createRemoteProvider as createRemoteProviderImpl,
   type ProviderName,
-} from "@statewalker/ai-agent/models";
+} from "@statewalker/ai-agent.core/models";
 import type { ConnectionHeader } from "./providers-store.js";
 
 export interface CreateRemoteProviderOptions {

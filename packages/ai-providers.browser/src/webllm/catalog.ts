@@ -1,4 +1,4 @@
-import type { LocalModelConfig } from "@statewalker/ai-agent/models";
+import type { LocalModelConfig } from "@statewalker/ai-agent.core/models";
 
 /**
  * WebLLM catalog. Only the function-calling-capable Hermes models are

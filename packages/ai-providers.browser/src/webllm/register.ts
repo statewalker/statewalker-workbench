@@ -3,7 +3,7 @@ import type {
   ActivationProgress,
   LocalModelConfig,
   ModelManager,
-} from "@statewalker/ai-agent/models";
+} from "@statewalker/ai-agent.core/models";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { WebLLMLanguageModel } from "./language-model.js";
 import { getWebLLMModule, type MLCEngine } from "./loader.js";

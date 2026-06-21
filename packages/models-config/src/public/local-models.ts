@@ -4,7 +4,7 @@ import {
   ModelManager,
   ModelStateStore,
   type ModelStatus,
-} from "@statewalker/ai-agent/models";
+} from "@statewalker/ai-agent.core/models";
 import { registerLocalProvider } from "@statewalker/ai-providers.browser/transformers";
 import { BaseClass } from "@statewalker/shared-baseclass";
 import type { FilesApi } from "@statewalker/webrun-files";

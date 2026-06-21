@@ -1,5 +1,5 @@
 import type { ProviderV3 } from "@ai-sdk/provider";
-import type { Agent, AgentRuntime } from "@statewalker/ai-agent/runtime";
+import type { Agent, AgentRuntime } from "@statewalker/ai-agent.core/runtime";
 import { Slots } from "@statewalker/shared-slots";
 import { Workspace } from "@statewalker/workspace.core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -155,7 +155,7 @@ describe("AgentRuntimeManager", () => {
       config: {
         command: "node",
         args: [],
-      } as unknown as import("@statewalker/ai-agent/runtime").McpServerConfig,
+      } as unknown as import("@statewalker/ai-agent.core/runtime").McpServerConfig,
     });
     await vi.runAllTimersAsync();
     expect(buildSpy).toHaveBeenCalledTimes(4);

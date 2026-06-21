@@ -1,4 +1,4 @@
-import type { LocalModelConfig } from "@statewalker/ai-agent/models";
+import type { LocalModelConfig } from "@statewalker/ai-agent.core/models";
 
 interface NdarrayCache {
   records?: Array<{ dataPath: string; format?: string; nbytes?: number }>;

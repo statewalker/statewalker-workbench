@@ -1,4 +1,4 @@
-import type { LocalModelConfig } from "@statewalker/ai-agent/models";
+import type { LocalModelConfig } from "@statewalker/ai-agent.core/models";
 
 /**
  * `LocalModelConfig` with an additional curated `description` field

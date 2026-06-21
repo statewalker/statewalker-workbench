@@ -1,5 +1,5 @@
 import type { ProviderV3 } from "@ai-sdk/provider";
-import type { McpServerConfig, SkillInfo, ToolInput } from "@statewalker/ai-agent/runtime";
+import type { McpServerConfig, SkillInfo, ToolInput } from "@statewalker/ai-agent.core/runtime";
 
 /**
  * Pointer to the resolved provider+model. Written by the providers

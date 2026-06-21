@@ -1,4 +1,4 @@
-import type { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime";
+import type { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime.core";
 import type { AiConfig } from "@statewalker/ai-config";
 
 /**

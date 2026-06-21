@@ -1,4 +1,4 @@
-import type { LocalModelConfig } from "@statewalker/ai-agent/models";
+import type { LocalModelConfig } from "@statewalker/ai-agent.core/models";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveMlcFiles, verifyMlcWeights } from "../../src/webllm/mlc-resolver.js";
 

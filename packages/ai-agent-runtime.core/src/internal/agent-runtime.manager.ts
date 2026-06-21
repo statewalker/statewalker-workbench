@@ -34,7 +34,7 @@ export interface AgentRuntimeManagerOptions {
    */
   buildRuntime?: (
     input: BuildRuntimeInput,
-  ) => Promise<import("@statewalker/ai-agent/runtime").AgentRuntime>;
+  ) => Promise<import("@statewalker/ai-agent.core/runtime").AgentRuntime>;
 }
 
 /**
@@ -247,8 +247,8 @@ export class AgentRuntimeManager {
 
 function dedupeMcp(
   contributions: readonly AgentMcpConnection[],
-): Record<string, import("@statewalker/ai-agent/runtime").McpServerConfig> {
-  const out: Record<string, import("@statewalker/ai-agent/runtime").McpServerConfig> = {};
+): Record<string, import("@statewalker/ai-agent.core/runtime").McpServerConfig> {
+  const out: Record<string, import("@statewalker/ai-agent.core/runtime").McpServerConfig> = {};
   for (const c of contributions) out[c.id] = c.config; // last-wins
   return out;
 }

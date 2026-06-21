@@ -1,7 +1,7 @@
 import type { ProviderV3 } from "@ai-sdk/provider";
-import type { McpServerConfig } from "@statewalker/ai-agent/runtime";
-import { AgentRuntime, type SkillInfo, type ToolInput } from "@statewalker/ai-agent/runtime";
-import { createFileTools } from "@statewalker/ai-agent/tools";
+import type { McpServerConfig } from "@statewalker/ai-agent.core/runtime";
+import { AgentRuntime, type SkillInfo, type ToolInput } from "@statewalker/ai-agent.core/runtime";
+import { createFileTools } from "@statewalker/ai-agent.core/tools";
 import type { FilesApi } from "@statewalker/webrun-files";
 
 const DEFAULT_SYSTEM_FOLDER = "/.settings";

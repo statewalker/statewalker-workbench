@@ -1,4 +1,4 @@
-import type { Agent, AgentRuntime } from "@statewalker/ai-agent/runtime";
+import type { Agent, AgentRuntime } from "@statewalker/ai-agent.core/runtime";
 import { BaseClass } from "@statewalker/shared-baseclass";
 
 /**

@@ -21,8 +21,8 @@
   "dependencies": {
     "@ai-sdk/provider": "catalog:",
     "@repo/chat-mini.chat": "workspace:*",
-    "@statewalker/ai-agent": "workspace:*",
-    "@statewalker/ai-agent-runtime": "workspace:*",
+    "@statewalker/ai-agent.core": "workspace:*",
+    "@statewalker/ai-agent-runtime.core": "workspace:*",
     "@statewalker/settings.core": "workspace:*",
     "@statewalker/shared-baseclass": "catalog:",
     "@statewalker/shared-commands": "catalog:",

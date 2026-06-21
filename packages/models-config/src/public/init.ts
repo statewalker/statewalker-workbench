@@ -1,5 +1,5 @@
 import { composerActionsSlot } from "@repo/chat-mini.chat";
-import { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime";
+import { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime.core";
 import { AiConfig } from "@statewalker/ai-config";
 import {
   type LocalModelRef,

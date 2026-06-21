@@ -1,4 +1,4 @@
-import type { LocalModelConfig } from "@statewalker/ai-agent/models";
+import type { LocalModelConfig } from "@statewalker/ai-agent.core/models";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { resolveMlcFiles } from "./mlc-resolver.js";
 

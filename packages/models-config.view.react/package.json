@@ -24,7 +24,7 @@
     "@json-render/react": "0.18.0",
     "@json-render/shadcn": "0.18.0",
     "@repo/chat-mini.chat-react": "workspace:*",
-    "@statewalker/ai-agent-runtime": "workspace:*",
+    "@statewalker/ai-agent-runtime.core": "workspace:*",
     "@statewalker/ai-providers": "workspace:*",
     "@statewalker/render.core": "workspace:*",
     "@statewalker/ui.view.react": "workspace:*",

@@ -1,4 +1,4 @@
-import type { ModelManager } from "@statewalker/ai-agent/models";
+import type { ModelManager } from "@statewalker/ai-agent.core/models";
 import { registerLocalProvider } from "./transformers/register.js";
 // import { registerWebLLMProvider } from "./webllm/register.js";
 

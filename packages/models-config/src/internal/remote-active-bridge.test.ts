@@ -1,4 +1,4 @@
-import { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime";
+import { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime.core";
 import { AiConfigImpl } from "@statewalker/ai-config";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { Secrets, Workspace } from "@statewalker/workspace.core";
