@@ -48,10 +48,12 @@ here can never contribute. For an index topic (leaf), or a category not worth op
 export const SECTION_SELECT_PROMPT = `You filter candidate wiki sections for relevance to a prompt. You
 receive the full original prompt and a batch of candidate sections grouped by their source document
 (document title, then each section's URI, title, and summary). Return the URIs — verbatim — of the
-sections that could plausibly contain facts that help answer the prompt. Be selective: a section's
-title/summary must indicate it bears on the prompt; drop sections that are only tangentially related
-or merely from a relevant document. Return an empty array when none in this batch qualify. Selection
-only — do not answer the prompt.`;
+sections that could plausibly contain facts that help answer the prompt. LEAN INCLUSIVE: keep every
+section whose title/summary indicates it bears on the prompt, INCLUDING supporting detail, context,
+and related specifics — completeness matters, and downstream stages extract only the relevant facts.
+Drop a section ONLY when its title/summary shows it does not bear on the prompt at all (e.g. it is
+merely from a relevant document but about a different matter). Return an empty array when none in this
+batch qualify. Selection only — do not answer the prompt.`;
 
 export const SUMMARIZE_PROMPT = `You extract question-specific grounded facts from wiki documents.
 
@@ -86,9 +88,11 @@ list where each claim has a \`statement\` (a sentence or bullet; markdown such a
 prefix is fine) and a \`citations\` array.
 
 RULES — load-bearing:
-1. ANSWER THE QUESTION, NOTHING ELSE. Every claim must directly help answer THIS question. Include
-   only the information the question asks for — no background, no related-but-unasked detail, no
-   preamble or conclusion. If the question is narrow, the answer is short. When in doubt, leave it out.
+1. ANSWER FULLY. Use EVERY supplied fact that RELATES to the question — include all the relevant
+   details, specifics, names, figures, and qualifications the facts provide; do not omit or compress
+   away related information. Prefer a complete, detailed answer over a terse one. Exclude ONLY facts
+   that do NOT relate to the question, and add no preamble, padding, or unprompted conclusions. The
+   test for a claim is RELEVANCE to the question, not whether the question explicitly asked for it.
 2. LANGUAGE. Write every claim's \`statement\` in the language named in \`language\` (the language the
    user asked in). Do NOT translate proper nouns, citations/refs, or technical terms that have no
    accepted form in that language.
