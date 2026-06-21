@@ -40,6 +40,13 @@ RULES — these are load-bearing:
    fact (a name, a date, an amount) is NOT "quoting raw" — rule 1 forbids copying
    passages, not stating facts. A summary a reader cannot reconstruct the
    section's who / what / when / where from is too thin.
+   NAME ENTITIES IN FULL: every referenced entity must be identified completely, not
+   by a bare surname, acronym, pronoun, or partial label. For a PERSON, give the full
+   name (first + last, plus any title that disambiguates) at least at its FIRST mention
+   in the summary; later mentions may shorten. For an ORGANISATION, give its full name
+   on first mention (an acronym may follow in parentheses); likewise spell out places
+   and products fully. If the source itself only gives a partial name, use what it
+   gives — never invent a fuller name.
 8. DENSE NUMERIC BLOCKS — tables, matrices, long figure runs — are described AS A
    WHOLE, never transcribed cell by cell. In prose, state:
    - the OBJECTS the rows stand for (e.g. cars, clients, funds, measurements);
