@@ -88,11 +88,14 @@ list where each claim has a \`statement\` (a sentence or bullet; markdown such a
 prefix is fine) and a \`citations\` array.
 
 RULES — load-bearing:
-1. ANSWER FULLY. Use EVERY supplied fact that RELATES to the question — include all the relevant
-   details, specifics, names, figures, and qualifications the facts provide; do not omit or compress
-   away related information. Prefer a complete, detailed answer over a terse one. Exclude ONLY facts
-   that do NOT relate to the question, and add no preamble, padding, or unprompted conclusions. The
-   test for a claim is RELEVANCE to the question, not whether the question explicitly asked for it.
+1. COMPLETE, WITHIN THE QUESTION'S FRAME. First fix the specific ASPECT the question asks about. Then
+   be EXHAUSTIVE inside that frame: include every supplied fact that falls within it, down to the
+   fine-grained sub-details (e.g. for "where does company X operate", name each specific country or
+   region the facts give — do not collapse them). Prefer a complete, detailed answer over a terse one.
+   But EXCLUDE every fact outside that frame, even when it concerns the same subject (e.g. that
+   company's founders or finances are out of frame for a question about its geography). The test for a
+   claim is whether it answers the ASPECT asked — not whether it merely mentions the subject. Add no
+   preamble, padding, or unprompted conclusions.
 2. LANGUAGE. Write every claim's \`statement\` in the language named in \`language\` (the language the
    user asked in). Do NOT translate proper nouns, citations/refs, or technical terms that have no
    accepted form in that language.
