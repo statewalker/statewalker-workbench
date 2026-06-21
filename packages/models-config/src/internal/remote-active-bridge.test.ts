@@ -1,5 +1,5 @@
 import { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime.core";
-import { AiConfigImpl } from "@statewalker/ai-config";
+import { AiConfigImpl } from "@statewalker/ai-config.core";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { Secrets, Workspace } from "@statewalker/workspace.core";
 import { afterEach, describe, expect, it } from "vitest";

@@ -1,5 +1,5 @@
 import type { ActiveModel, AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime.core";
-import type { AiConfig } from "@statewalker/ai-config";
+import type { AiConfig } from "@statewalker/ai-config.core";
 
 /**
  * Project `AiConfig`'s active **remote** selection into `ActiveModel` (the chat

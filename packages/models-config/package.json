@@ -37,7 +37,7 @@
     "@statewalker/webrun-files": "catalog:",
     "@statewalker/workspace.core": "workspace:*",
     "zod": "catalog:",
-    "@statewalker/ai-config": "workspace:*"
+    "@statewalker/ai-config.core": "workspace:*"
   },
   "devDependencies": {
     "@statewalker/webrun-files-mem": "catalog:",

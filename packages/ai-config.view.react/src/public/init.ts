@@ -2,7 +2,7 @@ import {
   AI_CONFIG_CONNECTIONS_TAB_ID,
   AI_CONFIG_CONNECTIONS_TAB_VIEW_KEY,
   ConfigureAiCommand,
-} from "@statewalker/ai-config";
+} from "@statewalker/ai-config.core";
 import { OpenSettingsCommand, settingsTabSlot } from "@statewalker/settings.core";
 import { Commands } from "@statewalker/shared-commands";
 import { newRegistry } from "@statewalker/shared-registry";

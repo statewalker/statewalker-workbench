@@ -1,5 +1,5 @@
 import { createStateStore, type Spec } from "@json-render/core";
-import { AiConfigImpl, makeConnectionsInitialState } from "@statewalker/ai-config";
+import { AiConfigImpl, makeConnectionsInitialState } from "@statewalker/ai-config.core";
 import { SpecRenderer } from "@statewalker/render.view.react";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { Secrets, Workspace } from "@statewalker/workspace.core";

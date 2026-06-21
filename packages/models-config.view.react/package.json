@@ -36,7 +36,7 @@
     "@statewalker/shared-slots": "workspace:*",
     "@statewalker/workspace.core": "workspace:*",
     "lucide-react": "catalog:",
-    "@statewalker/ai-config": "workspace:*"
+    "@statewalker/ai-config.core": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",

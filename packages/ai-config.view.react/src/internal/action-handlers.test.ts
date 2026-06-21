@@ -4,7 +4,7 @@ import {
   AiConfigImpl,
   apiKeySecretKey,
   makeConnectionsInitialState,
-} from "@statewalker/ai-config";
+} from "@statewalker/ai-config.core";
 import { MemFilesApi } from "@statewalker/webrun-files-mem";
 import { Secrets, Workspace } from "@statewalker/workspace.core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
