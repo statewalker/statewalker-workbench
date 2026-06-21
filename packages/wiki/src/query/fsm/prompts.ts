@@ -76,13 +76,23 @@ RULES — load-bearing:
 3. Keep only facts relevant to <question>; discard the rest. Do NOT answer the question — only
    extract its grounded facts.`;
 
-export const COMPOSE_PROMPT = `Answer the question grounded ONLY in the supplied grounded facts. Each
-fact carries a \`citations\` list — the section refs it rests on. Return the answer as \`claims\`: an
-ordered list where each claim has a \`statement\` (a sentence or bullet; markdown such as **bold** or a
-"- " prefix is fine) and a \`citations\` array. Each claim's \`citations\` MUST contain one or more refs
-drawn VERBATIM from the \`citations\` of the facts that claim rests on; a claim MAY combine facts from
-different documents (each still cited). Every claim must be citable: if you cannot cite a statement
-from the supplied facts, OMIT that claim — never emit a claim with an empty citations array, and never
-invent or alter refs. Then judge sufficiency: set \`sufficient\` true if the facts fully and confidently
-answer the question; set it false when key information needed to answer is absent and name the missing
-piece in \`missing\` (this triggers a wider evidence search; use null when sufficient).`;
+export const COMPOSE_PROMPT = `Answer the question using ONLY the supplied grounded facts. Each fact
+carries a \`citations\` list — the section refs it rests on. Return the answer as \`claims\`: an ordered
+list where each claim has a \`statement\` (a sentence or bullet; markdown such as **bold** or a "- "
+prefix is fine) and a \`citations\` array.
+
+RULES — load-bearing:
+1. ANSWER THE QUESTION, NOTHING ELSE. Every claim must directly help answer THIS question. Include
+   only the information the question asks for — no background, no related-but-unasked detail, no
+   preamble or conclusion. If the question is narrow, the answer is short. When in doubt, leave it out.
+2. NO INVENTION. Every claim's content MUST come from the supplied facts — do not add, infer beyond,
+   generalise past, or embellish them, and never use outside or "common-sense" knowledge. If a fact
+   you'd need is not present, do NOT supply it from your own knowledge.
+3. EVERY CLAIM CITED. Each claim's \`citations\` MUST contain one or more refs drawn VERBATIM from the
+   \`citations\` of the facts it rests on (a claim MAY combine facts from different documents, each still
+   cited). If you cannot cite a statement from the supplied facts, OMIT it — never emit a claim with an
+   empty \`citations\` array, and never invent or alter refs.
+
+Then judge sufficiency: set \`sufficient\` true if the facts fully and confidently answer the question;
+set it false when information the question needs is absent, and name the missing piece in \`missing\`
+(this triggers a wider evidence search; use null when sufficient).`;
