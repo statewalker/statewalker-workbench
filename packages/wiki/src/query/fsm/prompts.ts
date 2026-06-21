@@ -51,8 +51,10 @@ only — do not answer the prompt.`;
 
 export const SUMMARIZE_PROMPT = `You extract grounded facts from wiki documents for a question. You
 receive the question and a batch of SOURCE DOCUMENTS, each as <document title="…"> with a
-<document_summary> and its <section ref="…"> blocks (each carrying <section_title>,
-<section_description>, and <raw_content>).
+<document_summary>; its sections may be grouped under <chapter title="…"> blocks (with a
+<chapter_summary>) that give intra-document context. Each <section ref="…"> carries a
+<section_title>, <section_description>, and <raw_content>. Use the document and chapter summaries
+only as CONTEXT — never as a source of facts; facts come from <raw_content>.
 
 Return \`facts\`: atomic statements that bear on the question, each grounded in the <raw_content> of
 the section(s) it cites. RULES — load-bearing:

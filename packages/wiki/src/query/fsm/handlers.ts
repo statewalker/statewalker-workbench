@@ -29,6 +29,7 @@ import {
   packFilterBatches,
   readClassIndexes,
   renderDocumentBlock,
+  sectionChapters,
   sectionId,
   withinScope,
 } from "./retrieval.js";
@@ -493,16 +494,42 @@ export const SummarizeTrigger: QueryHandler = async function* (ctx) {
       const pageSummary = await (await project.getProjectResource(uri))
         ?.getAdapter(WikiPageSummary)
         ?.get();
-      const sections = evs.map((ev) => {
+      const docTitle = pageSummary?.title ?? uri;
+      // Group this document's retrieved sections under their parent chapter (document order),
+      // so each section carries its chapter's context; falls back to the document when unmapped.
+      const chapterOf = sectionChapters(pageSummary?.outline ?? []);
+      const chapters: {
+        title: string;
+        summary: string;
+        sections: { ref: string; title: string; description: string; raw: string }[];
+      }[] = [];
+      const byChapterKey = new Map<string, number>();
+      for (const ev of evs) {
         const ref = toCanonical({ key, path: ev.uri, section: ev.sectionKey }, key);
         refToUri.set(ref, ev.uri);
-        return { ref, title: ev.title, description: ev.summary, raw: ev.rawBlock };
-      });
+        const ch = chapterOf.get(ev.sectionKey) ?? {
+          key: "_doc",
+          title: docTitle,
+          summary: pageSummary?.summary ?? "",
+        };
+        let idx = byChapterKey.get(ch.key);
+        if (idx === undefined) {
+          idx = chapters.length;
+          byChapterKey.set(ch.key, idx);
+          chapters.push({ title: ch.title, summary: ch.summary, sections: [] });
+        }
+        chapters[idx]?.sections.push({
+          ref,
+          title: ev.title,
+          description: ev.summary,
+          raw: ev.rawBlock,
+        });
+      }
       docBlocks.push(
         renderDocumentBlock({
-          title: pageSummary?.title ?? uri,
+          title: docTitle,
           summary: pageSummary?.summary ?? "",
-          sections,
+          chapters,
         }),
       );
     }

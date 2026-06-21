@@ -91,6 +91,7 @@ export {
   migrateIndex,
 } from "./topic-graph.js";
 export type {
+  ChapterNode,
   DocumentEmbeddings,
   DocumentGraph,
   DocumentMeta,

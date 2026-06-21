@@ -5,7 +5,12 @@ import {
   WikiPageMeta,
   WikiPageSummary,
 } from "../../knowledge/page-adapters.js";
-import type { DocumentMeta, GlobalOutlier, GlobalTopic } from "../../knowledge/types.js";
+import type {
+  ChapterNode,
+  DocumentMeta,
+  GlobalOutlier,
+  GlobalTopic,
+} from "../../knowledge/types.js";
 import type { SearchAdapter } from "../../search/index.js";
 import { parseWikiUri, toCanonical } from "../../uri/wiki-uri.js";
 import type { AnswerTopic, EvidenceSection } from "../progress.js";
@@ -218,30 +223,64 @@ export function filterCitations(
   return { citations, caveats };
 }
 
+/** Map each section key to its leaf chapter (key/title/summary) by walking a document outline. */
+export function sectionChapters(
+  outline: ChapterNode[],
+): Map<string, { key: string; title: string; summary: string }> {
+  const map = new Map<string, { key: string; title: string; summary: string }>();
+  const walk = (nodes: ChapterNode[]): void => {
+    for (const n of nodes) {
+      if (n.sectionKeys) {
+        for (const k of n.sectionKeys)
+          map.set(k, { key: n.key, title: n.title, summary: n.summary });
+      }
+      if (n.children) walk(n.children);
+    }
+  };
+  walk(outline);
+  return map;
+}
+
 /**
  * Render one document's slice of a summarize batch: a `<document>` block carrying the
- * document title + summary header, with its sections nested. Each section is tagged with
- * its `ref` (the citation token the summarizer must cite) plus its title, prior narrative
- * description, and raw content. Grouping by document gives the summarizer the provenance it
- * needs to keep facts single-document and prevents cross-document conflation.
+ * document title + summary header, its retrieved sections grouped under their parent
+ * `<chapter>` (title + summary), each section tagged with its `ref` (the citation token the
+ * summarizer must cite), title, prior narrative description, and raw content. Grouping by
+ * document keeps facts single-document; the chapter layer gives intra-document context. The
+ * chapter wrapper is skipped when the only chapter just mirrors the document (a small
+ * document's mechanical single-chapter outline) to avoid redundancy.
  */
 export function renderDocumentBlock(input: {
   title: string;
   summary: string;
-  sections: { ref: string; title: string; description: string; raw: string }[];
+  chapters: {
+    title: string;
+    summary: string;
+    sections: { ref: string; title: string; description: string; raw: string }[];
+  }[];
 }): string {
   const parts: string[] = [
     `<document title="${input.title}">`,
     `<document_summary>\n${input.summary}\n</document_summary>`,
   ];
-  for (const s of input.sections) {
-    parts.push(
-      `<section ref="${s.ref}">`,
-      `<section_title>\n${s.title}\n</section_title>`,
-      `<section_description>\n${s.description}\n</section_description>`,
-      `<raw_content>\n${s.raw}\n</raw_content>`,
-      "</section>",
-    );
+  const flat = input.chapters.length === 1 && input.chapters[0]?.title === input.title;
+  for (const ch of input.chapters) {
+    if (!flat) {
+      parts.push(
+        `<chapter title="${ch.title}">`,
+        `<chapter_summary>\n${ch.summary}\n</chapter_summary>`,
+      );
+    }
+    for (const s of ch.sections) {
+      parts.push(
+        `<section ref="${s.ref}">`,
+        `<section_title>\n${s.title}\n</section_title>`,
+        `<section_description>\n${s.description}\n</section_description>`,
+        `<raw_content>\n${s.raw}\n</raw_content>`,
+        "</section>",
+      );
+    }
+    if (!flat) parts.push("</chapter>");
   }
   parts.push("</document>");
   return parts.join("\n");
