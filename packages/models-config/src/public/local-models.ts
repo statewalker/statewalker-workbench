@@ -5,7 +5,7 @@ import {
   ModelStateStore,
   type ModelStatus,
 } from "@statewalker/ai-agent.core/models";
-import { registerLocalProvider } from "@statewalker/ai-providers.browser/transformers";
+import { registerLocalProvider } from "@statewalker/ai-local-models.browser/transformers";
 import { BaseClass } from "@statewalker/shared-baseclass";
 import type { FilesApi } from "@statewalker/webrun-files";
 import { type LocalModelEntry, localCatalog } from "../internal/local-catalog.js";

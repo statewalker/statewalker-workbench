@@ -1,4 +1,4 @@
-# @statewalker/ai-providers.browser
+# @statewalker/ai-local-models.browser
 
 ## What it is
 
@@ -26,7 +26,7 @@ runtimes or MLC shard layouts.
 ## How to use
 
 ```sh
-pnpm add @statewalker/ai-providers.browser
+pnpm add @statewalker/ai-local-models.browser
 ```
 
 The engine SDKs are **optional peer dependencies** —
@@ -43,7 +43,7 @@ register; they're loaded lazily at activation time, never at import time.
 
 ```ts
 import type { ModelManager } from "@statewalker/ai-agent/models";
-import { registerBrowserProviders } from "@statewalker/ai-providers.browser/src/register.js";
+import { registerBrowserProviders } from "@statewalker/ai-local-models.browser/src/register.js";
 
 registerBrowserProviders(manager); // currently wires transformers.js only
 ```
@@ -53,7 +53,7 @@ registerBrowserProviders(manager); // currently wires transformers.js only
 ### Register the transformers.js engine
 
 ```ts
-import { registerLocalProvider } from "@statewalker/ai-providers.browser/transformers";
+import { registerLocalProvider } from "@statewalker/ai-local-models.browser/transformers";
 
 registerLocalProvider(manager, {
   // weights live alongside other workspace artifacts
@@ -68,8 +68,8 @@ registerLocalProvider(manager, {
 
 ```ts
 import { createDefaultCatalog, mergeCatalogs } from "@statewalker/ai-agent/models";
-import { registerWebLLMProvider } from "@statewalker/ai-providers.browser/src/webllm/register.js";
-import { webllmCatalog } from "@statewalker/ai-providers.browser/src/webllm/catalog.js";
+import { registerWebLLMProvider } from "@statewalker/ai-local-models.browser/src/webllm/register.js";
+import { webllmCatalog } from "@statewalker/ai-local-models.browser/src/webllm/catalog.js";
 
 const catalog = mergeCatalogs(createDefaultCatalog(), webllmCatalog);
 registerWebLLMProvider(manager, { basePath: "/.settings/models/webllm" });
@@ -85,7 +85,7 @@ import {
   propagateFilesHandle,
   registerWebLLMUrlMapping,
   unregisterWebLLMUrlMapping,
-} from "@statewalker/ai-providers.browser/src/webllm/sw-bridge.js";
+} from "@statewalker/ai-local-models.browser/src/webllm/sw-bridge.js";
 
 await navigator.serviceWorker.ready;
 await propagateFilesHandle(opfsDirectoryHandle); // once, at bootstrap
@@ -97,8 +97,8 @@ await unregisterWebLLMUrlMapping(urlPattern);
 ### Use the WebLLM model adapters directly
 
 ```ts
-import { WebLLMLanguageModel } from "@statewalker/ai-providers.browser/src/webllm/language-model.js";
-import { WebLLMEmbeddingModel } from "@statewalker/ai-providers.browser/src/webllm/embedding-model.js";
+import { WebLLMLanguageModel } from "@statewalker/ai-local-models.browser/src/webllm/language-model.js";
+import { WebLLMEmbeddingModel } from "@statewalker/ai-local-models.browser/src/webllm/embedding-model.js";
 
 const lm = new WebLLMLanguageModel(engine, modelId);    // LanguageModelV3
 const emb = new WebLLMEmbeddingModel(engine, modelId);  // EmbeddingModelV3

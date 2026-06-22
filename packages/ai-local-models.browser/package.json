@@ -1,5 +1,5 @@
 {
-  "name": "@statewalker/ai-providers.browser",
+  "name": "@statewalker/ai-local-models.browser",
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
@@ -53,6 +53,6 @@
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/statewalker/statewalker-ai.git",
-    "directory": "packages/ai-provider-browser"
+    "directory": "packages/ai-local-models.browser"
   }
 }
