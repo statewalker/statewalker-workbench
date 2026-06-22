@@ -1,7 +1,6 @@
 import { useChatPanelContext } from "@repo/chat-mini.chat-react";
 import { AgentRuntimeAdapter } from "@statewalker/ai-agent-runtime.core";
-import { AiConfig, ConfigureAiCommand, type Connection } from "@statewalker/ai-config.core";
-import { capabilitiesFor } from "@statewalker/models-config";
+import { AiConfig, ConfigureAiCommand } from "@statewalker/ai-config.core";
 import { Commands } from "@statewalker/shared-commands";
 import { useAdapter, useAdapterValue, useAppWorkspace } from "@statewalker/ui.view.react";
 import {
@@ -12,65 +11,10 @@ import {
   SelectValue,
 } from "@statewalker/ui.view.shadcn";
 import { type ReactElement, useEffect, useMemo, useState } from "react";
+import { buildChoices, isModelRefValid } from "./model-ref-validity.js";
 
 const NO_MODELS = "__no-models__";
 const CONFIGURE = "__configure__";
-
-interface ChoiceRow {
-  value: string;
-  connectionId: string;
-  modelId: string;
-  label: string;
-  providerLabel: string;
-}
-
-/** A connection is usable once a discovery has cached models on it. */
-function isConnected(c: Connection): boolean {
-  return (c.discoveredModels?.length ?? 0) > 0;
-}
-
-/** Build the dropdown list: union of (connection, starred modelId) across
- * connected AiConfig connections, filtered by `chat` capability. */
-function buildChoices(connections: readonly Connection[]): ChoiceRow[] {
-  const out: ChoiceRow[] = [];
-  for (const c of connections) {
-    if (!isConnected(c)) continue;
-    const discovered = new Set((c.discoveredModels ?? []).map((m) => m.id));
-    for (const modelId of c.starredModelIds) {
-      // Skip stars that no longer correspond to a discovered model.
-      if (!discovered.has(modelId)) continue;
-      if (!capabilitiesFor(modelId).includes("chat")) continue;
-      out.push({
-        value: `${c.id}::${modelId}`,
-        connectionId: c.id,
-        modelId,
-        label: modelId,
-        providerLabel: c.name,
-      });
-    }
-  }
-  return out;
-}
-
-function findConnection(
-  connections: readonly Connection[],
-  id: string | undefined,
-): Connection | undefined {
-  return id ? connections.find((c) => c.id === id) : undefined;
-}
-
-/** Is a `modelRef` still usable against the current AiConfig state? */
-function isModelRefValid(
-  connections: readonly Connection[],
-  ref: { connectionId: string; modelId: string } | undefined,
-): boolean {
-  if (!ref) return false;
-  const conn = findConnection(connections, ref.connectionId);
-  if (!conn || !isConnected(conn)) return false;
-  if (!conn.starredModelIds.includes(ref.modelId)) return false;
-  if (!capabilitiesFor(ref.modelId).includes("chat")) return false;
-  return true;
-}
 
 /**
  * Compact session-level model picker in the chat composer. Reads connections +
