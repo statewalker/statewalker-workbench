@@ -8,7 +8,7 @@ import {
   SelectActiveModelCommand,
   validateConnectionUrl,
 } from "@statewalker/ai-providers";
-import { applyDefaultStarred, capabilitiesFor } from "@statewalker/models-config";
+import { applyDefaultStarred, capabilitiesFor } from "@statewalker/ai-config.core";
 
 interface ModelRef {
   connectionId: string;

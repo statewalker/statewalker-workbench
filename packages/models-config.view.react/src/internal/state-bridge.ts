@@ -1,6 +1,7 @@
 import type { StateStore } from "@json-render/core";
 import type { Capability, Providers, ProvidersConfig } from "@statewalker/ai-providers";
-import { capabilitiesFor, type LocalModels } from "@statewalker/models-config";
+import { capabilitiesFor } from "@statewalker/ai-config.core";
+import type { LocalModels } from "@statewalker/models-config";
 
 /**
  * A flattened model row — one per (connection, model) pair across

@@ -1,5 +1,5 @@
 import type { Connection } from "@statewalker/ai-config.core";
-import { capabilitiesFor } from "@statewalker/models-config";
+import { capabilitiesFor } from "@statewalker/ai-config.core";
 
 /**
  * React-free validity + choice-building logic for the composer session model

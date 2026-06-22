@@ -1,6 +1,6 @@
 import { type Connection, listConnectionModels } from "@statewalker/ai-providers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { capabilitiesFor } from "./capabilities.js";
+import { capabilitiesFor } from "@statewalker/ai-config.core";
 
 const originalFetch = globalThis.fetch;
 
