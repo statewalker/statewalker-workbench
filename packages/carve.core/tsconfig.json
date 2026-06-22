@@ -4,8 +4,7 @@
     "target": "ES2022",
     "module": "Preserve",
     "moduleResolution": "Bundler",
-    "lib": ["ESNext", "DOM"],
-    "jsx": "react-jsx",
+    "lib": ["ESNext"],
     "strict": true,
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
@@ -18,11 +17,12 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
+    "resolvePackageJsonExports": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "noEmit": true
   },
-  "include": ["./src", "./tests"],
+  "include": ["./src", "./bin", "./tests"],
   "exclude": ["node_modules", "dist"]
 }

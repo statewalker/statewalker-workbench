@@ -1,0 +1,53 @@
+{
+  "name": "@statewalker/carve.core",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Deterministic substrate for the carving refactoring engine: block discovery, contract/white-box test partition, complexity-vector metrics, public-API diff, and IMPLEMENTATION.md skeleton extraction.",
+  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "author": {
+    "name": "Mikhail Kotelnikov",
+    "email": "mikhail.kotelnikov@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "bin": {
+    "carve": "./bin/carve.ts"
+  },
+  "files": [
+    "dist",
+    "src",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "lint": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "ts-morph": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "rimraf": "catalog:",
+    "tsdown": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}
