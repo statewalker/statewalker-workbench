@@ -61,7 +61,7 @@ export function DirectoryPickerEmptyState(): ReactElement {
         <CardHeader>
           <CardTitle>Pick a workspace folder</CardTitle>
           <CardDescription>
-            Chat Mini stores its sessions and provider configuration inside a folder you choose on
+            SandClaw stores its sessions and provider configuration inside a folder you choose on
             disk. Pick any folder — files outside the system subdirectory stay untouched.
           </CardDescription>
         </CardHeader>

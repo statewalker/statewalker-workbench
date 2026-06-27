@@ -6,6 +6,7 @@ catalog:
   "@statewalker/webrun-files-node": ^0.7.2
   "@ai-sdk/google": ^3.0.64
   "@ai-sdk/openai": ^3.0.53
+  "@ai-sdk/provider": ^3.0.10
   "@statewalker/content-extractors": ^0.1.0
   "@statewalker/fsm": ^0.37.0
   "@statewalker/fsm-validator": ^0.2.0
@@ -54,7 +55,6 @@ catalog:
   sucrase: ^3.35.1
   tailwind-merge: ^3.5.0
   tailwindcss: 4.2.2
-  ts-morph: ^28.0.0
   tsdown: ^0.21.9
   tsx: ^4.21.0
   turbo: ^2.9.6
