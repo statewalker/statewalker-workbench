@@ -1,4 +1,4 @@
-import { Markdown } from "@repo/chat-mini.chat-react";
+import { Markdown } from "./markdown.js";
 import { Commands } from "@statewalker/shared-commands";
 import { useAppWorkspace } from "@statewalker/ui.view.react";
 import { LoadFileCommand } from "@statewalker/workspace.core";
