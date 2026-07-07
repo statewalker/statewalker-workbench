@@ -22,7 +22,12 @@
   "dependencies": {
     "@json-render/core": "0.18.0",
     "@statewalker/render.view.react": "workspace:*",
-    "@repo/chat-mini.chat-react": "workspace:*",
+    "@statewalker/ui.view.shadcn": "workspace:*",
+    "marked": "^18.0.3",
+    "react-markdown": "catalog:",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "catalog:",
+    "shiki": "^4.0.2",
     "@statewalker/ui.view.react": "workspace:*",
     "@statewalker/shell.view.react": "workspace:*",
     "@statewalker/render.core": "workspace:*",
