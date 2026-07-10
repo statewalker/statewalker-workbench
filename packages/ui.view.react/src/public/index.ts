@@ -12,4 +12,5 @@ export {
   useAdapterValue,
 } from "../internal/use-adapter-value.js";
 export { type KeyedSlotView, useKeyedSlot, useSlot } from "../internal/use-slot.js";
+export { DirectoryPickerEmptyState } from "../internal/directory-picker-empty-state.js";
 export * from "./extension-points.js";

@@ -24,10 +24,11 @@
     "@statewalker/shared-commands": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/shared-slots": "workspace:*",
+    "@statewalker/ui.view.shadcn": "workspace:*",
     "@statewalker/workspace.core": "workspace:*",
     "@statewalker/workspace.browser": "workspace:*",
-    "@statewalker/workspace.view.react": "workspace:*",
-    "@tanstack/react-query": "^5.66.10"
+    "@tanstack/react-query": "^5.66.10",
+    "lucide-react": "catalog:"
   },
   "peerDependencies": {
     "react": ">=18",

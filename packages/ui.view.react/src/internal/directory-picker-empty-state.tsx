@@ -1,5 +1,6 @@
 import { Commands } from "@statewalker/shared-commands";
-import { useAdapter, useAdapterValue } from "@statewalker/ui.view.react";
+import { useAdapter } from "./use-adapter.js";
+import { useAdapterValue } from "./use-adapter-value.js";
 import {
   Button,
   Card,
