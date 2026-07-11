@@ -28,6 +28,7 @@
     "@statewalker/render.core": "workspace:*",
     "@statewalker/mime.core": "workspace:*",
     "@statewalker/shared-commands": "catalog:",
+    "@statewalker/shared-slots": "catalog:",
     "@statewalker/shared-registry": "catalog:",
     "@statewalker/workspace.core": "workspace:*",
     "@statewalker/workspace.view.react": "workspace:*",
