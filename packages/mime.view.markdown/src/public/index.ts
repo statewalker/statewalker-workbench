@@ -2,3 +2,4 @@
 // no other public exports.
 
 export * from "./catalog.js";
+export { Markdown, type MarkdownProps } from "../internal/markdown.js";
