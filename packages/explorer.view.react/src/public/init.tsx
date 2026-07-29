@@ -9,7 +9,7 @@ import {
 } from "@statewalker/explorer.core";
 import {
   catalogsSlot,
-  DOCK_LAYOUT_STORAGE_KEY,
+  LayoutStore,
   restorePanelSpecsFromLayout,
   SpecStore,
 } from "@statewalker/render.core";
@@ -51,23 +51,28 @@ export default function initFileExplorerReact(ctx: Record<string, unknown>): () 
   const commands = workspace.requireAdapter(Commands);
   const store = workspace.requireAdapter(SpecStore);
   const slots = workspace.requireAdapter(Slots);
+  const layoutStore = workspace.requireAdapter(LayoutStore);
 
   const [register, cleanup] = newRegistry();
 
   // ── Pre-allocate specs for restored tabs ──────────────────────
-  // Runs synchronously at fragment-init so DockView's fromJSON()
-  // (called once the React tree mounts and `DockHost.setApi` runs)
-  // finds a spec for every persisted file-explorer panel id, instead
-  // of flashing the `PanelMissing` placeholder.
-  restorePanelSpecsFromLayout({
-    store,
-    storage: globalThis.localStorage,
-    layoutKey: DOCK_LAYOUT_STORAGE_KEY,
-    panelIdPrefix: "file-explorer:",
-    catalogId: FILE_EXPLORER_CATALOG_ID,
-    buildSpec: (id) => makeFileExplorerSpec(id),
-    buildSpecId: (id) => fileExplorerSpecId(id),
-  });
+  // On workspace-connect, pre-allocate a spec for every persisted
+  // file-explorer panel id in the restored layout (held by the
+  // LayoutStore adapter), so DockHost's deferred fromJSON() finds a
+  // spec instead of flashing the `PanelMissing` placeholder. Registered
+  // before the preset onLoad below so pre-allocs precede preset upgrades.
+  register(
+    workspace.onLoad(() => {
+      restorePanelSpecsFromLayout({
+        store,
+        layout: layoutStore.get(),
+        panelIdPrefix: "file-explorer:",
+        catalogId: FILE_EXPLORER_CATALOG_ID,
+        buildSpec: (id) => makeFileExplorerSpec(id),
+        buildSpecId: (id) => fileExplorerSpecId(id),
+      });
+    }),
+  );
 
   // ── Catalog binding ───────────────────────────────────────────
   const { registry } = defineRegistry(fileExplorerCatalog, {

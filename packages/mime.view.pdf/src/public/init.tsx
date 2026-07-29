@@ -1,7 +1,7 @@
 import { mimeRenderersSlot } from "@statewalker/mime.core";
 import {
   catalogsSlot,
-  DOCK_LAYOUT_STORAGE_KEY,
+  LayoutStore,
   restorePanelSpecsFromLayout,
   SpecStore,
 } from "@statewalker/render.core";
@@ -25,19 +25,23 @@ export default function initPdfViewerReact(ctx: Record<string, unknown>): () => 
   const workspace = getWorkspace(ctx);
   const slots = workspace.requireAdapter(Slots);
   const store = workspace.requireAdapter(SpecStore);
+  const layoutStore = workspace.requireAdapter(LayoutStore);
 
-  // Pre-allocate specs for any pdf-viewer tabs in the persisted dock
-  // layout so DockView's fromJSON() — which fires when the React tree
-  // mounts — finds a spec instead of the PanelMissing placeholder.
-  restorePanelSpecsFromLayout({
-    store,
-    storage: globalThis.localStorage,
-    layoutKey: DOCK_LAYOUT_STORAGE_KEY,
-    panelIdPrefix: "pdf-viewer:",
-    catalogId: PDF_VIEWER_CATALOG_ID,
-    buildSpec: (uri) => makePdfSpec(uri),
-    buildSpecId: (uri) => pdfViewerSpecId(uri),
-  });
+  // On workspace-connect, pre-allocate specs for any pdf-viewer tabs in the
+  // restored dock layout (held by the LayoutStore adapter) so DockHost's
+  // deferred fromJSON() finds a spec instead of the PanelMissing placeholder.
+  register(
+    workspace.onLoad(() => {
+      restorePanelSpecsFromLayout({
+        store,
+        layout: layoutStore.get(),
+        panelIdPrefix: "pdf-viewer:",
+        catalogId: PDF_VIEWER_CATALOG_ID,
+        buildSpec: (uri) => makePdfSpec(uri),
+        buildSpecId: (uri) => pdfViewerSpecId(uri),
+      });
+    }),
+  );
 
   const { registry } = defineRegistry(pdfViewerCatalog, {
     components: {

@@ -1,7 +1,7 @@
 import { mimeRenderersSlot } from "@statewalker/mime.core";
 import {
   catalogsSlot,
-  DOCK_LAYOUT_STORAGE_KEY,
+  LayoutStore,
   restorePanelSpecsFromLayout,
   SpecStore,
 } from "@statewalker/render.core";
@@ -33,16 +33,22 @@ export default function initMarkdownViewerReact(ctx: Record<string, unknown>): (
   const workspace = getWorkspace(ctx);
   const slots = workspace.requireAdapter(Slots);
   const store = workspace.requireAdapter(SpecStore);
+  const layoutStore = workspace.requireAdapter(LayoutStore);
 
-  restorePanelSpecsFromLayout({
-    store,
-    storage: globalThis.localStorage,
-    layoutKey: DOCK_LAYOUT_STORAGE_KEY,
-    panelIdPrefix: "markdown-viewer:",
-    catalogId: MARKDOWN_VIEWER_CATALOG_ID,
-    buildSpec: (uri) => makeMarkdownSpec(uri),
-    buildSpecId: (uri) => markdownViewerSpecId(uri),
-  });
+  // Pre-allocate specs for restored markdown-viewer tabs on workspace-connect,
+  // reading the layout held by the LayoutStore adapter (see mime.view.pdf).
+  register(
+    workspace.onLoad(() => {
+      restorePanelSpecsFromLayout({
+        store,
+        layout: layoutStore.get(),
+        panelIdPrefix: "markdown-viewer:",
+        catalogId: MARKDOWN_VIEWER_CATALOG_ID,
+        buildSpec: (uri) => makeMarkdownSpec(uri),
+        buildSpecId: (uri) => markdownViewerSpecId(uri),
+      });
+    }),
+  );
 
   const { registry } = defineRegistry(markdownViewerCatalog, {
     components: {

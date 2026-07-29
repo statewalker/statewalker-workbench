@@ -1,7 +1,7 @@
 import { mimeRenderersSlot } from "@statewalker/mime.core";
 import {
   catalogsSlot,
-  DOCK_LAYOUT_STORAGE_KEY,
+  LayoutStore,
   restorePanelSpecsFromLayout,
   SpecStore,
 } from "@statewalker/render.core";
@@ -25,16 +25,22 @@ export default function initVideoViewerReact(ctx: Record<string, unknown>): () =
   const workspace = getWorkspace(ctx);
   const slots = workspace.requireAdapter(Slots);
   const store = workspace.requireAdapter(SpecStore);
+  const layoutStore = workspace.requireAdapter(LayoutStore);
 
-  restorePanelSpecsFromLayout({
-    store,
-    storage: globalThis.localStorage,
-    layoutKey: DOCK_LAYOUT_STORAGE_KEY,
-    panelIdPrefix: "video-viewer:",
-    catalogId: VIDEO_VIEWER_CATALOG_ID,
-    buildSpec: (uri) => makeVideoSpec(uri),
-    buildSpecId: (uri) => videoViewerSpecId(uri),
-  });
+  // Pre-allocate specs for restored video-viewer tabs on workspace-connect,
+  // reading the layout held by the LayoutStore adapter (see mime.view.pdf).
+  register(
+    workspace.onLoad(() => {
+      restorePanelSpecsFromLayout({
+        store,
+        layout: layoutStore.get(),
+        panelIdPrefix: "video-viewer:",
+        catalogId: VIDEO_VIEWER_CATALOG_ID,
+        buildSpec: (uri) => makeVideoSpec(uri),
+        buildSpecId: (uri) => videoViewerSpecId(uri),
+      });
+    }),
+  );
 
   const { registry } = defineRegistry(videoViewerCatalog, {
     components: {
