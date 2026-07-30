@@ -1,0 +1,55 @@
+{
+  "name": "@statewalker/webapp.view.react",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Web-app dock renderer fragment: the <SiteFrame> catalog component (an iframe pointed at the hosted client) registered into the shell's json:catalogs slot for JsonPanel to render.",
+  "homepage": "https://github.com/statewalker/statewalker-workbench",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/statewalker/statewalker-workbench.git"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./fragment": "./src/fragment.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@json-render/core": "0.18.0",
+    "@statewalker/render.core": "workspace:*",
+    "@statewalker/render.view.react": "workspace:*",
+    "@statewalker/shared-registry": "catalog:",
+    "@statewalker/shared-slots": "workspace:*",
+    "@statewalker/shell.view.react": "workspace:*",
+    "@statewalker/webapp.browser": "workspace:*",
+    "@statewalker/workspace.core": "workspace:*",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
