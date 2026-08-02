@@ -1,6 +1,6 @@
 import { type InlineComponentDescriptor, inlineComponentSlot } from "@statewalker/inline.core";
 import { VisualizeFileCommand } from "@statewalker/mime.core";
-import { Commands } from "@statewalker/shared-commands";
+import { Command, Commands, passthrough } from "@statewalker/shared-commands";
 import { Slots } from "@statewalker/shared-slots";
 import { AppWorkspaceProvider } from "@statewalker/ui.view.react";
 import { LoadDirectoryCommand, Workspace } from "@statewalker/workspace.core";
@@ -235,6 +235,49 @@ describe("inline-content-views built-ins", () => {
 
     utils.unmount();
     disposeVisualize();
+    await cleanup();
+  });
+
+  it("ActionButton dispatches its configured command with the payload on click", async () => {
+    const ws = new Workspace();
+    const ctx: Record<string, unknown> = { "workspace:workspace": ws };
+    const cleanup = initInlineContentReact(ctx);
+    const commands = ws.requireAdapter(Commands);
+
+    // A listener registered under the same key the button fires receives
+    // the dispatch — the button synthesizes a matching silent declaration.
+    const TestActionCommand = Command.silent("inline:test-action")
+      .input(passthrough<unknown>())
+      .output(passthrough<void>())
+      .build();
+    const handler = vi.fn();
+    const disposeHandler = commands.listen(TestActionCommand, (command) => {
+      handler(command.payload);
+      command.resolve();
+      return true;
+    });
+
+    const utils = mount(
+      ws,
+      <InlineContent
+        spec={{
+          componentId: "action-button",
+          props: {
+            label: "Do it",
+            command: "inline:test-action",
+            payload: { hello: "world" },
+          },
+        }}
+      />,
+    );
+
+    fireEvent.click(utils.getByText("Do it"));
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler).toHaveBeenCalledWith({ hello: "world" });
+
+    utils.unmount();
+    disposeHandler();
     await cleanup();
   });
 

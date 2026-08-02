@@ -1,4 +1,4 @@
-import { Commands } from "@statewalker/shared-commands";
+import { Command, Commands, passthrough } from "@statewalker/shared-commands";
 import { useAppWorkspace } from "@statewalker/ui.view.react";
 import { type ReactElement, useCallback } from "react";
 
@@ -30,8 +30,16 @@ export function ActionButton({ props }: { props: unknown }): ReactElement {
   const onClick = useCallback(() => {
     if (!isActionButtonProps(props)) return;
     // Dynamic dispatch by string key. The action key is configured per
-    // declarative spec; the bus accepts any CommandDeclaration shape.
-    commands.call({ key: props.command }, props.payload);
+    // declarative spec, so we synthesize a silent, passthrough-typed
+    // declaration for it — listeners registered under the same key receive
+    // the payload; a key with no listeners is a no-op (silent policy).
+    commands.call(
+      Command.silent(props.command)
+        .input(passthrough<unknown>())
+        .output(passthrough<void>())
+        .build(),
+      props.payload,
+    );
   }, [commands, props]);
 
   if (!isActionButtonProps(props)) {
