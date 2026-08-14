@@ -141,8 +141,6 @@ This repository depends on:
 | [`webrun-vcs`](https://github.com/statewalker/webrun-vcs) | `@statewalker/vcs-commands`, `@statewalker/vcs-core`, `@statewalker/vcs-store-files`, `@statewalker/vcs-transport`, `@statewalker/vcs-transport-adapters`, `@statewalker/vcs-working-tree`, `@statewalker/vcs-workspace` |
 | [`webrun-wire`](https://github.com/statewalker/webrun-wire) | `@statewalker/webrun-site-builder`, `@statewalker/webrun-site-host` |
 
-**Depended on by:** [`sandclaw`](https://github.com/statewalker/sandclaw) (`@statewalker/ai-agent-runtime.core`, `@statewalker/ai-agent.core`, `@statewalker/ai-config.core`, `@statewalker/ai-config.view.react`, `@statewalker/ai-local-models.browser`, `@statewalker/ai-local-models.core`, `@statewalker/ai-local-models.view.react`, `@statewalker/explorer.core`, `@statewalker/explorer.view.react`, `@statewalker/inline.core`, `@statewalker/inline.view.react`, `@statewalker/mime.core`, `@statewalker/mime.view.image`, `@statewalker/mime.view.markdown`, `@statewalker/mime.view.pdf`, `@statewalker/mime.view.video`, `@statewalker/platform.browser`, `@statewalker/platform.core`, `@statewalker/platform.node`, `@statewalker/render.core`, `@statewalker/render.view.react`, `@statewalker/settings.core`, `@statewalker/settings.view.react`, `@statewalker/shell.core`, `@statewalker/shell.view.react`, `@statewalker/ui.view.react`, `@statewalker/ui.view.shadcn`, `@statewalker/workspace.browser`, `@statewalker/workspace.core`, `@statewalker/workspace.view.react`).
-
 Cross-repo dependencies are declared `workspace:*` rather than `catalog:`. This is
 deliberate: turbo derives its task graph from `workspace:` specifiers and does **not**
 resolve `catalog:`, so a `catalog:` cross-repo dependency is invisible to the scheduler
