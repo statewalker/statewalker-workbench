@@ -28,7 +28,7 @@
     "@json-render/core": "0.18.0",
     "@statewalker/render.core": "workspace:*",
     "@statewalker/render.view.react": "workspace:*",
-    "@statewalker/shared-registry": "catalog:",
+    "@statewalker/shared-registry": "workspace:*",
     "@statewalker/shared-slots": "workspace:*",
     "@statewalker/shell.view.react": "workspace:*",
     "@statewalker/webapp.browser": "workspace:*",
