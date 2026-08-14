@@ -45,6 +45,10 @@
     }
   },
   "files": {
-    "includes": ["**", "!**/*.css"]
-  }
+    "includes": [
+      "**",
+      "!**/*.css"
+    ]
+  },
+  "root": false
 }
