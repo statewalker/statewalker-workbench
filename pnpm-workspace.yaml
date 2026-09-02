@@ -3,7 +3,33 @@ packages:
   - "apps/*"
 
 catalog:
-  "@statewalker/webrun-files-node": ^0.7.2
+  "idb-keyval": "^6.3.0"
+  "openai": "^7.4.0"
+  "@mlc-ai/web-llm": "^0.2.84"
+  "@huggingface/transformers": "^4.2.0"
+  "@browser-ai/transformers-js": "^3.0.0"
+  "@modelcontextprotocol/sdk": "^1.29.0"
+  "@ai-sdk/mcp": "^1.0.36"
+  "@ai-sdk/anthropic": "^3.0.71"
+  "remark-gfm": "^4.0.1"
+  "react-markdown": "^10.1.0"
+  "@statewalker/webrun-dataflow": ^0.1.1
+  "@statewalker/webrun-builder": ^0.1.1
+  "@statewalker/vcs-utils-node": ^0.1.1
+  "@statewalker/vcs-workspace": ^0.1.1
+  "@statewalker/vcs-working-tree": ^0.1.1
+  "@statewalker/vcs-transport-adapters": ^0.1.1
+  "@statewalker/vcs-transport": ^0.1.1
+  "@statewalker/vcs-store-files": ^0.1.1
+  "@statewalker/vcs-core": ^0.1.1
+  "@statewalker/vcs-commands": ^0.1.1
+  "@statewalker/webrun-site-builder": ^0.1.1
+  "@statewalker/webrun-modules": ^0.2.1
+  "@statewalker/webrun-site-host": ^0.1.1
+  "@statewalker/shared-ids": ^0.1.0
+  "@statewalker/shared-slots": ^0.2.0
+  "@statewalker/shared-commands": ^0.2.0
+  "@statewalker/webrun-files-node": "^0.7.0"
   "@ai-sdk/google": ^3.0.64
   "@ai-sdk/openai": ^3.0.53
   "@ai-sdk/provider": ^3.0.10

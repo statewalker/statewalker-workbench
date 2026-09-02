@@ -29,9 +29,9 @@
     "@json-render/core": "0.18.0",
     "@statewalker/render.view.react": "workspace:*",
     "zod": "catalog:",
-    "@statewalker/shared-baseclass": "workspace:*",
-    "@statewalker/shared-commands": "workspace:*",
-    "@statewalker/shared-registry": "workspace:*",
+    "@statewalker/shared-baseclass": "catalog:",
+    "@statewalker/shared-commands": "catalog:",
+    "@statewalker/shared-registry": "catalog:",
     "@statewalker/ui.view.react": "workspace:*",
     "@statewalker/shell.core": "workspace:*",
     "@statewalker/shell.view.react": "workspace:*",
@@ -39,8 +39,8 @@
     "@statewalker/render.core": "workspace:*",
     "@statewalker/mime.core": "workspace:*",
     "@statewalker/ui.view.shadcn": "workspace:*",
-    "@statewalker/shared-slots": "workspace:*",
-    "@statewalker/webrun-files": "workspace:*",
+    "@statewalker/shared-slots": "catalog:",
+    "@statewalker/webrun-files": "catalog:",
     "@statewalker/workspace.core": "workspace:*",
     "lucide-react": "catalog:"
   },
@@ -49,7 +49,7 @@
     "react-dom": ">=18"
   },
   "devDependencies": {
-    "@statewalker/webrun-files-mem": "workspace:*",
+    "@statewalker/webrun-files-mem": "catalog:",
     "@testing-library/react": "^16.3.2",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
